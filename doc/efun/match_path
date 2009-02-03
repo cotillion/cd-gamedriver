@@ -1,0 +1,32 @@
+NAME
+	match_path - Search a mapping for a given path.
+
+SYNOPSIS
+	mixed match_path(mapping map, string key)
+
+DESCRIPTION
+	There are several applications where it would be useful to be able
+	to search a mapping for a hierarchical resource.  For example, one
+	such application would be an access-control system which uses the
+	most-specific entry for a given path name.  match_path() is used to
+	search a mapping for each entry.
+
+	For example, the mapping:
+
+	    m = ([
+		"/a" : "a",
+		"/a/b" : "b",
+		"/a/b/c" : "c"
+	    ]);
+
+	defines a set of match rules, which match_path() can search.
+	Searching the above map m on the following:
+
+	    "/z", "/a", "/b", "/a/b", "/a/b/c", "/a/z"
+
+	would produce:
+
+	    0, "a", 0, "b", "c", "a"
+
+	I.e. return the value in the mapping of the most-specific key
+	that matches.  If no match is found, 0 is returned.

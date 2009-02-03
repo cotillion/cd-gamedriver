@@ -1,0 +1,175 @@
+LPC has so far lacked first class function (i.e.
+the ability so pass functions as arguments and return 
+them as results, store them in data structures etc.).
+I finally decided to do something about it and
+here's a description on how it turned out.
+
+This is not complete.  Any suggestions are welcome.
+
+
+Functions
+---------
+A function variable is declared by
+
+	function f;
+
+This variable, f, can then be assigned any value
+which is a function, i.e., which can be called.
+So assuming the following is a legal code fragment
+
+int square(int x) { return x*x; }
+
+void foo() {
+	function f;
+	f = square;
+	...
+
+Note that "square" is used without parenthesis after;
+if it was not then it would be a call to square.
+But this is not the case, instead f is assigned the
+function square so that when f is subsequently used
+in a function call then square gets called.
+To continute the example:
+
+	write(f(5));
+
+This line would print 25 since f is currently the
+square function.
+
+Any kind of value (well almost) that can be used
+in a function call can be assigned to a function
+variable, i.e., efuns, lfuns, and simulated efuns.
+This means that this is also legal:
+
+	f = ctime;           /* an efun */
+	f = atoi;            /* a simulated efun */
+
+The right hand side need not be an identifier, of course.
+The simplest expression yielding a function value
+is probably the ->.  So another legal expression.
+
+	f = this_player()->query_name;
+
+In this expressions the object (this_player()) is computed,
+but query_name is not called.  query_name in this object
+gets called if f is called later.
+
+The value returned by a call to a function variable is
+of mixed type so it normally needs to casted before it can
+be used.
+
+	f = atoi;
+	i = f("1234");
+
+Naturally functions can be stored in arrays and mappings
+as well.  Example:
+
+int cube(int x) { return x*x*x; }
+
+void baz()
+{
+    function *funarr;
+    function c_or_s;
+
+    funarr = ([ square, cube ]);
+    c_or_s = funarr[1];
+    write(c_or_s(3));
+}
+
+***
+*** NOTE:
+*** Due to problems with the parser it is not possible
+*** to use
+***     write( (funarr[1])(3) );
+*** I hope to take care of this problem in the future.
+***
+
+Function values can be sent as arguments and returned
+as values as well.
+
+
+Partial applications
+--------------------
+It is sometimes useful to have a function where some
+of the arguments have been "frozen".  Partial application
+supports freezeing any number of initial arguments.
+
+*** NOTE: The syntax for this is not yet fixed.
+*** The current one is rather ugly.
+
+An example:
+
+int funnysum(int x, int y) { return x + 2*y; }
+
+int bar() {
+    function f;
+    int i, j;
+
+    f = &funnysum(5);
+    i = f(1);
+    j = f(10);
+}
+
+In this example i will get the value 7 and j the value 25.
+The function f is funnysum with the first argument "frozen"
+to 5.  I.e., when f is called it should only have one argument;
+the second argument to funnysym.
+
+Motivation:
+Let's have a look at the old filter function.  It has this horrible
+type:
+
+	mixed *filter(int foobar|mixed *arr|mapping map, string filter, 
+                      object ob|string ob, void|mixed extra)
+
+The last argument is an extra argument to the filter function.
+So with the old syntax we would write 
+
+	arr1 = filter(arr2, "fun", ob, ext);
+
+I find this ugly, with proper functions and partial applications
+it would become
+
+	arr1 = filter(arr2, &ob->fun(ext));
+
+Or, if no extra argument is needed
+
+	arr1 = filter(arr2, ob->fun);
+
+Or maybe we need 3 extra arguments
+
+	arr1 = filter(arr2, &ob->fun(x1,x2,x3));
+
+(The function fun has to be changed from the old to the new
+since the arguments are swapped.)
+
+An advanced example
+-------------------
+
+Here is an example of how a function
+to do function composition can be written.
+In mathematics we write  f . g  (where . is supposed to
+be a little ring), in LPC we will can compose(f, g).
+
+static mixed 
+compose_util(function f, function g, mixed x)
+{
+    return f(g(x));
+}
+
+function
+compose(function f, function g)
+{
+    return &compose_util(f,g);
+}
+
+In fact, function composition so common that it has its own
+operator, @.  So the composition of f and g is written  f@g.
+
+
+
+-------------------------------------------------------------
+
+See ~marvin/open/efuns for changed efuns.
+
+*** Are there any more?

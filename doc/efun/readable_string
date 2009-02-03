@@ -1,0 +1,9 @@
+NAME
+	readable_string - convert a string to contain only readable characters
+	
+SYNOPSIS
+	string readable_string(string)
+
+DESCRIPTION
+	This function takes a string as a parameter and returns a string
+	with all non-readable characters coverted to a '.' character.

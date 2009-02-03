@@ -1,0 +1,13 @@
+ NAME
+	m_sizeof - return the cardinality of a mapping
+
+SYNOPSIS
+	int m_sizeof(mapping map|int foobar)
+
+DESCRIPTION
+	Return the number of mapping pairs contained in a mapping.
+	If an integer is given as argument, 0 is returned.
+
+SEE ALSO
+	mkmapping, m_indexes, m_values, m_delete, mappingp
+

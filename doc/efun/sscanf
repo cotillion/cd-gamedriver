@@ -1,0 +1,34 @@
+NAME
+	sscanf - Parse a string with a given format
+
+SYNOPSIS
+	int sscanf(string str, string fmt, mixed var1, mixed var2 ...)
+
+DESCRIPTION
+	sscanf works vey much like its Unix counterpart. The string
+	str is broken up according to the format pattern in fmt.
+	Valid symbols are:
+
+	normal text - matches character for character
+
+	%d - matches an integer number
+
+	%s - matches a character string
+
+	%f - matches a float
+		Example:
+		sscanf("4.43e-2", "%f", f);
+                		       -2
+		will set f to 4.43 * 10  .
+
+	Return value:
+	The number of variables var1, var2 etc that matched.
+
+
+NOTA BENE
+
+SEE ALSO
+
+CAVEAT
+
+BUGS

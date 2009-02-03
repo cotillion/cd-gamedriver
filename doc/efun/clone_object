@@ -1,0 +1,13 @@
+NAME
+	clone_object - clone an object
+
+SYNOPSIS
+	object clone_object(string path)
+
+DESCRIPTION
+	This funciton clones an object indicated by the path. However,
+	this is subject to the rules defined in the function `valid_read()'
+	in `/secure/master.c'
+
+SEE ALSO
+	destruct

@@ -1,0 +1,15 @@
+NAME
+	query_idle - give time since last command from a player
+
+SYNOPSIS
+	int query_idle(object player)
+
+DESCRIPTION
+	Returns the number of seconds that an interactive player has been
+	idle, ie the time since the last command was issued.	
+
+NOTA BENE
+	This is only relevant to interactive players and is not implemented
+	for npc's.
+
+

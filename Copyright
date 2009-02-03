@@ -1,0 +1,20 @@
+The CD gamedriver, consisting of code in this directory and subdirectories,
+as made avaliable from the authors, is copyright Chalmers Datorf|rening,
+G|teborg, Sweden 1991, 1992, 1993. Parts of the package may be copyrighted 
+by others or may be in the public domain. In these cases such information 
+is stated in the individual files.
+The CD gamedriver is based on LPMud, developed by Lars Pensj| and others.
+
+Source code herein refers to the source code, and any executables
+created from the same source code.
+
+All rights reserved.  Permission is granted to extend and modify the
+source code provided subject to the restriction that the source code may
+not be used in any way whatsoever for monetary gain.
+
+The grants made here may be subject to later change. Such a change will
+only apply to versions of the program made avaliable to the public after
+said change.
+
+Note that the modules mstring.c and mstring.h carries a seperate copy-
+right and limits on use.  Read those files for details.

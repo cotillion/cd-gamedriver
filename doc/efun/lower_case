@@ -1,0 +1,14 @@
+NAME
+	lower_case - decapitalize all text in a string
+
+SYNOPSIS
+	string lower_case(string str|int foobar)
+
+DESCRIPTION
+	This function returns a string that is a copy of the argument
+	string `str' but with all letters in lower case.
+
+	If an integer is given as argument, 0 is returned.
+
+SEE ALSO
+	capitalize, upper_case

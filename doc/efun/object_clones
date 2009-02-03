@@ -1,0 +1,8 @@
+NAME
+	object_clones - return a list of all the clones of a file
+
+SYNOPSIS
+	object *object_clones(object ob)
+
+DESCRIPTION
+	Returns a list of all the clones of an object.

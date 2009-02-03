@@ -1,0 +1,22 @@
+NAME
+	this_interactive - give the originator of the current execution
+
+SYNOPSIS
+	object this_interactive()
+
+DESCRIPTION
+	Gives the player that is the cause of the current execution chain.
+	This is always an interactive player or 0. It is 0 if the current
+	execution is caused by heartbeat or callout.
+
+	This is never changed in functions like command, move_object etc.
+
+NOTA BENE
+	Do not use this_interactive as a replacement for this_player. There
+	several occasions when this will cause errors. Most worth noting
+	is when a command() is executed. this_player will then change to 
+	reflect the new current player, but this_interactive will not.	
+
+SEE ALSO
+	this_player, set_this_player
+

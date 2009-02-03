@@ -1,0 +1,278 @@
+
+This is the DONE file for the CD version of the 3.0 Gamedriver
+
+CD.01.54
+
+JnA:	Modified the following efuns to accept an integer argument to
+	allow composite statements without runtime errors:
+
+		m_sizeof, m_delete, m_indexes, m_values, break_string,
+		mkmapping
+
+JnA:	Added file_time(string filename), which gives the last time a file
+	was modified.
+	
+JnA:    Added object_time(object ob), which gives the creation time of an
+	object.
+
+JnA: 	Added Germano Caronnis' library routines. Including extensions
+	to getrusage.
+
+JnA:	Added patches and features from Lars' up to 3.1.2:
+
+   It is now possible to initialize non-local variables. If such initialization
+   is used, then a function __INIT() will automatically be defined, which can
+   be called. __INIT() is automatically called when the object is created
+   for the first time, as well as when it is cloned. The __INIT() function will
+   also call __INIT() of all inherited files, if there are any. Strict types
+   are enforced. Example:
+   object created_me = this_player();
+   The variables are initalized and __INIT is called in the same order as
+   variables are declared respectively inherit statements are encountered.
+   
+   Fixed a bug in the initialization code, which did become a recursive
+   function call.
+   
+   The statment catch(exec(...)) could crash the game.
+   
+   3.1.1
+   
+   Fixed a severe bug, where this_player() returned non-zero value when the
+   object was destructed. The basic idea is that it should never be possible
+   to refer to a destructed object.
+   
+   'nomask' functions and variables wasn't checked for correctly. 'private'
+   functions were fixed, so that they can no be called through call_other().
+   
+   This is a short summary of how special types are handled:
+   
+       'static' variables: Will not be saved at save_object(), nor modified at
+       restore_object(). 'static' functions can not be called through
+       call_other(). 'static' inheritance will make all inherited definitions
+       'static'.
+   
+       'private' variables and functions: Can not be accessed by a sub class
+       inheriting their definitions. Functions can not be called through
+       call_other(). 'private' inheritance will make all variables and
+       functions 'private'. 
+   
+       'nomask' functions and variables can not be redefined by a sub class.
+       'nomask' inheritance will make all inherited definitions 'nomask'.
+   
+       'public' variables and functions can be redefined by a sub class, even
+       if they have been inherited 'private'ly. 'public' inheritance will make
+       all inherited definitions 'public'. 
+   
+       The type 'protected' is reserved, but does not mean anything currently.
+   
+   3.1.2
+   
+JnA:	Added an extended capability to Germanos binary dump routines. It is
+	now possible to have a 'shadow dirstructure' with compiled objects
+	dumped to disk. This is controlled with a #define BINARIES "path/"
+	in config.h
+
+	Files that have the #pragma save_binary
+	are stored as binary files, this speeds up preloading somewhat :-)
+
+   	The compiler is slightly picky about spaces after pragma directives
+
+JnA:	Added patches from Lars' up to 3.1.3:
+   
+       All variables were accidently considered to be nomask.
+
+       The statement 'static int a = 1;' no longer generates an error message
+       about non-matching types because of the 'static' type.
+
+   3.1.3
+
+JnA:	Fixed osem byte order bugs for ip-addresses.
+	
+RW:	Added Reith's new sprintf.c that *should* be able to handle mappings.
+
+	Modified mkmapping to take lists of both indexes and values or
+	just one of them.
+
+	Modified m_delete and += for mappings to work like arrays.
+
+JnA:	Added Germano Caronnis patches to binary load/save handling included
+	files too. The binary is now invalidated if any included file is
+	later than the binary.
+
+JnA:	Added a couple of commands to the debug() efun:
+		index, malloc, status, status tables, mudstatus, functionlist
+
+JnA:	Added Linus Tolkes fix for function searches.
+
+JnA:	Implemented a 'smalltalk-like' dynamic late binding for call_other().
+	The last function index found for each call_other is stored in the
+	stack code each time a call_other is made. This is possible to turn
+	on and off with #define CACHE_CALL_OTHER
+
+CD.01.55
+
+JnA:	If switch statements with string case labels are used, the program
+	can not be saved as a binary. The binary save flag is automatically
+	turned off in this case. This is a bug... switch / case ought to be
+	rewritten, completely.
+
+JnA:	The following efuns have been removed and made into sub-commands for
+	the debug efun:
+		rusage, top_ten_cpu, object_cpu, swap, version,
+		wizlist, trace, traceprefix, call_out_info, inherit_list,
+		query_load_average, shutdown
+
+JnA:	The functions of a program can now be put in a mapping which is
+	associated with the program. This makes the function search into
+	a hashed search instedad of a linear search, which is faster...
+	This is done with a subcommand to debug():
+		debug("function_map", 1, object);
+
+	It is recommended that at least /secure/master.c uses this as that
+	object is called from the GD a lot and therefore can't use the
+	CACHE_CALL_OTHER functionality.
+
+JnA:	A new efun update_actions() has been added. It updates an objects
+	exported actions in all 'nearby' living objects. This behaviour
+	could be partially simulated using move_object() before but now it
+	will also work for objects without environments, ie rooms.
+
+JnA:	Fixed a bug in binary load when included files where checked, correct
+	error codes are now returned. This was only relevant for the
+	binaries package which uses library.c in a slightly different fashion
+	than the blib package.
+
+JnA: 	Changed the 'top_ten_cpu' subcommand of debug() so that it gives
+	programs instead of objects. It is possible that both will needed in
+	the future but the 'program' information is currently more valuable.
+
+JnA:	Fixed a bug in remove_interactive that would dump the game if
+	the interactive player was in ed and needed the ed buffer saved.
+
+JnA:	Fixed a small bug in parse.c that would dump the game if %p was
+	used at the end of the parsed text.
+
+JnA:	If USE_ENCOUNTER_NOT_INIT is defined and the living object has no
+	encounter() function then init() is called in the old way.
+
+JnA:	Fixed in destruct_object() so that the master_ob can be destructed
+	and reloaded.
+
+JnA:	Added new efun readable_string() that filters out all nonprintable
+	characters from a string.
+
+JnA:	Rewrote subtract_array and intersect_array using mappings.
+
+JnA:	Introduced tmpalloc() for temporary memory allocation. Memory that
+	can be freed each turn around the backend() loop. The motivation
+	for this is memory lost due to errors occuring.
+
+JnA:	Access checks in comm1.c deleted. This is done in the mudlib.
+
+JnA:	Fixed so that an LPC error in epilog() in master does not dump
+	the game. There was no error recovery context at that call.
+
+JnA:	Previous object should always be set in call_other(). This was not
+	always the case.
+
+JnA:	get_mud_name() is now called in /secure/master to get the name of
+	the mud. This name is then defined in all compilations of LPC files.
+
+JnA:	Functionality for sending and receiving UDP packages added. The 
+	#define CATCH_UDP_PORT decides if this is active, see config.h
+
+JnA:	The global cache is now optional. There is a GLOBAL_CACHE define
+	in config.h. The define should be the size of the cache.
+
+CD.01.58 (920817-)
+
+JnA:	Applied patches from Thorsten Lockert (Plugh@Genesis). Fixes were
+	in comm1.c, mudstat.c and lint.h call_out.c array.c for compiling
+	under Ultrix.
+
+JnA:	Fixed the recompile check of the master object so that it actually
+	aborts the destruction of the old if the new is buggy.
+
+JnA:	Added a check in process_value for destructed object.
+
+JnA:	Fixed a subtle bug in explode() that would create an array with
+	one element less than needed if a consecutive multiple same-char
+	delimiter were used. The bug was caused by the check to see if
+	the exploded string was terminated by a delimiter. This is in the
+	above case not certain even if the last chars are identical to
+	the delimiter. Example: explode("fooooooo", "oo")
+
+JnA:	catch should not be able to catch 'eval cost too big'. We allow
+	the actual catch but we see to it that a new error happens
+	directly after.
+
+JnA:	parse_command should now handle combinations with %s better. %p
+	also works better.
+
+JnA:	Fixed so that /secure/simul_efun.c can be updated. The same checks
+	as for the master object is done in simulate.c::destruct_object()
+
+JnA:	Fixed a bug when creator_file is called in master from 
+	give_uid_to_object(). Enclosed it in an error recovery. Before
+	objects could be left without uids which is fatal.
+
+JnA:	Changed explode()'s behaviour when the string contains only n number
+	of delimiters. It now returns an empty array. Before it returned 0.
+
+JnA:	Fixed break_string() so that when a single string, the indent string
+	is added. It was not before.
+
+JnA:	Added a subfunction 'get_eval_cost' to the debug() efun.
+
+JH:	Added debugmalloc. You can now compile with debugmalloc as
+	malloc function, If you call debug with 'debug malloc' as parameter
+	the entire memory will be crossreferenced to find memory leaks
+
+JH:	Patched smalloc, so that snippets of large blocks aren't turned
+	into smallblocks. Thanks to Dworkin for the patch.
+
+JnA:	Changed function header organization to use one hash table per
+	program block.
+
+JnA:	Compressed size of function headers from 16 to 12 bytes.
+
+JH:	Patched lex.c to concatenate string constants.
+
+CD.01.59 (921201-)
+
+JnA:	Stored the linenumber information used in runtimerrors in the
+	swapfile thereby saving a lot of memory. Also added the pid to
+	the swap file name, making multiple drivers running on the same
+	mudlib dir not use the same swapfile.
+
+JnA:	Call 'linkdead_player' in master when linkdeath occurs, i.e. when
+	the interactive structure is removed due to fault in transmission.
+	Is there a faster way of detecting linkdeath?
+
+JnA:	Profiling of functions in LPC programs. When PROFILE_FUNS is
+	defined in config.h information on how many times a function
+	is called and how much time is spent in it is stored in
+	the (struct function). The debug("getprofile", ob) gives
+	an array of all functions in the object and their current
+	number of calls / time spent.
+
+JnA:	print_mudstatus now also prints processtime not just actual time.
+
+JnA:	Ensure that neither simul_efun nor master is swapped.
+
+JnA:	Measure the average response time for commands by players. The
+	debug("get_avg_response") gives the average time between
+	entry of the 'select' in comm1.c The actual average response
+	time ought to be half of this.
+
+JH:	Installed working debug("get_variables")
+
+JH:	Added type information to runtime error printouts.
+
+JH:	Fixed bug in enable_commands(0). Commandgiver was set to 0 at bad times.
+
+
+CD.01.60 (921213-)
+
+JH:	Applied Amylaars speed patches to hash.c
+

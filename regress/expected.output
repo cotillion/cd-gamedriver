@@ -1,0 +1,36 @@
+secure/simul_efun.c loaded: 2 functions
+Loading /tests/test-001.c -> *stack overflow
+Loading /tests/test-002.c -> *Too deep recursion.
+Loading /tests/test-003.c -> Ok.
+Loading /tests/test-004.c -> Ok.
+Loading /tests/test-005.c -> Ok.
+Loading /tests/test-006.c -> *Illegal throw.
+Loading /tests/test-007.c -> Ok.
+Loading /tests/test-008.c -> Ok.
+Loading /tests/test-009.c -> *ERROR: (s)printf(): BUFF_SIZE overflowed...
+Loading /tests/test-010.c -> Ok.
+Loading /tests/test-011.c -> *too many alarms in object
+Loading /tests/test-012.c -> tests/test-012.c: redefinition of variable 'i' line 7
+tests/test-012.c: Type mismatch ( int * vs int ) when initializing i line 7
+*Error in loading object
+Loading /tests/test-013.c -> eval_cost too big 500001 (/tests/test-013.c Line: 10)
+*Too long evaluation. Execution aborted.
+Loading /tests/test-014.c -> Ok.
+Loading /tests/test-015.c -> Ok.
+Loading /tests/test-016.c -> Ok.
+Loading /tests/test-017.c -> Ok.
+Loading /tests/test-018.c -> tests/test-018.c: Function watchmecrashthisdriverwithareallyreallyreallyreallyreallreallyreallyreallyreallyreallyreallyreallyreallyreallreallylongfunctionnameohitneedstobereallyreallyreallylongofcoursebutIcandoityesicanithinkicanithinkicaniknowicaniknowcanhahahahahabutthisisreallyboringsozzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz line 9
+*Error in loading object
+Loading /tests/test-019.c -> tests/test-019.c: Illegal to redeclare local name line 11
+tests/test-019.c: Incorrect number of arguments line 11
+tests/test-019.c: Incorrect number of arguments line 13
+tests/test-019.c: Function touch_me declared but never defined line 14
+*Error in loading object
+Loading /tests/test-020.c -> Ok.
+Loading /tests/test-021.c -> Ok.
+Loading /tests/test-022.c -> Ok.
+Loading /tests/test-023.c -> *Attempt to write empty string.
+Loading /tests/test-024.c -> Ok.
+Loading /tests/test-025.c -> Ok.
+Setting up ipc.
+Shutting down ipc...

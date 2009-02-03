@@ -1,0 +1,14 @@
+NAME
+	m_indexes - return the domain of a mapping
+
+SYNOPSIS
+	mixed *m_indexes(mapping map|int foobar)
+
+DESCRIPTION
+	This function returns the domain, the `index' part, of a mapping
+	as an array. 
+
+	If an integer is given as argument, 0 is returned. 
+
+SEE ALSO
+	mkmapping, m_values, m_sizeof, m_delete, mappingp

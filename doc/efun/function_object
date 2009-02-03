@@ -1,0 +1,18 @@
+NAME
+        function_object
+
+SYNOPSIS
+        object function_object(function func)
+
+DESCRIPTION
+        function_object takes a function-pointer as argument, and returns the
+        object reference to the object the function exists in.
+
+RETURN VALUES
+        The object that the function exists in, or 0.
+
+NOTE
+        This efun is created 2000-03-27 by Styggamorf, so if you find any 
+        problems with it, please drop me a mail.
+SEE ALSO
+        functions, mkfunction, functionp, function_name, calling_function

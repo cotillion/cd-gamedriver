@@ -1,0 +1,12 @@
+NAME
+        asinh - hyperbolic function operating on float
+
+SYNOPSIS
+        float   asinh(float)
+
+DESCRIPTION
+        asinh() returns the hyperbolic arc-sine of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

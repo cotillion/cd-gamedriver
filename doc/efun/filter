@@ -1,0 +1,59 @@
+NAME
+        filter - filter an array or a mapping through a specific 
+                 filter function
+
+SYNOPSIS
+        mixed filter(int foobar|mixed *arr|mapping map, function func)
+
+DESCRIPTION
+        If an array is given as argument 1, filter() returns an array
+        consisting of all items in the given array for which func(item)
+        is true.
+
+        If a mapping is given as argument 1, filter() returns a mapping
+        consisiting of all index-value pairs for which func(value) is
+        true.
+
+        If an integer is given as argument 1 instead of an array or mapping,
+        0 is returned.
+
+
+EXAMPLES
+
+        int func(int i)
+        {
+            return (i > 1);
+        }
+
+        int *a()
+        {
+            return filter(({ 0, 1, 2, 3 }), func);
+        }
+
+        mapping b()
+        {
+            return filter(([ 1 : 0, 2 : 1, 3 : 2 ]), func);
+        }
+ 
+        int c()
+        {
+            return filter(0, func);
+        }
+
+        Given the above code,
+
+            a() returns ({ 2, 3 })
+
+            b() returns ([ 3 : 2 ])
+
+            c() returns 0
+
+SEE ALSO
+        map
+
+OBSOLETE
+
+        mixed *filter(int foobar|mixed *arr|mapping map, string filter, 
+                            object ob|string ob, void|mixed extra)
+
+

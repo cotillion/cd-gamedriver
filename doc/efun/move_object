@@ -1,0 +1,42 @@
+NAME
+	move_object - move the current object somewhere
+
+SYNOPSIS
+	void move_object(object dest|string destfilename)
+
+DESCRIPTION
+	Moves the object executing the function to the destination indicated
+	by 'dest' or if the argument is a string 'destfilename' then 
+	move_object tries to load the corresponding object and move 
+	this_object to that destination.
+
+	When an object moves from a destination all the commands it has
+	defined in nearby objects using add_action through init, will be
+	automatically removed. If this_object is a living object then
+	all commands from nearby objects will be removed automatically.
+
+	Upon entering the destination object each living object which becomes
+	nearby will be set to this_player respectively and init will be run
+	in the entering object. Thus letting it add its commands with 
+	add_action to each nearby living object.
+
+	If the entering object is itself living, then this_player will be
+	set to the entering object and init will be called in each object
+	already in the destination. Init will also be called in the
+	destination object which is normally a room.
+
+NOTA BENE
+	You normally do not use move_object directly. Instead there is
+	a lfun move() in the object which should be called. This ensures
+	that things like light, weight, volumes and heaps to be updated
+	correctly.
+
+SEE ALSO
+	add_action, enable_commands, disable_commands, this_player
+
+CAVEAT
+	As init is called from 'within' the move_object function, care must
+	be taken that an infinit loop is not created by moving the wrong
+	object within an init routine. If you are doubtful, never move
+	an object in init.
+

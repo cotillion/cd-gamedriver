@@ -1,0 +1,13 @@
+NAME
+	rm - remove a file
+
+SYNOPSIS
+	int rm(string filename)
+
+DESCRIPTION
+	Removes a file 'filename'. Returns 1 if successful.
+
+SEE ALSO
+	rmdir
+
+

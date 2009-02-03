@@ -1,0 +1,23 @@
+NAME
+	previous_object - give object that called current object
+
+SYNOPSIS
+	object previous_object(void|int)
+
+DESCRIPTION
+	This function returns the previous object that called a function
+	in this object from the outside, ie with `call_other()'. 
+
+	This include `call_other(this_object(), ...)' constructions. In 
+	this case, the returned value will be `this_object()'.
+
+	previous_object(0) returns the same as previous_object().
+	previus_object(-1) returns previous previous object.
+	previous_object(-2) returns previous previous previous object and 
+	so on.
+	when there are no more previous object it returns 0;
+CAVEAT
+	If the function was called internally, the result is undefined.
+
+
+

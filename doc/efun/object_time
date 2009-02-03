@@ -1,0 +1,15 @@
+NAME
+	object_time - return the time when the object was created
+
+SYNOPSIS
+	int object_time(object ob)
+
+DESCRIPTION
+	Gives the time in seconds since whatever 1970, when the object
+	was created.
+	
+SEE ALSO
+ 	time, ctime, file_time
+
+
+

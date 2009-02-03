@@ -1,0 +1,17 @@
+NAME
+	random - give a random value
+
+SYNOPSIS
+	int random(int limit, void|int seed)
+	
+DESCRIPTION
+	Gives a random value between 0 and 'limit - 1'. Note that the 'limit'
+	must be a positive integer.
+
+	If the optional argument 'seed' is given then a specific random
+	number will be given. random will always return the same value
+	for a given limit and seed.
+
+NOTA BENE
+	The last paragraph is badly tested, please report any bugs found
+

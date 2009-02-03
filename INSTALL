@@ -1,0 +1,47 @@
+This is a brief description of how to install the CD driver:
+
+To use the driver you will need.
+
+gcc 		3.3
+gnu libc 	2.3
+make		3.80
+bison		1.875
+
+Make a directory 'mud', which contains directories named 'src', 'bin' and
+'lib'. Move the game driver source (this code) to the src directory.
+
+Copy Makefile.default to Makefile and uncomment the proper definitions for
+compiling on your system.  If your system is not one of those listed, you
+will have to create a section for it.  You will want to try compiling the
+driver with empty MISSING_OBJ and MISSING_SRC variables; add only objects
+required to successfully compile the driver.  Pay special attention to the
+version of yacc being used.  AT&T yacc will NOT work.  byacc (standard on
+some systems) is the preferred yacc to use, GNU bison will also work.
+
+Make sure the MUD_LIB and BINDIR variables in your Makefile reflects where
+the mud's binaries and mudlib will be placed.
+
+There are several allocators supported by the driver.  The preferred one
+is "bibop", and is also the default.
+
+If you are going to do driver development it is recommended that you enable
+the DEBUG option in your Makefile as well.  You may want to look over the
+options in config.h and tailor those for your system.
+
+To actually build the driver, do 'make' and 'make utils'.  If you would
+like to run a regression test of the driver before installing, do 'make
+check'.
+
+To install the driver, do 'make install' and 'make install.utils'.
+
+Get a mudlib and install it in the 'lib' directory. The most current version
+of the CDLIB mudlib is available from ftp.cd.chalmers.se in the directory
+pub/cdlib.
+
+Test the game with 'driver &'.
+
+If you see the message 'Setting up ipc', then you are up and running.
+Test with 'telnet localhost 3011' (or the portnumber you specified in the
+config.h file, if you changed it).
+
+If you want the game to restart automatically, use 'bin/restart_mud'.

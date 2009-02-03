@@ -1,0 +1,21 @@
+NAME
+	m_delkey - delete entries in a mapping
+
+SYNOPSIS
+	void m_delkey(mapping map, mixed index)
+
+DESCRIPTION
+	This function is used to remove an entry in a mapping.
+
+	The first argument `map' should be the mapping you want to remove
+	entries from.
+
+	The second argument `index' should be the index part of the mapping
+	pair you want to remove from the mapping.
+
+        The difference to m_delete is that m_delkey will remove the entry
+        indexed by index while m_delete will not change map.
+
+SEE ALSO
+	mkmapping, m_indexes, m_values, m_delete, mappingp
+

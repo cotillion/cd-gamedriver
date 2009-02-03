@@ -1,0 +1,15 @@
+NAME
+	file_name - find the filename of an object
+
+SYNOPSIS
+	string file_name(object ob)
+
+DESCRIPTION
+	This function gives the filename of an object concatenated with
+	a possible instance number. This typically is a string on the
+	form "/std/weapon#423". Instance numbers are unique for all
+	objects in the game.
+
+	If a filename has no instance number it is the 'master object' and
+	not a 'cloned copy'. 
+

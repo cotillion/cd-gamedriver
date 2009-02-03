@@ -1,0 +1,20 @@
+NAME
+	save_object - save global variables in current object to a file
+
+SYNOPSIS
+	void save_object(string filename)
+
+DESCRIPTION
+	Saves all non static global variables of an object to a given file.
+	All variables are saved except those currently of the type object.
+	The filename gets a filetype ".o" appended and the format is:
+
+		variable_name	variable_value
+
+		intvar		number
+		stringvar	"stringvalue"
+		arrayvar	({ variable_values })
+		mappingvar	([ index:value ])
+
+SEE ALSO
+	restore_object

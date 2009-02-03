@@ -1,0 +1,17 @@
+NAME
+    max - find the largest value in a group of values
+
+SYNOPSIS
+    varargs mixed max(mixed val1, mixed val2, ...)
+
+DESCRIPTION
+    max() returns the largest of the arguments passed to it.
+    At least two arguments must be provided.
+
+EXAMPLES
+    max(2, 6, 9)      returns 9
+    max(1.0, 2.0)     returns 2.0
+    max("abc", "cba") returns "cba"
+
+SEE ALSO 
+    min

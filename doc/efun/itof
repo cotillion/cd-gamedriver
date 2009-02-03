@@ -1,0 +1,11 @@
+NAME
+        itof - int to float
+
+SYNOPSIS
+        float  itof(int)
+
+DESCRIPTION
+        itof() converts an int to a float.
+
+SEE ALSO
+        math - for a list of other math functions available.

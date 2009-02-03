@@ -1,0 +1,120 @@
+>    Reserving 'function' as a keyword is not the only problem.  As far as I
+> know, function and variable names are presently stored in different tables.
+> This change means they have to be put in the same one, so function names
+> and variable names may not be identical.
+You are right.  I'm currently dodging the problem by looking
+at the two tables in a certain order.  (I think it was a big 
+mistake to use separate name spaces to start with, but that's
+anothet matter.)  Unless I do a complete rewrite of the compiler
+this is going to be the way it works.
+
+
+>    Several problems suggest themselves.  What about functions called with
+> too many/too few arguments, or with arguments of the wrong type?  Currently
+> the gamedriver checks local calls at compile time, but that won't be possible.
+> The best solution would be to use runtime typechecking (as DGD does).  Of
+> course, this is also true for call_other(), but now even private functions
+> might be called with the wrong arguments.
+There are runtime checks now, just as with call_other.
+In fact, it's almost implemented with call_other.
+This gives you lousy performance, but I don't care right now.
+
+
+>    Do you think typechecking is important, given that FLs don't
+> have it?
+Huh?!?  Functional languages have the best and most powerful
+type systems around.  Try Haskell or SML.
+It would be very nice to have a type system like those of Haskell or
+SML, but I'm afraid there are problems with static type checking in a
+language where you can replace parts of a running program.
+
+
+> >
+> >	f = this_player()->query_name;
+> >
+> >In this expressions the object (this_player()) is computed,
+> >but query_name is not called.  query_name in this object
+> >gets called if f is called later.
+> 
+>    What if the object has been destructed?
+Then the call fails.  Just as call_other would.
+
+
+> >
+> >	f = atoi;
+> >	i = (int)f("1234");
+> 
+>    Isn't it time to get rid of those useless mandatory casts?
+Well, I didn't invent them.  Changing two lines in the compiler
+would remove them.
+
+
+> >*** Due to problems with the parser it is not possible
+> >*** to use
+> >***     write( (funarr[1])(3) );
+> >*** I hope to take care of this problem in the future.
+> 
+>    Even funarr[1](3) ought to work.
+Absolutely!
+
+
+> >    f = &funnysum{5};
+> >    i = (int)f(1);
+> >    j = (int)f(10);
+> >}
+> 
+>    Ugly indeed, why not &funnysum(5)
+I agree 100%!  But look at how the parser is written
+and try to make that work.  Looks trivial, but it's
+well near impossible.
+
+
+
+>    As lists are not a basic datatype in LPC, there isn't really a need to
+> stick to the car/cdr idea.  Why not allow frozen arguments in the second
+> place, etc?  &funnysum(5, ) and &funnysum(, 5).  Perhaps with a placeholder
+> to make it more readable: &funnysum(5, .)  &funnysum(., 5)
+This idea has merits, but also complications (as you mention below).
+
+> Drawback: a partial function
+> would have to be called as funnycall(., .) and not as funnycall(), so you'd
+> have to know in the call what type of function you are calling.
+This is more than a drawback, in my opinion, it completely
+looses the abstraction power that functios give you.
+This, I will never implement!
+
+If the more general version is to be used the call will look as
+usual, and the arguments will fill the "empty slots" in order.
+
+You argument about efuns with their parameters in the wrong order
+is well taken, but also easily fixed.  Say that we have an efun(x,y)
+but want to have a function with the arguments the other way around.
+Well, we just use (and defined) the function swapargs efun
+(i.e. swapargs(efun)) and use that instead.
+
+    static mixed sautil(function f, mixed x, mixed y) { return f(y,x); }
+    function swapargs(function f) { return &sautil(f); }
+
+(This can be done in different way.  And anonymous functions would
+really help here.)
+
+> >	arr1 = filter(arr2, &ob->fun{ext});
+> 
+>    Still ugly :)
+Syntactically yes, but not sematically :-)
+
+
+> >
+> >Or, if no extra argument is needed
+> >
+> >	arr1 = filter(arr2, ob->fun);
+> >
+> >Or maybe we need 3 extra arguments
+> >
+> >	arr1 = filter(arr2, &ob->fun{x1,x2,x3});
+> 
+>    I'm beginning to dislike the & for partial functions only.  Perhaps it
+> should be used for all functions as data?  That would also solve the
+> function/variable symbol table problem.
+Good point!  I'll think about it.
+

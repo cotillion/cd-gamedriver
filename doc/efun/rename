@@ -1,0 +1,22 @@
+NAME
+	rename - rename a file or move a subdirectory
+
+SYNOPSIS
+	int rename(string frompath, string topath)
+
+DESCRIPTION
+	Renames the file 'frompath' to the name 'topath'. This is functionally
+	identical to copying the file 'frompath' to 'topath' and the remove
+	'frompath'. 
+	
+	If 'topath' exists and is a file, it is removed.
+
+	If 'topath' is a directory then move the file to that directory.
+
+	If 'frompath' is a directory then move the entire subdirectory
+	to 'topath'.
+
+   Returns 1 if successful.
+
+SEE ALSO
+	rmdir, rm, mkdir

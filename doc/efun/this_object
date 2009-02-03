@@ -1,0 +1,8 @@
+NAME
+	this_object - give the object pointer to the executing object
+
+SYNOPSIS
+	object this_object()
+
+DESCRIPTION
+	Gives the object pointer to the object that is currently executing.

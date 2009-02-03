@@ -1,0 +1,11 @@
+NAME
+        pow - exponential function operating on a float
+
+SYNOPSIS
+        float  pow(float x, float e)
+
+DESCRIPTION
+        pow(x,e) returns the e'th power of x (x^e).
+
+SEE ALSO
+        math - for a list of other math functions available.

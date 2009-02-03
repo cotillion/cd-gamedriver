@@ -1,0 +1,9 @@
+NAME
+	strlen - give the length of a string
+
+SYNOPSIS
+	int strlen(int|string str)
+
+DESCRIPTION
+	Gives the length of a string in number of characters. If an integer
+	is passed as an argument then 0 is returned.

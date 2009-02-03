@@ -1,0 +1,33 @@
+NAME
+	call_self, call_selfv - call a function in this object
+	
+SYNOPSIS
+	mixed call_self(string func, ...)
+
+	mixed call_selfv(string func, mixed *argarr)
+
+DESCRIPTION
+	This function is used to call another function in this object.
+
+	`func' should simply be the name of the function to be called.
+	Any number of arguments to the function can be added to the
+	call. The reason to use this function instead of a direct call
+	is that the name of the function need not be know at compile time,
+	and that functions that are declared static or private can be
+	accessed as oposed to call_other(). In the second form (call_selfv())
+	the elements in argarr will be sent as arguments to the function,
+	i.e. if sizeof(argarr) == 3 the function will be called with 3
+	arguments.
+
+	Examples:
+
+	name = (string)call_self("query_real_name");
+	
+NOTA BENE
+	The default type of "call_self()" is mixed, but as shown in the
+	example above it is always possible to cast to a type of your
+	own choosing, if nothing else only to aid memory.
+
+SEE ALSO
+	call_other()
+

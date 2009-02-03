@@ -1,0 +1,22 @@
+NAME
+	papplyv
+
+SYNOPSIS
+	function papplyv(function func, mixed *array)
+
+DESCRIPTION
+	Partially apply function `func' to a vector of
+	arguments taken from `array'.
+
+	Doing a
+		papplyv(func, ({ v1,v2,...vn }))
+	would be equivalent of doing
+		&func(v1,v2,...vn)
+	But the second can only be used when the array elements
+	are explicitely available, whereas papplyv always works.
+
+RETURN VALUES
+	The value returned is the partially applied function.
+
+SEE ALSO
+	functions, applyv, mkfunction

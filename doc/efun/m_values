@@ -1,0 +1,14 @@
+NAME
+	m_values - return the co-domain of a mapping
+
+SYNOPSIS
+	mixed *m_values(mapping map|int foobar)
+
+DESCRIPTION
+	This function returns the co-domain, the `vaplue' part, of a mapping
+	as an array. 
+
+	If an integer is given as argument, 0 is returned. 
+
+SEE ALSO
+	mkmapping, m_indexes, m_sizeof, m_delete, mappingp

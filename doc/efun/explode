@@ -1,0 +1,19 @@
+NAME
+	explode - explode a string into subparts
+
+SYNOPSIS
+	string *explode(string str, string break_string)
+
+DESCRIPTION
+	This function returns an array of the strings resulting from
+	dividing `str' into the component strings separated by 
+	`break_string'.
+
+        If `break_string' is given as "", `str' is broken into its
+        component characters.
+
+        If `str' starts with `break_string', the first entry in the
+        returned array will be "".
+
+SEE ALSO
+	implode, break_string, sprintf

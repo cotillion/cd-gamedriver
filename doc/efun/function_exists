@@ -1,0 +1,31 @@
+NAME
+	function_exists - find out if a named function is defined in an
+			  object and return the object filename.
+
+SYNOPSIS
+	string function_exists(string func, object ob)
+
+DESCRIPTION
+	This function searches for a named function `func' in the specified
+	object `ob'. If it is found, the filename of that object is returned.
+	If it is not found, 0 is returned.
+
+	The filename returned is not the same as the string returned by
+	the function `file_name()', it does not have the instance number
+	of the found object suffixed to it.
+
+	If no argument `ob' is given, `this_object()' is used by default.
+
+NOTA BENE
+	It is the filename of the object that contains the function that
+	is returned, not the composite object that might inherit the file
+	that contains the function.
+
+	E.g: the expression 
+	
+	    function_exists("create_container", find_living("orc"))
+
+	will always return "/std/living".
+
+SEE ALSO
+	inherit_list

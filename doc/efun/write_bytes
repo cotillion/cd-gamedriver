@@ -1,0 +1,23 @@
+NAME
+	write_bytes - write chars in a given position in a file
+
+SYNOPSIS
+	int write_bytes(string filename, int position, string text)
+
+DESCRIPTION
+	Write the string 'text' at a given position in a file. If the position
+	is negative it is counted backwards from the end of the file.
+
+	If the position is outside the file the nothing is written.
+
+	If the 'text' extends outside the file then the file is extended.
+
+NOTA BENE
+	Observe that you overwrite existing data in the file. Not like
+	write_file where you only append data at the end.
+
+SEE ALSO
+	read_bytes, write_file, read_file
+
+
+

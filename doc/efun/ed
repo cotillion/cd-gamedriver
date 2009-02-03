@@ -1,0 +1,15 @@
+NAME
+	ed - edit a file
+
+SYNOPSIS
+	void ed(void|string path, void|string exit_func)
+
+DESCRIPTION
+	With this function an interactive object (a player) can edit
+	a file with the given path. If no `path' is given, the player
+	is expected to save the file from inside the editor. `exit_func' 
+	is called on completion	of the command.
+
+	This function is subject to the rules given by the functions
+	`valid_read()' and `valid_write()' in `/secure/master.c'
+

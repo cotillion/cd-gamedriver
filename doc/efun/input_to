@@ -1,0 +1,20 @@
+NAME
+	input_to - redirect keyboard input to a function
+
+SYNOPSIS
+	void input_to(function func, void|int noecho)
+
+DESCRIPTION
+	With this function it is possible to redirect the keyboard
+	input from a player into a function.
+
+	The function `func' is then called with the string the player
+	wrote as argument. If `noecho' is given and is non-zero, the string 
+	is not echoed on the player's screen.
+
+NOTA BENE
+	This only works for interactive players. This will not work
+	for an npc of any kind.
+
+OBSOLETE
+	void input_to(string func, void|int noecho, void|mixed arg)

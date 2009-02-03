@@ -1,0 +1,3 @@
+*.debug.log
+LP_SWAP.4.*
+regress.output

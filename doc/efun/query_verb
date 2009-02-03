@@ -1,0 +1,25 @@
+NAME
+	query_verb - give the currently active verb
+
+SYNOPSIS
+	string query_verb()
+
+DESCRIPTION
+	Returns the currently issued verb. This is only relevant when an
+	interactive player has issued a command. This function will
+	then return the first word of that command, ie all text upto but
+	not including the first space.
+
+SEE ALSO
+	add_action
+
+CAVEAT
+	When the verb have been added with the short verb flag, ie with
+		add_action("function","verb",1)
+	then all text up to first space is not equivalent to what triggered
+	the command to be executed.
+
+	You must currently remember which verb you did add_action() on
+	until there exists a query_trigverb()
+	
+BUGS

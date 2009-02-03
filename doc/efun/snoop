@@ -1,0 +1,15 @@
+NAME
+	snoop - let one player snoop another
+
+SYNOPSIS
+	object snoop(void|object snooper, object snoopee)
+
+DESCRIPTION
+
+NOTA BENE
+
+SEE ALSO
+
+CAVEAT
+
+BUGS

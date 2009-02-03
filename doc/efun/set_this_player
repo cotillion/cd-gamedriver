@@ -1,0 +1,18 @@
+NAME
+	set_this_player - set the current player
+
+SYNOPSIS
+	void set_this_player(object liveob)
+
+DESCRIPTION
+	Set the currently active 'command giver' object. The 'command giver'
+	is the living object to which all writes goes. It is also relevant
+	to add_action. It is the object returned by this_player()
+
+NOTA BENE
+	This is not the same as this_interactive() which gives the interactive
+	object that caused the current execution chain.
+
+SEE ALSO
+	this_player, this_interactive, write, add_action
+

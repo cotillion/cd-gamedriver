@@ -1,0 +1,9 @@
+NAME
+	query_host_name - give the hostname that the gamedriver is running on
+
+SYNOPSIS
+	string query_host_name()
+
+DESCRIPTION
+	Gives the name of the machine that the game is running on
+

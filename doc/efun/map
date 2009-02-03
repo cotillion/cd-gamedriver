@@ -1,0 +1,56 @@
+NAME
+        map - map a function onto each element of an array or a mapping
+
+SYNOPSIS
+        mixed map(int foobar|mixed *array|mapping map, function func)
+
+DESCRIPTION
+        If an array is given as argument 1, map() calls func(item) for each
+        item in the given array and returns an array of the return values.
+
+        If a mapping is given as argument 1, map() calls func(value) for
+        each index-value pair and returns a mapping which maps the indices
+        of the original mapping to the corresponding return value.
+
+        If an integer is given as argument instead of an array or mapping,
+        0 is returned.
+
+EXAMPLES
+
+        int func(int i)
+        {
+            return i + 1;
+        }
+
+        int *a()
+        {
+            return map(({ 1, 2, 3 }), func);
+        }
+
+        mapping b()
+        {
+            return map(([ 1 : 2, 3 : 4 ]), func);
+        }
+
+        int c()
+        {
+            return map(0, func);
+        }
+
+        Given the above code,
+
+            a() returns ({ 2, 3, 4 })
+ 
+            b() returns ([ 1 : 3, 3 : 5 ])
+
+            c() returns 0
+
+SEE ALSO
+        filter
+
+OBSOLETE
+
+        mixed *map(int foobar|mixed *array|mapping map, string map,
+                         object ob|string ob, mixed extra)
+
+

@@ -1,0 +1,16 @@
+NAME
+	write_file - append text to a file
+
+SYNOPSIS
+	int write_file(string filename, string text)
+
+DESCRIPTION
+	This function appends a given string 'text' to the file 'filename'.
+	Returns 0 for failure, 1 for success.
+
+NOTA BENE
+	If you need to rewrite a file, that is not append but write from
+	start, then you have to first remove the file with rm.
+
+SEE ALSO
+	read_file, read_bytes, write_bytes, rm, rmdir

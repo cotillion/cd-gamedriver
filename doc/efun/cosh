@@ -1,0 +1,12 @@
+NAME
+        cosh - hyperbolic function operating on float
+
+SYNOPSIS
+        float   cosh(float)
+
+DESCRIPTION
+        cosh() returns the hyperbolic cosine of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

@@ -1,0 +1,20 @@
+NAME
+	calling_object - find an object in the chain that is calling us
+
+SYNOPSIS
+	object calling_object(int previous_count = 0)
+
+DESCRIPTION
+	This function returns the object that generated the call corresponding
+	to "previous_count". For the purpose of this function each call is
+	counted, not just call_others.
+	
+	Please note that "previous_count should be a negative number, or 0.
+
+	If there is no calling object corresponding to "previous_count" the
+	return value is 0.
+
+SEE ALSO
+	previous_object, calling_function, calling_program
+
+

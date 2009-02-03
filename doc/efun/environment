@@ -1,0 +1,19 @@
+NAME
+	environment - find the environment of an object
+
+SYNOPSIS
+	object environment(object ob)
+
+DESCRIPTION
+	This function returns the object that has `ob' in its inventory, 
+	the environment of `ob'. If no object is given as argument,
+	`this_object()' is used by default.
+
+	If no environment to `ob' is found, 0 is returned.
+
+SEE ALSO
+	inventory, deep_inventory
+
+CAVEAT
+
+BUGS

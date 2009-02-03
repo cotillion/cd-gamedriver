@@ -1,0 +1,12 @@
+NAME
+        tanh - hyperbolic function operating on a float
+
+SYNOPSIS
+        float  tanh(float)
+
+DESCRIPTION
+        tanh() returns the hyperbolic tangent of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

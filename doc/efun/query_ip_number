@@ -1,0 +1,14 @@
+NAME
+	query_ip_number - give the ip number for a player
+
+SYNOPSIS
+	string query_ip_number(void |object player)
+
+DESCRIPTION
+	Gives the ip number of an interactive player, ie from which site
+	the player is connecting to the game.
+	
+	The string returned is on the form: "129.16.48.2"
+
+SEE ALSO
+	query_ip_name

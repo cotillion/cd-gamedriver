@@ -1,0 +1,12 @@
+NAME
+	remove_alarm - delete an alarm by it's id.
+
+SYNOPSIS
+	void remove_alarm(int id);
+
+DESCRIPTION
+	Delete the alarm "id".  The id of an alarm is returned by
+	the function set_alarm().
+
+SEE_ALSO
+	set_alarm, get_alarm, get_all_alarms

@@ -1,0 +1,12 @@
+NAME
+	write_socket - send text to an interactive user
+	
+SYNOPSIS
+	void write_socket(string | int)
+
+DESCRIPTION
+	If the object that makes the call is interactive, the parameter
+	to the function is sent to the user. If the parameter is an integer,
+	it is first converted to text form.
+	If the object is not interactive, the text is sent to the central
+	error log.

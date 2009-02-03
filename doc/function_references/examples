@@ -1,0 +1,12 @@
+nomask int
+is_arch(object ob)
+{
+    return (SECURITY->query_wiz_level(ob->query_real_name()) > WIZLEV_LORD);
+}
+
+    ...
+    list = filter(users(), "is_arch", this_object());
+    ...
+
+-------
+

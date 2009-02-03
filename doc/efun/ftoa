@@ -1,0 +1,12 @@
+NAME
+        ftoa - float to ascii
+
+SYNOPSIS
+        string exp(float)
+
+DESCRIPTION
+        ftoa() returns the string representation of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

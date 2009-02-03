@@ -1,0 +1,15 @@
+NAME
+	this_player - give the current player
+
+SYNOPSIS
+	object this_player()
+
+DESCRIPTION
+	Gives the currently active player. This can be both an interactive
+	player and an npc in the game. this_player is the object that gets
+	all writes and is affected by add_action.
+
+SEE ALSO
+	this_interactive, write, set_this_player, add_action, move_object
+
+

@@ -1,0 +1,52 @@
+The program was written originally by
+
+Lars Pensj|, April 1989 (lars@cd.chalmers.se).
+
+In 1992 the main development work was done by
+
+Johan Andersson (jna@cd.chalmers.se)
+
+The development of this version is now done by
+
+Anders Chrigstr|m (ac@dd.chalmers.se)
+
+and 
+
+Jacob Hallen (jacob@cd.chalmers.se)
+
+
+Other credits:
+
+The regexp package was made by Henry Spencer.
+
+The ed package was not done by me. See the file ed.c for information.
+
+Bit manipulations was implemented by pell@lysator.liu.se who also found
+several bugs that had eluded me for months.
+
+Mike McGaughy made the shared string implementation.
+
+Roland Dunkerley III fixed for-loops, do-while and the operators ++ and --.
+
+Sean T Barrett made smalloc.c.
+
+Lennart Augustsson convinced me to implement a compiler for a virtual
+stack machine. He also implemented the built-in preprocessor.
+
+John S. Price found and fixed many bugs.
+
+The shadow idea was "forwarded" to me by John S. Price from Team Cthulhu
+(Bill Burdick, Roy Riggs, Mitch Adler).
+
+Joern Renecke made the original implementation of switch and the AVL tree
+implementation of smalloc.
+
+Ronny Wikh and Lennart Augustsson implemented the first version of mappings.
+
+Lennart Augustsson made bibopmalloc.
+
+Thorsten Lockert <tholo@sigmasoft.com> fixed numerous bugs, rewrote
+interpret.c and redid much of the build procedure.
+
+Dave Richards <richards@zso.dec.com> corrected many performance problems,
+corrected bugs and contributed to the general cleanup of the driver.

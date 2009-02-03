@@ -1,0 +1,19 @@
+This is an ancient bugs file, I have removed most of it, but the following
+items are worth looking into. Sometime...
+
+
+Pattern matching doesn't seem to work any longer.
+
+A lot of calls to xalloc() should be replaced with alloca().
+
+Are sentences freed twice when destructing objects ? Second time,
+no sentences will remain.
+
+Only the first two arguments to efuns have their types checked, and only
+at run time. Not at compile time. The data structure should be enhanced.
+
+Can 'user' for a player object be 0 ?
+
+Memory is lost when compilation gives errors.
+
+Should be able to handle empty objects (without programs). Maybe it can ?

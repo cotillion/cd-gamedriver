@@ -1,0 +1,12 @@
+NAME
+	rmdir - remove an empty directory
+
+SYNOPSIS
+	void rmdir(string pathname)
+
+DESCRIPTION
+	Removes an empty directory. Returns 1 on success, otherwise 0.
+
+SEE ALSO
+	mkdir, rm
+

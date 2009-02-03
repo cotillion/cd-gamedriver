@@ -1,0 +1,12 @@
+NAME
+        acosh - hyperbolic function operating on float
+
+SYNOPSIS
+        float   acosh(float)
+
+DESCRIPTION
+        acosh() returns the hyperbolic arc-cosine of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

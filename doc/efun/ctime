@@ -1,0 +1,12 @@
+NAME
+	ctime - convert time stamp to string
+
+SYNOPSIS
+	string ctime(int time)
+
+DESCRIPTION
+	This funtion converts the given `time' to a string.
+
+SEE ALSO
+	time
+

@@ -1,0 +1,13 @@
+NAME
+	throw - cause an execution to terminate with an error
+
+SYNOPSIS
+	void throw(mixed errdata)
+
+DESCRIPTION
+	Terminates the execution with an error message. If a prior catch is
+	active then execution will resume after the catch statement.
+
+SEE ALSO
+	catch
+

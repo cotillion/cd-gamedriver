@@ -1,0 +1,29 @@
+NAME
+	wildmatch
+
+SYNOPSIS
+	int wildmatch(string pattern, string subject)
+
+DESCRIPTION
+	wildmatch will return 1 if the `subject' matches
+	the `pattern'.  The patterns used by wildmatch
+	are similar to those used in file name matching
+	by UNIX shells.
+
+	Most characters match only themselves in the pattern,
+	but the following are special:
+		*	- matches any number of any characters
+		?	- matches any characters
+		[xyz]	- matches any characters in xyz
+		[^xyz]	- matches any characters not in xyz
+		\c	- matches c even if c is special
+
+	Examples:
+		wildmatch("*.foo", "bar.foo") == 1
+		wildmatch("*.foo", "foo.bar") == 0
+		wildmatch("[abc]?*", "axy") == 1
+		wildmatch("[abc]?*", "dxy") == 0
+		wildmatch("[abc]?*", "a") == 0
+
+SEE ALSO
+	regexp

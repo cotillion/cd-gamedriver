@@ -1,0 +1,19 @@
+NAME
+	regexp - match a regular expression
+
+SYNOPSIS
+	string regexp(string *array, string pattern)
+
+DESCRIPTION
+	Returns an array containing all matches of `pattern' in the
+	strings contained in `array'.
+
+	The rules for this operation is somewhat hazy, I haven't had
+	the energy to penetrate the rather large bulk of code that
+	takes care of this so for now you'll have to read the source
+	code for yourself if you're interested.
+
+	However, it seems that the rules are the same as for UNIX
+	`grep', but don't count on it until you have verified by
+	testing.
+

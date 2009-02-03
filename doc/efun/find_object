@@ -1,0 +1,18 @@
+NAME
+	find_object - find a named object
+
+SYNOPSIS
+	object find_object(string path_name)
+
+DESCRIPTION
+	If the object with the specified `path_name' is loaded, its
+	pointer is returned by this function.
+
+	If the filename is given merely as the path to the object,
+	e.g. "/std/coins" the master object is returned, but it is
+	possible to find specific objects by giving the name complete
+	with instance number, e.g. "/std/coins#123".
+
+SEE ALSO
+	present, find_living, find_player
+

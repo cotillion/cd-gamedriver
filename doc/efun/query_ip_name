@@ -1,0 +1,22 @@
+NAME
+	query_ip_name - give the hostname from which a player is connected
+
+SYNOPSIS
+	string query_ip_name(void|object player)
+
+DESCRIPTION
+	Gives the host name of an interactive player, ie from which site
+	the player is connecting to the game.
+	
+	The string returned is on the form: "milou.cd.chalmers.se"
+
+SEE ALSO
+	query_ip_number
+
+BUGS
+	This function demands an external process to be active on the
+	machine running the gamedriver. If that process is not active
+	query_ip_name will return the same as query_ip_number, always.
+
+
+	

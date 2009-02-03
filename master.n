@@ -1,0 +1,88 @@
+#
+# driver_name [mudlib_name]
+#######
+#
+# Boot
+#######
+flag
+start_boot
+preload_boot
+final_boot
+#
+# Shutdown
+#######
+start_shutdown
+cleanup_shutdown
+final_shutdown
+#
+# Object admin.
+#######
+loaded_object
+cloned_object
+destructed_object
+destruct_environment_of
+parse_exception
+valid_resident
+valid_move
+#
+# Interactive admin.
+#######
+remove_interactive
+connect
+modify_command
+valid_users
+valid_exec
+valid_snoop
+valid_query_ip_ident
+valid_query_ip_number_name
+#
+# Other communication.
+#######
+incoming_udp
+incoming_service
+#
+# Error admin.
+#######
+log_error
+runtime_error
+#
+# Authority admin.
+#######
+query_allow_shadow
+#valid_compile_path
+valid_debug
+valid_set_auth
+valid_write
+valid_read
+#
+# Others.
+#######
+get_mud_name
+define_include_dirs
+predef_defines
+memory_failure
+external_signal
+#
+# ed()
+#######
+make_path_absolute
+save_ed_setup
+retrieve_ed_setup
+get_ed_buffer_save_file_name
+get_ed_empty_file
+#
+# process_(string|value)()
+#######
+get_vbfc_object
+#
+# parse_command()
+#######
+parse_command_id_list
+parse_command_plural_id_list
+parse_command_adjectiv_id_list
+parse_command_prepos_list
+parse_command_all_word
+#
+# sprintf()
+#######
+object_name

@@ -1,0 +1,35 @@
+/##  Filter noise out of Sun, BSD, v7 lint output./d
+/^[a-z1_]*.[cy]:$/d
+/Lint pass2:/d
+/##  My specific fluff I don't want to see/d
+/possible pointer alignment problem/d
+/lang.y([0-9]*): warning: constant in conditional context/d
+/regerror multiply defined/d
+/regerror value declared inconsistently/d
+/regerror, arg 1 declared inconsistently/d
+/regerror: variable # of args declared/d
+/regcomp multiply defined/d
+/regcomp value declared inconsistently/d
+/regcomp, arg [12] declared inconsistently/d
+/regcomp: variable # of args declared/d
+/regexec multiply defined/d
+/regexec value declared inconsistently/d
+/regexec, arg [12] declared inconsistently/d
+/regexec: variable # of args declared/d
+/realloc multiply defined/d
+/malloc multiply defined/d
+/free multiply defined/d
+/slc_names declared.*, but never used or defined/d
+/enctype_names declared.*, but never used or defined/d
+/encrypt_names declared.*, but never used or defined/d
+/telcmds declared.*, but never used or defined/d
+/cuserid declared.*, but never used or defined/d
+/sigstack declared.*, but never used or defined/d
+/re_comp declared.*, but never used or defined/d
+/re_exec declared.*, but never used or defined/d
+/authtype_names declared.*, but never used or defined/d
+/gethostent declared.*, but never used or defined/d
+/gethostbyname2 declared.*, but never used or defined/d
+/futimes declared.*, but never used or defined/d
+/yydebug defined.*, but never used/d
+/./p

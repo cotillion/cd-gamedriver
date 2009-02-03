@@ -1,0 +1,48 @@
+NAME
+	call_other - call a function in another object
+	
+SYNOPSIS
+	mixed call_other(object ob|string ob, string func, ...)
+	mixed <object ob>|<string ob>-><func>(<...>)
+	
+	mapping <mapping m>-><func>(<...>)
+	array <array m>-><func>(<...>)
+DESCRIPTION
+	This function is used to call another function in a given
+	object. If the object `ob' is given as a string the object
+	is found using "find_object()", otherwise the object pointer
+	is used directly. If the object is given as a string, the
+	absolute path to the object must be given.
+
+	`func' should simply be the name of the function to be called.
+	Any number of arguments to the function can be added to the
+	call.
+
+	Example:
+
+	name = call_other(find_player("commander"), "query_real_name");
+	access = call_other("/secure/master", "valid_read", 
+		"/DONE", "commander", "my_func");
+
+	"call_other()" can also be performed using "->" with this syntax:
+
+	name = find_player("commander")->query_real_name();
+	access = "/secure/master"->valid_read("/DONE", "commander", 
+							"my_func");
+
+	An extended form of call_other is when a mapping or an array
+	takes the place of the object argument. The types of the array
+	elements or mapping values should be object or string. If an
+	array is used, the function "func" will be called in every object
+	in the array, and the returned value will be an array of the return
+	values from the function calls.
+	If a mapping is used, a mapping with the original indexes and the
+	resulting values from the function call will be returned.
+	
+	Example:
+	
+	int *arr;
+	arr = users()->query_wiz_level();
+
+SEE ALSO
+	call_otherv

@@ -1,0 +1,121 @@
+This file contains the changes between the CD.01 and CD.02 gamedriver versions.
+
+
+removed uid and euid.
+added set_auth and query_auth.
+# uid functionality is handled by a general, protected variable that is
+  accessed through the set_auth and query_auth functions. Calls to set_auth
+  are validated and modified by an apply to 'valid_set_auth' in the master 
+  object.
+
+valid_exec() is called with objects involved in exec.
+
+removed cat
+removed write.
+removed tell_object.
+# All player interaction is done through write_socket()
+
+added set_screen_width and query_screen_width.
+# Breaks lines automatically.
+
+removed wizlist.
+
+efun destruct() takes no arguments and destructs this_object().
+efun debug("destruct", ob) destructs ob.
+
+removed efuns interactive() and sort_array().
+
+remove_interactive called in master.
+# Is called every time a link is lost.
+
+added efun commands() obsoletes get_localcmd().
+
+You can no longer make local calls to undefined functions.
+
+Socastic resets.
+# The time to reset is no longer constant.
+
+notify_fail returns 0.
+
+super_snoop
+# If you need this, read the code to find out how to use it.
+
+create() not called in master of clones.
+
+create() is the first function called in an object.
+
+call_other(0, ...) is valid.
+
+simul_efun_reload() called in master when simul_efun is updated.
+
+Object variables will now be saved by efun save_object() and
+restored with restore_object().
+# 0 returned if the object no longer exists.
+
+Added support for floats.
+
+exec(0, ob) will kill the link to ob.
+
+added efun object_clones().
+
+virtual inheritance.
+
+added #pragma no_inherit and #pragma no_clone. 
+
+added true varargs.
+# func(a, b, ...) where ... = mixed *argv.
+
+
+implemented call_otherv(ob, func, argarr) 
+argarr is treated as as many arguments as containing elements.
+
+added the possibility to name an inherit.
+inherit "foo" name;
+Used as name::func(), name::var, name1::name2::var etc
+
+previous_object takes an optional argument specifying how
+far back to look.
+# Note that the argument is a negative number.
+
+call_other to array or mapping added.
+arr->func(), mapping->func()
+Values in mappings are used. Return values in array/mapping
+
+default values to arguments of functions added.
+# void fun(int a, int b = 3) { ....... }
+
+Faster heart_beat
+# Float in the config file.
+
+New applies to the master object:
+interpret.c:                ret = apply_master_ob("valid_set_this_player", 2);
+interpret.c:                ret = apply_master_ob("valid_set_auth", 3);
+interpret.c:                ret = apply_master_ob("valid_query_ip", 3);
+interpret.c:                ret = apply_master_ob("valid_query_host_name", 1);
+interpret.c:                ret = apply_master_ob("valid_users", 1);
+interpret.c:                ret = apply_master_ob("valid_debug", num_arg + 1);
+lex.c:                      ret = apply_master_ob("valid_compile_path", 3);
+simulate.c:                 ret = apply_master_ob("valid_load", 2);
+simulate.c:                 ret = apply_master_ob("valid_inherit", 2);
+# May object A inherit object b?
+simulate.c:                 ret = apply_master_ob("valid_resident", 1);
+# Determines if #pragma RESIDENT is ok.
+simulate.c:                 apply_master_ob("loaded_object", 2);
+# Called when an object has been loaded, before create()
+# Needed to give objects default uid/euid.
+simulate.c:                 apply_master_ob("cloned_object", 2);
+# Called when an object has been cloned, before create()
+# Needed to give objects default uid/euid.
+simulate.c:                 apply_master_ob("destructed_object", 1);
+# Called just before object is to be destructed.
+simulate.c:                 ret = apply_master_ob("valid_input_to", 2);
+# May the object do an input_to?
+simulate.c:                 ret = apply_master_ob("valid_commands", 2);
+# May the object call the commands() efun?
+simulate.c:                 v = apply_master_ob("modify_path", 2);
+# All path parameters except compiletime paths are handled in this call.
+swap.c:                     apply_master_ob("gamedriver_message",1);
+# Passes messages from the gamedriver to the mud.
+
+
+

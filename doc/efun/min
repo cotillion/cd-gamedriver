@@ -1,0 +1,17 @@
+NAME
+    min - find the smallest value in a group of values
+
+SYNOPSIS
+    varargs mixed min(mixed val1, mixed val2, ...)
+
+DESCRIPTION
+    min() returns the smallest of the arguments passed to it.
+    At least two arguments must be provided.
+
+EXAMPLES
+    min(2, 6, 9)      returns 2
+    min(1.0, 2.0)     returns 1.0
+    min("abc", "cba") returns "abc"
+
+SEE ALSO
+    max

@@ -1,0 +1,642 @@
+README CD.05.00
+Increaed precision of float to double.
+
+Increased int from 32 bits to 64 bits.
+
+Added foreach statement to simplify looping over arrays and mappings.
+
+Allow declaration on variables anywhere you can have a statement.
+
+Added modulo for floats.
+
+Allow delaration of vatiables in the first expression of a for statement.
+
+Fixed an error in the accounting of mstrings.
+
+===============================================================================
+README CD.04.07
+Communications subsystem mostly rewritten; from Cygnus
+
+Stop using periodic signals to update current time and trigger alarms
+
+Add calloc() entry point to allocators that did not previously have this,
+also add cfree() for compatibility with some older, broken systems.  Noticed
+by Plarry.
+
+Document all efuns in the driver source tree to make sure they are kept up to
+date
+
+Only try to swap if we haven't already done so within the last second
+
+Add path-matching efun::match_path; from Cygnus
+
+Add efun::nrnd() for natural distribution random numbers; from Cygnus
+
+Added lots of casts to silence overly picky and noisy compilers
+
+Removed assertions, pre- and post-conditions from the grammar, no-one uses
+them and they impose extra overhead; from Cygnus
+
+Added check for trying to write a NULL string with efun::write_bytes; pointed
+out by Plarry@Muddy_Waters
+
+Fixed a problem with %O output format and large integers in efun::sprintf,
+pointed out by Mercade
+
+Fix efun::parse_command so that 0 will no longer match all objects, pointed
+out by Skywise
+
+Make efun::break_string be consistant on first vs. rest of lines, from Mercade
+
+Allow efun::unique_array to take a closure argument; from Shiva
+===============================================================================
+README CD.04.06
+Fixed small things that were pointed out by GCC 2.8.x
+
+Fixed one more memory leak, pointed out by Cygnus
+
+Changed how sockets are made non-blocking to not repeat common code many times.
+
+Make "array - ({ 0 })" and "-= ({ 0 })" expressions actually remove all
+destructed objects in arrays too; from Cygnus
+
+Added statistics for cleanup performance; from Cygnus
+
+Made ?: expressions with an empty second part legal, if empty it will take on
+the value from the first part; from Azid@Kingdoms.
+
+If we are doing cleanups, try to do a single object every time the swapper is
+called; from Cygnus
+
+Add a call to master to verify that an object has the right to get IP address
+or name for another object
+===============================================================================
+README CD.04.05
+Made functionp() return 0 when passed a pointer to a function in a destructed
+object.
+
+Added function_object() to extract the object from a function pointer.
+
+After a catch of evaluation cost overflow the evaluation cost is reset to
+slightly below maximum if this was in the outermost catch().  The reserve
+is defined by EXTRA_COST in config.h.
+
+Allow using parentisized constant strings in inherit; from Plarry@Muddy_Waters.
+
+Put back code to call clean_up() in objects before swapping them out, to give
+them a chance to remove themselves.
+
+Added an auto-inherited object "/secure/auto".  This object is automatically
+inherited into _all_ objects, including "/secure/master".  Most of the code
+by Azid@Kingdoms
+
+Added efun::min() and efun::max(); from Azid
+
+Added efun::function_name() to get a string representation of a function
+pointer.
+
+Made the not-operator "!" understand about destructed objects and function
+pointers pointing at functions in destructed objects.
+
+Removed efun::cindent() and util/indent; it was both sorely out of date and
+did not make much sense to keep.
+
+Removed efun::query_inherit_list(); it is available as efun::debug("inherit_list")
+
+Removed the reserved word and attribute "protected"; it was not used.
+
+Told the indenter in ed about some preprocessor directives; from Skywise
+
+Moved function composition into the driver; from Cygnus@Synergy.
+
+operator(!) and operator(~) now works; from Skywise
+
+Get better textual function pointer representations; from Skywise
+
+Allow master to insert lines at the start of new files; from Skywise
+
+Optimized jumps in loops and switch statements; from Skywise
+
+Optimized jumps to jumps; from Cygnus
+
+Use snprintf() many places to prevent overflowing buffers; add a small version
+of snprintf() for systems that might not have it.  Add regression test for the
+problem this fixes.
+
+Only enable efun::break_point() when the driver is compiled with DEBUG
+
+Added floating point formats to efun::speintf(); from Pippin@Synergy
+
+Corrected a seldom-occuring condition where we would loop forever.
+
+Don't print last line twice in "ed" when doing substitution if both the
+general print flag is set and the "p" flag is given on the substitute
+command.
+
+Define DEBUG_DRIVER preprocessor symbol if driver has been compiled with
+DEBUG enabled.
+
+Make efun::min() and efun::max() take a variable number of arguments, at least
+two, and return the minimum/maximum of all values passed.  From Cygnus@Synergy.
+
+Make the | operator do array unions; from Cygnus@Synergy.
+
+Check for stack overflow in macro version of push_svalue().
+
+Don't die if a function is redeclared with different number of arguments when
+running in DEBUG mode.
+
+Don't special-case shadowing of catch_tell() in the driver; that should be done
+in the mudlib if at all.
+
+efun::call_self and efun::call_selfv no longer cause the stack to be mangled,
+restore them and add a regression test to verify that they work properly
+
+Add implementation of strerror() for systems that do not provide it
+===============================================================================
+README CD.04.04
+Fixed a problem where the driver would crash when getting the command list for
+a living object if any of the verbs had an efun connected to them (and thus no
+object defined)
+
+Optimized SUPER_SNOOP code; from Azid.
+
+Allow "void" as an argument, indicating no arguments are allowed like ANSI.
+From Azid.
+
+Made sprintf() generate runtime errors when buffer overflows.
+
+Add limits to number of concurrent alarms per object; default to 128.
+
+Generate runtime error and remove all alarms from an object if it exceeds the
+per-object limit of alarms.
+
+Add access checking on calls to query_ip_ident().
+
+Don't crash on redifinition of local variables where the second definition also
+has an assignment of a mismatched type.
+
+Allow compilation without SERVICE_PORT defined.
+
+Correct new super-snoop code.
+
+Allow compilation without ALLOWED_SERVICE defined.
+
+Change many abort() calls to fatal().
+
+Correct reference count handling for progs (code in objects).
+
+Allow tracebacks through the VBFC object to complete.
+
+Replaced indent code in "ed"; it would sometimes mangle the indented code.
+
+Allow negative indices to splice_array; makes it possible to use code that
+says "array[2 .. -1]" to get everything from the 3rd element to the last
+element.
+===============================================================================
+README CD.04.03
+This release has two new features, one of which is commands with no trailing
+whitespace.  The can be used to implement eg. commands like : and ' with
+simple add_action() calls.  To use this feature, give add_action() a third
+argument of 2.  Note that with this change the handling of add_action() with
+a third argument of 1 has been changed to require a space between the verb
+and its arguments.  The latter is disabled by default for compatibility
+reasons.  This can be changed by editing config.h.
+
+The other new feature is a query_trigverb() efun which for abbreviated verbs
+like those added with a third argument of 1 to add_action() will return the
+whole verb, while query_verb() still returns only the portion that the player
+actually entered.
+
+Some bugs in handling of destructed objects.
+
+Getting the intersection of arrays ("array & array") and subtracting ("array -
+array") now works, as does subtracting 0-elements from arrays of objects to
+remove destructed objects ("obarray -= ({ 0 })").
+
+If various access check routines does not exist in the master object, they are
+now assumed to have been present and returned 1, allowing the operation.
+
+A problem where a '#pragma resident' statement in one object would cause all
+objects compiled after that object to appear to have set it has been fixed.
+'#pragma resident' should also work better now.  Parts of this from Alcides.
+
+The break_string() efun will now wrap the first line correctly; it used to have
+problems with that if a space between words was on the exact column the wrap
+was to be done on.  It will also work correctly with indentation now.
+
+The built-in wrapping of text sent to uses has been changed to also do word-
+wrapping on hyphens.
+
+The rename() efun has had its return values inverted so that it is consistent
+with return values for success and failure used by other efuns.
+
+If passed an array of object where an element were 0, parse_command() would
+try dereferencing an illegal pointer.
+
+The sprintf() efun could write into freed (and potentially reused) memory in
+certain instances.
+
+Alarms would be attached to the object holding the function to be called, and
+not the object creating the alarm.
+
+The driver will now give warnings if it encounters unknown #pragma statements.
+
+A destructor is now called with errors catched and ignored, allowing an object
+with a buggy destructor to actually be destructed.
+
+Line number information on runtime errors should be correct now.  From Alcides.
+
+Proper block-scoping of variables has been implemented.  Patches by Alcides.
+
+Protect against FP exceptions, flagging an error if one is caught.
+
+Protect against overflow when converting from float to integer in ftoi().
+
+Enforce limit on line length in ed to prevent internal buffers from being
+overrun when a file is later listed.
+
+Optional second argument to notify_fail(); if set to 0 a message will not
+be set if one has already been set.
+
+Put in a limit on depth of inherit chain.
+
+Avoid copying a struct twice every time an LPC function returns; don't
+do any copying at all if there are no local variables in the LPC function.
+
+Make object-level profiling optional dependant on PROFILE_OBJS.
+
+Error handling redone to reduce copying of structures when error recovery
+contexts are needed; code is more intuitive and more effective.
+
+No longer require user to ensure that F_OFFSET is set up correctly for the
+yacc generator being used
+
+Better support for profiling the driver.
+
+cfun implementation of sort_array() added.
+
+restart_mud now processes any gprof output if the driver exited normally.
+
+We could sometimes call recvfrom() with invalid parameters.
+
+efun::restore_mapping failed on strings.
+
+efun::parse_command no longer fetch values from /secure/master on every call,
+only when /secure/master has been (re)loaded.
+
+efun::call_out removed.
+
+Many other minor performance improvements.
+
+Fixed some memory leaks.
+
+Fixed support for compiling with RANDOM
+
+Made it possible to link with the dmalloc debug allocator; do a much better job
+at freeing allocated memory if DEALLOCATE_MEMORY_AT_SHUTDOWN is defined.
+
+Inlined a few more functions for performance.
+
+Major cleanup of interpreter stack usage.
+
+Make a start on a regression test suite.  Run by doing "make check".
+
+Fixed some swap leaks and cleaned up swap code. Changed swap code to use stdio;
+also keep an in-memory bitmap of free blocks in swap.  By Cygnus@Synergy.
+
+Add error checking on writes of precompiled binaries in save_binary().
+
+Add FreeBSD as a supported platform for compilation.
+
+New string handling; by Cygnus@Synergy.
+
+Added '#pragma no_shadow' support.  If any object on the inherit chain has
+'#pragma no_shadow', shadowing the object will be denied.
+
+Push a return value on efun::break_point() so that the game won't crash if it
+is called.
+
+Add an option to decide wether or not using host names when sending UDP data-
+grams is allowed; disabled by default
+
+Redo handling of normal exit from a catch() statement so that throw(0)
+cannot be used to kill the driver
+===============================================================================
+README CD.04.00beta1
+This release contains several new things, of which some are not yet documented.
+The most important change is the addition of function references as data type.
+How they work is explained in various files in doc/function_references.
+
+An other addition is a new set of regexps. I don't have any docs yet, so you'll
+have to read the code to see how they work.
+
+An other important change is that the gamedriver has been further
+ANSI-fied. There should be very few warnings left when the driver is
+compiled with -Wall. Also, the varargs functions have been changed to be
+ANSI-C compliant.
+
+A manifest has been written, explaining the aims of development work in the
+near future. Please read it.
+===============================================================================
+
+README CD.03.31beta1
+The call_out system has changed again.
+get_all_call_outs() nad delete_call_out() are gone.
+call_out() still remains for compatibility purposes, but negative
+arguments are not legal.
+The new efuns set_alarm(), get_alarm(), remove_alarm() and get_all_alarms()
+implement the new call_out system.
+
+The driver calls the function runtime_error() in the master object when 
+a runtime error is encountered. It is then up to the master object to
+send the information to the player/to the responsible wizard etc.
+
+The faulty memmove->bcopy macro from the previous release has been changed.
+===============================================================================
+README CD.03.27beta2
+The makefiles have been improved, with better macro handling.
+You need to install a new Makefile, or patch the old one.
+
+make_func.c no longer uses the 'make' program.
+
+A small error in line number information processing in make_func.c has been
+fixed.
+===============================================================================
+README CD.03.27beta1
+The Makefile has been split to make life easier.
+The file dependencies are in the file Makefile.distrib. The stuff that you
+may want to change, should be in a file called Makefile, that you have to
+create. The first time you create the Makefile, you should do this by moving
+the file Makefile.default to Makefile and then editing paths, compilation
+flags etc as required. After that, you should be able to take your old
+Makefile whenever you get a new version of the driver. If you need to make
+modifications, the README file will say so.
+
+Resets and heartbeat are no longer implemented by the driver. You should use
+the call_out mechanism instead. If you want to you can simulate resets and
+heartbeats in lpc.
+
+Explode works differently.
+If the start of the string matches the matching pattern, the first element
+in the resulting array will be an empty string. This was not previously the
+case.
+
+An example
+==========
+
+Old type explode:
+    arr = explode("aabcaade", "aa")
+
+    arr gets the value ({ "bc", "de" })
+
+New type explode:
+
+    arr = explode("aabcaade", "aa")
+
+    arr gets the value ({ "", "bc", "de" })
+
+You can no longer have prototypes for functions that don't exist.
+
+The driver checks the number and types of function parameters in a
+better way.
+
+There are some new and nifty things that can be done with call_outs.
+Call_out overhead is smaller, and they are now stored in a per-object way.
+remove_call_out() is no longer an efun. You should simulate it in the mudlib.
+find_call_out() is no longer an efun. You should simulate it in the mudlib.
+call_out() now returns a number which is the id of the callout.
+void delete_call_out(int id) is used to remove a call_out.
+mixed *get_all_call_outs() returns an array of call_out info. One element
+per callout in the object.
+
+  mixed *calls = get_all_call_outs();
+  int i;
+
+  for (i = 0; i < sizeof(calls); ++i) {
+    int    id_of_callout = calls[i][0];
+    string function      = calls[i][1]; // name of the callout function
+    float  time_left     = calls[i][2]; // how soon until it gets called?
+    float  delay         = calls[i][3]; // the original delay asked for 
+                                        // (might be negative)
+    mixed  arg           = calls[i][4]; // Argument 3 to call_out().
+    }
+
+You can set the swapping parameters from within the game.
+You have to use debug("set_swap") to enable swapping.
+
+E.g.
+    debug("set_swap", ({ 0,         // Don't swap anything unless this much
+                                    // memory is used. (bytes)
+                         16777216,  // Swap as much as possible if this much
+                                    // memory is used. (bytes)
+                         60,        // Don't swap out an object/program
+                                    // unless it is atleast this old. (seconds)
+                         900,       // Allways swap out an object/program if
+                                    // it is older than this. (seconds)
+                      }));
+also
+    debug("query_swap"); /* or */ debug("query_swap", 0);
+        // Returns the current swapping parameters.
+
+    debug("query_swap", 1); 
+        // Returns swapin/swapout statistics as an (int ret[4][3])
+        // ({ // Objects in.
+        //    ({ /* last second */, /* last minute */, /* last hour */ }),
+              // Programs in.
+        //    ({ /* last second */, /* last minute */, /* last hour */ }),
+              // Objects out.
+        //    ({ /* last second */, /* last minute */, /* last hour */ }),
+              // Programs out.
+        //    ({ /* last second */, /* last minute */, /* last hour */ }),
+        // }) 
+    debug("query_swap", 2);
+        // Returns age of oldest object/program not swapped out.
+
+    debug("query_swap", 3);
+       // Returns amount of used memory.
+
+Assertions (ordinary assertions pre/postconditions and invariants) are
+expressions that should evaluate to true, if they don't they will
+cause a runtime error when executed.
+
+Ordinary assertion:
+    @ : expr;  // Is executed when control reaches it.
+               // This is valid wherever a statement is.
+
+Precondition:
+    >> : expr; // Is executed after all arguments have got their
+               // values and before control reaches the function block.
+Postcondition:
+    << : expr; // Is executed after a return statement but before
+               // control reaches the calling function.
+               // These are valid between the function head and the
+               // function block. E.g.
+    void reset()
+        // Pre/post-conditions here.
+    {
+        ....
+    }
+
+Invariant:
+    <> : expr; // Is executed after a return statement but before
+               // control reaches the calling function.
+               // This is valid where global declarations are.
+
+Which assertions are to be executed are controlled with a 16 bit bitmask
+where assertions are bit 0 (0x1) preconditions are bit 8 (0x100)
+postconditions are bit 9 (0x200) and invatiants bit 10 (0x400).
+
+
+    debug("set_debug_prog", prog, bitmask);
+        // Sets which assertions to execute in the program prog.
+    debug("query_debug_prog", prog);
+        // Returns which assertions are being executed in program prog.
+        
+    debug("set_debug_obj", ob, bitmask);
+        // Controles which assertions to execute in the object ob.
+    debug("query_debug_obj", ob);
+        // Returns which assertions are being executed in object ob.
+
+An alternate form of ordinary assertions exists.
+    @ constant_bitmask : expr;
+       // The bitmask controles for what assertions it should be executed.
+       // E.g.
+    @ 0 : expr; // Will never be executed since no bits are selected.
+    @ 1 : expr; // Same as @ : expr;
+    @ 0x100 : expr; // Will only be executed when preconditions are turned on.
+    @ 0x701 : expr; // Will be executed when any of pre/post-conditions,
+                    // invariants or ordinary assertions are turned on.
+    @ 0xffff : expr; // Will be executed when any assertions are turned on.
+
+Constructors/destructors functions that are called when an object is 
+created/destructed.
+A constructor is called before create() is called and after all constructors
+in inherited classes have been called.
+A destructor is called before the object is destructed and before any
+destructors in inherited classes have been called.
+The constructors and destructors are functions declared in a special way.
+they should have no return type and no arguments and must have a special name.
+
+constructor:
+    >>()
+    {
+        /* construct object here */
+    }
+destructor:
+    <<()
+    {
+        /* destruct the object here */
+    }
+
+The efuns string val2str(mixed) and mixed str2val(string).
+val2str() converts the argument to its string represetation (the same
+as used with save/restore_object()).
+str2val() converts a value in string representation back to a value.
+
+The efuns mapping m_save_object() and void m_restore_object(mapping)
+m_save_object() saves its variables like save_object but returnes it
+in a mapping instead of writing it to a file.
+m_restore_object() restores an object but does it from its argument
+instead of from reading from a file.
+
+The efuns void save_map(mapping, string) and mapping restrore_map(string).
+Write and read files like save/restore_object but take/return values
+in a mapping instead of the variables in this_object().
+
+This means that save/restore_object can be simulated with
+    save_map(m_save_object(), "file_name");
+and
+    m_restore_object(restore_map("file_name"));
+
+Efuns call_self() and call_selfv(). Like call_other() and call_otherv()
+but makes a local call instead of a call_other.
+
+===============================================================================
+README from CD.02.05
+This is the official release of the CD.02.05 driver. It is the final CD.02
+version. We will make extensive changes to the LPC language, to the reset,
+heart_beat and call_out systems in the next version, so we will be upping
+the version numbers to CD.03.XX. (Don't worry, the changes will require
+very minor muldib changes.)
+A version of the CD mudlib that should work with this driver version is 
+released together with this driver version.
+Changes since the previous release:
+There are now working cfuns for a number of heavily used functions. They work 
+with the CDLIB mudlib. The original lfuns are left intact in the mudlib
+release, so if you have problems with the cfuns, you can revert to the lfuns 
+at any time.
+The rusage calls have been fixed, so now you can use top_ten_cpu and
+getprofile options to the debug() efun. (If you have enabled the options in
+the config file)
+There is now documentation for all the efuns (I hope). The documentation is
+distributed with the mudlib. In the future I plan to distribute the efundocs
+separately.
+The error logs look neater.
+Hname now supports the user identification protocol.
+A bunch of minor bugs have been fixed. Among them some obscure bugs in 
+parse_command. There are a few known bugs remaining. The most important
+ones are that very long lines sent to write_socket hang the driver and that
+virtual inheritance doesn't work properly under some circumstances.
+
+Current compatibility status:
+Sparc		SunOS 4			gcc	OK
+Sparc		SunOS 5 (SOLARIS)	gcc	OK
+Alpha		OSF/1			cc	OK
+??		Sequent			??	Probably OK
+386		Linux			gcc	OK
+386		NetBSD			gcc	Crashes
+MIPS		Ultrix 4.2		gcc	OK
+In addition to this the driver will probably work well on a lot of
+Unixes, but we haven't made any recent tests.
+===============================================================================
+README from the first beta release of the CD.02.03 driver.
+Changes since the previous release:
+Some bug fixes.
+Speedup of mappings.
+interpret.c has been rewritten to get rid of the huge switch(). It started
+to cause compiler problems.
+Compat changes for Solaris 2.x and Sequent.
+A bunch of cfuns for use with the CDLIB have been added. They are untested.
+New malloc called bibopmalloc. This malloc uses less memory than smalloc, but
+is slightly slower. It needs some more tuning before it's prefect on
+32 bit machines, it works very well on 64 bit machines.
+Process_string and process_value will now accept an extra argument. If this
+argument is non-zero, the call will set previous_object to the object
+returned by a call to the function get_vbfc_object in the master object.
+This is a way to provide vbfc security without the overhead of changing
+uids and euids. It also avoids the problems with errors during vbfc calls.
+
+===============================================================================
+README from the third beta release of the CD.02.02 driver.
+
+The differences from the previous beta versions are that I fixed the little 
+makefile problem, and that cfuns now should work properly. The ones that I have
+tested with cdlib are write, check_call and query_prop. The others were
+used with the kingdoms mudlib, and are probably not working they way
+you want them to.
+
+There is a new release of byacc out. (Berkely Yacc) It is faster than both
+yacc and bison. (Compiles faster and creates faster code.) You can get
+a bit better speed by installing it and changing the makefile to use it instead
+of bison.
+
+If you want to try your hands at coding cfuns the following functions are 
+strong candidates:
+
+In /secure/simul_efun:
+cat
+sort_array
+tell_room
+say (expand the tell_rooms inside the say)
+
+In /std/object:
+add_prop
+change_prop
+add_list
+del_list
+query_list
+item_id
+cmditem_action
+
+

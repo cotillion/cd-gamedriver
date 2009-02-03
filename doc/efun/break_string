@@ -1,0 +1,21 @@
+NAME
+	break_string - break a string at regular intervals
+	
+SYNOPSIS
+	string break_string(string str|int foobar, int len, 
+			    void|int indent|string indent)
+
+DESCRIPTION
+	This function breaks a continous string without newlines into a
+	a string with newlines inserted at every `len':th character. 
+
+	If `indent' is defined and is given as an integer, `indent' number
+	of spaces are inserted after every newline. If `indent'	is a string 
+	that string is inserted before every newline.
+
+	If the first argument is an integer, the function simply returns 0.
+
+SEE ALSO
+	implode, explode, sprintf
+
+	

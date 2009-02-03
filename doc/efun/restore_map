@@ -1,0 +1,21 @@
+NAME
+	restore_map - load a mapping from file
+
+SYNOPSIS
+	mapping restore_map(string filename)
+
+DESCRIPTION
+	Loads a mapping from a file, named filename, previosly written
+	by a save_object or a save_map. The indexes will be strings and
+	correspond to variable names in save/restore_object.
+	The filename gets a filetype ".o" appended and the format is:
+	
+		mapping_index	mapping_value
+
+		intvar		number
+		stringvar	"stringvalue"
+		arrayvar	({ variable_values })
+		mappingvar	([ index:value ])
+
+SEE ALSO
+	save_map, save_object, restore_object

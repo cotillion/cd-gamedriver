@@ -1,0 +1,14 @@
+NAME
+	enable_commands - set an to be object `living'
+
+SYNOPSIS
+	void enable_commands(void)
+
+DESCRIPTION
+	This function makes an object `living'. It will now pick up
+	commands defined by `add_action()' and can listen to what is
+	said in its environment.
+
+SEE ALSO
+	disable_commands, move_object
+

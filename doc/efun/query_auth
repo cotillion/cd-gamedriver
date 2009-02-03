@@ -1,0 +1,16 @@
+NAME
+	query_auth - return the authority information of an object
+
+SYNOPSIS
+	mixed query_auth(object)
+
+DESCRIPTION
+	It is possible to store authority information in any format in the
+	hidden authority variable of all objects. This function retrieves
+	the information.
+
+SEE ALSO
+	set_auth
+
+
+

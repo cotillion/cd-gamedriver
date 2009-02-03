@@ -1,0 +1,15 @@
+NAME
+	notify_fail - give a message to be printed if all commands failed
+
+SYNOPSIS
+	void notify_fail(string message)
+
+DESCRIPTION
+	With this function you can set a message that will be printed instead
+	of the notorious 'What ?' when all commands fail. The message will be
+	passed through process_string which allows you to decide the
+	content of the string 'late' and also do other things in the
+	function(s) called through process_string.
+
+SEE ALSO
+	process_string		

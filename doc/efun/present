@@ -1,0 +1,21 @@
+NAME
+	present - find a present object through its id() function
+
+SYNOPSIS
+	object present(object ob|string ob, object *where|object where|void)
+
+DESCRIPTION
+	This function returns the specified object `ob' if it is found
+	in the inventory of the object(s) `where'. The object `ob' can
+	be given either as an actual object or as a string.
+
+	`where' can either be one object or an array of objects to search
+	through. It can also be omitted, and this_object() is then used as
+	default.
+
+	If the object is not present, 0 is returned.
+
+SEE ALSO
+	find_object
+
+

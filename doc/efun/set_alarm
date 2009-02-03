@@ -1,0 +1,40 @@
+NAME
+	set_alarm, set_alarmv - delayed execution of a function
+	
+SYNOPSIS
+	int set_alarm(float delay, float repeat, function func)
+
+	OBSOLETE
+	int set_alarm(float delay, float repeat, string func, ...)
+
+	int set_alarmv(float delay, float repeat, string func, mixed *argarr)
+
+DESCRIPTION
+	With this function you can delay the call of a name function
+	`func' for `delay' seconds.  If `repeat' is positive, then it is
+	a repeating callout with repeat time repeat (like a heartbeat)
+	 -- for example, if delay is 3.0, and repeat is 4.0 then the
+        function will be called in 3 seconds and every 4 seconds after that.
+
+	OBSOLETE
+	  If `...' is specified it is passed as arguments to the function.
+	 In the second form (set_alarmv()) the elements of the array argarr
+	will be sent as arguments to the function, i.e. if argarr is an
+	array with 3 elements the function will be called with 3 arguments.
+
+RETURN VALUES
+	The return value is the id of the alarm.
+
+NOTA BENE
+        Neither "this_interactive()" nor "this_player()" is defined
+        in a function that has been called by "set_alarm()". If you
+        have a `write()' statement in the function that is called 
+        with `set_alarm()' the output will end up in the game log.
+
+WARNING
+	Never, ever, make a repeating alarm inside a repeating
+	alarm.  The alarms generated will be exponential, and
+	in less than a minute the entire mud will grind to a halt.
+
+SEE_ALSO
+	remove_alarm, get_all_alarms, get_alarm.

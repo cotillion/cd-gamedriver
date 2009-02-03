@@ -1,0 +1,17 @@
+NAME
+	member_array - find the position of an element in an array
+
+SYNOPSIS
+	int member_array(mixed element, int foobar|mixed *array)
+
+DESCRIPTION
+	Gives the index in 'array' which is occupied with the value 'element'.
+	If 'element' is not found or an integer is given instead of an array
+	as second argument, -1 is returned.
+
+	Searching works like the equality operator, ie integers and strings
+	are compared for equality and arrays and mappings for identity.
+
+	This means that integers and strings must have the same value to match,
+	while arrays and mappings must be the exact same.
+

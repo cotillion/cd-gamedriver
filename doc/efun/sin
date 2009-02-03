@@ -1,0 +1,12 @@
+NAME
+        sin - trigonometric function operating on a float
+
+SYNOPSIS
+        float  sin(float)
+
+DESCRIPTION
+        sin() returns the sine of a floating point number.
+        The input value is in radians.
+
+SEE ALSO
+        math - for a list of other math functions available.

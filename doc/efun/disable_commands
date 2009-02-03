@@ -1,0 +1,13 @@
+NAME
+	disable_commands - set an object `non-living'
+
+SYNOPSIS
+	void disable_commands()
+
+DESCRIPTION
+	With this function an object is made `non-living'. This disables
+	the adding of commands from entering rooms or objects that move
+	into the inventory of this object.
+
+SEE ALSO
+	enable_commands, move_object

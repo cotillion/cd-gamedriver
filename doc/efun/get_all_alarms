@@ -1,0 +1,21 @@
+NAME
+	get_all_alarms - returns an array of the alarms for this_object()
+
+SYNOPSIS
+	mixed *get_all_alarms();
+
+DESCRIPTION
+  mixed *calls = get_all_alarms();
+  int i;
+
+  for (i = 0; i < sizeof(calls); ++i) {
+    int    id_of_callout = calls[i][0];
+    string function      = calls[i][1]; // name of the callout function
+    float  time_left     = calls[i][2]; // how soon until it gets called?
+    float  repeat_time   = calls[i][3]; // the repeat time for the alarm. 
+    mixed  *arg          = calls[i][4]; // An array containing the arguments
+					// that will be sent to the function.
+  }
+
+SEE_ALSO
+	set_alarm, get_alarm, remove_alarm.

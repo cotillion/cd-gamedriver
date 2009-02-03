@@ -1,0 +1,16 @@
+NAME
+	file_size - return the size of a file
+
+SYNOPSIS
+	int file_size(string path)
+
+DESCRIPTION
+	This function returns the size, in bytes, of an existing file. If the
+	file does not exist, file_size returns -1.
+
+	If the file is actually a directory and not a file, -2 will be
+	returned.
+
+SEE ALSO
+	file_time, file_name
+

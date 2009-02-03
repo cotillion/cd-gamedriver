@@ -1,0 +1,23 @@
+NAME
+	read_bytes - read text from a given position in a file
+
+SYNOPSIS
+	string read_bytes(string filename, void|int fromchar, void|int numchar)
+
+DESCRIPTION
+	Gives the contents of the file 'filename'. If the optional arguments
+	'fromchar' and 'numchar' are given then the function gives the contents
+	from byte 'fromchar' and the following bytes for a total of 'numchar'
+	bytes. If the length of the file is smaller than 'fromchar' + 'numchar'
+	only the bytes from 'fromchar' to the end of the file are returned.
+	If 'fromchar' is negative it is taken to be a count from the end of
+	the file. If 0 or less characters are to be returned the return value
+	is 0.
+
+NOTA BENE
+	There is a maximum limit to the number of bytes that can be read. This
+	limit is defined when the gamedriver is compiled and is normally
+	50Kbytes.
+
+SEE ALSO
+	write_file, read_file, write_bytes

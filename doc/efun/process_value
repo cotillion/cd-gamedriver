@@ -1,0 +1,33 @@
+NAME
+	process_value - give a value from a described function call
+
+SYNOPSIS
+	mixed process_value(string calldescription, void | int security)
+
+DESCRIPTION
+	Get the replacement of one syntactic pattern. The pattern is on
+	the form:
+
+		   "function[:filename][|arg1|arg2....|argN]"
+
+	The returned value can be of any type.
+
+  	Note that both object and arguments are marked optional with the
+	brackets and that the brackets are not included in the actual pattern.
+
+	If the security parameter is specified and non-zero, the call is
+	generated with a special object marked as the generator. The
+	object is provided by the function "get_vbfc_object". This object
+	will normally be one without any privileges.
+
+SEE ALSO
+	process_string
+
+CAVEAT
+	This is usually used to support 'value by function call' in the mudlib.
+	It is wise to set the security parameter of the process_value
+	call, as any function in any object can be called with almost
+	any arguments. You probably don't want to have this done with your
+	privileges.
+
+

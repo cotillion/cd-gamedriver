@@ -1,0 +1,12 @@
+NAME
+        asin - trigonometric function operating on float
+
+SYNOPSIS
+        float   asin(float)
+
+DESCRIPTION
+        asin() returns the arc-sine of a floating point number.
+        The value returned is in radians.
+
+SEE ALSO
+        math - for a list of other math functions available.

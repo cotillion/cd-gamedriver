@@ -1,0 +1,12 @@
+NAME
+        atanh - hyperbolic function operating on float
+
+SYNOPSIS
+        float   atanh(float)
+
+DESCRIPTION
+        atanh() returns the hyperbolic arc-tangent of a floating
+        point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

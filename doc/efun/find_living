@@ -1,0 +1,24 @@
+NAME
+	find_living - find named living objects
+
+SYNOPSIS
+	mixed find_living(string name, void|int)
+
+DESCRIPTION
+	This function returns the living object with the given `name'.
+
+	The argument `name' must be given in lowercase for this function
+	to work.
+
+	If the second argument is specified to 1, the function returns a
+	list of all living objects with the specified name.
+
+NOTA BENE
+	For this function to work, the object must have added its name 
+	to the game-driver internal list by calling the function 
+	`set_living_name()'. Just making it living with `enable_commands()'
+	is not enough.
+
+SEE ALSO
+	set_living_name, enable_commands, find_player, find_object
+

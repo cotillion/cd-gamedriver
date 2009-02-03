@@ -1,0 +1,11 @@
+NAME
+	allocate - create an array of n elements
+	
+SYNOPSIS
+	mixed *allocate(int n);
+
+DESCRIPTION
+	This function returns an empty array of `n' elements. All
+	values in the array are initialized to 0.
+
+

@@ -1,0 +1,26 @@
+NAME
+	call_otherv - call a function in another object with array parameter
+	
+SYNOPSIS
+	mixed call_other(object ob|string ob|object *oblist|mapping *oblist|
+	int 0, string func, mixed *arglist)
+
+DESCRIPTION
+	This function is used to call another function in a given
+	object. If the object `ob' is given as a string the object
+	is found using "find_object()", otherwise the object pointer
+	is used directly. If the object is given as a string, the
+	absolute path to the object must be given.
+
+	`func' should simply be the name of the function to be called.
+
+	The 'arglist' is an array of arguments that are passed to the called
+	function in such a way that the first element of the array is assigned
+	to the first formal parameter of the function, the second element to
+	the second parameter etc.
+
+	The extended forms of call_other, using an array or a mapping as
+	target object parameter are valid for call_otherv too.
+
+SEE ALSO
+	call_other

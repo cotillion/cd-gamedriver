@@ -1,0 +1,20 @@
+NAME
+	set_auth - sets the authority information of an object
+
+SYNOPSIS
+	void set_auth(object, mixed)
+
+DESCRIPTION
+	It is possible to store authority information in any format in the
+	hidden authority variable of all objects. This function provides
+	the basic information for setting the variable. The gamedriver
+	calls the function valid_set_auth in the master object, to determin
+	if the call is legal and possibly to modify the information.
+	The return value of valid_set_auth is stored in the hidden authority
+	variable.
+
+SEE ALSO
+	query_auth
+
+
+

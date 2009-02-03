@@ -1,0 +1,13 @@
+NAME
+	pointerp - determine if the value of a variable is an array
+
+SYNOPSIS
+	int pointerp(mixed testvar)
+
+DESCRIPTION
+	This function return 1 if `testvar' was of the type pointer,
+	and 0 otherwise.
+
+SEE ALSO
+	intp, stringp, mappingp, objectp, floatp
+

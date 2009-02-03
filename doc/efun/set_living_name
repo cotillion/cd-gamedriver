@@ -1,0 +1,22 @@
+NAME
+	set_living_name - set the searchable name for a living object
+
+SYNOPSIS
+	void set_living_name(string name)
+
+DESCRIPTION
+	Sets a specific searchable name for a living object, ie an object
+	that has done enable_commands. By doing so the object can be found
+	by the function find_living. 
+
+NOTA BENE
+	This is normally used to allow finding of an npc globally in the
+	game.
+
+SEE ALSO
+	find_living, find_player, enable_commands
+
+CAVEAT
+	If there is two living objects with the same name then only one
+	of them will ever be found by find_living, undefined which one.
+

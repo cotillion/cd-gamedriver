@@ -1,0 +1,20 @@
+NAME
+	get_alarm - returns information of an alarm for this_object()
+
+SYNOPSIS
+	mixed *get_alarm(int alarm_id);
+
+DESCRIPTION
+  alarm_id is the id returned by set_alarm().
+
+  mixed *call;
+
+  call = get_alarm(alarm_id);
+  int    id_of_callout = calls[0];
+  string function      = calls[1]; // name of the callout function
+  float  time_left     = calls[2]; // how soon until it gets called?
+  float  repeat_time   = calls[3]; // the repeat time for the alarm. 
+  mixed  *arg          = calls[4]; // An array containing the arguments
+
+SEE_ALSO
+	set_alarm, get_all_alarms, remove_alarm.

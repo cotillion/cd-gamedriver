@@ -1,0 +1,25 @@
+NAME
+	mkfunction
+
+SYNOPSIS
+	function mkfunction(string func, object ob | void)
+
+DESCRIPTION
+	mkfunction makes a function that when called will
+	call the function named `func' in the object `ob'.
+	If `func' is a constant string then this mkfunction
+	should not be used, since
+		mkfunction("func", obj)
+	is the same as
+		obj->func
+	It should only be used when the name of the function
+	cannot be known until runtime because it is computed.
+
+	If `ob' is not given this_object() is assumed.
+
+RETURN VALUES
+	The value returned is function in the specified object,
+	or 0 if no such function exists (or if it is inaccessible).
+
+SEE ALSO
+	functions, applyv, papplyv

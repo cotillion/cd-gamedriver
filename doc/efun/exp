@@ -1,0 +1,12 @@
+NAME
+        exp - exponential function operating on float
+
+SYNOPSIS
+        float   exp(float)
+
+DESCRIPTION
+        exp() returns exponential of a floating point number.
+        Uses the natural log base e=2.7183...
+
+SEE ALSO
+        math - for a list of other math functions available.

@@ -1,0 +1,11 @@
+NAME
+	crypt - encrypt a string
+
+SYNOPSIS
+	string crypt(string data, string key|int random)
+
+DESCRIPTION
+	This function encrypts the given `data' using the given encryption
+	`key'. If the the second argument is given as an integer, the
+	encryption is done with a random key.
+

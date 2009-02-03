@@ -1,0 +1,12 @@
+NAME
+        cos - trigonometric function operating on float
+
+SYNOPSIS
+        float   cos(float)
+
+DESCRIPTION
+        cos() returns the cosine of a floating point number.
+        Input value in radians.
+
+SEE ALSO
+        math - for a list of other math functions available.

@@ -1,0 +1,15 @@
+NAME
+	capitalize - capitalize the first word of a string
+	
+SYNOPSIS
+	string capitalize(string str|int foobar)
+
+DESCRIPTION
+	With this command the first letter of a string is made
+	upper-case. If the argument given is an integer, a 0 is
+	returned.
+
+SEE ALSO
+	lower_case, upper_case
+
+

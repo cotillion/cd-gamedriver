@@ -1,0 +1,18 @@
+NAME
+	deep_inventory - recursive inventory of an object
+
+SYNOPSIS
+	object *deep_inventory(object ob|int foobar)
+
+DESCRIPTION
+	This function returns a list of the all the objects contained
+	by the given `object' including the objects contained in other
+	objects. The inventory of `object' is searched recursively in
+	order to produce this list.
+
+	If an integer is given as argument, 0 is returned. If no argument
+	is given, `this_object()' is used by default.
+
+SEE ALSO
+	inventory, environment
+

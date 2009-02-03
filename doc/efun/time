@@ -1,0 +1,17 @@
+NAME
+	time - give the current time
+
+SYNOPSIS
+	int time()
+
+DESCRIPTION
+	Gives the current time in number of seconds passed since January 1970,
+	something. 
+
+SEE ALSO
+	ctime, file_time, object_time
+
+BUGS
+	The actual time is only updated in the gamedriver each heartbeat.
+	This means that time makes 'leaps' every heartbeat.
+

@@ -1,0 +1,14 @@
+NAME
+	upper_case - capitalize all text in a string
+
+SYNOPSIS
+	string upper_case(string str|int foobar)
+
+DESCRIPTION
+	This function returns a string that is a copy of the argument
+	string `str' but with all letters in upper case.
+
+	If an integer is given as argument, 0 is returned.
+
+SEE ALSO
+	capitalize, lower_case

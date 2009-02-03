@@ -1,0 +1,15 @@
+NAME
+	sizeof - give the size of an array
+
+SYNOPSIS
+	int sizeof(int foobar|mixed *array)
+
+DESCRIPTION
+
+NOTA BENE
+
+SEE ALSO
+
+CAVEAT
+
+BUGS

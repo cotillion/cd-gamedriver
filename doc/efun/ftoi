@@ -1,0 +1,11 @@
+NAME
+        ftoi - float to int
+
+SYNOPSIS
+        int    ftoi(float)
+
+DESCRIPTION
+        ftoi() returns the integer part of a floating point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

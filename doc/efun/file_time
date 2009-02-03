@@ -1,0 +1,13 @@
+NAME
+	file_time - return the last modification time for a file
+
+SYNOPSIS
+	int file_time(string path)
+
+DESCRIPTION
+	Gives the time in seconds since whatever 1970, when the file was last
+	modified. 
+	
+SEE ALSO
+	time, ctime, object_time, file_size, file_name
+

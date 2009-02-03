@@ -1,0 +1,114 @@
+
+These efuns can now take a function as well as a string:
+
+void	add_action(string|function, void|string, void|int);
+void	ed(void|string, void|string|function);
+void	input_to(string|function, ...);
+
+These functions can only take a local function as function
+argument.
+
+
+Functions that could be changed:
+
+call_out      deprecated
+call_other
+call_otherv   these two are strange efuns.  Maybe they should take
+	      functions, maybe not.
+unique_array  Yes, eventually I'll do this one.
+set_alarmv    is obsolete now
+		set_alarmv(d,r,str,v)
+		 is the same as 
+		function f = mkfunction(str); set_alarm(d,r,papply_array(f, v))
+set_auth      ?
+
+
+
+These efuns will have changed:
+
+mixed	*filter(int|mapping|mixed *, string, object|string, void|mixed);
+mixed	*map(int|mapping|mixed *, string, object|string, void|mixed);
+int     set_alarm(float, float, string|function, ...);
+
+New types:
+
+mixed	*filter(int|mapping|mixed *, function);
+mixed	*map(int|mapping|mixed *, function);
+int     set_alarm(float, float, string);
+
+The old ones will be kept for compatibility.
+
+
+
+New efuns, operators, and simul_efuns:
+
+function papplyv(function, mixed *);
+	papplyv(f, ({ v1,v2,...vn })) is the same as &f(v1,v2,...vn)
+
+function compose(function, function);
+	function compostion, i.e. if	function fg = compose(f,g);
+	then fg(x) == f(g(x))
+
+f @ g   same as compose(f,g)
+
+mixed   applyv(function, mixed *)
+	applyv(f, ({ v1,v2,...vn })) is the same as f(v1,v2,...vn)
+
+function mkfunction(string str, object ob | void);
+	returns the function named str in object ob,
+	if it exists, otherwise 0.  If the object
+	is left out this_object() is assumed.
+
+====================================================
+
+How to rewrite your code to adapt the new style.
+------------------------------------------------
+
+In general a function can only be used after it
+has been defined (i.e., a prototype or definition
+of a function must appear before it is first used
+in a file).  This means that you may have to move
+the definitions around when you make the changes below.
+
+OLD:	add_action("func", "cmd");	or	add_action("func", "cmd", flag);
+NEW:	add_action(func, "cmd");		add_action(func, "cmd", flag);
+
+OLD:	ed(file, "func");
+NEW	ed(file, func);
+
+OLD:	input_to("func");		or	input_to("func", args...);
+NEW:	input_to(func);				input_to(&func(args...));
+
+OLD:	call_out("func", delay);	or	call_out("func", delay, arg);
+NEW:	set_alarm(delay, 0.0, func);		set_alarm(delay, 0.0, &func(arg));
+NOTE: In the first form of call_out the call_out id
+is given to the func when it is called.  If your
+program uses this misfeauture you have to rewrite it.
+
+OLD:	set_alarmv(delay, repeat, "func", vec);
+NEW:	set_alarm(delay, repeat, papplyv(func, vec));
+
+OLD:	filter(arr, "func", obj);	or	filter(arr, "func", obj, arg);
+NEW:	filter(arr, obj->func);			filter(arr, &obj->func(,arg));
+NOTE: If obj=this_object() it can be left out, i.e.
+	filter(arr, "func", this_object());  becomes
+	filter(arr, func);
+
+OLD:	map(arr, "func", obj);		or	map(arr, "func", obj, arg);
+NEW:	map(arr, obj->func);			map(arr, &obj->func(,arg));
+NOTE: The same note about this_object as for filter
+applies here.
+
+map_array, filter_array should be changed in the same way as
+map and filter.  (Or they could be changed into map/filter.)
+
+OLD:	set_alarm(delay, repeat, "func"); or	set_alarm(delay, repeat, "func", args...);
+NEW:	set_alarm(delay, repeat, func);		set_alarm(delay, repeat, &func(args...));
+NOTE: The same note about this_object as for filter
+applies here.
+
+
+GENERAL NOTE: If the function in any of the old constructs
+above should not be a string literal (i.e. "func"), but
+an expression (e.g. foo+bar) you can use mkfunction to
+obtain the function (e.g. mkfunction(foo+bar)).

@@ -1,0 +1,19 @@
+NAME
+	restore_object - load global variables in current object from file
+
+SYNOPSIS
+	int restore_object(string filename)
+
+DESCRIPTION
+	Loads all nonstatic global variables from a specifically formatted
+	file given by 'filename'. The format of the file is:
+	
+		variable_name	variable_value
+
+		intvar		number
+		stringvar	"stringvalue"
+		arrayvar	({ variable_values })
+		mappingvar	([ index:value ])
+
+SEE ALSO
+	save_object

@@ -1,0 +1,22 @@
+NAME
+	calling_program - find the program that contains the function
+	that is calling us
+
+SYNOPSIS
+	string calling_program(int previous_count = 0)
+
+DESCRIPTION
+	This function returns the name of the program that contained
+	the function that generated the call corresponding to 
+	"previous_count". For the purpose of this function each call is
+	counted, not just call_others.
+	
+	Please note that "previous_count should be a negative number, or 0.
+
+	If there is no calling object corresponding to "previous_count" the
+	return value is 0.
+
+SEE ALSO
+	previous_object, calling_object, calling_function
+
+

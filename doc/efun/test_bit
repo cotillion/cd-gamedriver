@@ -1,0 +1,17 @@
+NAME
+	test_bit - test a given bit in a bitfield
+
+SYNOPSIS
+	int test_bit(string bitfield, int bitnum)
+
+DESCRIPTION
+	Tests a bit with the number 'bitnum' in a specifically coded string
+	'bitfield'. The bitfield string is a string consisting of writable
+	characters. Each character represents six bits.
+
+	test_bit returns 1 if the bit is set, otherwise 0.
+
+CAVEAT
+	There is a maximum bitindex number which can be changed in config.h
+	in the gamedriver source. This constant is normally 1200.
+

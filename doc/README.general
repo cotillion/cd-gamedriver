@@ -1,0 +1,38 @@
+Read the file INSTALL for information about how to install the game.
+
+Mail bugs or info about problems to mud@cd.chalmers.se.
+
+
+
+Here is some information about 3.0:
+
+Flags accepted by driver:
+
+-D'arg'	make 'arg' into a global define for LPC code
+
+-N	Don't start the IP demon
+
+-S	Log statistics to the MUDstatistics file
+
+-c	Print to stdout every time a file is compiled.
+
+-d	Debug information. Prints nothing interesting.
+
+-y	Yacc debug information. Prints nothing interesting.
+
+-e	Start without loading any wizard file.
+
+-f'arg' Send 'arg' as argument to function 'flag()' in obj/master.c.
+
+-m'dir' Specify 'dir' as the directory to use as mudlib.
+
+-t	Don't call any heart beats. Makes it easier to debug.
+
+-s'sec'	Delay in seconds before swap
+
+-u'port'	Use 'port' as the udp port
+
+-p'port'	Use 'port' as the service port (for ftp and other purposes)
+
+
+

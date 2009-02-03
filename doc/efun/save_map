@@ -1,0 +1,22 @@
+NAME
+	save_map - save contents of a mapping to a file
+
+SYNOPSIS
+	void save_map(mapping map, string filename)
+
+DESCRIPTION
+	Saves the contents of the mapping map to file filename in a format
+	compatible with save_object(). The indices of the mapping has to be
+	strings and will correspond to the names of variables saved with
+	save_object().
+	The filename gets a filetype ".o" appended and the format is:
+
+		mapping_index	mapping_value
+
+		intvar		number
+		stringvar	"stringvalue"
+		arrayvar	({ variable_values })
+		mappingvar	([ index:value ])
+
+SEE ALSO
+	save_object, restore_map, restore_object

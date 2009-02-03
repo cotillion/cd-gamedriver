@@ -1,0 +1,12 @@
+NAME
+        atan2 - trigonometric function operating on float
+
+SYNOPSIS
+        float   atan2(float y, float x)
+
+DESCRIPTION
+        atan2() returns the arc-tangent of y/x.
+        The value returned is in radians (-pi to pi).
+
+SEE ALSO
+        math - for a list of other math functions available.

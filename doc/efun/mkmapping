@@ -1,0 +1,30 @@
+NAME
+	mkmapping - make a mapping from an array
+
+SYNOPSIS
+	mapping mkmapping(int foobar|mixed *index, int foobar|mixed *value)
+
+DESCRIPTION
+	This function returns a mapping built from the given arguments.
+
+	If both arguments are arrays, the result mapping will be a combination
+	of the two.
+
+	e.g: mkmapping(({ "apa", 3, "gustav"}), ({ -23, "nit" })) will return
+	     ([ "apa":-23, 3:"nit" ])
+
+	     The index or value that aren't matched by a corresponding value
+	     or index is dropped.
+
+	If one of the arguments is an integer (of any value) an incremented
+	counter will be put in the corresponding field.
+
+	e.g: mkmapping(0, ({ "apa", 3, "gustav"})) will return
+	     ([ 0:"apa", 1:3, 2:"gustav" ])
+
+	e.g: mkmapping(({ "apa", 3, "gustav"}), 0) will return`
+	     (["apa":0, 3:1, "gustav":2 ])
+
+SEE ALSO
+	m_indexes, m_values, m_sizeof, m_delete, mappingp
+

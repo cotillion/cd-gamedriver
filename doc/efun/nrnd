@@ -1,0 +1,28 @@
+NAME
+	nrnd - return a normally distributed random floating-point value
+
+SYNOPSIS
+	float nrnd([float mean[, float stdev]])
+	
+DESCRIPTION
+	Returns a normally distributed random floating-point value.
+	With no arguments nrnd() returns a random value with a mean
+	of 0.0 and a standard deviation of 1.0.  The caller may
+	specify values for the mean and standard deviation, in which case
+	the value:
+
+		mean + nrnd() * stdev
+
+	is returned.
+
+NOTA BENE
+	Be certain to use ftoi() to convert the floating-point value to
+	an integer value as appropriate, this is not done automatically.
+	Also note, normally distributed random numbers have probability
+	distributions such that 75% of all values should fall within one
+	standard deviation, 96% of all random values should fall within
+	two standard devations, and 99% of all random values should fall
+	within three standard deviations.  However, it is possible
+	that random values could exceed three standard deviations.
+	Therefore, when using nrnd() be certain to limit the upper and
+	lower bounds to protect against excessively large or small values.

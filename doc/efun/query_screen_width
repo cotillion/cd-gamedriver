@@ -1,0 +1,11 @@
+NAME
+	query_screen_width - query the width of the screen for user output
+	
+SYNOPSIS
+	int query_screen_width()
+
+DESCRIPTION
+	Return the width of the user srceen, as set by set_screen_width.
+
+SEE ALSO
+	set_screen_width

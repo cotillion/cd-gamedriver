@@ -1,0 +1,13 @@
+NAME
+	objectp - true if the value of a variable is an object
+
+SYNOPSIS
+	int objectp(mixed testvar)
+
+DESCRIPTION
+	This function return 1 if `testvar' was of the type object,
+	and 0 otherwise.
+
+SEE ALSO
+	intp, stringp, pointerp, mappingp, floatp
+

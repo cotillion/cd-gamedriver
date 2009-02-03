@@ -1,0 +1,35 @@
+#ifdef _FUNCTION
+/* Only used by compose() */
+static mixed 
+compose_util(function f, function g, mixed x)
+{
+    return f(g(x));
+}
+
+/*
+ * Function name: compose
+ * Description:   The returns the composition of two functions
+ *                (in the mathematical sense).  So if
+ *                h = compose(f,g)  then  h(x) == f(g(x))
+ * Arguments:     f, g: the functions to compose.
+ * Returns:       a function which is the composition of f and g.
+ */
+function
+compose(function f, function g)
+{
+    return &compose_util(f,g);
+}
+
+/*
+ * Function name: apply_array
+ * Description:   apply a function to an array of arguments
+ * Arguments:     f: the function, v: the array
+ * Returns:       f(v1,...vn) if v=({v1,...vn})
+ */
+mixed
+apply_array(function f, mixed *v)
+{
+    function g = papply_array(f, v);
+    return g();
+}
+#endif

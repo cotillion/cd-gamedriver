@@ -1,0 +1,13 @@
+NAME
+	get_dir - return an array of filenames in a directory
+
+SYNOPSIS
+	string *get_dir(string path)
+
+DESCRIPTION
+	This function returns the names of all files contained in the
+	specified directory.
+
+	The function is subject to the rules defined by the function
+	`valid_read()' in `/secure/master.c'.
+

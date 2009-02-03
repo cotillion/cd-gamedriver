@@ -1,0 +1,11 @@
+NAME
+	clear_bit - clear a bit in a string bitfield
+
+SYNOPSIS
+	string clear_bit(string bitstring, int pos)
+
+DESCRIPTION
+	This function will clear the indicated bit in the given bitstring.
+
+SEE ALSO
+	set_bit, test_bit

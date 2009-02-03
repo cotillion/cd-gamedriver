@@ -1,0 +1,13 @@
+NAME
+	implode - concatenate an array of strings
+
+SYNOPSIS
+	string implode(int foobar|string *arr, string pad)
+
+DESCRIPTION
+	This function concatenates all strings contained in `arr' with
+	the string `pad' inserted between them.
+
+SEE ALSO
+	explode, break_string, sprintf
+

@@ -1,0 +1,13 @@
+NAME
+	set_screen_width - set the width of the screen for user output
+	
+SYNOPSIS
+	void set_screen_width(int)
+
+DESCRIPTION
+	If the object that makes the call is interactive, the parameter
+	to the function is interpreted as the width to which user output
+	should be folded. If the parameter is 0, no folding takes place.
+
+SEE ALSO
+	query_screen_width

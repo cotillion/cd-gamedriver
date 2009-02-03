@@ -1,0 +1,19 @@
+NAME	
+	set_bit - set a specific bit in a bitfield
+
+SYNOPSIS
+	string set_bit(string bitfield, int bitnum)
+
+DESCRIPTION
+	Sets a bit with the number 'bitnum' in a specifically coded string
+	'bitfield'. The bitfield string is a string consisting of writable
+	characters. Each character represents six bits.
+
+	The 'bitfield' string is automatically extended to satisfy the setting
+	of bits outside the current string size.
+
+CAVEAT
+	There is a maximum bitindex number which can be changed in config.h
+	in the gamedriver source. This constant is normally 1200.
+
+

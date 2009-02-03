@@ -1,0 +1,11 @@
+NAME
+	users - give an array of the current players
+
+SYNOPSIS
+	object *users()
+
+DESCRIPTION
+	Gives an array of objectpointers to the currently interactive
+	objects. This is most often the playerobjects, unless exec() has
+	been run to swap a players interactivity into another object.	
+

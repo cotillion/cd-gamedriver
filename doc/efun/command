@@ -1,0 +1,32 @@
+NAME
+	command - execute a command in a living object
+
+SYNOPSIS
+	int command(string command)
+
+DESCRIPTION
+	With this function an object can command itself to perform
+	an action that previously has been added with add_action.
+	The given string `command' should be on the same format as
+	if it had been given from the command line.
+
+	`command()' returns the number eval-cycles that was used to perform
+	the command, or 0 if it proved impossble due to eval-cost.
+
+	A force function can then simply be implemented in the player-
+	object like this:
+
+	nomask int /* We'd rather not have anyone shadowing this function */
+	force_player(string command)
+	{
+	    if (ok_to_force())
+	        if (command(command))
+	   	    return 1;
+
+	    return 0;
+	}
+
+	The function `ok_to_force()' can then determine if it is permitted
+	for the person that tries to execute the command to force the
+	player or not.
+

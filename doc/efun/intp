@@ -1,0 +1,13 @@
+NAME
+	intp - determine if a variable is of type int
+
+SYNOPSIS
+	int intp(mixed testvar)
+
+DESCRIPTION
+	This function return 1 if `testvar' was of the type integer,
+	and 0 otherwise.
+
+SEE ALSO
+	mappingp, stringp, pointerp, objectp, floatp
+

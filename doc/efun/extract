@@ -1,0 +1,23 @@
+NAME
+	extract - extract a subpart of a string
+
+SYNOPSIS
+	string extract(string str, void|int start, void|int to)
+
+DESCRIPTION
+	Get a subpart of a string. Both 'start' and 'to' is a position in
+	'str'. If the position(s) is negative then it is counted from the
+	end of the string.
+
+	If the 'start' is bigger or equal to 'to' then an empty string is
+	returned. An empty string is also returned if the subpart is
+	outside the string in its entirety.
+
+	Both positions are optional. If no position is given then 'str' is
+	returned.
+
+	If only 'start' is given then a string from 'start' to the end of
+	'str' is returned.
+
+SEE ALSO
+	capitalize, lower_case, explode, implode

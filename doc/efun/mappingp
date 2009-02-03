@@ -1,0 +1,13 @@
+NAME
+	mappingp - determine if the value of a variable is a mapping
+
+SYNOPSIS
+	int mappingp(mixed testvar)
+
+DESCRIPTION
+	This function return 1 if `testvar' was of the type mapping,
+	and 0 otherwise.
+
+SEE ALSO
+	intp, stringp, pointerp, objectp, floatp
+

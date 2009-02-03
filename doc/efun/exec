@@ -1,0 +1,30 @@
+NAME
+	exec - connect a socket to a new object
+
+SYNOPSIS
+	int exec(object new, object old)
+
+DESCRIPTION
+	This function is used to shift an interactive user betwen two
+	objects. The function `valid_exec()' is called in `/secure/master.c'
+	with the calling object as argument. If `valid_write()' accepts
+	the calling object the interactive user is switched from the object
+	`old' to `new'.
+
+        Returns a 1 for success, 0 for failure.
+
+NOTA BENE
+	It is very easy to become confused when writing the code that uses
+	this efun. All the internal variables like `this_player()' or
+	`this_object()' remain unchanged, it is just the user that is 
+	switched between the objects.
+
+CAVEAT
+	This is one of the greater threats to security in the system. Unless
+	the use is this efun is rigorously restricted anyone can become arch
+	or keeper.
+
+FRIENDLY ADVICE
+	Don't do this unless you're damn certain you what you are doing.
+
+

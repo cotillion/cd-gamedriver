@@ -1,0 +1,33 @@
+NAME
+	unique_array - Sort an array into arrays of unique groups
+
+SYNOPSIS
+	mixed *unique_array(int|mixed *array, string uniqfunc, void|mixed del)
+
+DESCRIPTION
+	Gives an array of arrays of nonunique objects. The function 'uniqfunc'
+	is called on each of the objects in the array. The return values are
+	used to group the objects into a number of arrays. For each object
+	in such a subarray 'uniqfunc' returned the same value.
+
+	If the 'del' argument is specified, elements that return a value that
+	is equal to 'del' from the 'uniqfunc' will not be included in the 
+	result. If the 'del' argument is unspecified, it will default to
+	integer 0.
+
+ 	Then an array on the below form is returned:
+   
+	   ({
+	   ({Same1:1, Same1:2, Same1:3, .... Same1:N }),
+	   ({Same2:1, Same2:2, Same2:3, .... Same2:N }),
+	   ({Same3:1, Same3:2, Same3:3, .... Same3:N }),
+	   ....
+	   ....
+	   ({SameM:1, SameM:2, SameM:3, .... SameM:N }),
+	   })
+   
+CAVEAT
+	All elements of the array that are not objectpointers are ignored.
+
+BUGS
+	

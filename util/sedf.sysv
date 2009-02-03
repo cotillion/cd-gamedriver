@@ -1,0 +1,23 @@
+/##  Filter noise out of System V-style lint output./d
+:top
+/==============/ {
+    n
+    b top
+}
+/struct.union iovec never defined/ {
+    n
+    b eat
+}
+/./ {
+    p
+    n
+    b top
+}
+:eat
+/^    / {
+    n
+    b eat
+}
+/./ {
+    b top
+}

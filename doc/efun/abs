@@ -1,0 +1,11 @@
+NAME
+        abs - function operating on float
+
+SYNOPSIS
+        float   abs(float)
+
+DESCRIPTION
+        abs() returns the absolute value of a floating point number.
+
+SEE ALSO
+        math - for a list of other math functions available.

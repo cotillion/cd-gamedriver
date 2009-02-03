@@ -1,0 +1,11 @@
+NAME
+	all_inventory - return the contents of an object
+	
+SYNOPSIS
+	object *all_inventory(object ob)
+
+DESCRIPTION
+	This function returns an array of the objects contained in `ob'.
+
+	If `ob' is not specified "this_object()" is used by default.
+
