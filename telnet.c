@@ -1355,7 +1355,7 @@ telnet_accept(void *vp)
     ip = (void *)new_player(tp, &addr, addrlen);
     if (ip == NULL)
     {
-	telnet_shutdown(nd, tp);
+	telnet_shutdown(tp->t_nd, tp);
     }
     else
     {
