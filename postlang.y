@@ -100,13 +100,22 @@ inheritance: type_modifier_list F_INHERIT string_constant opt_inherit_name ';'
 
 opt_inherit_name: /* empty */
                 {
-		char *n = strrchr($<string>0, '/');
-                if (n)
-                {
-                    $$ = tmpstring_copy(n + 1);
-		}
-                else
-		    $$ = tmpstring_copy($<string>0);
+                    char *n = strrchr($<string>0, '/');
+                    
+                    if (n)
+                    {
+                        char *s = tmpstring_copy(n + 1);
+                        char *p = strchr(s, '.');
+
+                        if (p)
+                        {
+                            *p = '\0';
+                            $$ = tmpstring_copy(s);
+                        }
+                        $$ = s;
+                    }
+                    else
+                        $$ = tmpstring_copy($<string>0);
                 }
                 | F_IDENTIFIER
                 {
