@@ -5928,6 +5928,28 @@ f_set_living_name(int num_arg)
     set_living_name(current_object, sp->u.string);
 }
 
+/* ARGSUSED */
+static void
+f_query_living_name(int num_arg)
+{
+    char *str;
+
+    if (sp->type == T_NUMBER)
+    {
+       assign_svalue(sp, &const0);
+       return;
+    }
+
+    str = sp->u.ob->living_name;
+    pop_stack();
+
+    if (str)
+       push_string(str, STRING_SSTRING);
+    else
+       push_number(0);
+}
+
+
 static void
 f_parse_command(int num_arg)
 {
