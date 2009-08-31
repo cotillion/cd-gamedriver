@@ -2,10 +2,27 @@ NAME
 	crypt - encrypt a string
 
 SYNOPSIS
-	string crypt(string data, string key|int random)
+	string crypt(string data, string salt|int random)
 
 DESCRIPTION
 	This function encrypts the given `data' using the given encryption
-	`key'. If the the second argument is given as an integer, the
-	encryption is done with a random key.
+	`salt'. If the the second argument is given as an integer, the
+	encryption is done with a random salt.
 
+        If the the OS supports it other encryption modes than the standard
+        DES are available.
+
+        ID  -  Method        
+        1   | MD5
+        2a  | Blowfish (not in mainline glibc; added in some
+            | Linux distributions)
+
+        5   | SHA-256 (since glibc 2.7)
+        6   | SHA-512 (since glibc 2.7)
+
+        To use these methods provide a salt of the format $<id>$<salt>$.
+        For a random salt to be used use the form $<id>$
+
+EXAMPLES
+        crypt("foo", "$1$")  - Will return the foo encrypted with a
+                               random salt value using MD5

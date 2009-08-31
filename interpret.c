@@ -4677,23 +4677,60 @@ f_ed(int num_arg)
 	error("Bad arg to ed()\n");
 }
 
+static char *
+build_salt(int length)
+{
+    char *str;
+    int i;
+    static char *choise = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
+    
+    str = xalloc(length + 1);    
+    for (i = 0; i < length; i++)
+        str[i] = choise[random_number((int)strlen(choise), 0, NULL)];
+
+    if (length > 0)
+        str[length] = '\0';
+    
+    return str;
+}
+
+#define MAX_SALT_LENGTH 16
+
 /* ARGSUSED */
 static void
 f_crypt(int num_arg)
 {
-    char salt[2];
+    char *salt;
     char *res;
-    char *choise =
-	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
+    int i, count = 0;
+    
+    if (sp->type == T_STRING && strlen(sp->u.string) >= 2)
+    {
+        /* If the string matches. $<id>$ then we add a salt.
+         * If it's $<id>$<salt>$ salt we don't. */
+        for (i = 0; i < strlen(sp->u.string); i++)
+            if (sp->u.string[i] == '$')
+                count++;
 
-    if (sp->type == T_STRING && strlen(sp->u.string) >= 2) {
-	salt[0] = sp->u.string[0];
-	salt[1] = sp->u.string[1];
+        if (count > 1 && count < 3)
+        {
+            salt = xalloc(strlen(sp->u.string) + MAX_SALT_LENGTH + 2);
+            strcpy(salt, sp->u.string);
+            res = build_salt(MAX_SALT_LENGTH);
+            strcat(salt, res);
+            strcat(salt, "$");
+            free(res);
+        } else {
+            salt = xalloc(strlen(sp->u.string) + 1);
+            strcpy(salt, sp->u.string);
+        }
     } else {
-	salt[0] = choise[random_number((int)strlen(choise), 0, NULL)];
-	salt[1] = choise[random_number((int)strlen(choise), 0, NULL)];
+        salt = build_salt(2);
     }
+    
     res = make_mstring(crypt((sp-1)->u.string, salt));
+    free(salt);
+    
     pop_n_elems(2);
     push_mstring(res);
 }

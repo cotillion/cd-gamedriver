@@ -164,6 +164,3 @@ void push_vector(struct vector*i, bool_t);
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
 void clear_closure_cache(void);
 #endif
-#ifdef PROFILE_LPC
-extern long double profile_timebase, profile_exp_mtimebase;
-#endif

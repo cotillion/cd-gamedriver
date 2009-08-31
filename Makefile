@@ -30,9 +30,9 @@ DEBUG=
 #
 
 SYS_CFLAGS=-pipe
-SYS_OPT=-std=gnu99 -g -O3
+SYS_OPT=-std=gnu99 -g -O3 -fgnu89-inline
 SYS_LIBS=-lcrypt
-CC=gcc-3.4
+CC=gcc
 
 CFLAGS=  $(SYS_CFLAGS) $(SYS_OPT) $(WARN) $(DEBUG) 
 
@@ -90,7 +90,7 @@ master.t master.h: master.n genfkntab
 	./genfkntab m master <master.n
 
 make_func.c: make_func.y
-	bison -o make_func.c make_func.y
+	bison -y -o make_func.c make_func.y
 
 genfkntab: genfkntab.o
 	$(CC) genfkntab.o -o genfkntab
@@ -110,7 +110,7 @@ lang.y efun_defs.c: func_spec.i make_func prelang.y postlang.y config.h
 	rm tmp_efun_defs
 
 lang.c lang.h: lang.y
-	bison -o lang.c -d lang.y
+	bison -y -o lang.c -d lang.y
 
 install:
 	-mv $(BINDIR)/driver $(BINDIR)/driver.old

@@ -128,6 +128,8 @@ void opcdump(void);
 
 extern struct program *prog_list;
 static double get_top_func_criteria(struct function *func, int criteria);
+static void mem_variables(FILE *f, struct object *ob);
+    
 
 struct svalue *
 debug_command(char *debcmd, int argc, struct svalue *argv)
@@ -786,7 +788,6 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
     case 34: /* dump objects */
     {
 	FILE *ufile;
-	static void mem_variables(FILE *f, struct object *);
 	struct object *ob;
        
 	if ((ufile = fopen(OBJECT_DUMP_FILE, "w")) == NULL)
