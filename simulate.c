@@ -246,8 +246,8 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 
     if (stat(real_name, &c_st) == -1)
     {
-	(void)fprintf(stderr, "Could not load descr for %s\n", real_name);
-	error("Failed to load file.\n");
+	(void)fprintf(stderr, "File not found: %s\n", real_name);
+	error("Failed to load file: %s.\n", real_name);
 	/* NOTREACHED */
     }
     /*
@@ -256,7 +256,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     if (!legal_path(real_name))
     {
 	(void)fprintf(stderr, "Illegal pathname: %s\n", real_name);
-	error("Illegal path name.\n");
+	error("Illegal path name: %s\n", real_name);
 	/* NOTREACHED */
     }
     if (comp_flag)

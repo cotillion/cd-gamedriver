@@ -340,8 +340,8 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	return &retval;
     case 10: /*	version,		  	*/
     {
-	char buff[9];
-	(void)sprintf(buff, "%6.6s%02d %s %s", GAME_VERSION, PATCH_LEVEL, __DATE__, __TIME__);
+	char buff[64];
+	(void)snprintf(buff, sizeof(buff), "%6.6s%02d %s %s", GAME_VERSION, PATCH_LEVEL, __DATE__, __TIME__);
 	retval.type = T_STRING;
 	retval.string_type = STRING_MSTRING;
 	retval.u.string = make_mstring(buff);
@@ -469,10 +469,10 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 #endif
 	    (void)sprintf(tdb,"swap_num    : %d\n", ob->swap_num);
 	    (void)strcat(db_buff, tdb);
-	    (void)sprintf(tdb,"name        : '%s'\n", ob->name);
+	    (void)snprintf(tdb, sizeof(tdb), "name        : '%s'\n", ob->name);
 	    (void)strcat(db_buff, tdb);
-	    (void)sprintf(tdb,"next_all    : OBJ(%s)\n",
-			ob->next_all?ob->next_all->name:"NULL");
+	    (void)snprintf(tdb, sizeof(tdb), "next_all    : OBJ(%s)\n",
+			ob->next_all?ob->next_all->name: "NULL");
 	    (void)strcat(db_buff, tdb);
 	    if (obj_list == ob) 
 	    {
@@ -484,7 +484,7 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	    do
 		if (obj2->next_all == ob) 
 		{
-		    (void)sprintf(tdb,"Previous object in object list: OBJ(%s)\n",
+		    (void)snprintf(tdb, sizeof(tdb), "Previous object in object list: OBJ(%s)\n",
 			    obj2->name);
 		    (void)strcat(db_buff, tdb);
 		    (void)sprintf(tdb, "position in object list:%d\n",i);
@@ -500,7 +500,7 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	    ob = argv[1].u.ob;
 	    
 	    (void)sprintf(db_buff,"program ref's %d\n", ob->prog->ref);
-	    (void)sprintf(tdb,"Name %s\n", ob->prog->name);
+	    (void)snprintf(tdb, sizeof(tdb), "Name %s\n", ob->prog->name);
 	    (void)strcat(db_buff, tdb);
 	    (void)sprintf(tdb,"program size %d\n", ob->prog->program_size);
 	    (void)strcat(db_buff, tdb);
@@ -673,9 +673,9 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	    retval.u.vec = allocate_array(argv[0].u.ob->prog->num_functions);
 	    for (il = 0; il < (int)argv[0].u.ob->prog->num_functions; il++)
 	    {
-	        char buff[200]; /* I know longer funnames crashes the GD... */
+	        char buff[200]; 
 
-	        (void)sprintf(buff, "%016lld:%020lld: %s",
+	        (void)snprintf(buff, sizeof(buff), "%016lld:%020lld: %s",
 		        (long long)argv[0].u.ob->prog->functions[il].num_calls,
 		        (long long)(argv[0].u.ob->prog->functions[il].time_spent * 1e6),
 		        argv[0].u.ob->prog->functions[il].name);
