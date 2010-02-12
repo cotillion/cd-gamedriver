@@ -150,7 +150,7 @@ save_mapping(struct savebuf *f, struct mapping *m)
 static void
 save_one(struct savebuf *f, struct svalue *v)
 {
-    char buf[20];
+    char buf[48];
 
     switch(v->type) {
     case T_FLOAT:
