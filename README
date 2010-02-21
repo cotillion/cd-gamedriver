@@ -1,9 +1,12 @@
-README CD.06.01-wip
+README CD.06.02
+Compiles and runs on on GCC 4.4
+Fixed numerous buffer overflows
+'Could not load descr' is now 'File not found'
+Add MD5 support for crypt()
 
+README CD.06.01
 Strip .c from inherit names
-
 Fixed a crash when a connection is closed right away.
-
 Adds query_living_name
 
 README CD.06.00

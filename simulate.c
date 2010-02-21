@@ -240,14 +240,14 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     if (depth > MAX_INHERIT)
     {
 	(void)fprintf(stderr, "Inherit chain too long for %s\n", real_name);
-	error("Inherit chain too long.\n");
+	error("Inherit chain too long: %s\n", real_name);
 	/* NOTREACHED */
     }
 
     if (stat(real_name, &c_st) == -1)
     {
 	(void)fprintf(stderr, "File not found: %s\n", real_name);
-	error("Failed to load file: %s.\n", real_name);
+	error("File not found: %s\n", real_name);
 	/* NOTREACHED */
     }
     /*
@@ -271,7 +271,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     if (f == 0)
     {
 	perror(real_name);
-	error("Could not read the file.\n");
+	error("Could not read the file: %s\n", real_name);
 	/* NOTREACHED */
     }
     init_smart_log();
