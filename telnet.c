@@ -1344,6 +1344,7 @@ telnet_accept(void *vp)
 
     enable_nbio(s);
     enable_oobinline(s);
+    enable_nodelay(s);
     enable_lowdelay(s);
     enable_keepalive(s);
     set_rcvsize(s, TELNET_RCVBUF_SIZE);
