@@ -8,13 +8,11 @@
 #include <sys/stat.h>
 /* #include <netinet/in.h> Included in comm.h below */
 #include <memory.h>
-
-#include <crypt.h>
-
 #include <limits.h>
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "lint.h"

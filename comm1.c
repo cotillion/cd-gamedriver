@@ -56,7 +56,7 @@ extern int udp_port;
 udpsvc_t *udpsvc;
 #endif /* CATCH_UDP_PORT */
 
-void *new_player(void *, struct sockaddr_in *, size_t);
+void *new_player(void *, struct sockaddr_storage *, size_t);
 
 int num_player;
 
@@ -81,7 +81,7 @@ receive_hname(long addr, int lport, int rport,
 {
     int i;
     struct interactive *ip;
-    
+    /*
     add_ip_entry(addr, ip_name);
 
     if (rname == NULL)
@@ -104,7 +104,7 @@ receive_hname(long addr, int lport, int rport,
 	    return;
 	}
     }
-    
+    */
 }
 #endif
 
@@ -433,7 +433,7 @@ int i;
 }
 
 void *
-new_player(void *tp, struct sockaddr_in *addr, size_t len)
+new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
 {
     int i;
 
@@ -474,10 +474,14 @@ new_player(void *tp, struct sockaddr_in *addr, size_t len)
 	all_players[i] = master_ob->interactive;
 	all_players[i]->tp = tp;
 	set_prompt(NULL);
+        
 	(void)memcpy((char *)&all_players[i]->addr, (char *)addr, len);
-	all_players[i]->rport = ntohs(addr->sin_port);
+        all_players[i]->addrlen = len;
+        
+	all_players[i]->rport = 0; // ntohs(addr->sin_port);
 	all_players[i]->lport = port_number;
 	num_player++;
+
 #ifndef NO_IP_DEMON
 	if (!no_ip_demon)
 	    hname_sendreq(hname, query_ip_number(master_ob),
@@ -765,21 +769,23 @@ query_ip_name(struct object *ob)
 	ob = command_giver;
     if (!ob || ob->interactive == 0)
 	return 0;
+    /*
     for(i = 0; i < IPSIZE; i++)
     {
 	if (iptable[i].addr ==
 	    (ob->interactive->addr.sin_addr.s_addr & 0xffffffff) &&
 	    iptable[i].name)
 	    return iptable[i].name;
-    }
-    return inet_ntoa(ob->interactive->addr.sin_addr);
+            }
+    */
+    return query_ip_number(ob);;
 }
 
 static void
 add_ip_entry(unsigned long addr, const char *name)
 {
     int i;
-
+    /*
     for(i = 0; i < IPSIZE; i++)
     {
 	if (iptable[i].addr == addr)
@@ -790,32 +796,24 @@ add_ip_entry(unsigned long addr, const char *name)
 	free_sstring(iptable[ipcur].name);
     iptable[ipcur].name = make_sstring(name);
     ipcur = (ipcur+1) % IPSIZE;
+    */
 }
 
 char *
 query_ip_number(struct object *ob)
 {
+    static char host[NI_MAXHOST];
+            
     if (ob == 0)
 	ob = command_giver;
     if (!ob || ob->interactive == 0)
 	return 0;
-    return inet_ntoa(ob->interactive->addr.sin_addr);
-}
 
-#ifndef INET_NTOA_OK
-char *
-inet_ntoa(struct in_addr in)
-{
-    static char b[18];
-    char *p;
-
-    p = (char *)&in;
-#define	UC(b)	(((int)b) & 0xFF)
-    (void)sprintf(b, "%d.%d.%d.%d", UC(p[0]), UC(p[1]), UC(p[2]), UC(p[3]));
-#undef UC
-    return b;
+    if (getnameinfo((struct sockaddr*)&ob->interactive->addr, ob->interactive->addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST) != 0)
+        return 0;
+    
+    return host;
 }
-#endif /* INET_NTOA_OK */
 
 char *
 query_host_name()

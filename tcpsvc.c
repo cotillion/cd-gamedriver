@@ -35,8 +35,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include "config.h"
 #include "lint.h"
 #include "main.h"
@@ -89,7 +91,7 @@ typedef struct {
  */
 #define	TCPSVC_MAX		32
 
-static ndesc_t *tcpsvc_nd = NULL;
+// static ndesc_t *tcpsvc_nd = NULL;
 static int tcpsvc_count = 0;
 
 /*
@@ -317,15 +319,17 @@ tcpsvc_write(ndesc_t *nd, tcpsvc_t *tsp)
 static void
 tcpsvc_accept(void *vp)
 {
-    int s, addrlen;
-    struct sockaddr_in addr;
+    int s;
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    struct sockaddr_storage addr;
+    socklen_t addrlen;
     tcpsvc_t *tsp;
+    ndesc_t *nd = vp;
+    
+    nd_enable(nd, ND_R);
 
-    nd_enable(tcpsvc_nd, ND_R);
-
-    addrlen = sizeof (addr);
-	
-    s = accept(nd_fd(tcpsvc_nd), (struct sockaddr *)&addr, &addrlen);
+    addrlen = sizeof (addr);	
+    s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
     {
 	switch (errno)
@@ -338,20 +342,26 @@ tcpsvc_accept(void *vp)
 	    return;
 	}
     }
+
+    getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+    fprintf(stderr, "SERVICE PORT ACCESS FROM [%s]:%s\n", host, port);
+    close(s);
+    return;
     
+    /*    
     if (addr.sin_addr.s_addr != htonl(INADDR_LOOPBACK))
     {
 #ifdef ALLOWED_SERVICE
 	if (addr.sin_addr.s_addr != htonl(ALLOWED_SERVICE))
 #endif
 	{
-	    (void)fprintf(stderr, "SERVICE PORT ACCESS FROM %s %d\n",
-			  inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-	    (void)close(s);
+            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+	    fprintf(stderr, "SERVICE PORT ACCESS FROM [%s]:%s\n", host, port);
+	    close(s);
 	    return;
 	}
     }
-    
+    */
     enable_nbio(s);
     
     tsp = tcpsvc_alloc();
@@ -371,8 +381,8 @@ tcpsvc_accept(void *vp)
 static void
 tcpsvc_ready(ndesc_t *nd, void *vp)
 {
-    nd_disable(tcpsvc_nd, ND_R);
-    create_task(tcpsvc_accept, NULL);
+    nd_disable(nd, ND_R);
+    create_task(tcpsvc_accept, nd);
 }
 
 /*
@@ -381,40 +391,60 @@ tcpsvc_ready(ndesc_t *nd, void *vp)
 void
 tcpsvc_init(void)
 {
-    int s;
-    struct sockaddr_in addr;
-
+    int s, e;
+    struct addrinfo hints;
+    struct addrinfo *res, *rp;
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    ndesc_t *nd;
+    
     if (service_port < 0)
 	return;
 
-    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (s == -1)
-	return;
-
-    enable_reuseaddr(s);
-
-    memset(&addr, 0, sizeof (addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons((u_short)service_port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(s, (struct sockaddr *)&addr, sizeof (addr)) == -1)
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    e = getaddrinfo(NULL, "3003", &hints, &res);
+    
+    if (e)
     {
-	(void)close(s);
-	return;
+        perror(gai_strerror(e));
+        exit(1);
     }
 
-    if (listen(s, 5) == -1)
+    s = -1;
+    for (rp = res; rp != NULL; rp = rp->ai_next) 
     {
-	(void)close(s);
-	return;
+        s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+
+        if (s == -1)
+            continue;
+        
+        if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
+        {
+            /* Success */
+            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+            printf("Listening to tcp service port: %s:%s\n",  host, port);
+
+
+            enable_reuseaddr(s);
+            enable_nbio(s);
+
+            if (listen(s, 5) == -1)
+            {
+                close(s);
+                return;
+            }
+
+            
+            nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL, tcpsvc_shutdown, NULL);
+            nd_enable(nd, ND_R);
+                        
+        } else {
+            close(s);
+        }
     }
-
-    enable_nbio(s);
-
-    tcpsvc_nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL,
-		    tcpsvc_shutdown, NULL);
-    nd_enable(tcpsvc_nd, ND_R);
 }
 
 #endif

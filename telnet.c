@@ -38,6 +38,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/telnet.h>
+#include <netdb.h>
 #include "config.h"
 #include "patchlevel.h"
 #include "lint.h"
@@ -420,11 +421,11 @@ telnet_dm(telnet_t *tp)
 static void
 telnet_ayt(telnet_t *tp)
 {
-    u_char version[13];
+    char version[24];
 
-    sprintf(version, "[%6.6s%02d]\r\n", GAME_VERSION, PATCH_LEVEL);
+    snprintf(version, sizeof(version), "[%6.6s%02d]\r\n", GAME_VERSION, PATCH_LEVEL);
 
-    nq_puts(tp->t_outq, version);
+    nq_puts(tp->t_outq, (u_char *)version);
 
     telnet_enabw(tp);
 }
@@ -1319,11 +1320,13 @@ static void
 telnet_accept(void *vp)
 {
     ndesc_t *nd = vp;
-    int addrlen, s;
-    struct sockaddr_in addr;
+    int s;
+    socklen_t addrlen;
+    struct sockaddr_storage addr;
     telnet_t *tp;
     void *ip;
-
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    
     nd_enable(nd, ND_R);
     
     addrlen = sizeof (addr);
@@ -1333,8 +1336,10 @@ telnet_accept(void *vp)
 	switch (errno)
 	{
 	default:
-            warning("telnet_accept: accept() errno = %d. ip: %s\n",
-                errno, inet_ntoa(addr.sin_addr));
+            getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+            
+            warning("telnet_accept: accept() errno = %d. ip: [%s]:%s\n",
+                errno, host, port);
 	case EWOULDBLOCK:
 	case EINTR:
 	case EPROTO:
@@ -1375,43 +1380,61 @@ telnet_ready(ndesc_t *nd, void *vp)
  * Initialize the Telnet server.
  */
 void
-telnet_init(u_short port)
+telnet_init(u_short port_nr)
 {
-    int s;
-    struct sockaddr_in addr;
+    int s = -1, e;
+    struct addrinfo hints;
+    struct addrinfo *res, *rp;    
     ndesc_t *nd;
-
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    
     s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (s == -1)
 	fatal("telnet_init: socket() error = %d.\n", errno);
 
     enable_reuseaddr(s);
 
-    memset(&addr, 0, sizeof (addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_socktype = SOCK_STREAM;
 
-    if (bind(s, (struct sockaddr *)&addr, sizeof (addr)) == -1)
+    if ((e = getaddrinfo(NULL, "3011", &hints, &res)))
+        fatal("telnet_init: %s\n", gai_strerror(e));
+
+    for (rp = res; rp != NULL; rp = rp->ai_next)
     {
-	if (errno == EADDRINUSE)
-	{
-	    (void)fprintf(stderr, "Socket already bound!\n");
-	    debug_message("Socket already bound!\n");
-	    exit(errno);
-	}
-	else
-	{
-	    fatal("telnet_init: bind() error = %d.\n", errno);
-	}
+        if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1)
+            fatal("telnet_init: socket() error = %d.\n", errno);
+        
+        if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
+        {
+            /* Success */
+            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+            printf("Listening to telnet port: %s:%s\n",  host, port);
+
+            enable_reuseaddr(s);
+            enable_nbio(s);
+
+            if (listen(s, 5) == -1)
+                fatal("telnet_init: listen() error = %d.\n", errno);
+
+            nd = nd_attach(s, telnet_ready, NULL, NULL, NULL, telnet_shutdown, NULL);
+            nd_enable(nd, ND_R);
+            
+        }
+        else
+        {
+            if (errno == EADDRINUSE)
+            {
+                (void)fprintf(stderr, "Socket already bound!\n");
+                debug_message("Socket already bound!\n");
+                exit(errno);
+            }
+            else
+            {
+                fatal("telnet_init: bind() error = %d.\n", errno);
+            }
+        }
     }
-
-    if (listen(s, 5) == -1)
-	fatal("telnet_init: listen() error = %d.\n", errno);
-
-    enable_nbio(s);
-
-    nd = nd_attach(s, telnet_ready, NULL, NULL, NULL, telnet_shutdown,
-		   NULL);
-    nd_enable(nd, ND_R);
 }

@@ -11,7 +11,8 @@ struct interactive {
     void *tp;
     struct object *ob;		/* Points to the associated object */
     struct sentence *input_to;	/* To be called with next input line ! */
-    struct sockaddr_in addr;
+    struct sockaddr_storage addr;
+    socklen_t addrlen;
     char *prompt;
     int closing;		/* True when closing this socket. */
     int do_close;		/* This is to be closed down. */
@@ -37,4 +38,4 @@ struct interactive {
 
 void remove_interactive(struct interactive *, int);
 void interactive_input(struct interactive *, char *);
-void *new_player(void *, struct sockaddr_in *, size_t);
+void *new_player(void *, struct sockaddr_storage *, socklen_t);
