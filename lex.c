@@ -1200,7 +1200,17 @@ yylex1(void)
 	    myungetc(c);
 	    *yyp = 0;
 	    if (*yytext == '0')
-		return number( strtoll(yytext,(char**)NULL,010) );
+            {
+                /* OCTALS */
+                char *endptr;
+                long long value;
+
+                value = strtoll(yytext, &endptr, 010);
+                if (*endptr != '\0')
+                    lexwarning("Invalid digits in octal number");
+
+		return number(value);
+            }
 	    return number(atoll(yytext));
 	default:
 	    if (isalpha(c) || c == '_') {
