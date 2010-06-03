@@ -1388,29 +1388,25 @@ telnet_init(u_short port_nr)
     ndesc_t *nd;
     char host[NI_MAXHOST], port[NI_MAXSERV];
     
-    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (s == -1)
-	fatal("telnet_init: socket() error = %d.\n", errno);
-
-    enable_reuseaddr(s);
-
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((e = getaddrinfo(NULL, "3011", &hints, &res)))
+    snprintf(port, sizeof(port), "%d", port_nr);    
+    if ((e = getaddrinfo(NULL, port, &hints, &res)))
         fatal("telnet_init: %s\n", gai_strerror(e));
 
     for (rp = res; rp != NULL; rp = rp->ai_next)
     {
         if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1)
             fatal("telnet_init: socket() error = %d.\n", errno);
+
+        getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
         
         if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
         {
             /* Success */
-            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
             printf("Listening to telnet port: %s:%s\n",  host, port);
 
             enable_reuseaddr(s);
@@ -1427,9 +1423,8 @@ telnet_init(u_short port_nr)
         {
             if (errno == EADDRINUSE)
             {
-                (void)fprintf(stderr, "Socket already bound!\n");
-                debug_message("Socket already bound!\n");
-                exit(errno);
+                (void)fprintf(stderr, "Telnet socket already bound: %s:%s\n", host, port);
+                debug_message("Telnet socket already bound %s:%s\n", host, port);
             }
             else
             {

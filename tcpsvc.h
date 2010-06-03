@@ -29,4 +29,4 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-void tcpsvc_init(void);
+void tcpsvc_init(u_short);

@@ -389,7 +389,7 @@ tcpsvc_ready(ndesc_t *nd, void *vp)
  * Initialize the TCP Service Manager.
  */
 void
-tcpsvc_init(void)
+tcpsvc_init(u_short port_nr)
 {
     int s, e;
     struct addrinfo hints;
@@ -404,8 +404,9 @@ tcpsvc_init(void)
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
     hints.ai_socktype = SOCK_STREAM;
-    
-    e = getaddrinfo(NULL, "3003", &hints, &res);
+
+    snprintf(port, sizeof(port), "%d", port_nr);    
+    e = getaddrinfo(NULL, port, &hints, &res);
     
     if (e)
     {
@@ -420,11 +421,12 @@ tcpsvc_init(void)
 
         if (s == -1)
             continue;
+
+        getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
         
         if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
         {
             /* Success */
-            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
             printf("Listening to tcp service port: %s:%s\n",  host, port);
 
 
@@ -442,6 +444,7 @@ tcpsvc_init(void)
             nd_enable(nd, ND_R);
                         
         } else {
+            fprintf(stderr, "Failed to bind tcp service port: %s:%s\n", host, port);
             close(s);
         }
     }

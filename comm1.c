@@ -118,7 +118,7 @@ prepare_ipc()
 #endif
     telnet_init((u_short)port_number);
 #ifdef SERVICE_PORT
-    tcpsvc_init();
+    tcpsvc_init(SERVICE_PORT);
 #endif /* SERVICE_PORT */
 #ifdef CATCH_UDP_PORT
     udpsvc = udpsvc_init(udp_port);
