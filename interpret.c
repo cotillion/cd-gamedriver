@@ -2518,11 +2518,11 @@ f_find_player(int num_arg)
 static void 
 f_write_socket(int num_arg)
 {
+    char tmpbuf[48];
+    
     if (sp->type == T_NUMBER)
     {
-	char tmpbuf[10];
-
-	(void)sprintf(tmpbuf, "%lld", sp->u.number);
+	snprintf(tmpbuf, sizeof(tmpbuf), "%lld", sp->u.number);
 	if (current_object->interactive)
 	    write_socket(tmpbuf, current_object);
 	else if (current_object == master_ob)
