@@ -439,6 +439,7 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
 
     for (i = 0; i < MAX_PLAYERS; i++)
     {
+        struct interactive *inter;
 	struct object *ob;
 	struct svalue *ret;
 	extern struct object *master_ob;
@@ -447,9 +448,12 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
 	    continue;
 	command_giver = master_ob;
 	current_interactive = master_ob;
-	master_ob->interactive =
-	    (struct interactive *)xalloc(sizeof (struct interactive));
-	master_ob->interactive->default_err_message = 0;
+
+        inter = (struct interactive *)xalloc(sizeof (struct interactive));
+        memset(inter, 0, sizeof(struct interactive));
+        
+	master_ob->interactive = inter;
+        master_ob->interactive->default_err_message = 0;
 	master_ob->flags |= O_ONCE_INTERACTIVE;
 	/* This initialization is not pretty. */
 	master_ob->interactive->rname = 0;

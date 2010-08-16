@@ -12,6 +12,7 @@ struct interactive {
     struct object *ob;		/* Points to the associated object */
     struct sentence *input_to;	/* To be called with next input line ! */
     struct sockaddr_storage addr;
+    char *hostname;    
     socklen_t addrlen;
     char *prompt;
     int closing;		/* True when closing this socket. */
