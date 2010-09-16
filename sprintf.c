@@ -135,7 +135,7 @@ typedef unsigned int format_info;
 #define INFO_TABLE 0x400
 #define	INFO_COMMA 0x800
 
-#define BUFF_SIZE 10000
+#define BUFF_SIZE 65535
 
 #define ERROR(x) longjmp(error_jmp, x)
 #define ERR_BUFF_OVERFLOW	0x1	/* buffer overflowed */
