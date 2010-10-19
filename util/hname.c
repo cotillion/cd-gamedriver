@@ -98,9 +98,13 @@ main(int argc, char *argv[])
     char buf[0x100];
     char *port1;
     char *port2;
-    unsigned long addr;
     struct hostent *hp;
     char *name;
+    char *addr;
+    struct sockaddr *sa;    /* input */
+    socklen_t len;         /* input */
+    
+    char hbuf[NI_MAXHOST];
 
 #ifndef SOLARIS
     (void)setlinebuf(stdout);
@@ -123,13 +127,24 @@ main(int argc, char *argv[])
 	}
 	else
 	    port2 = 0;
-	
-	addr = inet_addr(buf);
+
+        len = buf
+	addr = buf;
+
+        
+        
+        
 	if (addr != (unsigned long)-1) {
 	    if (port2)
 		name = get_auth_name(addr, atoi(port1), atoi(port2));
 	    else
 		name = "";
+
+            if (getnameinfo(sa, len, hbuf, sizeof(hbuf), NULL, 0, 0))
+                return;
+            
+            
+            
 	    hp = gethostbyaddr((char *)&addr, 4, AF_INET);
 	    if (!hp) {
 		(void)sleep(5);

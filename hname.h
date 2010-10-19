@@ -29,7 +29,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-typedef void (*hname_callback_t)(long addr, int lport, int rport,
+typedef void (*hname_callback_t)(const char *addr, int lport, int rport,
 				 const char *ip_name, const char *rname);
 
 void *hname_init(hname_callback_t, void (*)(void *));

@@ -76,15 +76,13 @@ shutdown_hname(void *hp)
 }
 
 static void
-receive_hname(long addr, int lport, int rport,
+receive_hname(const char *addr, int lport, int rport,
 	      const char *ip_name, const char *rname)
 {
     int i;
     struct interactive *ip;
-    /*
-    add_ip_entry(addr, ip_name);
 
-    if (rname == NULL)
+    if (addr == NULL || rname == NULL)
 	return;
 
     for (i = 0; i < MAX_PLAYERS; i++)
@@ -93,18 +91,24 @@ receive_hname(long addr, int lport, int rport,
 	if (ip == NULL)
 	    continue;
 
-	if (ip->addr.sin_addr.s_addr == addr &&
-	    ip->lport == lport &&
-	    ip->rport == rport)
-	{
-	    if (ip->rname != NULL)
-		free(ip->rname);
-	    ip->rname = xalloc(strlen(rname) + 1);
-	    strcpy(ip->rname, rname);
-	    return;
-	}
+        if (!strcmp(addr, query_ip_number(ip->ob)))
+        {
+            if (ip->host_name)
+                free(ip->host_name);
+            
+            ip->host_name = xalloc(strlen(ip_name) + 1);
+            strcpy(ip->host_name, ip_name);
+            
+            if (ip->lport == lport &&
+                ip->rport == rport)
+            {
+                if (ip->rname != NULL)
+                    free(ip->rname);
+                ip->rname = xalloc(strlen(rname) + 1);
+                strcpy(ip->rname, rname);
+            }
+        }
     }
-    */
 }
 #endif
 
@@ -481,6 +485,7 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
         
 	(void)memcpy((char *)&all_players[i]->addr, (char *)addr, len);
         all_players[i]->addrlen = len;
+        all_players[i]->host_name = NULL;
         
 	all_players[i]->rport = 0; // ntohs(addr->sin_port);
 	all_players[i]->lport = port_number;
@@ -773,34 +778,11 @@ query_ip_name(struct object *ob)
 	ob = command_giver;
     if (!ob || ob->interactive == 0)
 	return 0;
-    /*
-    for(i = 0; i < IPSIZE; i++)
-    {
-	if (iptable[i].addr ==
-	    (ob->interactive->addr.sin_addr.s_addr & 0xffffffff) &&
-	    iptable[i].name)
-	    return iptable[i].name;
-            }
-    */
-    return query_ip_number(ob);;
-}
 
-static void
-add_ip_entry(unsigned long addr, const char *name)
-{
-    int i;
-    /*
-    for(i = 0; i < IPSIZE; i++)
-    {
-	if (iptable[i].addr == addr)
-	    return;
-    }
-    iptable[ipcur].addr = addr;
-    if (iptable[ipcur].name)
-	free_sstring(iptable[ipcur].name);
-    iptable[ipcur].name = make_sstring(name);
-    ipcur = (ipcur+1) % IPSIZE;
-    */
+    if (ob->interactive->host_name)
+        return ob->interactive->host_name;
+
+    return query_ip_number(ob);;
 }
 
 char *
@@ -822,10 +804,10 @@ query_ip_number(struct object *ob)
 char *
 query_host_name()
 {
-    static char name[20];
+    static char name[64];
     
-    (void)gethostname(name, sizeof name);
-    name[sizeof name - 1] = '\0';	/* Just to make sure */
+    (void)gethostname(name, sizeof(name));
+    name[sizeof (name - 1)] = '\0';	/* Just to make sure */
     return name;
 }
 

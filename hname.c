@@ -132,8 +132,8 @@ hname_input(hname_t *hp)
 {
     int ntok, lport, rport;
     char *tok[5] = {};
-    u_long addr;
-    char *rname, *ip_name, *cp;
+    char *addr, *rname, *ip_name, *cp;
+
     
     static char *sep[5] = { " ", ",\n", ",", ":", "\n" };
 
@@ -141,7 +141,7 @@ hname_input(hname_t *hp)
 	return;
     
     hp->h_flags &= ~HF_INPUT;
-    cp = nq_rptr(hp->h_canq);
+    cp = (char *)nq_rptr(hp->h_canq);
 
     for (ntok = 0; ntok < 5; ntok++)
     {
@@ -153,15 +153,12 @@ hname_input(hname_t *hp)
 
     if (ntok == 2 || ntok == 4 || ntok == 5)
     {
-	addr = inet_addr(tok[0]);
-	if (addr != INADDR_NONE)
-	{
-	    ip_name = tok[1];
-	    lport = ntok >= 3 ? atoi(tok[2]) : 0;
-	    rport = ntok >= 4 ? atoi(tok[3]) : 0;
-	    rname = ntok >= 5 ? tok[4] : NULL;
-	    hp->callback(addr, lport, rport, ip_name, rname);
-	}
+	addr = tok[0];
+        ip_name = tok[1];
+        lport = ntok >= 3 ? atoi(tok[2]) : 0;
+        rport = ntok >= 4 ? atoi(tok[3]) : 0;
+        rname = ntok >= 5 ? tok[4] : NULL;
+        hp->callback(addr, lport, rport, ip_name, rname);
     }
     nq_init(hp->h_canq);
 }
@@ -354,7 +351,7 @@ hname_init(hname_callback_t callback, void (*shutdown_callback)(void *))
 	strncpy(path, BINDIR, sizeof (path));
 	strncat(path, "/hname", sizeof (path));
 
-	(void)execl(path, "hname", 0);
+	(void)execl(path, "hname", NULL);
 
         (void)fprintf(stderr, "exec of hname failed.\n");
 
