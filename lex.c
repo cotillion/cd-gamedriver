@@ -1867,6 +1867,18 @@ add_input(char *p)
 struct defn *defns[DEFHASH];
 #define defhash(s) hashstr(s, 10, DEFHASH)
 
+void
+add_pre_define(char *define)
+{
+    struct lpc_predef_s *tmp;
+    
+    tmp = (struct lpc_predef_s *)xalloc(sizeof(struct lpc_predef_s));
+    
+    tmp->flag = string_copy(define);
+    tmp->next = lpc_predefs;
+    lpc_predefs = tmp;
+}
+
 static void
 add_define(char *name, int nargs, char *exps)
 {

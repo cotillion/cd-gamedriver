@@ -9,6 +9,7 @@
 #include <math.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "lint.h"
@@ -32,7 +33,9 @@ int no_ip_demon = 0;
 int unlimited = 0; /* Run without eval cost limits */
 int comp_flag = 0; /* Trace compilations */
 int warnobsoleteflag = 0;
+char *flag = NULL;
 int driver_mtime;
+char *mudlib_path = MUD_LIB;
 
 void init_signals(void);
 void create_object(struct object *ob);
@@ -59,11 +62,97 @@ extern struct object *vbfc_object;
 
 extern struct object *master_ob, *auto_ob;
 
+void
+usage(int argc, char **argv)
+{
+    fprintf(stderr, "Usage: %s -m <mudlib> -t <telnet port> -u <udp port> -p <service port>\n", argv[0]);
+    fprintf(stderr, "Additional flags:\n");
+    fprintf(stderr, " -f <flag>   Flag sent to mudlib before preloading\n");
+    fprintf(stderr, " -d <flag>   Set debug flag\n");
+    fprintf(stderr, " -D <define> Add a pre define\n"); 
+    fprintf(stderr, " -O          Warn of use of obsolete functions\n");
+    fprintf(stderr, " -e          Skip preloading\n");
+    fprintf(stderr, " -c          Additional information about file compilation\n");
+    fprintf(stderr, " -l          Unlimited eval cost\n");
+    fprintf(stderr, " -S          Enable mudstatus\n");
+    fprintf(stderr, " -y          YY debugging\n");
+    fprintf(stderr, " -N          Do not start reverse lookup daemon\n");
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
+void
+parse_args(int argc, char **argv)
+{
+    int ch;
+
+    while ((ch = getopt(argc, argv, "h?m:p:u:f:d:D:OeclNSy")) != -1)
+    {
+        switch (ch)
+        {
+        case 'm':
+            mudlib_path = strdup(optarg);
+            break;
+        case 't':
+            port_number = atoi(optarg);
+            break;
+
+        case 'u':
+#ifdef CATCH_UDP_PORT
+            udp_port = atoi(optarg);
+#endif
+            break;
+        case 'p':
+#ifdef SERVICE_PORT            
+            service_port = atoi(optarg);
+#endif
+            break;
+        case 'f':
+            flag = strdup(optarg);
+            continue;
+        case 'e':
+            e_flag++;
+            continue;
+        case 'D':
+            add_pre_define(optarg);
+            continue;
+        case 'O':
+            warnobsoleteflag++;
+            continue;
+        case 'd':
+            d_flag = atoi(optarg);
+            continue;
+        case 'c':
+            comp_flag++;
+            continue;
+        case 'l':
+            unlimited++;
+            continue;
+        case 'N':
+            no_ip_demon++;
+            continue;
+        case 'S':
+            s_flag++;
+            mudstatus_set(1, -1, -1); /* Statistics, default limits */
+            continue;
+        case 'y':
+#ifdef YYDEBUG
+            yydebug = 1;
+#endif
+        default:
+        case '?':
+            usage(argc, argv);
+            break;
+            
+        }            
+    }    
+}
+
 int 
 main(int argc, char **argv)
 {
     extern int game_is_being_shut_down;
-    int i, new_mudlib = 0;
+    int i;    
     char *p;
     struct svalue *ret;
     extern struct svalue catch_value;
@@ -72,6 +161,8 @@ main(int argc, char **argv)
 
     (void)setlinebuf(stdout);
 
+    parse_args(argc, argv);
+    
     const0.type = T_NUMBER; const0.u.number = 0;
     const1.type = T_NUMBER; const1.u.number = 1;
     constempty.type = T_FUNCTION; constempty.u.func = &funcempty;
@@ -117,51 +208,7 @@ main(int argc, char **argv)
      */
     init_signals();
 
-    /*
-     * The flags are parsed twice !
-     * The first time, we only search for the -m flag, which specifies
-     * another mudlib, and the D-flags, so that they will be available
-     * when compiling master.c.
-     */
-    for (i = 1; i < argc; i++)
-    {
-	if (atoi(argv[i]))
-	    port_number = atoi(argv[i]);
-	else if (argv[i][0] != '-')
-	    continue;
-	switch(argv[i][1])
-	{
-	case 'D':
-	    if (argv[i][2]) { /* Amylaar : allow flags to be passed down to
-				 the LPC preprocessor */
-		struct lpc_predef_s *tmp;
-		
-		tmp = (struct lpc_predef_s *)
-		    xalloc(sizeof(struct lpc_predef_s));
-		if (!tmp)
-		    fatal("xalloc failed\n");
-		tmp->flag = string_copy(argv[i]+2);
-		tmp->next = lpc_predefs;
-		lpc_predefs = tmp;
-		continue;
-	    }
-	    (void)fprintf(stderr, "Illegal flag syntax: %s\n", argv[i]);
-	    exit(1);
-	    /* NOTREACHED */
-	case 'N':
-	    no_ip_demon++; continue;
-	case 'm':
-	    if (chdir(argv[i]+2) == -1)
-	    {
-	        (void)fprintf(stderr, "Bad mudlib directory: %s\n", argv[i]+2);
-		exit(1);
-	    }
-	    new_mudlib = 1;
-	    break;
-	}
-    }
-
-    if (!new_mudlib && chdir(MUD_LIB) == -1) {
+    if (chdir(mudlib_path) == -1) {
         (void)fprintf(stderr, "Bad mudlib directory: %s\n", MUD_LIB);
 	exit(1);
     }
@@ -213,6 +260,7 @@ main(int argc, char **argv)
 	exit(1);
     }
     set_inc_list(apply_master_ob(M_DEFINE_INCLUDE_DIRS, 0));
+    
     {
 	struct svalue* ret1;
 
@@ -220,88 +268,26 @@ main(int argc, char **argv)
 	if (ret1 && ret1->type == T_POINTER)
 	{
 	    int ii;
-	    struct lpc_predef_s *tmp;
 
 	    for (ii = 0; ii < ret1->u.vec->size; ii++)
 		if (ret1->u.vec->item[ii].type == T_STRING)
 		{
-		    tmp = (struct lpc_predef_s *)
-			xalloc(sizeof(struct lpc_predef_s));
-		    tmp->flag = string_copy(ret1->u.vec->item[ii].u.string);
-		    tmp->next = lpc_predefs;
-		    lpc_predefs = tmp;
+                    add_pre_define(ret1->u.vec->item[ii].u.string);
 		}
 	}
     }
-    for (i = 1; i < argc; i++)
+
+    if (flag != NULL)
     {
-	if (atoi(argv[i]))
-	    ;
-	else if (argv[i][0] != '-')
-	{
-	    (void)fprintf(stderr, "Bad argument %s\n", argv[i]);
-	    exit(1);
-	}
-	else 
-	{
-	    /*
-	     * Look at flags. -m has already been tested.
-	     */
-	    switch(argv[i][1])
-	    {
-	    case 'f':
-		push_string(argv[i]+2, STRING_MSTRING);
-		(void)apply_master_ob(M_FLAG, 1);
-		if (game_is_being_shut_down)
-		{
-		    (void)fprintf(stderr, "Shutdown by master object.\n");
-		    exit(0);
-		}
-		continue;
-	    case 'e':
-		e_flag++; continue;
-	    case 'O':
-		warnobsoleteflag++; continue;
-	    case 'D':
-		continue;
-	    case 'N':
-		continue;
-	    case 'm':
-		continue;
-	    case 'd':
-		d_flag = atoi(argv[i] + 2);
-		continue;
-	    case 'c':
-		comp_flag++; continue;
-	    case 'l':
-		unlimited++;
-		continue;
-	    case 't':
-		t_flag++; continue;
-	    case 'S':
-		s_flag++; 
-		mudstatus_set(1, -1, -1); /* Statistics, default limits */
-		continue;
-	    case 'u':
-#ifdef CATCH_UDP_PORT
-		udp_port = atoi (&argv[i][2]);
-#endif
-		continue;
-	    case 'p':
-#ifdef SERVICE_PORT
-		service_port = atoi (&argv[i][2]);
-#endif
-		continue;
-	    case 'y':
-#ifdef YYDEBUG
-		yydebug = 1;
-#endif
-		continue;
-	    default:
-		(void)fprintf(stderr, "Unknown flag: %s\n", argv[i]);
-		exit(1);
-	    }
-	}
+        printf("Applying driver flag: %s\n", flag);
+        push_string(flag, STRING_MSTRING);
+        (void)apply_master_ob(M_FLAG, 1);
+
+        if (game_is_being_shut_down)
+        {
+            (void)fprintf(stderr, "Shutdown by master object.\n");
+            exit(0);
+        }
     }
 
     /*
@@ -334,15 +320,11 @@ main(int argc, char **argv)
     if (game_is_being_shut_down)
 	exit(1);
 
-    if (!t_flag)
-	init_call_out();
-
+    init_call_out();
     preload_objects(e_flag);
     (void)apply_master_ob(M_FINAL_BOOT, 0);
     
-
     mainloop();
-    /* backend(); */
 
     return 0;
 }
