@@ -1115,18 +1115,35 @@ yylex1(void)
 
 	case '0':
 	    c = mygetc();
-	    if ( c == 'X' || c == 'x' ) 
+	    if ( c == 'X' || c == 'x' || c == 'o') 
 	    {
+                char *endptr;
+                long long value;
+                int base = 16;
+                if (c == 'o')
+                    base = 8;
+
+                
 		yyp = yytext;
+
 		for (;;) 
 		{
 		    c = mygetc();
-		    SAVEC;
 		    if (!isxdigit(c))
 			break;
+                    SAVEC;
 		}
 		myungetc(c);
-		return number( (int)strtoll(yytext,(char**)NULL,0x10) );
+                *yyp = '\0';
+                
+                value = strtoll(yytext, &endptr, base);
+                if (*endptr != '\0')
+                {
+                    fprintf(stderr, "%s\n", yytext);
+                    lexwarning("Invalid digits in octal number number");
+                }
+                
+                return number(value);
 	    }
 	    myungetc(c);
 	    c = '0';
@@ -1206,9 +1223,13 @@ yylex1(void)
                 long long value;
 
                 value = strtoll(yytext, &endptr, 010);
+
                 if (*endptr != '\0')
                     lexwarning("Invalid digits in octal number");
 
+                if (value != 0)
+                    lexwarning("Obsolete octal format used. Use 0o111 syntax");
+                
 		return number(value);
             }
 	    return number(atoll(yytext));
