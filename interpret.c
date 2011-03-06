@@ -491,14 +491,15 @@ push_indexed_lvalue(int needlval)
 {
     struct svalue *i, *vec, *item;
     long long ind = 0;		/* = 0 to make Wall quiet */
+    long long org_ind = 0;
     
     i = sp;
     vec = sp - 1;
     if (vec->type != T_MAPPING)
     {
-	if (i->type != T_NUMBER || i->u.number < 0)
-	    error("Illegal index\n");
-	ind = i->u.number;
+	if (i->type != T_NUMBER)
+	    error("Illegal index.\n");
+        org_ind = ind = i->u.number;
     }
     switch(vec->type) {
     case T_STRING: {
@@ -506,6 +507,10 @@ push_indexed_lvalue(int needlval)
 	/* marion says: this is a crude part of code */
 	pop_stack();
 	one_character.type = T_NUMBER;
+
+        if (ind < 0)
+            ind = strlen(vec->u.string) + ind;
+        
 	if (ind > strlen(vec->u.string) || ind < 0)
 	    one_character.u.number = 0;
 	else
@@ -516,9 +521,13 @@ push_indexed_lvalue(int needlval)
 	break;}
     case T_POINTER:
 	pop_stack();
-	if (ind >= vec->u.vec->size)
-	    error ("Index out of bounds. Vector size: %d, index: %lld\n",
-		   vec->u.vec->size, ind);
+
+        if (ind < 0)
+            ind = vec->u.vec->size + ind;
+        
+	if (ind >= vec->u.vec->size || ind < 0)
+	    error("Index out of bounds. Vector size: %d, index: %lld\n",
+                vec->u.vec->size, org_ind);
 	item = &vec->u.vec->item[ind];
 	if (vec->u.vec->ref == 1) {
 	    static struct svalue quickfix = { T_NUMBER };
@@ -527,6 +536,7 @@ push_indexed_lvalue(int needlval)
 	    assign_svalue (&quickfix, item);
 	    item = &quickfix;
 	}
+        
 	free_svalue(sp);	  /* This will make 'vec' invalid to use */
 	sp->type = T_LVALUE;
 	sp->u.lvalue = item;
