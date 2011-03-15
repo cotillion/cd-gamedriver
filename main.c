@@ -86,7 +86,7 @@ parse_args(int argc, char **argv)
 {
     int ch;
 
-    while ((ch = getopt(argc, argv, "h?m:p:u:f:d:D:OeclNSy")) != -1)
+    while ((ch = getopt(argc, argv, "h?m:p:t:u:f:d:D:OeclNSy")) != -1)
     {
         switch (ch)
         {
