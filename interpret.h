@@ -46,8 +46,8 @@ extern struct svalue start_of_stack[];
 #define STRING_CSTRING	2	/* Do not has to be freed at all */
 
 struct vector {
-    short size;
-    unsigned short ref;
+    unsigned int size;
+    unsigned int ref;
 #ifdef DEBUG
     int extra_ref;
 #endif
@@ -70,7 +70,7 @@ struct closure {
     struct closure *next;
     struct object *from;
 #endif
-    short ref;			/* reference counter */
+    unsigned int ref;           /* reference counter */
     char funtype;
 #define FUN_LFUN 1
 #define FUN_SFUN 2

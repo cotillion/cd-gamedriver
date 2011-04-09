@@ -8,7 +8,7 @@ struct apair {
 
 struct mapping {
     short size;			/* current size (no of pairs entries) */
-    unsigned short ref;		/* reference count */
+    unsigned int ref;		/* reference count */
     short card;			/* number of elements in the mapping */
     short mcard;		/* extend when card exceeds this value */
     struct apair **pairs;	/* array of lists of elements */
