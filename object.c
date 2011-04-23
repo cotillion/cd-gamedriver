@@ -47,6 +47,8 @@ struct savebuf {
 
 
 #define STRBUFSIZE 4096
+#define MAX_DEPTH  10000
+
 void
 add_strbuf(struct savebuf *sbuf, char *str)
 {
@@ -72,7 +74,6 @@ add_strbuf(struct savebuf *sbuf, char *str)
     sbuf->size += len;
 }
 
-
 #define Fprintf(s) if (fprintf s == EOF) failed=1
 
 static void save_one (struct savebuf *,struct svalue *);
@@ -80,7 +81,7 @@ static void save_one (struct savebuf *,struct svalue *);
 static void
 save_string(struct savebuf *f, char *s)
 {
-    char buf[2];
+    static char buf[2];
 
     buf[1] = '\0';
     
@@ -99,7 +100,6 @@ save_string(struct savebuf *f, char *s)
 	    add_strbuf(f, "\\n");
 	    break;
 	default:
-	/*if (isprint(*s))*/
 	    buf[0] = *s;
 	    add_strbuf(f, buf);
 	    break;
@@ -150,7 +150,15 @@ save_mapping(struct savebuf *f, struct mapping *m)
 static void
 save_one(struct savebuf *f, struct svalue *v)
 {
-    char buf[48];
+    static char buf[48];
+    static int depth = 0;
+
+    if (++depth > MAX_DEPTH)
+    {
+        free(f->buf);
+        depth = 0;
+        error("Too deep recursion\n");
+    }
 
     switch(v->type) {
     case T_FLOAT:
@@ -185,6 +193,8 @@ save_one(struct savebuf *f, struct svalue *v)
 	add_strbuf(f, "0");
 	break;
     }
+
+    depth--;
 }
 
 /*
