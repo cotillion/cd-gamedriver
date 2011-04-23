@@ -55,11 +55,11 @@ tags:	TAGS
 # This line is needed on some machines.
 MAKE=make
 
-SRC=array.c backend.c bibopmalloc.c call_out.c comm1.c debug.c ed.c hash.c \
+SRC=array.c backend.c call_out.c comm1.c debug.c ed.c hash.c \
     hname.c interface.c interpret.c lex.c main.c mapping.c mstring.c \
     mudstat.c ndesc.c net.c nqueue.c object.c otable.c parse.c port.c regexp.c \
     signals.c simulate.c simul_efun.c sprintf.c super_snoop.c \
-    tcpsvc.c telnet.c udpsvc.c wildmat.c 
+    tcpsvc.c telnet.c udpsvc.c wildmat.c stdmalloc.c
 
 CSRC=${SRC} lang.c
 
@@ -68,11 +68,11 @@ HEADERS=comm.h config.h exec.h incralloc.h inline_eqs.h inline_svalue.h \
 	mstring.h mudstat.h net.h object.h patchlevel.h regexp.h sent.h \
 	backend.h bibopmalloc.h
 
-OBJ=array.o backend.o bibopmalloc.o call_out.o comm1.o debug.o ed.o hash.o \
+OBJ=array.o backend.o call_out.o comm1.o debug.o ed.o hash.o \
     hname.o interface.o interpret.o lex.o main.o mapping.o mstring.o \
     mudstat.o ndesc.o net.o nqueue.o object.o otable.o parse.o port.o regexp.o \
     signals.o simulate.o simul_efun.o sprintf.o super_snoop.o \
-    tcpsvc.o telnet.o udpsvc.o wildmat.o 
+    tcpsvc.o telnet.o udpsvc.o wildmat.o stdmalloc.o
 
 MPATH=-DMUD_LIB=\"$(MUD_LIB)\"
 BINPATH=-DBINDIR=\"$(BINDIR)\"
