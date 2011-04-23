@@ -9,6 +9,7 @@
 
 */
 
+#include <alloca.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1950,13 +1951,14 @@ break_string(char *str, int width, struct svalue *indent)
 {
     char 	*fstr, *istr;
     struct 	vector *lines;
-
-    int il, l, nchar, space, indlen;
+    long long l;
+    int il, nchar, space, indlen;
 
 
     if (!indent)
 	istr = 0;
-    else if (indent->type == T_NUMBER && indent->u.number < 1000)
+
+    else if (indent->type == T_NUMBER && indent->u.number >= 0 && indent->u.number < 1000)
     {
 	l = indent->u.number;
 	istr = xalloc((size_t)l + 1);

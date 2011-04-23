@@ -7,7 +7,7 @@ Loading /tests/test-005.c -> Ok.
 Loading /tests/test-006.c -> *Illegal throw.
 Loading /tests/test-007.c -> Ok.
 Loading /tests/test-008.c -> Ok.
-Loading /tests/test-009.c -> *ERROR: (s)printf(): BUFF_SIZE overflowed...
+Loading /tests/test-009.c -> Ok.
 Loading /tests/test-010.c -> Ok.
 Loading /tests/test-011.c -> *too many alarms in object
 Loading /tests/test-012.c -> tests/test-012.c: redefinition of variable 'i' line 7
@@ -33,6 +33,7 @@ Loading /tests/test-023.c -> *Attempt to write empty string.
 Loading /tests/test-024.c -> Ok.
 Loading /tests/test-025.c -> Ok.
 Loading /tests/test-026.c -> Ok.
+Loading /tests/test-027.c -> *Too deep recursion
 Setting up ipc.
 Shutting down ipc...
 exec of hname failed.

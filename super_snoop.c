@@ -30,6 +30,8 @@ read_snoop_file()
       (void)strcpy(super_snoopfile[i], "../snoops/");
       (void)strcat(super_snoopfile[i], super_snooped[i]);
   }
+
+  fclose(f);
   num_super_snooped = i;
 }
 

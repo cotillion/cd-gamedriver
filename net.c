@@ -38,6 +38,8 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
+
 #include "config.h"
 #include "simulate.h"
 #include "lint.h"
@@ -111,6 +113,17 @@ enable_lowdelay(int s)
 //    if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof (tos)) == -1)
 //	fatal("enable_lowdelay: setsockopt() errno = %d.\n", errno);
 #endif
+}
+
+/*
+ * Enable TCP_NODELAY / Disable Nagle
+ */
+void
+enable_nodelay(int s)
+{
+    int nodelay = 1;
+    if (setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&nodelay, sizeof (nodelay)) == -1)
+        fatal("enable_nodelay: setsockopt() errno = %d.\n", errno);
 }
 
 /*

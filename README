@@ -1,3 +1,14 @@
+README CD.06.03
+Octal Syntax has been changed from 01111 to 0o1111.
+The old syntax will be obsolete in a future release.
+
+Using TCP_NODELAY for telnet connections.
+
+Sprintf Efun can now print 65535 bytes.
+
+Allow negative indexes to arrays to reference from the end. arr[-1] == arr[sizeof(arr) - 1]
+
+
 README CD.06.02
 Compiles and runs on on GCC 4.4
 Fixed numerous buffer overflows

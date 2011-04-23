@@ -1115,18 +1115,35 @@ yylex1(void)
 
 	case '0':
 	    c = mygetc();
-	    if ( c == 'X' || c == 'x' ) 
+	    if ( c == 'X' || c == 'x' || c == 'o') 
 	    {
+                char *endptr;
+                long long value;
+                int base = 16;
+                if (c == 'o')
+                    base = 8;
+
+                
 		yyp = yytext;
+
 		for (;;) 
 		{
 		    c = mygetc();
-		    SAVEC;
 		    if (!isxdigit(c))
 			break;
+                    SAVEC;
 		}
 		myungetc(c);
-		return number( (int)strtoll(yytext,(char**)NULL,0x10) );
+                *yyp = '\0';
+                
+                value = strtoll(yytext, &endptr, base);
+                if (*endptr != '\0')
+                {
+                    fprintf(stderr, "%s\n", yytext);
+                    lexwarning("Invalid digits in octal number number");
+                }
+                
+                return number(value);
 	    }
 	    myungetc(c);
 	    c = '0';
@@ -1200,7 +1217,21 @@ yylex1(void)
 	    myungetc(c);
 	    *yyp = 0;
 	    if (*yytext == '0')
-		return number( strtoll(yytext,(char**)NULL,010) );
+            {
+                /* OCTALS */
+                char *endptr;
+                long long value;
+
+                value = strtoll(yytext, &endptr, 010);
+
+                if (*endptr != '\0')
+                    lexwarning("Invalid digits in octal number");
+
+                if (value != 0)
+                    lexwarning("Obsolete octal format used. Use 0o111 syntax");
+                
+		return number(value);
+            }
 	    return number(atoll(yytext));
 	default:
 	    if (isalpha(c) || c == '_') {
@@ -1856,6 +1887,18 @@ add_input(char *p)
 #define DEFHASH 1999
 struct defn *defns[DEFHASH];
 #define defhash(s) hashstr(s, 10, DEFHASH)
+
+void
+add_pre_define(char *define)
+{
+    struct lpc_predef_s *tmp;
+    
+    tmp = (struct lpc_predef_s *)xalloc(sizeof(struct lpc_predef_s));
+    
+    tmp->flag = string_copy(define);
+    tmp->next = lpc_predefs;
+    lpc_predefs = tmp;
+}
 
 static void
 add_define(char *name, int nargs, char *exps)
