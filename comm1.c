@@ -37,8 +37,8 @@ void set_prompt (char *);
 void prepare_ipc (void);
 void ipc_remove (void);
 char *query_ip_number (struct object *);
+char *query_port_number (struct object *);
 char *query_host_name (void);
-static void add_ip_entry (unsigned long, const char *);
 
 extern char *string_copy(char *);
 extern int d_flag;
@@ -56,7 +56,7 @@ extern int udp_port;
 udpsvc_t *udpsvc;
 #endif /* CATCH_UDP_PORT */
 
-void *new_player(void *, struct sockaddr_storage *, size_t);
+void *new_player(void *, struct sockaddr_storage *, size_t, u_short local_port);
 
 int num_player;
 
@@ -99,8 +99,7 @@ receive_hname(const char *addr, int lport, int rport,
             ip->host_name = xalloc(strlen(ip_name) + 1);
             strcpy(ip->host_name, ip_name);
             
-            if (ip->lport == lport &&
-                ip->rport == rport)
+            if (ip->lport == lport && atoi(query_port_number(ip->ob)) == rport)
             {
                 if (ip->rname != NULL)
                     free(ip->rname);
@@ -437,7 +436,7 @@ int i;
 }
 
 void *
-new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
+new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local_port)
 {
     int i;
 
@@ -486,16 +485,14 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len)
 	(void)memcpy((char *)&all_players[i]->addr, (char *)addr, len);
         all_players[i]->addrlen = len;
         all_players[i]->host_name = NULL;
-        
-	all_players[i]->rport = 0; // ntohs(addr->sin_port);
-	all_players[i]->lport = port_number;
+	all_players[i]->lport = local_port;
 	num_player++;
 
 #ifndef NO_IP_DEMON
 	if (!no_ip_demon)
 	    hname_sendreq(hname, query_ip_number(master_ob),
 			  (u_short)all_players[i]->lport,
-			  (u_short)all_players[i]->rport);
+			  atoi(query_port_number(master_ob)));
 #endif
 	/*
 	 * The player object has one extra reference.
@@ -747,33 +744,9 @@ set_snoop(struct object *me, struct object *you)
     
 }
 
-#define IPSIZE 200
-static struct ipentry
-{
-    unsigned long addr;
-    char *name;
-} iptable[IPSIZE];
-static int ipcur;
-
-#ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
-void
-clear_ip_table()
-{
-    int i;
-
-    for (i = 0; i < IPSIZE; i++)
-	if (iptable[i].name) {
-	    free_sstring(iptable[i].name);
-	    iptable[i].name = NULL;
-	}
-}
-#endif
-
 char *
 query_ip_name(struct object *ob)
 {
-    int i;
-
     if (ob == 0)
 	ob = command_giver;
     if (!ob || ob->interactive == 0)
@@ -782,7 +755,7 @@ query_ip_name(struct object *ob)
     if (ob->interactive->host_name)
         return ob->interactive->host_name;
 
-    return query_ip_number(ob);;
+    return query_ip_number(ob);
 }
 
 char *
@@ -792,13 +765,31 @@ query_ip_number(struct object *ob)
             
     if (ob == 0)
 	ob = command_giver;
+
     if (!ob || ob->interactive == 0)
-	return 0;
+	return NULL;
 
     if (getnameinfo((struct sockaddr*)&ob->interactive->addr, ob->interactive->addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST) != 0)
-        return 0;
+        return NULL;
     
     return host;
+}
+
+char *
+query_port_number(struct object *ob)
+{
+    static char port[NI_MAXSERV];
+
+    if (ob == 0)
+        ob = command_giver;
+
+    if (!ob || ob->interactive == 0)
+        return NULL;
+
+    if (getnameinfo((struct sockaddr*)&ob->interactive->addr, ob->interactive->addrlen, NULL, 0, port, sizeof(port), NI_NUMERICSERV) != 0)
+        return NULL;
+
+    return port;
 }
 
 char *
@@ -838,8 +829,7 @@ notify_no_command()
     p = command_giver->interactive->default_err_message;
     if (p) 
     {
-	/* We want 'value by function call' 
-	 */
+	/* We want 'value by function call' */
 	m = process_string(p, vbfc_object != 0); 
         if (m) {
 	    (void)add_message("%s", m);
@@ -925,7 +915,8 @@ replace_interactive(struct object *ob, struct object *obfrom,
     }
     else
 	remove_interactive(obfrom->interactive, 0);
-    if (obfrom == command_giver) command_giver = ob;
+    if (obfrom == command_giver) 
+        command_giver = ob;
     return 1;
 }
 

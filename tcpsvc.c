@@ -167,7 +167,7 @@ tcpsvc_process(void *vp)
         tcpsvc_count--;
 	return;
     }
-    
+
     update_tcp_av();
 
     if (nq_full(tsp->ts_canq))
@@ -178,7 +178,7 @@ tcpsvc_process(void *vp)
 	return;
     }
 
-	
+
     exception_frame.e_exception = exception;
     exception_frame.e_catch = 0;
 
@@ -223,7 +223,7 @@ tcpsvc_read(ndesc_t *nd, tcpsvc_t *tsp)
 {
     int cc;
     char c;
-    
+
     if (!nq_full(tsp->ts_rawq))
     {
 	cc = nq_recv(tsp->ts_rawq, nd_fd(nd), NULL);
@@ -252,7 +252,7 @@ tcpsvc_read(ndesc_t *nd, tcpsvc_t *tsp)
 	    return;
 	}
 
-    }	
+    }
     for (;;)
     {
 	if (nq_empty(tsp->ts_rawq))
@@ -325,10 +325,10 @@ tcpsvc_accept(void *vp)
     socklen_t addrlen;
     tcpsvc_t *tsp;
     ndesc_t *nd = vp;
-    
+
     nd_enable(nd, ND_R);
 
-    addrlen = sizeof (addr);	
+    addrlen = sizeof (addr);
     s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
     {
@@ -347,8 +347,8 @@ tcpsvc_accept(void *vp)
     fprintf(stderr, "SERVICE PORT ACCESS FROM [%s]:%s\n", host, port);
     close(s);
     return;
-    
-    /*    
+
+    /*
     if (addr.sin_addr.s_addr != htonl(INADDR_LOOPBACK))
     {
 #ifdef ALLOWED_SERVICE
@@ -363,11 +363,11 @@ tcpsvc_accept(void *vp)
     }
     */
     enable_nbio(s);
-    
+
     tsp = tcpsvc_alloc();
     tsp->ts_nd = nd_attach(s, tcpsvc_read, tcpsvc_write, NULL, NULL,
 			   tcpsvc_shutdown, tsp);
-    
+
     if (++tcpsvc_count > TCPSVC_MAX)
     {
 	nq_puts(tsp->ts_canq, (u_char *)"ERROR Too many services in use.\n");
@@ -396,7 +396,7 @@ tcpsvc_init(u_short port_nr)
     struct addrinfo *res, *rp;
     char host[NI_MAXHOST], port[NI_MAXSERV];
     ndesc_t *nd;
-    
+
     if (service_port < 0)
 	return;
 
@@ -405,9 +405,9 @@ tcpsvc_init(u_short port_nr)
     hints.ai_flags = AI_PASSIVE;
     hints.ai_socktype = SOCK_STREAM;
 
-    snprintf(port, sizeof(port), "%d", port_nr);    
+    snprintf(port, sizeof(port), "%d", port_nr);
     e = getaddrinfo(NULL, port, &hints, &res);
-    
+
     if (e)
     {
         perror(gai_strerror(e));
@@ -415,15 +415,17 @@ tcpsvc_init(u_short port_nr)
     }
 
     s = -1;
-    for (rp = res; rp != NULL; rp = rp->ai_next) 
+    for (rp = res; rp != NULL; rp = rp->ai_next)
     {
         s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
         if (s == -1)
             continue;
 
+        enable_reuseaddr(s);
+
         getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-        
+
         if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
         {
             /* Success */
@@ -439,10 +441,9 @@ tcpsvc_init(u_short port_nr)
                 return;
             }
 
-            
             nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL, tcpsvc_shutdown, NULL);
             nd_enable(nd, ND_R);
-                        
+
         } else {
             fprintf(stderr, "Failed to bind tcp service port: %s:%s\n", host, port);
             close(s);

@@ -1321,6 +1321,8 @@ telnet_accept(void *vp)
 {
     ndesc_t *nd = vp;
     int s;
+    u_short local_port;
+
     socklen_t addrlen;
     struct sockaddr_storage addr;
     telnet_t *tp;
@@ -1328,7 +1330,15 @@ telnet_accept(void *vp)
     char host[NI_MAXHOST], port[NI_MAXSERV];
     
     nd_enable(nd, ND_R);
-    
+
+    /* Get the port number of the accepting socket */
+    addrlen = sizeof(addr);
+    if (getsockname(nd_fd(nd), (struct sockaddr *)&addr, &addrlen))
+        return;
+
+    getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+    local_port = atoi(port);
+
     addrlen = sizeof (addr);
     s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
@@ -1358,7 +1368,7 @@ telnet_accept(void *vp)
     tp = telnet_alloc();
     tp->t_nd = nd_attach(s, telnet_read, telnet_write, telnet_exception,
 			 NULL, telnet_shutdown, tp);
-    ip = (void *)new_player(tp, &addr, addrlen);
+    ip = (void *)new_player(tp, &addr, addrlen, local_port);
     if (ip == NULL)
     {
 	telnet_shutdown(tp->t_nd, tp);
@@ -1404,13 +1414,13 @@ telnet_init(u_short port_nr)
             fatal("telnet_init: socket() error = %d.\n", errno);
 
         getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-        
+       
+        enable_reuseaddr(s);
+
         if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
         {
             /* Success */
             printf("Listening to telnet port: %s:%s\n",  host, port);
-
-            enable_reuseaddr(s);
             enable_nbio(s);
 
             if (listen(s, 5) == -1)
@@ -1424,8 +1434,7 @@ telnet_init(u_short port_nr)
         {
             if (errno == EADDRINUSE)
             {
-                (void)fprintf(stderr, "Telnet socket already bound: %s:%s\n", host, port);
-                debug_message("Telnet socket already bound %s:%s\n", host, port);
+                fatal("Telnet socket already bound: %s:%s\n", host, port);
             }
             else
             {

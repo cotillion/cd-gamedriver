@@ -132,10 +132,7 @@ hname_input(hname_t *hp)
 {
     int ntok, lport, rport;
     char *tok[5] = {};
-    char *addr, *rname, *ip_name, *cp;
-
-    
-    static char *sep[5] = { " ", ",\n", ",", ":", "\n" };
+    char *addr, *rname, *ip_name, *cp, *end;
 
     if ((hp->h_flags & HF_INPUT) == 0)
 	return;
@@ -145,21 +142,25 @@ hname_input(hname_t *hp)
 
     for (ntok = 0; ntok < 5; ntok++)
     {
-	cp = strtok(ntok == 0 ? cp : NULL, sep[ntok]);
-	if (cp == NULL)
-	    break;
-	tok[ntok] = cp;
-    }
+        tok[ntok] = (char *)cp;
 
-    if (ntok == 2 || ntok == 4 || ntok == 5)
-    {
-	addr = tok[0];
-        ip_name = tok[1];
-        lport = ntok >= 3 ? atoi(tok[2]) : 0;
-        rport = ntok >= 4 ? atoi(tok[3]) : 0;
-        rname = ntok >= 5 ? tok[4] : NULL;
-        hp->callback(addr, lport, rport, ip_name, rname);
+        end = strchr(cp, ',');
+
+        if (end != NULL)
+        {
+            *end = '\0';
+            end++;
+            cp = end;
+        }
     }
+    
+    addr = tok[0];
+    lport = (tok[1] == NULL ? 0 : atoi(tok[1]));
+    rport = (tok[2] == NULL ? 0 : atoi(tok[2]));
+    ip_name = tok[3];
+    rname = tok[4];
+    hp->callback(addr, lport, rport, ip_name, rname);
+    
     nq_init(hp->h_canq);
 }
 
@@ -375,20 +376,18 @@ hname_init(hname_callback_t callback, void (*shutdown_callback)(void *))
 void
 hname_sendreq(void *vp, const char *addr, u_short lport, u_short rport)
 {
-    char req[32];
+    char req[128];
     hname_t *hp = vp;
     
     if (hp == NULL || hp->h_nd == NULL)
 	return;
 
-    sprintf(req, ";%hu,%hu\n", lport, rport);
+    snprintf(req, sizeof(req), "%s,%hu,%hu\n", addr, lport, rport);
 
-    if (nq_avail(hp->h_outq) < strlen(addr) + strlen(req))
+    if (nq_avail(hp->h_outq) < strlen(req))
 	return;
 
-    nq_puts(hp->h_outq, (u_char *)addr);
     nq_puts(hp->h_outq, (u_char *)req);
-
     nd_enable(hp->h_nd, ND_W);
 }
 
