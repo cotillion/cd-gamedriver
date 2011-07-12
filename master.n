@@ -40,6 +40,7 @@ valid_query_ip_number_name
 #######
 incoming_udp
 incoming_service
+valid_incoming_service
 #
 # Error admin.
 #######

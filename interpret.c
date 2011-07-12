@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,13 +9,11 @@
 #include <sys/stat.h>
 /* #include <netinet/in.h> Included in comm.h below */
 #include <memory.h>
-
-#include <crypt.h>
-
 #include <limits.h>
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "lint.h"
@@ -48,6 +47,8 @@ struct fkntab
     unsigned short function_index;
 };
 
+
+extern char *crypt(const char *key, const char *salt);
 extern struct object *master_ob;
 
 extern struct vector *inherit_list (struct object *);
@@ -4738,7 +4739,7 @@ f_crypt(int num_arg)
         salt = build_salt(2);
     }
     
-    res = make_mstring(crypt((sp-1)->u.string, salt));
+    res = make_mstring((char *)crypt((sp-1)->u.string, salt));
     free(salt);
     
     pop_n_elems(2);

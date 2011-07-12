@@ -35,8 +35,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include "config.h"
 #include "lint.h"
 #include "main.h"
@@ -47,10 +49,6 @@
 #include "net.h"
 #include "backend.h"
 #include "tcpsvc.h"
-
-#ifndef INADDR_LOOPBACK
-#define	INADDR_LOOPBACK		0x7f000001
-#endif
 
 #ifndef EPROTO
 #define	EPROTO	EPROTOTYPE
@@ -81,15 +79,15 @@ typedef struct {
 /*
  * Queue Sizes.
  */
-#define	TCPSVC_RAWQ_SIZE	1536
-#define	TCPSVC_CANQ_SIZE	1536
+#define	TCPSVC_RAWQ_SIZE        32768	
+#define	TCPSVC_CANQ_SIZE        32768	
 
 /*
  * Maximum # of concurrent TCP Service.
  */
 #define	TCPSVC_MAX		32
 
-static ndesc_t *tcpsvc_nd = NULL;
+// static ndesc_t *tcpsvc_nd = NULL;
 static int tcpsvc_count = 0;
 
 /*
@@ -165,7 +163,7 @@ tcpsvc_process(void *vp)
         tcpsvc_count--;
 	return;
     }
-    
+
     update_tcp_av();
 
     if (nq_full(tsp->ts_canq))
@@ -176,7 +174,7 @@ tcpsvc_process(void *vp)
 	return;
     }
 
-	
+
     exception_frame.e_exception = exception;
     exception_frame.e_catch = 0;
 
@@ -221,7 +219,7 @@ tcpsvc_read(ndesc_t *nd, tcpsvc_t *tsp)
 {
     int cc;
     char c;
-    
+
     if (!nq_full(tsp->ts_rawq))
     {
 	cc = nq_recv(tsp->ts_rawq, nd_fd(nd), NULL);
@@ -250,7 +248,7 @@ tcpsvc_read(ndesc_t *nd, tcpsvc_t *tsp)
 	    return;
 	}
 
-    }	
+    }
     for (;;)
     {
 	if (nq_empty(tsp->ts_rawq))
@@ -317,15 +315,20 @@ tcpsvc_write(ndesc_t *nd, tcpsvc_t *tsp)
 static void
 tcpsvc_accept(void *vp)
 {
-    int s, addrlen;
-    struct sockaddr_in addr;
+    int s;
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    struct sockaddr_storage addr;
+    socklen_t addrlen;
     tcpsvc_t *tsp;
+    ndesc_t *nd = vp;
+    struct svalue *svp;
+    struct gdexception exception_frame;
 
-    nd_enable(tcpsvc_nd, ND_R);
+
+    nd_enable(nd, ND_R);
 
     addrlen = sizeof (addr);
-	
-    s = accept(nd_fd(tcpsvc_nd), (struct sockaddr *)&addr, &addrlen);
+    s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
     {
 	switch (errno)
@@ -338,26 +341,39 @@ tcpsvc_accept(void *vp)
 	    return;
 	}
     }
+
+    getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
     
-    if (addr.sin_addr.s_addr != htonl(INADDR_LOOPBACK))
+    exception_frame.e_exception = exception;
+    exception_frame.e_catch = 0;
+    exception = &exception_frame;
+
+    if (setjmp(exception_frame.e_context) == 0)
     {
-#ifdef ALLOWED_SERVICE
-	if (addr.sin_addr.s_addr != htonl(ALLOWED_SERVICE))
-#endif
-	{
-	    (void)fprintf(stderr, "SERVICE PORT ACCESS FROM %s %d\n",
-			  inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
-	    (void)close(s);
-	    return;
-	}
+        push_string(host, STRING_MSTRING);
+        push_number(atoi(port));
+        svp = apply_master_ob(M_VALID_INCOMING_SERVICE, 2);
     }
-    
+    else
+    {
+        svp = NULL;
+    }
+
+    exception = exception->e_exception;
+
+    if (svp == NULL || svp->type != T_NUMBER || svp->u.number == 0)
+    {
+        fprintf(stderr, "SERVICE PORT ACCESS DENIED FROM [%s]:%s\n", host, port);
+        close(s);
+        return;
+    }
+
     enable_nbio(s);
-    
+
     tsp = tcpsvc_alloc();
     tsp->ts_nd = nd_attach(s, tcpsvc_read, tcpsvc_write, NULL, NULL,
 			   tcpsvc_shutdown, tsp);
-    
+
     if (++tcpsvc_count > TCPSVC_MAX)
     {
 	nq_puts(tsp->ts_canq, (u_char *)"ERROR Too many services in use.\n");
@@ -371,50 +387,74 @@ tcpsvc_accept(void *vp)
 static void
 tcpsvc_ready(ndesc_t *nd, void *vp)
 {
-    nd_disable(tcpsvc_nd, ND_R);
-    create_task(tcpsvc_accept, NULL);
+    nd_disable(nd, ND_R);
+    create_task(tcpsvc_accept, nd);
 }
 
 /*
  * Initialize the TCP Service Manager.
  */
 void
-tcpsvc_init(void)
+tcpsvc_init(u_short port_nr)
 {
-    int s;
-    struct sockaddr_in addr;
+    int s, e;
+    struct addrinfo hints;
+    struct addrinfo *res, *rp;
+    char host[NI_MAXHOST], port[NI_MAXSERV];
+    ndesc_t *nd;
 
     if (service_port < 0)
 	return;
 
-    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (s == -1)
-	return;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_socktype = SOCK_STREAM;
 
-    enable_reuseaddr(s);
+    snprintf(port, sizeof(port), "%d", port_nr);
+    e = getaddrinfo(NULL, port, &hints, &res);
 
-    memset(&addr, 0, sizeof (addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons((u_short)service_port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-
-    if (bind(s, (struct sockaddr *)&addr, sizeof (addr)) == -1)
+    if (e)
     {
-	(void)close(s);
-	return;
+        perror(gai_strerror(e));
+        exit(1);
     }
 
-    if (listen(s, 5) == -1)
+    s = -1;
+    for (rp = res; rp != NULL; rp = rp->ai_next)
     {
-	(void)close(s);
-	return;
+        s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+
+        if (s == -1)
+            continue;
+
+        enable_reuseaddr(s);
+
+        getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+
+        if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
+        {
+            /* Success */
+            printf("Listening to tcp service port: %s:%s\n",  host, port);
+
+
+            enable_reuseaddr(s);
+            enable_nbio(s);
+
+            if (listen(s, 5) == -1)
+            {
+                close(s);
+                return;
+            }
+
+            nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL, tcpsvc_shutdown, NULL);
+            nd_enable(nd, ND_R);
+
+        } else {
+            fatal("Failed to bind tcp service port: %s:%s\n", host, port);
+            close(s);
+        }
     }
-
-    enable_nbio(s);
-
-    tcpsvc_nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL,
-		    tcpsvc_shutdown, NULL);
-    nd_enable(tcpsvc_nd, ND_R);
 }
 
 #endif
