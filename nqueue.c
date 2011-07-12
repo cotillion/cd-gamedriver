@@ -201,7 +201,7 @@ nq_puts(nqueue_t *nq, u_char *cp)
 {
     int len, size;
 
-    len = strlen(cp);
+    len = strlen((char *)cp);
 
     while (len > 0)
     {

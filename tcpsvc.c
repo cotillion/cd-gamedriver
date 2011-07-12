@@ -50,10 +50,6 @@
 #include "backend.h"
 #include "tcpsvc.h"
 
-#ifndef INADDR_LOOPBACK
-#define	INADDR_LOOPBACK		0x7f000001
-#endif
-
 #ifndef EPROTO
 #define	EPROTO	EPROTOTYPE
 #endif
@@ -83,8 +79,8 @@ typedef struct {
 /*
  * Queue Sizes.
  */
-#define	TCPSVC_RAWQ_SIZE	1536
-#define	TCPSVC_CANQ_SIZE	1536
+#define	TCPSVC_RAWQ_SIZE        32768	
+#define	TCPSVC_CANQ_SIZE        32768	
 
 /*
  * Maximum # of concurrent TCP Service.
@@ -325,6 +321,9 @@ tcpsvc_accept(void *vp)
     socklen_t addrlen;
     tcpsvc_t *tsp;
     ndesc_t *nd = vp;
+    struct svalue *svp;
+    struct gdexception exception_frame;
+
 
     nd_enable(nd, ND_R);
 
@@ -344,24 +343,31 @@ tcpsvc_accept(void *vp)
     }
 
     getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-    fprintf(stderr, "SERVICE PORT ACCESS FROM [%s]:%s\n", host, port);
-    close(s);
-    return;
+    
+    exception_frame.e_exception = exception;
+    exception_frame.e_catch = 0;
+    exception = &exception_frame;
 
-    /*
-    if (addr.sin_addr.s_addr != htonl(INADDR_LOOPBACK))
+    if (setjmp(exception_frame.e_context) == 0)
     {
-#ifdef ALLOWED_SERVICE
-	if (addr.sin_addr.s_addr != htonl(ALLOWED_SERVICE))
-#endif
-	{
-            getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-	    fprintf(stderr, "SERVICE PORT ACCESS FROM [%s]:%s\n", host, port);
-	    close(s);
-	    return;
-	}
+        push_string(host, STRING_MSTRING);
+        push_number(atoi(port));
+        svp = apply_master_ob(M_VALID_INCOMING_SERVICE, 2);
     }
-    */
+    else
+    {
+        svp = NULL;
+    }
+
+    exception = exception->e_exception;
+
+    if (svp == NULL || svp->type != T_NUMBER || svp->u.number == 0)
+    {
+        fprintf(stderr, "SERVICE PORT ACCESS DENIED FROM [%s]:%s\n", host, port);
+        close(s);
+        return;
+    }
+
     enable_nbio(s);
 
     tsp = tcpsvc_alloc();
@@ -445,7 +451,7 @@ tcpsvc_init(u_short port_nr)
             nd_enable(nd, ND_R);
 
         } else {
-            fprintf(stderr, "Failed to bind tcp service port: %s:%s\n", host, port);
+            fatal("Failed to bind tcp service port: %s:%s\n", host, port);
             close(s);
         }
     }
