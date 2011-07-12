@@ -798,7 +798,7 @@ query_host_name()
     static char name[64];
     
     (void)gethostname(name, sizeof(name));
-    name[sizeof (name - 1)] = '\0';	/* Just to make sure */
+    name[sizeof(name) - 1] = '\0';	/* Just to make sure */
     return name;
 }
 
