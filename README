@@ -1,29 +1,40 @@
+===============================================================================
+README CD.06.04
+- IPv6 support has been added to all services except udp. 
+  The UDP service is not secure and should be disabled in active muds.
+  This also requires a new version of the hname binary to be installed.
+- Bibopmalloc has been disabled as it appears Linux system malloc is alot faster
+  and not much different in memory consumption.
+- Refcounters changed to unsigned int as short could be overflowed fairly easily 
+  crashing the GD.
+- Fixed an issue where self referencing arrays would crash the GD.
+
+===============================================================================
 README CD.06.03
-Octal Syntax has been changed from 01111 to 0o1111.
-The old syntax will be obsolete in a future release.
+- Octal Syntax has been changed from 01111 to 0o1111.
+  The old syntax will be obsolete in a future release.
+- Using TCP_NODELAY for telnet connections.
+- Sprintf Efun can now print 65535 bytes.
+- Allow negative indexes to arrays to reference from the end. arr[-1] == arr[sizeof(arr) - 1]
 
-Using TCP_NODELAY for telnet connections.
-
-Sprintf Efun can now print 65535 bytes.
-
-Allow negative indexes to arrays to reference from the end. arr[-1] == arr[sizeof(arr) - 1]
-
-
+===============================================================================
 README CD.06.02
-Compiles and runs on on GCC 4.4
-Fixed numerous buffer overflows
-'Could not load descr' is now 'File not found'
-Add MD5 support for crypt()
+- Compiles and runs on on GCC 4.4
+- Fixed numerous buffer overflows
+- 'Could not load descr' is now 'File not found'
+- Add MD5 support for crypt()
 
+===============================================================================
 README CD.06.01
-Strip .c from inherit names
-Fixed a crash when a connection is closed right away.
-Adds query_living_name
+- Strip .c from inherit names
+- Fixed a crash when a connection is closed right away.
+- Adds query_living_name
 
+===============================================================================
 README CD.06.00
-
 ?
 
+===============================================================================
 README CD.05.00
 Increaed precision of float to double.
 
