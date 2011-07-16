@@ -429,6 +429,9 @@ tcpsvc_init(u_short port_nr)
             continue;
 
         enable_reuseaddr(s);
+       
+        if (rp->ai_family == AF_INET6)
+            enable_v6only(s);
 
         getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
 

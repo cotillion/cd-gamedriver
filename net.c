@@ -97,6 +97,19 @@ enable_oobinline(int s)
 }
 
 /*
+ * Enable v6only on ipv6 sockets.
+ */
+void
+enable_v6only(int s)
+{
+    int on = 1;
+
+    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&on, sizeof (on)) == -1)
+        fatal("enable_v6only: setsockopt() errno = %d.\n", errno);
+}
+
+
+/*
  * Enable Low-Delay IP Type-of-service.
  */
 void

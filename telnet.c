@@ -1417,6 +1417,9 @@ telnet_init(u_short port_nr)
        
         enable_reuseaddr(s);
 
+        if (rp->ai_family == AF_INET6)
+            enable_v6only(s);
+
         if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
         {
             /* Success */

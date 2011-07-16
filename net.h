@@ -35,6 +35,7 @@ void enable_oobinline(int);
 void enable_lowdelay(int);
 void enable_keepalive(int);
 void enable_nodelay(int);
+void enable_v6only(int);
 int at_mark(int);
 void set_sndsize(int, int);
 void set_rcvsize(int, int);

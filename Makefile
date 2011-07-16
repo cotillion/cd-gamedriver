@@ -1,9 +1,9 @@
 # Set MUD_LIB to the directory which contains the mud data. Was formerly
 # defined in config.h !
-MUD_LIB = /home/erik/genesis/lib
+MUD_LIB = /home/mud/genesis/lib
 
 # Set BINDIR to the directory where you want to install the executables.
-BINDIR = /home/erik/genesis/bin
+BINDIR = /home/mud/genesis/bin
 
 # Specify the interface source files on the ISRC line, and the corresponding
 # object files on the IOBJ line.
@@ -13,9 +13,7 @@ IOBJ= clib/efun.o clib/stdobject.o clib/gl_language.o
 
 #Enable warnings from the compiler, if wanted.
 WARN=-Wall -Wformat=2
-#-Wmissing-prototypes #-Wmissing-declarations -Wnested-externs
 
-# -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
 #
 # Enable run time debugging. It will use more time and space.
 # When the flag is changed, be sure to recompile everything.
@@ -25,13 +23,12 @@ WARN=-Wall -Wformat=2
 # If you will not change anything, you are still strongly to have it defined,
 # as long as the game is not bug free.
 DEBUG=
-#-fstack-protector-all
 #DEBUG=-DDEBUG
 #
 #
 
 SYS_CFLAGS=-pipe
-SYS_OPT=-std=gnu99 -g -O1 -fgnu89-inline
+SYS_OPT=-std=gnu99 -O3 -fgnu89-inline
 SYS_LIBS=-lcrypt
 CC=gcc
 
