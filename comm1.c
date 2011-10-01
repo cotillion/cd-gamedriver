@@ -93,13 +93,16 @@ receive_hname(const char *addr, int lport, int rport,
 
         if (!strcmp(addr, query_ip_number(ip->ob)))
         {
-            if (ip->host_name)
-                free(ip->host_name);
-            
-            ip->host_name = xalloc(strlen(ip_name) + 1);
-            strcpy(ip->host_name, ip_name);
-            
-            if (ip->lport == lport && atoi(query_port_number(ip->ob)) == rport)
+            if (strlen(ip_name)) 
+            {
+                if (ip->host_name)
+                    free(ip->host_name);
+
+                ip->host_name = xalloc(strlen(ip_name) + 1);
+                strcpy(ip->host_name, ip_name);
+            }
+
+            if (ip->lport == lport && atoi(query_port_number(ip->ob)) == rport && strlen(rname))
             {
                 if (ip->rname != NULL)
                     free(ip->rname);
