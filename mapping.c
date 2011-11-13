@@ -322,7 +322,7 @@ rehash_map(struct mapping *map)
 {
     register struct apair **pairs, *next, *ptr;
     short i, hval;
-    short nsize;
+    unsigned int nsize;
 
     nsize = map->size * 2;
     if (nsize > MAX_MAPPING_SIZE) {
