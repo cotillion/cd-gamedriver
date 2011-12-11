@@ -157,8 +157,8 @@ tcpsvc_process(void *vp)
 
     if (tsp->ts_flags & TF_CLOSE)
     {
+        close(nd_fd(tsp->ts_nd));
         nd_detach(tsp->ts_nd);
-        (void)close(nd_fd(tsp->ts_nd));
         tcpsvc_free(tsp);
         tcpsvc_count--;
 	return;
