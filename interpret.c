@@ -2550,6 +2550,20 @@ f_write_socket(int num_arg)
     }
 }
 
+static void
+f_write_socket_gmcp(int num_arg)
+{
+    switch ((sp - 1)->type)
+    {
+        case T_OBJECT:
+            error("Bad argument to f_write_socket, recieved type was object");
+        case T_FUNCTION:
+            error("bad argument to f_write_socket, recieved type was function");
+    }
+
+    write_gmcp(sp->u.string, (sp - 1)->u.string);
+}
+
 /* ARGSUSED */
 static void
 f_str2val(int num_arg)

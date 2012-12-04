@@ -106,6 +106,8 @@
 static void telnet_interactive(void *vp);
 static void telnet_input(telnet_t *tp);
 static void telnet_readbytes(ndesc_t *nd, telnet_t *tp);
+static void telnet_send_sb(telnet_t *tp, u_char opt, u_char *data);
+
 
 /*
  * Allocate a Telnet control block.
@@ -128,13 +130,13 @@ telnet_alloc(void)
     tp->t_rblen = 0;
     tp->t_sblen = 0;
     tp->task = NULL;
-    
+
     for (i = 0; i < OP_SIZE; i++)
     {
-	tp->t_optb[i].o_us = OS_NO;
-	tp->t_optb[i].o_usq = OQ_EMPTY;
-	tp->t_optb[i].o_him = OS_NO;
-	tp->t_optb[i].o_himq = OQ_EMPTY;
+        tp->t_optb[i].o_us = OS_NO;
+        tp->t_optb[i].o_usq = OQ_EMPTY;
+        tp->t_optb[i].o_him = OS_NO;
+        tp->t_optb[i].o_himq = OQ_EMPTY;
     }
 
     return tp;
@@ -149,10 +151,10 @@ telnet_free(telnet_t *tp)
     nq_free(tp->t_rawq);
     nq_free(tp->t_canq);
     if (tp->t_optq != NULL)
-	nq_free(tp->t_optq);
+        nq_free(tp->t_optq);
     nq_free(tp->t_outq);
     if (tp->task)
-	remove_task(tp->task);
+        remove_task(tp->task);
     tp->task = NULL;
     free(tp);
 }
@@ -164,7 +166,7 @@ static void
 telnet_flush(telnet_t *tp)
 {
     if (!nq_empty(tp->t_outq))
-	nq_send(tp->t_outq, nd_fd(tp->t_nd), &tp->t_sblen);
+        nq_send(tp->t_outq, nd_fd(tp->t_nd), &tp->t_sblen);
 }
 
 /*
@@ -175,8 +177,8 @@ telnet_shutdown(ndesc_t *nd, telnet_t *tp)
 {
     if (tp != NULL)
     {
-	telnet_flush(tp);
-	telnet_free(tp);
+        telnet_flush(tp);
+        telnet_free(tp);
     }
 
     (void)close(nd_fd(nd));
@@ -199,12 +201,12 @@ void
 telnet_detach(telnet_t *tp)
 {
     if ((tp->t_flags & TF_ATTACH) == 0)
-	return;
+        return;
 
     tp->t_flags &= ~TF_ATTACH;
     tp->t_ip = NULL;
     if (!tp->task)
-	tp->task = create_task(telnet_interactive, tp);
+        tp->task = create_task(telnet_interactive, tp);
 }
 
 /*
@@ -228,24 +230,24 @@ telnet_output(telnet_t *tp, u_char *cp)
     u_char c, *bp, buf[TELNET_OUTQ_SIZE + 3];
 
     if (tp->t_flags & TF_OVFLOUTQ)
-	return 1;
+        return 1;
 
     bp = buf;
 
     while (bp < &buf[TELNET_OUTQ_SIZE] && *cp != '\0')
     {
-	c = *cp++;
-	switch (c)
-	{
-	case LF:
-	    *bp++ = CR;
-	    break;
+        c = *cp++;
+        switch (c)
+        {
+            case LF:
+                *bp++ = CR;
+                break;
 
-	case IAC:
-	    *bp++ = IAC;
-	    break;
-	}
-	*bp++ = c;
+            case IAC:
+                *bp++ = IAC;
+                break;
+        }
+        *bp++ = c;
     }
 
     *bp = '\0';
@@ -253,27 +255,42 @@ telnet_output(telnet_t *tp, u_char *cp)
     len = bp - buf;
 
     if (len == 0)
-	return 0;
+        return 0;
 
     if (nq_len(tp->t_outq) + len >= TELNET_OUTQ_HIWAT)
     {
-	telnet_flush(tp);
-	if (nq_len(tp->t_outq) + len >= TELNET_OUTQ_HIWAT)
-	{
-	    tp->t_flags |= TF_OVFLOUTQ;
-	    buf[TELNET_OUTQ_HIWAT - nq_len(tp->t_outq)] = '\0';
-	    nq_puts(tp->t_outq, buf);
-	    nq_puts(tp->t_outq, (u_char *)"*** Truncated. ***\r\n");
+        telnet_flush(tp);
+        if (nq_len(tp->t_outq) + len >= TELNET_OUTQ_HIWAT)
+        {
+            tp->t_flags |= TF_OVFLOUTQ;
+            buf[TELNET_OUTQ_HIWAT - nq_len(tp->t_outq)] = '\0';
+            nq_puts(tp->t_outq, buf);
+            nq_puts(tp->t_outq, (u_char *)"*** Truncated. ***\r\n");
 
-	    telnet_enabw(tp);
-	    return 1;
-	}
+            telnet_enabw(tp);
+            return 1;
+        }
     }
 
     nq_puts(tp->t_outq, buf);
 
-    telnet_enabw(tp);
     return 0;
+}
+
+/* 
+ * Send a GMCP SB message if GMCP has been enabled on the connection.
+ * Returns 1 if gmcp is not enabled on the connection.
+ */
+int
+telnet_output_gmcp(telnet_t *tp, u_char *cp)
+{
+    if (tp->t_flags & TF_GMCP)
+    {
+        telnet_send_sb(tp, TELOPT_GMCP, cp);
+        telnet_enabw(tp);
+        return 0;
+    }
+    return 1;
 }
 
 /*
@@ -283,11 +300,11 @@ static void
 telnet_disconnect(telnet_t *tp)
 {
     if ((tp->t_flags & TF_ATTACH) == 0)
-	return;
+        return;
 
     tp->t_flags |= TF_DISCONNECT;
     if (!tp->task)
-	tp->task = create_task(telnet_interactive, tp);
+        tp->task = create_task(telnet_interactive, tp);
 }
 
 /*
@@ -297,20 +314,20 @@ static void
 telnet_canq_putc(telnet_t *tp, u_char c)
 {
     if (tp->t_flags & (TF_OVFLCANQ | TF_SYNCH))
-	return;
+        return;
 
     if (!nq_full(tp->t_canq))
     {
-	nq_putc(tp->t_canq, c);
+        nq_putc(tp->t_canq, c);
     }
     else
     {
-	tp->t_flags |= TF_OVFLCANQ;
-	if (nq_avail(tp->t_outq) > 0)
-	{
-	    nq_putc(tp->t_outq, BEL);
-	    telnet_enabw(tp);
-	}
+        tp->t_flags |= TF_OVFLCANQ;
+        if (nq_avail(tp->t_outq) > 0)
+        {
+            nq_putc(tp->t_outq, BEL);
+            telnet_enabw(tp);
+        }
     }
 }
 
@@ -321,12 +338,12 @@ static void
 telnet_optq_putc(telnet_t *tp, u_char c)
 {
     if (tp->t_flags & TF_OVFLOPTQ)
-	return;
+        return;
 
     if (!nq_full(tp->t_optq))
-	nq_putc(tp->t_optq, c);
+        nq_putc(tp->t_optq, c);
     else
-	tp->t_flags |= TF_OVFLOPTQ;
+        tp->t_flags |= TF_OVFLOPTQ;
 }
 
 /*
@@ -336,15 +353,15 @@ static void
 telnet_eol(telnet_t *tp)
 {
     if (tp->t_flags & TF_SYNCH)
-	return;
+        return;
 
     if (nq_full(tp->t_canq))
     {
-	tp->t_flags &= ~TF_OVFLCANQ;
+        tp->t_flags &= ~TF_OVFLCANQ;
     }
     else
     {
-	nq_putc(tp->t_canq, '\0');
+        nq_putc(tp->t_canq, '\0');
     }
 
     tp->t_flags |= TF_INPUT;
@@ -355,51 +372,51 @@ telnet_interactive(void *vp)
 {
     telnet_t *tp = vp;
     char *cp;
-    
+
     if (!(tp->t_flags & TF_ATTACH)) {
-	tp->task = NULL;
-	telnet_shutdown(tp->t_nd, tp);
-	return;
+        tp->task = NULL;
+        telnet_shutdown(tp->t_nd, tp);
+        return;
     }
     if (tp->t_flags & TF_DISCONNECT) {
-	tp->t_flags &= ~TF_DISCONNECT;
-	if (tp->t_ip)
-	    remove_interactive(tp->t_ip, 1);
+        tp->t_flags &= ~TF_DISCONNECT;
+        if (tp->t_ip)
+            remove_interactive(tp->t_ip, 1);
     }
     if (!(tp->t_flags & TF_ATTACH)) {
-	tp->task = NULL;
-	telnet_shutdown(tp->t_nd, tp);
-	return;
+        tp->task = NULL;
+        telnet_shutdown(tp->t_nd, tp);
+        return;
     }
     if (tp->t_flags & TF_OVFLOUTQ) {
-	tp->task = NULL;
-	return;
+        tp->task = NULL;
+        return;
     }
     if (tp->t_flags & TF_INPUT) {
-	tp->t_flags &= ~TF_INPUT;
-	if (nq_full(tp->t_canq))
-	    cp = "";
-	else
-	    cp = (char *)nq_rptr(tp->t_canq);
-	interactive_input(tp->t_ip, cp);
-	nq_init(tp->t_canq);
+        tp->t_flags &= ~TF_INPUT;
+        if (nq_full(tp->t_canq))
+            cp = "";
+        else
+            cp = (char *)nq_rptr(tp->t_canq);
+        interactive_input(tp->t_ip, cp);
+        nq_init(tp->t_canq);
     }
     if (!(tp->t_flags & TF_ATTACH)) {
-	tp->task = NULL;
-	telnet_shutdown(tp->t_nd, tp);
-	return;
+        tp->task = NULL;
+        telnet_shutdown(tp->t_nd, tp);
+        return;
     }
     tp->t_flags &= ~TF_GA;
     telnet_readbytes(tp->t_nd, tp);
     telnet_input(tp);
     if (!(tp->t_flags & TF_ATTACH)) {
-	tp->task = NULL;
-	telnet_shutdown(tp->t_nd, tp);
-	return;
+        tp->task = NULL;
+        telnet_shutdown(tp->t_nd, tp);
+        return;
     }
     if (tp->t_flags & (TF_INPUT|TF_DISCONNECT)) {
-	reschedule_task(tp->task);
-	return;
+        reschedule_task(tp->task);
+        return;
     }
     tp->task = NULL;
     nd_enable(tp->t_nd, ND_R);
@@ -412,7 +429,7 @@ static void
 telnet_dm(telnet_t *tp)
 {
     if ((tp->t_flags & TF_URGENT) == 0)
-	tp->t_flags &= ~TF_SYNCH;
+        tp->t_flags &= ~TF_SYNCH;
 }
 
 /*
@@ -437,10 +454,10 @@ static INLINE void
 telnet_ec(telnet_t *tp)
 {
     if (tp->t_flags & (TF_OVFLCANQ | TF_SYNCH))
-	return;
+        return;
 
     if (!nq_empty(tp->t_canq))
-	nq_unputc(tp->t_canq);
+        nq_unputc(tp->t_canq);
 }
 
 /*
@@ -450,7 +467,7 @@ static void
 telnet_el(telnet_t *tp)
 {
     if (tp->t_flags & (TF_OVFLCANQ | TF_SYNCH))
-	return;
+        return;
 
     nq_init(tp->t_canq);
 }
@@ -462,7 +479,7 @@ static void
 telnet_sb(telnet_t *tp, u_char opt)
 {
     if (tp->t_optq == NULL)
-	tp->t_optq = nq_alloc(TELNET_OPTQ_SIZE);
+        tp->t_optq = nq_alloc(TELNET_OPTQ_SIZE);
 
     tp->t_opt = opt;
 }
@@ -487,17 +504,20 @@ telnet_get_optp(telnet_t *tp, u_char opt)
 {
     switch (opt)
     {
-    case TELOPT_ECHO:
-	return &tp->t_optb[OP_ECHO];
+        case TELOPT_ECHO:
+            return &tp->t_optb[OP_ECHO];
 
-    case TELOPT_SGA:
-	return &tp->t_optb[OP_SGA];
+        case TELOPT_SGA:
+            return &tp->t_optb[OP_SGA];
 
-    case TELOPT_CDM:
-	return &tp->t_optb[OP_CDM];
+        case TELOPT_CDM:
+            return &tp->t_optb[OP_CDM];
 
-    default:
-	return NULL;
+        case TELOPT_GMCP:
+            return &tp->t_optb[OP_GMCP];
+
+        default:
+            return NULL;
     }
 }
 
@@ -509,17 +529,17 @@ telnet_lenabp(telnet_t *tp, u_char opt)
 {
     switch (opt)
     {
-    case TELOPT_ECHO:
-	return 1;
+        case TELOPT_ECHO:
+            return 1;
 
-    case TELOPT_SGA:
-	return 1;
+        case TELOPT_SGA:
+            return 1;
 
-    case TELOPT_CDM:
-	return 1;
+        case TELOPT_CDM:
+            return 1;
 
-    default:
-	return 0;
+        default:
+            return 0;
     }
 }
 
@@ -531,11 +551,11 @@ telnet_renabp(telnet_t *tp, u_char opt)
 {
     switch (opt)
     {
-    case TELOPT_SGA:
-	return 1;
+        case TELOPT_SGA:
+            return 1;
 
-    default:
-	return 0;
+        default:
+            return 0;
     }
 }
 
@@ -618,6 +638,24 @@ telnet_send_dont(telnet_t *tp, u_char opt)
     telnet_enabw(tp);
 }
 
+/* 
+ * Send IAC SB subnegotiation sequence
+ */
+static void
+telnet_send_sb(telnet_t *tp, u_char opt, u_char *data)
+{
+    nqueue_t *nq;
+
+    nq = tp->t_outq;
+
+    nq_putc(nq, IAC);
+    nq_putc(nq, SB);
+    nq_putc(nq, opt);
+    nq_puts(nq, data);
+    nq_putc(nq, IAC);
+    nq_putc(nq, SE);
+}
+
 /*
  * Acknowledge enabling an option in the local-to-remote direction.
  */
@@ -626,9 +664,11 @@ telnet_ack_lenab(telnet_t *tp, u_char opt)
 {
     switch (opt)
     {
-    case TELOPT_SGA:
-	tp->t_flags |= TF_SGA;
-	break;
+        case TELOPT_SGA:
+            tp->t_flags |= TF_SGA;
+            break;
+        case TELOPT_GMCP:
+            tp->t_flags |= TF_GMCP;
     }
 }
 
@@ -640,9 +680,9 @@ telnet_ack_ldisab(telnet_t *tp, u_char opt)
 {
     switch (opt)
     {
-    case TELOPT_SGA:
-	tp->t_flags &= ~TF_SGA;
-	break;
+        case TELOPT_SGA:
+            tp->t_flags &= ~TF_SGA;
+            break;
     }
 }
 
@@ -672,41 +712,41 @@ telnet_neg_lenab(telnet_t *tp, u_char opt)
 
     op = telnet_get_optp(tp, opt);
     if (op == NULL)
-	return;
+        return;
 
     switch (op->o_us)
     {
-    case OS_NO:
-        op->o_us = OS_WANTYES;
-        telnet_send_will(tp, opt);
-        break;
-
-    case OS_YES:
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
-            op->o_usq = OQ_OPPOSITE;
+        case OS_NO:
+            op->o_us = OS_WANTYES;
+            telnet_send_will(tp, opt);
             break;
 
-        case OQ_OPPOSITE:
-            break;
-        }
-        break;
-
-    case OS_WANTYES:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
+        case OS_YES:
             break;
 
-        case OQ_OPPOSITE:
-            op->o_usq = OQ_EMPTY;
+        case OS_WANTNO:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_usq = OQ_OPPOSITE;
+                    break;
+
+                case OQ_OPPOSITE:
+                    break;
+            }
             break;
-        }
-        break;
+
+        case OS_WANTYES:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_usq = OQ_EMPTY;
+                    break;
+            }
+            break;
     }
 }
 
@@ -720,41 +760,41 @@ telnet_neg_ldisab(telnet_t *tp, u_char opt)
 
     op = telnet_get_optp(tp, opt);
     if (op == NULL)
-	return;
+        return;
 
     switch (op->o_us)
     {
-    case OS_NO:
-        break;
-
-    case OS_YES:
-        op->o_us = OS_WANTNO;
-        telnet_send_wont(tp, opt);
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
+        case OS_NO:
             break;
 
-        case OQ_OPPOSITE:
-            op->o_usq = OQ_EMPTY;
-            break;
-        }
-        break;
-
-    case OS_WANTYES:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
-            op->o_usq = OQ_OPPOSITE;
+        case OS_YES:
+            op->o_us = OS_WANTNO;
+            telnet_send_wont(tp, opt);
             break;
 
-        case OQ_OPPOSITE:
+        case OS_WANTNO:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_usq = OQ_EMPTY;
+                    break;
+            }
             break;
-        }
-        break;
+
+        case OS_WANTYES:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_usq = OQ_OPPOSITE;
+                    break;
+
+                case OQ_OPPOSITE:
+                    break;
+            }
+            break;
     }
 }
 
@@ -765,7 +805,7 @@ void
 telnet_enable_echo(telnet_t *tp)
 {
     if (nq_avail(tp->t_outq) < 3)
-	return;
+        return;
 
     telnet_neg_lenab(tp, TELOPT_ECHO);
 }
@@ -777,10 +817,35 @@ void
 telnet_disable_echo(telnet_t *tp)
 {
     if (nq_avail(tp->t_outq) < 3)
-	return;
+        return;
 
     telnet_neg_ldisab(tp, TELOPT_ECHO);
 }
+
+/* 
+ * Enable GMCP
+ */
+void
+telnet_enable_gmcp(telnet_t *tp)
+{
+    if (nq_avail(tp->t_outq) < 3)
+        return;
+
+    telnet_neg_lenab(tp, TELOPT_GMCP);
+}
+
+/*
+ * Disable GMCP
+ */   
+void
+telnet_disable_gmcp(telnet_t *tp)
+{
+    if (nq_avail(tp->t_outq) < 3)
+        return;
+
+    telnet_neg_ldisab(tp, TELOPT_GMCP);
+}
+
 
 /*
  * Process IAC WILL <option>.
@@ -799,52 +864,52 @@ telnet_will(telnet_t *tp, u_char opt)
 
     switch (op->o_him)
     {
-    case OS_NO:
-        if (telnet_renabp(tp, opt))
-        {
-            op->o_him = OS_YES;
-            telnet_send_do(tp, opt);
-	    telnet_ack_renab(tp, opt);
-        }
-        else
-        {
-            telnet_send_dont(tp, opt);
-        }
-        break;
-
-    case OS_YES:
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_himq)
-        {
-        case OQ_EMPTY:
-            op->o_him = OS_NO;
-	    telnet_ack_rdisab(tp, opt);
+        case OS_NO:
+            if (telnet_renabp(tp, opt))
+            {
+                op->o_him = OS_YES;
+                telnet_send_do(tp, opt);
+                telnet_ack_renab(tp, opt);
+            }
+            else
+            {
+                telnet_send_dont(tp, opt);
+            }
             break;
 
-        case OQ_OPPOSITE:
-            op->o_him = OS_YES;
-            op->o_himq = OQ_EMPTY;
-	    telnet_ack_renab(tp, opt);
-            break;
-        }
-        break;
-
-    case OS_WANTYES:
-        switch (op->o_himq)
-        {
-        case OQ_EMPTY:
-            op->o_him = OS_YES;
-	    telnet_ack_renab(tp, opt);
+        case OS_YES:
             break;
 
-        case OQ_OPPOSITE:
-            op->o_him = OS_WANTNO;
-            op->o_himq = OQ_EMPTY;
-            telnet_send_dont(tp, opt);
-        }
-        break;
+        case OS_WANTNO:
+            switch (op->o_himq)
+            {
+                case OQ_EMPTY:
+                    op->o_him = OS_NO;
+                    telnet_ack_rdisab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_him = OS_YES;
+                    op->o_himq = OQ_EMPTY;
+                    telnet_ack_renab(tp, opt);
+                    break;
+            }
+            break;
+
+        case OS_WANTYES:
+            switch (op->o_himq)
+            {
+                case OQ_EMPTY:
+                    op->o_him = OS_YES;
+                    telnet_ack_renab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_him = OS_WANTNO;
+                    op->o_himq = OQ_EMPTY;
+                    telnet_send_dont(tp, opt);
+            }
+            break;
     }
 }
 
@@ -862,46 +927,46 @@ telnet_wont(telnet_t *tp, u_char opt)
 
     switch (op->o_him)
     {
-    case OS_NO:
-        break;
+        case OS_NO:
+            break;
 
-    case OS_YES:
-        op->o_him = OS_NO;
-        telnet_send_dont(tp, opt);
-	telnet_ack_rdisab(tp, opt);
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_himq)
-        {
-        case OQ_EMPTY:
+        case OS_YES:
             op->o_him = OS_NO;
-	    telnet_ack_rdisab(tp, opt);
+            telnet_send_dont(tp, opt);
+            telnet_ack_rdisab(tp, opt);
             break;
 
-        case OQ_OPPOSITE:
-            op->o_him = OS_WANTYES;
-            op->o_himq = OQ_EMPTY;
-            telnet_send_do(tp, opt);
-            break;
-        }
-        break;
+        case OS_WANTNO:
+            switch (op->o_himq)
+            {
+                case OQ_EMPTY:
+                    op->o_him = OS_NO;
+                    telnet_ack_rdisab(tp, opt);
+                    break;
 
-    case OS_WANTYES:
-        switch (op->o_himq)
-        {
-        case OQ_EMPTY:
-            op->o_him = OS_NO;
-	    telnet_ack_rdisab(tp, opt);
+                case OQ_OPPOSITE:
+                    op->o_him = OS_WANTYES;
+                    op->o_himq = OQ_EMPTY;
+                    telnet_send_do(tp, opt);
+                    break;
+            }
             break;
 
-        case OQ_OPPOSITE:
-            op->o_him = OS_NO;
-            op->o_himq = OQ_EMPTY;
-	    telnet_ack_rdisab(tp, opt);
+        case OS_WANTYES:
+            switch (op->o_himq)
+            {
+                case OQ_EMPTY:
+                    op->o_him = OS_NO;
+                    telnet_ack_rdisab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_him = OS_NO;
+                    op->o_himq = OQ_EMPTY;
+                    telnet_ack_rdisab(tp, opt);
+                    break;
+            }
             break;
-        }
-        break;
     }
 }
 
@@ -915,8 +980,8 @@ telnet_do(telnet_t *tp, u_char opt)
 
     if (opt == TELOPT_TM)
     {
-	telnet_send_will(tp, opt);
-	return;
+        telnet_send_will(tp, opt);
+        return;
     }
 
     op = telnet_get_optp(tp, opt);
@@ -928,52 +993,52 @@ telnet_do(telnet_t *tp, u_char opt)
 
     switch (op->o_us)
     {
-    case OS_NO:
-        if (telnet_lenabp(tp, opt))
-        {
-            op->o_us = OS_YES;
-            telnet_send_will(tp, opt);
-	    telnet_ack_lenab(tp, opt);
-        }
-        else
-        {
-            telnet_send_wont(tp, opt);
-        }
-        break;
-
-    case OS_YES:
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
-            op->o_us = OS_NO;
-	    telnet_ack_ldisab(tp, opt);
+        case OS_NO:
+            if (telnet_lenabp(tp, opt))
+            {
+                op->o_us = OS_YES;
+                telnet_send_will(tp, opt);
+                telnet_ack_lenab(tp, opt);
+            }
+            else
+            {
+                telnet_send_wont(tp, opt);
+            }
             break;
 
-        case OQ_OPPOSITE:
-            op->o_us = OS_YES;
-            op->o_usq = OQ_EMPTY;
-	    telnet_ack_lenab(tp, opt);
-            break;
-        }
-        break;
-
-    case OS_WANTYES:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
-            op->o_us = OS_YES;
-	    telnet_ack_lenab(tp, opt);
+        case OS_YES:
             break;
 
-        case OQ_OPPOSITE:
-            op->o_us = OS_WANTNO;
-            op->o_usq = OQ_EMPTY;
-            telnet_send_wont(tp, opt);
-        }
-        break;
+        case OS_WANTNO:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_us = OS_NO;
+                    telnet_ack_ldisab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_us = OS_YES;
+                    op->o_usq = OQ_EMPTY;
+                    telnet_ack_lenab(tp, opt);
+                    break;
+            }
+            break;
+
+        case OS_WANTYES:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_us = OS_YES;
+                    telnet_ack_lenab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_us = OS_WANTNO;
+                    op->o_usq = OQ_EMPTY;
+                    telnet_send_wont(tp, opt);
+            }
+            break;
     }
 }
 
@@ -991,46 +1056,46 @@ telnet_dont(telnet_t *tp, u_char opt)
 
     switch (op->o_us)
     {
-    case OS_NO:
-        break;
+        case OS_NO:
+            break;
 
-    case OS_YES:
-        op->o_us = OS_NO;
-        telnet_send_wont(tp, opt);
-	telnet_ack_ldisab(tp, opt);
-        break;
-
-    case OS_WANTNO:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
+        case OS_YES:
             op->o_us = OS_NO;
-	    telnet_ack_ldisab(tp, opt);
+            telnet_send_wont(tp, opt);
+            telnet_ack_ldisab(tp, opt);
             break;
 
-        case OQ_OPPOSITE:
-            op->o_us = OS_WANTYES;
-            op->o_usq = OQ_EMPTY;
-            telnet_send_will(tp, opt);
-            break;
-        }
-        break;
+        case OS_WANTNO:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_us = OS_NO;
+                    telnet_ack_ldisab(tp, opt);
+                    break;
 
-    case OS_WANTYES:
-        switch (op->o_usq)
-        {
-        case OQ_EMPTY:
-            op->o_us = OS_NO;
-	    telnet_ack_ldisab(tp, opt);
+                case OQ_OPPOSITE:
+                    op->o_us = OS_WANTYES;
+                    op->o_usq = OQ_EMPTY;
+                    telnet_send_will(tp, opt);
+                    break;
+            }
             break;
 
-        case OQ_OPPOSITE:
-            op->o_us = OS_NO;
-            op->o_usq = OQ_EMPTY;
-	    telnet_ack_ldisab(tp, opt);
+        case OS_WANTYES:
+            switch (op->o_usq)
+            {
+                case OQ_EMPTY:
+                    op->o_us = OS_NO;
+                    telnet_ack_ldisab(tp, opt);
+                    break;
+
+                case OQ_OPPOSITE:
+                    op->o_us = OS_NO;
+                    op->o_usq = OQ_EMPTY;
+                    telnet_ack_ldisab(tp, opt);
+                    break;
+            }
             break;
-        }
-        break;
     }
 }
 
@@ -1046,153 +1111,153 @@ telnet_input(telnet_t *tp)
     {
         c = nq_getc(tp->t_rawq);
 
-	switch (tp->t_state)
-	{
-	case TS_DATA:
-            switch (c)
-            {
-	    case NUL:
-		break;
+        switch (tp->t_state)
+        {
+            case TS_DATA:
+                switch (c)
+                {
+                    case NUL:
+                        break;
 
-            case BS:
-		telnet_ec(tp);
+                    case BS:
+                        telnet_ec(tp);
+                        break;
+
+                    case LF:
+                        telnet_eol(tp);
+                        return;
+
+                    case CR:
+                        tp->t_state = TS_CR;
+                        break;
+
+                    case DEL:
+                        telnet_ec(tp);
+                        break;
+
+                    case IAC:
+                        tp->t_state = TS_IAC;
+                        break;
+
+                    default:
+                        telnet_canq_putc(tp, c);
+                        break;
+                }
                 break;
 
-	    case LF:
-		telnet_eol(tp);
+            case TS_CR:
+                telnet_eol(tp);
+                tp->t_state = TS_DATA;
                 return;
-                
-            case CR:
-                tp->t_state = TS_CR;
+
+            case TS_IAC:
+                tp->t_state = TS_DATA;
+                switch (c)
+                {
+                    case DM:
+                        telnet_dm(tp);
+                        break;
+
+                    case AYT:
+                        telnet_ayt(tp);
+                        break;
+
+                    case EC:
+                        telnet_ec(tp);
+                        break;
+
+                    case EL:
+                        telnet_el(tp);
+                        break;
+
+                    case SB:
+                        tp->t_state = TS_IAC_SB;
+                        break;
+
+                    case WILL:
+                        tp->t_state = TS_IAC_WILL;
+                        break;
+
+                    case WONT:
+                        tp->t_state = TS_IAC_WONT;
+                        break;
+
+                    case DO:
+                        tp->t_state = TS_IAC_DO;
+                        break;
+
+                    case DONT:
+                        tp->t_state = TS_IAC_DONT;
+                        break;
+
+                    case IAC:
+                        telnet_canq_putc(tp, c);
+                        break;
+                }
                 break;
 
-            case DEL:
-		telnet_ec(tp);
+            case TS_IAC_SB:
+                telnet_sb(tp, c);
+                tp->t_state = TS_IAC_SB_DATA;
                 break;
 
-            case IAC:
-                tp->t_state = TS_IAC;
+            case TS_IAC_SB_DATA:
+                switch (c)
+                {
+                    case IAC:
+                        tp->t_state = TS_IAC_SB_IAC;
+                        break;
+
+                    default:
+                        telnet_optq_putc(tp, c);
+                        break;
+                }
                 break;
 
-            default:
-		telnet_canq_putc(tp, c);
-                break;
-            }
-	    break;
+            case TS_IAC_SB_IAC:
+                tp->t_state = TS_IAC_SB_DATA;
+                switch (c)
+                {
+                    case SE:
+                        telnet_se(tp);
+                        tp->t_state = TS_DATA;
+                        break;
 
-	case TS_CR:
-	    telnet_eol(tp);
-            tp->t_state = TS_DATA;
-            return;
-
-	case TS_IAC:
-            tp->t_state = TS_DATA;
-            switch (c)
-            {
-            case DM:
-		telnet_dm(tp);
+                    case IAC:
+                        telnet_optq_putc(tp, c);
+                        break;
+                }
                 break;
 
-	    case AYT:
-		telnet_ayt(tp);
-		break;
-
-	    case EC:
-		telnet_ec(tp);
-		break;
-
-	    case EL:
-		telnet_el(tp);
-		break;
-
-            case SB:
-                tp->t_state = TS_IAC_SB;
-                break;
-
-            case WILL:
-                tp->t_state = TS_IAC_WILL;
-                break;
-
-            case WONT:
-                tp->t_state = TS_IAC_WONT;
-                break;
-
-            case DO:
-                tp->t_state = TS_IAC_DO;
-                break;
-
-            case DONT:
-                tp->t_state = TS_IAC_DONT;
-                break;
-
-            case IAC:
-		telnet_canq_putc(tp, c);
-		break;
-            }
-	    break;
-
-	case TS_IAC_SB:
-	    telnet_sb(tp, c);
-            tp->t_state = TS_IAC_SB_DATA;
-	    break;
-
-	case TS_IAC_SB_DATA:
-            switch (c)
-            {
-            case IAC:
-                tp->t_state = TS_IAC_SB_IAC;
-                break;
-
-            default:
-		telnet_optq_putc(tp, c);
-                break;
-            }
-	    break;
-
-	case TS_IAC_SB_IAC:
-	    tp->t_state = TS_IAC_SB_DATA;
-            switch (c)
-            {
-            case SE:
-                telnet_se(tp);
+            case TS_IAC_WILL:
+                telnet_will(tp, c);
                 tp->t_state = TS_DATA;
                 break;
 
-            case IAC:
-		telnet_optq_putc(tp, c);
+            case TS_IAC_WONT:
+                telnet_wont(tp, c);
+                tp->t_state = TS_DATA;
                 break;
-            }
-	    break;
 
-	case TS_IAC_WILL:
-            telnet_will(tp, c);
-	    tp->t_state = TS_DATA;
-	    break;
+            case TS_IAC_DO:
+                telnet_do(tp, c);
+                tp->t_state = TS_DATA;
+                break;
 
-	case TS_IAC_WONT:
-            telnet_wont(tp, c);
-            tp->t_state = TS_DATA;
-	    break;
-
-	case TS_IAC_DO:
-	    telnet_do(tp, c);
-            tp->t_state = TS_DATA;
-	    break;
-
-	case TS_IAC_DONT:
-            telnet_dont(tp, c);
-            tp->t_state = TS_DATA;
-	    break;
+            case TS_IAC_DONT:
+                telnet_dont(tp, c);
+                tp->t_state = TS_DATA;
+                break;
         }
     }
 
     if ((tp->t_flags & (TF_SGA | TF_GA)) == 0)
     {
-	if (nq_avail(tp->t_outq) >= 2)
-	{
-	    tp->t_flags |= TF_GA;
-	    telnet_send_ga(tp);
-	}
+        if (nq_avail(tp->t_outq) >= 2)
+        {
+            tp->t_flags |= TF_GA;
+            telnet_send_ga(tp);
+        }
     }
 
     nq_init(tp->t_rawq);
@@ -1208,39 +1273,39 @@ telnet_readbytes(ndesc_t *nd, telnet_t *tp)
 
     if (!nq_full(tp->t_rawq))
     {
-	if (tp->t_flags & TF_URGENT)
-	{
-	    if (at_mark(nd_fd(nd)))
-	    {
-		tp->t_flags &= ~TF_URGENT;
-		nd_enable(nd, ND_X);
-	    }
-	}
+        if (tp->t_flags & TF_URGENT)
+        {
+            if (at_mark(nd_fd(nd)))
+            {
+                tp->t_flags &= ~TF_URGENT;
+                nd_enable(nd, ND_X);
+            }
+        }
 
         cc = nq_recv(tp->t_rawq, nd_fd(nd), &tp->t_rblen);
         if (cc == -1)
         {
             switch (errno)
             {
-            case EWOULDBLOCK:
-            case EINTR:
-            case EPROTO:
-                break;
+                case EWOULDBLOCK:
+                case EINTR:
+                case EPROTO:
+                    break;
 
-            default:
-		telnet_disconnect(tp);
-                return;
+                default:
+                    telnet_disconnect(tp);
+                    return;
             }
         }
 
-	if (cc == 0)
-	{
-	    telnet_disconnect(tp);
-	    return;
-	}
+        if (cc == 0)
+        {
+            telnet_disconnect(tp);
+            return;
+        }
 
-	if (!nq_full(tp->t_rawq))
-	    return;
+        if (!nq_full(tp->t_rawq))
+            return;
     }
 
 }
@@ -1251,12 +1316,12 @@ telnet_read(ndesc_t *nd, telnet_t *tp)
     telnet_readbytes(nd, tp);
     telnet_input(tp);
     if (tp->t_flags & (TF_INPUT|TF_DISCONNECT)) {
-	if (!tp->task)
-	    tp->task = create_task(telnet_interactive, tp);
-	nd_disable(tp->t_nd, ND_R);
+        if (!tp->task)
+            tp->task = create_task(telnet_interactive, tp);
+        nd_disable(tp->t_nd, ND_R);
     }
 }
-    
+
 
 /*
  * Write data from the output queue to the Telnet session.
@@ -1266,35 +1331,35 @@ telnet_write(ndesc_t *nd, telnet_t *tp)
 {
     if (!nq_empty(tp->t_outq))
     {
-	if (nq_send(tp->t_outq, nd_fd(nd), &tp->t_sblen) == -1)
-	{
-	    switch (errno)
-	    {
-	    case EWOULDBLOCK:
-	    case EINTR:
-	    case EPROTO:
-		break;
+        if (nq_send(tp->t_outq, nd_fd(nd), &tp->t_sblen) == -1)
+        {
+            switch (errno)
+            {
+                case EWOULDBLOCK:
+                case EINTR:
+                case EPROTO:
+                    break;
 
-	    default:
-		telnet_disconnect(tp);
-		return;
-	    }
-	}
+                default:
+                    telnet_disconnect(tp);
+                    return;
+            }
+        }
     }
 
     if (tp->t_flags & TF_OVFLOUTQ)
     {
-	if (nq_len(tp->t_outq) < TELNET_OUTQ_LOWAT)
-	{
-	    tp->t_flags &= ~TF_OVFLOUTQ;
-	    if (tp->t_flags & (TF_INPUT|TF_DISCONNECT) &&
-		!tp->task) /* Reenable command processing */
-		tp->task = create_task(telnet_interactive, tp);
-	}
+        if (nq_len(tp->t_outq) < TELNET_OUTQ_LOWAT)
+        {
+            tp->t_flags &= ~TF_OVFLOUTQ;
+            if (tp->t_flags & (TF_INPUT|TF_DISCONNECT) &&
+                !tp->task) /* Reenable command processing */
+                tp->task = create_task(telnet_interactive, tp);
+        }
     }
 
     if (!nq_empty(tp->t_outq))
-	return;
+        return;
 
     nq_init(tp->t_outq);
 
@@ -1328,7 +1393,7 @@ telnet_accept(void *vp)
     telnet_t *tp;
     void *ip;
     char host[NI_MAXHOST], port[NI_MAXSERV];
-    
+
     nd_enable(nd, ND_R);
 
     /* Get the port number of the accepting socket */
@@ -1343,18 +1408,18 @@ telnet_accept(void *vp)
     s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
     {
-	switch (errno)
-	{
-	default:
-            getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-            
-            warning("telnet_accept: accept() errno = %d. ip: [%s]:%s\n",
-                errno, host, port);
-	case EWOULDBLOCK:
-	case EINTR:
-	case EPROTO:
-	    return;
-	}
+        switch (errno)
+        {
+            default:
+                getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
+
+                warning("telnet_accept: accept() errno = %d. ip: [%s]:%s\n",
+                        errno, host, port);
+            case EWOULDBLOCK:
+            case EINTR:
+            case EPROTO:
+                return;
+        }
     }
 
     enable_nbio(s);
@@ -1367,16 +1432,20 @@ telnet_accept(void *vp)
 
     tp = telnet_alloc();
     tp->t_nd = nd_attach(s, telnet_read, telnet_write, telnet_exception,
-			 NULL, telnet_shutdown, tp);
+                         NULL, telnet_shutdown, tp);
+
+    /* Start negotiation of GMCP */
+    telnet_enable_gmcp(tp);
+
     ip = (void *)new_player(tp, &addr, addrlen, local_port);
     if (ip == NULL)
     {
-	telnet_shutdown(tp->t_nd, tp);
+        telnet_shutdown(tp->t_nd, tp);
     }
     else
     {
-	telnet_attach(tp, ip);
-	nd_enable(tp->t_nd, ND_R | ND_X);
+        telnet_attach(tp, ip);
+        nd_enable(tp->t_nd, ND_R | ND_X);
     }
 }
 
@@ -1398,7 +1467,7 @@ telnet_init(u_short port_nr)
     struct addrinfo *res, *rp;    
     ndesc_t *nd;
     char host[NI_MAXHOST], port[NI_MAXSERV];
-    
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_flags = AI_PASSIVE;
@@ -1414,7 +1483,7 @@ telnet_init(u_short port_nr)
             fatal("telnet_init: socket() error = %d.\n", errno);
 
         getnameinfo(rp->ai_addr, rp->ai_addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-       
+
         enable_reuseaddr(s);
 
         if (rp->ai_family == AF_INET6)
@@ -1431,7 +1500,7 @@ telnet_init(u_short port_nr)
 
             nd = nd_attach(s, telnet_ready, NULL, NULL, NULL, telnet_shutdown, NULL);
             nd_enable(nd, ND_R);
-            
+
         }
         else
         {

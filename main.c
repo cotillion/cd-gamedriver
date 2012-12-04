@@ -152,8 +152,8 @@ int
 main(int argc, char **argv)
 {
     extern int game_is_being_shut_down;
-    int i;    
     char *p;
+    int i = 0;
     struct svalue *ret;
     extern struct svalue catch_value;
     extern void init_cfuns(void);

@@ -187,6 +187,22 @@ add_message(char *fmt, ...)
         write_socket(buff, (struct object *)0);
 }
 
+/* 
+ * Outputs GMCP data to the client
+ */
+void
+write_gmcp(struct object *ob, char *data)
+{
+    struct interactive *ip;
+
+    if (ob == NULL || ob->flags & O_DESTRUCTED || 
+        (ip = ob->interactive) == NULL || ip->do_close)
+        return;
+
+    telnet_output_gmcp(ip->tp, data);
+
+}
+
 /*
  * Will output to telnet on every newline to avoid overflow.
  */
@@ -530,6 +546,7 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local
 #endif
 	logon(ob);
 	current_interactive = 0;
+
 	return all_players[i];
     }
     telnet_output(tp, (u_char *)"Lpmud is full. Come back later.\n");
@@ -551,7 +568,7 @@ call_function_interactive(struct interactive *i, char *str)
     if (!legal_closure(func))
     {
 	/* Sorry, the object has selfdestructed ! */
-	free_sentence(i->input_to);
+    free_sentence(i->input_to);
 	i->input_to = 0;
 	return 0;
     }
