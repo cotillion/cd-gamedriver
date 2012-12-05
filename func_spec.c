@@ -167,6 +167,7 @@ int	write_bytes(string, int, string);
 int	write_file(string, string);
 void    write_socket(string|int);
 void    write_socket_gmcp(string, mixed);
+string  val2json(mixed);
 
 #ifdef WORD_WRAP
 /*

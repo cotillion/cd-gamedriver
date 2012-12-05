@@ -199,7 +199,7 @@ write_gmcp(struct object *ob, char *data)
         (ip = ob->interactive) == NULL || ip->do_close)
         return;
 
-    telnet_output_gmcp(ip->tp, data);
+    telnet_output_gmcp(ip->tp, (u_char *)data);
 
 }
 

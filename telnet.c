@@ -669,6 +669,7 @@ telnet_ack_lenab(telnet_t *tp, u_char opt)
             break;
         case TELOPT_GMCP:
             tp->t_flags |= TF_GMCP;
+            break;
     }
 }
 
