@@ -87,3 +87,7 @@ parse_command_all_word
 # sprintf()
 #######
 object_name
+#
+# gmcp
+#######
+incoming_gmcp

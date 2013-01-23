@@ -273,7 +273,7 @@ telnet_output(telnet_t *tp, u_char *cp)
     }
 
     nq_puts(tp->t_outq, buf);
-
+    telnet_enabw(tp);
     return 0;
 }
 
@@ -372,7 +372,6 @@ telnet_interactive(void *vp)
 {
     telnet_t *tp = vp;
     char *cp;
-
     if (!(tp->t_flags & TF_ATTACH)) {
         tp->task = NULL;
         telnet_shutdown(tp->t_nd, tp);
@@ -490,6 +489,14 @@ telnet_sb(telnet_t *tp, u_char opt)
 static void
 telnet_se(telnet_t *tp)
 {
+    if (!nq_full(tp->t_optq) && !nq_empty(tp->t_optq))
+    {
+        if (tp->t_opt == TELOPT_GMCP) {
+            nq_putc(tp->t_optq, '\0');
+            gmcp_input(tp->t_ip, (char *)nq_rptr(tp->t_optq));
+        }
+    }
+
     tp->t_flags &= ~TF_OVFLOPTQ;
     nq_init(tp->t_optq);
 }

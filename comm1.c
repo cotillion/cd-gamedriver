@@ -32,6 +32,9 @@
 #include "udpsvc.h"
 #include "main.h"
 #include "backend.h"
+#include "mapping.h"
+#include "json.h"
+#include "inline_svalue.h"
 
 void set_prompt (char *);
 void prepare_ipc (void);
@@ -56,7 +59,7 @@ extern int udp_port;
 udpsvc_t *udpsvc;
 #endif /* CATCH_UDP_PORT */
 
-void *new_player(void *, struct sockaddr_storage *, size_t, u_short local_port);
+void *new_player(void *, struct sockaddr_storage *, socklen_t, u_short local_port);
 
 int num_player;
 
@@ -1110,4 +1113,37 @@ interactive_input(struct interactive *ip, char *cp)
 	print_mudstatus(current_interactive->name, eval_cost, get_millitime(), get_processtime());
     }
     current_interactive = 0;
+}
+
+void 
+gmcp_input(struct interactive *ip, char *cp)
+{
+    char *sep = strchr(cp, ' ');
+    if (sep != NULL) 
+    {
+        *sep = 0;
+        sep++;
+    } 
+
+    printf("Received GMCP for %s - %s\n", cp, sep);
+
+    if (ip->ob)
+    {
+        push_object(ip->ob);
+        push_string(cp, STRING_CSTRING);
+
+        struct svalue *payload = json2val(sep);
+        if (payload != NULL) 
+        {
+            push_svalue(payload);
+            (void)apply_master_ob(M_INCOMING_GMCP, 3);
+            // TODO: Do we need to free the svalue or is that done using the master?
+            // and how does that work with allocated data
+            //free_svalue(payload);
+        } 
+        else
+        {
+            (void)apply_master_ob(M_INCOMING_GMCP, 2);  
+        }
+    } 
 }

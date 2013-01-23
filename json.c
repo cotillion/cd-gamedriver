@@ -19,16 +19,19 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <json/json.h>
+#include <string.h>
 
 #include "simulate.h"
 #include "lint.h"
 #include "interpret.h"
 #include "mapping.h"
 #include "simulate.h"
+#include "mstring.h"
 
 #define MAX_DEPTH 40
 
 json_object *value_to_json(struct svalue *sp); 
+struct svalue *json_to_value(json_object *ob);
 
 json_object *
 string_to_json(struct svalue *sp)
@@ -39,7 +42,8 @@ string_to_json(struct svalue *sp)
 json_object *
 int_to_json(struct svalue *sp)
 {
-    return json_object_new_int64(sp->u.number);
+    return json_object_new_int(sp->u.number);
+    // TODO: return json_object_new_int64(sp->u.number);
 }
 
 json_object *
@@ -130,4 +134,129 @@ val2json(struct svalue *sp)
     json = value_to_json(sp);
     str = json_object_to_json_string(json);
     return str;
+}
+
+struct svalue *
+json_to_string(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_STRING;
+    ret->string_type = STRING_MSTRING;
+    ret->u.string = make_mstring(json_object_get_string(ob));
+    return ret;
+}
+
+struct svalue *
+json_to_int(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_NUMBER;
+    ret->u.number = json_object_get_int(ob);
+    return ret;
+}
+
+struct svalue *
+json_to_float(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_FLOAT;
+    ret->u.real = json_object_get_double(ob);
+    return ret;
+}
+
+struct svalue *
+json_to_boolean(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_NUMBER;
+    ret->u.number = json_object_get_boolean(ob) ? 1 : 0;
+    return ret;
+}
+
+struct svalue *
+json_to_null(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_NUMBER;
+    ret->u.number = 0;
+    return ret;
+}
+
+struct svalue *
+json_to_array(json_object *ob)
+{
+    int arraylen = json_object_array_length(ob);
+
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_POINTER;
+    ret->u.vec = allocate_array(arraylen);
+    
+    for (int x = 0; x < arraylen; x++) 
+    {
+        json_object *element = json_object_array_get_idx(ob, x);
+        assign_svalue_no_free(&ret->u.vec->item[x], 
+            json_to_value(element));
+    }
+
+    return ret;
+}
+
+struct svalue *
+json_to_mapping(json_object *ob)
+{
+    struct svalue *ret = alloca(sizeof(struct svalue));
+    ret->type = T_MAPPING;
+    ret->u.map = allocate_map(10);
+
+    json_object_object_foreach(ob, name, val) {
+        struct svalue key = {};
+        key.type = T_STRING;
+        key.string_type = STRING_MSTRING;
+        key.u.string = make_mstring(name);
+
+        struct svalue *converted = json_to_value(val);
+        printf("converted type: %d\n", converted->type);
+        struct svalue *mappos = get_map_lvalue(ret->u.map, &key, 1);
+        // TODO: Assigning converted here messes things up, because
+        // somehow, it gets corrupted .
+        printf("converted type: %d\n", converted->type);
+        assign_svalue_no_free(mappos, &key); 
+    }
+
+    return ret;
+}
+
+struct svalue *
+json_to_value(json_object *ob)
+{
+    enum json_type type = json_object_get_type(ob);
+    switch (type) {
+      case json_type_boolean: return json_to_boolean(ob);
+      case json_type_double: return json_to_float(ob);
+      case json_type_int: return json_to_int(ob);
+      case json_type_string: return json_to_string(ob);
+      case json_type_object: return json_to_mapping(ob);
+      case json_type_array: return json_to_array(ob); 
+      case json_type_null: return json_to_null(ob); 
+    }
+
+    return NULL;
+}
+
+struct svalue *
+json2val(const char *cp)
+{
+    struct svalue *ret;
+    json_object *jobj = json_tokener_parse(cp);
+
+    if (jobj == NULL) 
+    {
+        printf("Unable to parse JSON: %s\n", cp);
+        return NULL;
+    }
+
+    ret = json_to_value(jobj);
+    // TODO performing the dealloc here somehow messes up the return value
+   // json_object_put(jobj); 
+    return ret;
 }
