@@ -1137,9 +1137,7 @@ gmcp_input(struct interactive *ip, char *cp)
         {
             push_svalue(payload);
             (void)apply_master_ob(M_INCOMING_GMCP, 3);
-            // TODO: Do we need to free the svalue or is that done using the master?
-            // and how does that work with allocated data
-            //free_svalue(payload);
+            free_svalue(payload);
         } 
         else
         {

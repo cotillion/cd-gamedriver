@@ -139,47 +139,47 @@ val2json(struct svalue *sp)
 struct svalue *
 json_to_string(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_STRING;
-    ret->string_type = STRING_MSTRING;
-    ret->u.string = make_mstring(json_object_get_string(ob));
-    return ret;
+    static struct svalue ret;
+    ret.type = T_STRING;
+    ret.string_type = STRING_MSTRING;
+    ret.u.string = make_mstring(json_object_get_string(ob));
+    return &ret;
 }
 
 struct svalue *
 json_to_int(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_NUMBER;
-    ret->u.number = json_object_get_int(ob);
-    return ret;
+    static struct svalue ret;
+    ret.type = T_NUMBER;
+    ret.u.number = json_object_get_int(ob);
+    return &ret;
 }
 
 struct svalue *
 json_to_float(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_FLOAT;
-    ret->u.real = json_object_get_double(ob);
-    return ret;
+    static struct svalue ret;
+    ret.type = T_FLOAT;
+    ret.u.real = json_object_get_double(ob);
+    return &ret;
 }
 
 struct svalue *
 json_to_boolean(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_NUMBER;
-    ret->u.number = json_object_get_boolean(ob) ? 1 : 0;
-    return ret;
+    static struct svalue ret;
+    ret.type = T_NUMBER;
+    ret.u.number = json_object_get_boolean(ob) ? 1 : 0;
+    return &ret;
 }
 
 struct svalue *
 json_to_null(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_NUMBER;
-    ret->u.number = 0;
-    return ret;
+    static struct svalue ret;
+    ret.type = T_NUMBER;
+    ret.u.number = 0;
+    return &ret;
 }
 
 struct svalue *
@@ -187,26 +187,26 @@ json_to_array(json_object *ob)
 {
     int arraylen = json_object_array_length(ob);
 
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_POINTER;
-    ret->u.vec = allocate_array(arraylen);
+    static struct svalue ret;
+    ret.type = T_POINTER;
+    ret.u.vec = allocate_array(arraylen);
     
     for (int x = 0; x < arraylen; x++) 
     {
         json_object *element = json_object_array_get_idx(ob, x);
-        assign_svalue_no_free(&ret->u.vec->item[x], 
+        assign_svalue_no_free(&ret.u.vec->item[x], 
             json_to_value(element));
     }
 
-    return ret;
+    return &ret;
 }
 
 struct svalue *
 json_to_mapping(json_object *ob)
 {
-    struct svalue *ret = alloca(sizeof(struct svalue));
-    ret->type = T_MAPPING;
-    ret->u.map = allocate_map(10);
+    static struct svalue ret;
+    ret.type = T_MAPPING;
+    ret.u.map = allocate_map(10);
 
     json_object_object_foreach(ob, name, val) {
         struct svalue key = {};
@@ -214,16 +214,11 @@ json_to_mapping(json_object *ob)
         key.string_type = STRING_MSTRING;
         key.u.string = make_mstring(name);
 
-        struct svalue *converted = json_to_value(val);
-        printf("converted type: %d\n", converted->type);
-        struct svalue *mappos = get_map_lvalue(ret->u.map, &key, 1);
-        // TODO: Assigning converted here messes things up, because
-        // somehow, it gets corrupted .
-        printf("converted type: %d\n", converted->type);
-        assign_svalue_no_free(mappos, &key); 
+        assign_svalue_no_free(get_map_lvalue(ret.u.map, &key, 1), 
+            json_to_value(val)); 
     }
 
-    return ret;
+    return &ret;
 }
 
 struct svalue *
@@ -256,7 +251,6 @@ json2val(const char *cp)
     }
 
     ret = json_to_value(jobj);
-    // TODO performing the dealloc here somehow messes up the return value
-   // json_object_put(jobj); 
+    json_object_put(jobj); 
     return ret;
 }
