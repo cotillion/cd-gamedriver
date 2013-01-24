@@ -1127,19 +1127,33 @@ gmcp_input(struct interactive *ip, char *cp)
 
     if (ip->ob)
     {
-        push_object(ip->ob);
-        push_string(cp, STRING_CSTRING);
+        struct gdexception exception_frame;
 
-        struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
-        if (payload != NULL) 
-        {
-            push_svalue(payload);
-            (void)apply_master_ob(M_INCOMING_GMCP, 3);
-            free_svalue(payload);
-        } 
-        else if ((sep == NULL) || strlen(sep) == 0)
-        {
-            (void)apply_master_ob(M_INCOMING_GMCP, 2);  
+        exception_frame.e_exception = NULL;
+        exception_frame.e_catch = 0;
+
+        if (setjmp(exception_frame.e_context)) {
+            exception = exception_frame.e_exception;
+            clear_state();
+        } else {
+            exception = &exception_frame;
+
+            push_object(ip->ob);
+            push_string(cp, STRING_CSTRING);
+
+            struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
+            if (payload != NULL) 
+            {
+                push_svalue(payload);
+                (void)apply_master_ob(M_INCOMING_GMCP, 3);
+                free_svalue(payload);
+            } 
+            else if ((sep == NULL) || strlen(sep) == 0)
+            {
+                (void)apply_master_ob(M_INCOMING_GMCP, 2);  
+            }
+
+            exception = NULL;
         }
     } 
 }
