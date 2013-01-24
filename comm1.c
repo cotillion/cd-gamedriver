@@ -1125,21 +1125,19 @@ gmcp_input(struct interactive *ip, char *cp)
         sep++;
     } 
 
-    printf("Received GMCP for %s - %s\n", cp, sep);
-
     if (ip->ob)
     {
         push_object(ip->ob);
         push_string(cp, STRING_CSTRING);
 
-        struct svalue *payload = json2val(sep);
+        struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
         if (payload != NULL) 
         {
             push_svalue(payload);
             (void)apply_master_ob(M_INCOMING_GMCP, 3);
             free_svalue(payload);
         } 
-        else
+        else if ((sep == NULL) || strlen(sep) == 0)
         {
             (void)apply_master_ob(M_INCOMING_GMCP, 2);  
         }

@@ -19,6 +19,7 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <json/json.h>
+#include <json/bits.h>
 #include <string.h>
 
 #include "simulate.h"
@@ -242,9 +243,9 @@ struct svalue *
 json2val(const char *cp)
 {
     struct svalue *ret;
-    json_object *jobj = json_tokener_parse(cp);
 
-    if (jobj == NULL) 
+    json_object *jobj = json_tokener_parse(cp);
+    if ((jobj == NULL) || is_error(jobj))
     {
         printf("Unable to parse JSON: %s\n", cp);
         return NULL;
