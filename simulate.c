@@ -1009,6 +1009,16 @@ input_to(struct closure *fun, int flag)
     if (!command_giver || command_giver->flags & O_DESTRUCTED)
 	return 0;
 
+    if(!fun)
+    {
+        if (command_giver->interactive->input_to != NULL) {
+            free_closure(command_giver->interactive->input_to->funct);
+            free_sentence(command_giver->interactive->input_to);
+            command_giver->interactive->input_to = 0;
+        }
+        return 0;
+    }
+
     s = alloc_sentence();
     if (set_call(command_giver, s, flag)) {
 	s->funct = fun;

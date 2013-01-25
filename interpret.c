@@ -5965,6 +5965,12 @@ f_input_to(int num_arg)
     int r;
     int flag = 1;
 
+    if (num_arg == 0) {
+        r = input_to(NULL, flag);
+        push_number(r);
+        return;
+    }
+
     if (arg[0].type == T_FUNCTION) {
 	if (num_arg > 2)
 	    error("Bad # of args to input_to()\n");

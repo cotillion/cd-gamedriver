@@ -1141,6 +1141,11 @@ gmcp_input(struct interactive *ip, char *cp)
             push_object(ip->ob);
             push_string(cp, STRING_CSTRING);
 
+            command_giver = ip->ob;
+            current_object = NULL;
+            current_interactive = command_giver;
+            previous_ob = command_giver;
+
             struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
             if (payload != NULL) 
             {
