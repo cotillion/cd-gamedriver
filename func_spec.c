@@ -69,7 +69,7 @@ mixed   *get_alarm(int);
 mixed   *get_all_alarms();
 string	*get_dir(string);
 string	implode(int|string *, string);
-void	input_to(string|function|void, ...);
+void	input_to(string|function, ...);
 int	intp(mixed);
 float	itof(int);
 int     last_reference_time();
