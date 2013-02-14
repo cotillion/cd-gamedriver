@@ -97,6 +97,7 @@ typedef struct {
 #define	TF_SGA			0x2000
 #define TF_GMCP         0x4000
 
+
 /*
  * Telnet Input States.
  */
