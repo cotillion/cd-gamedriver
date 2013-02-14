@@ -2557,10 +2557,8 @@ f_write_socket_gmcp(int num_arg)
     const char *json;
     char *str;
 
-    printf("in efun\n");
     if (current_object->interactive)
     {
-        printf("interac\n");
         json = val2json(sp);
         str = (char *)xalloc(strlen(json) + strlen((sp - 1)->u.string) + 2);
         strcpy(str, (sp - 1)->u.string); 

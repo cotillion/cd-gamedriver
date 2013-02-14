@@ -273,6 +273,7 @@ telnet_output(telnet_t *tp, u_char *cp)
     }
 
     nq_puts(tp->t_outq, buf);
+    telnet_enabw(tp);
 
     return 0;
 }
@@ -287,7 +288,6 @@ telnet_output_gmcp(telnet_t *tp, u_char *cp)
     if (tp->t_flags & TF_GMCP)
     {
         telnet_send_sb(tp, TELOPT_GMCP, cp);
-        telnet_enabw(tp);
         return 0;
     }
     return 1;
@@ -654,6 +654,7 @@ telnet_send_sb(telnet_t *tp, u_char opt, u_char *data)
     nq_puts(nq, data);
     nq_putc(nq, IAC);
     nq_putc(nq, SE);
+    telnet_enabw(tp);
 }
 
 /*
