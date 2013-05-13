@@ -32,6 +32,9 @@
 #include "udpsvc.h"
 #include "main.h"
 #include "backend.h"
+#include "mapping.h"
+#include "json.h"
+#include "inline_svalue.h"
 
 void set_prompt (char *);
 void prepare_ipc (void);
@@ -56,7 +59,7 @@ extern int udp_port;
 udpsvc_t *udpsvc;
 #endif /* CATCH_UDP_PORT */
 
-void *new_player(void *, struct sockaddr_storage *, size_t, u_short local_port);
+void *new_player(void *, struct sockaddr_storage *, socklen_t, u_short local_port);
 
 int num_player;
 
@@ -185,6 +188,22 @@ add_message(char *fmt, ...)
     }
     else
         write_socket(buff, (struct object *)0);
+}
+
+/* 
+ * Outputs GMCP data to the client
+ */
+void
+write_gmcp(struct object *ob, char *data)
+{
+    struct interactive *ip;
+
+    if (ob == NULL || ob->flags & O_DESTRUCTED || 
+        (ip = ob->interactive) == NULL || ip->do_close)
+        return;
+
+    telnet_output_gmcp(ip->tp, (u_char *)data);
+
 }
 
 /*
@@ -530,6 +549,7 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local
 #endif
 	logon(ob);
 	current_interactive = 0;
+
 	return all_players[i];
     }
     telnet_output(tp, (u_char *)"Lpmud is full. Come back later.\n");
@@ -551,7 +571,7 @@ call_function_interactive(struct interactive *i, char *str)
     if (!legal_closure(func))
     {
 	/* Sorry, the object has selfdestructed ! */
-	free_sentence(i->input_to);
+    free_sentence(i->input_to);
 	i->input_to = 0;
 	return 0;
     }
@@ -1093,4 +1113,47 @@ interactive_input(struct interactive *ip, char *cp)
 	print_mudstatus(current_interactive->name, eval_cost, get_millitime(), get_processtime());
     }
     current_interactive = 0;
+}
+
+void 
+gmcp_input(struct interactive *ip, char *cp)
+{
+    char *sep = strchr(cp, ' ');
+    if (sep != NULL) 
+    {
+        *sep = 0;
+        sep++;
+    } 
+
+    if (ip->ob)
+    {
+        struct gdexception exception_frame;
+
+        exception_frame.e_exception = NULL;
+        exception_frame.e_catch = 0;
+
+        if (setjmp(exception_frame.e_context)) {
+            exception = exception_frame.e_exception;
+            clear_state();
+        } else {
+            exception = &exception_frame;
+
+            push_object(ip->ob);
+            push_string(cp, STRING_CSTRING);
+
+            struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
+            if (payload != NULL) 
+            {
+                push_svalue(payload);
+                (void)apply_master_ob(M_INCOMING_GMCP, 3);
+                free_svalue(payload);
+            } 
+            else if ((sep == NULL) || strlen(sep) == 0)
+            {
+                (void)apply_master_ob(M_INCOMING_GMCP, 2);  
+            }
+
+            exception = NULL;
+        }
+    } 
 }

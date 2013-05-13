@@ -31,6 +31,7 @@
 #include "simulate.h"
 #include "main.h"
 #include "sent.h"
+#include "json.h"
 
 #include "inline_eqs.h"
 #include "inline_svalue.h"
@@ -2535,19 +2536,51 @@ f_write_socket(int num_arg)
     
     if (sp->type == T_NUMBER)
     {
-	snprintf(tmpbuf, sizeof(tmpbuf), "%lld", sp->u.number);
-	if (current_object->interactive)
-	    write_socket(tmpbuf, current_object);
-	else if (current_object == master_ob)
-	    write_socket(tmpbuf, 0);
+        snprintf(tmpbuf, sizeof(tmpbuf), "%lld", sp->u.number);
+        if (current_object->interactive)
+            write_socket(tmpbuf, current_object);
+        else if (current_object == master_ob)
+            write_socket(tmpbuf, 0);
     }
     else
     {
-	if (current_object->interactive)
-	    write_socket(sp->u.string, current_object);
-	else if (current_object == master_ob)
-	    write_socket(sp->u.string, 0);
+        if (current_object->interactive)
+            write_socket(sp->u.string, current_object);
+        else if (current_object == master_ob)
+            write_socket(sp->u.string, 0);
     }
+}
+
+static void
+f_write_socket_gmcp(int num_arg)
+{
+    const char *json;
+    char *str;
+
+    if (current_object->interactive)
+    {
+        json = val2json(sp);
+        str = (char *)xalloc(strlen(json) + strlen((sp - 1)->u.string) + 2);
+        strcpy(str, (sp - 1)->u.string); 
+        strcat(str, " ");
+        strcat(str, json);
+
+        write_gmcp(current_object, (char *)str);
+        free(str);
+    }
+
+    pop_stack();
+    pop_stack();
+}
+
+static void
+f_val2json(int num_arg)
+{
+    const char *json;
+    json = val2json(sp);
+
+    pop_stack();
+    push_string((char *)json, STRING_MSTRING);
 }
 
 /* ARGSUSED */

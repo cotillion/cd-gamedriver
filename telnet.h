@@ -59,7 +59,8 @@ typedef struct {
 #define	OP_ECHO			0
 #define	OP_SGA			1
 #define	OP_CDM			2
-#define	OP_SIZE			3
+#define OP_GMCP         3 
+#define OP_SIZE         4
 
 /*
  * Telnet Control Block.
@@ -83,8 +84,8 @@ typedef struct {
  * Telnet Flags.
  */
 #define	TF_ATTACH		0x0001
-#define TF_INPUT                0x0002
-#define TF_DISCONNECT           0x0004
+#define TF_INPUT        0x0002
+#define TF_DISCONNECT   0x0004
 
 #define TF_OVFLCANQ		0x0010
 #define TF_OVFLOPTQ		0x0020
@@ -94,6 +95,8 @@ typedef struct {
 #define	TF_GA			0x0200
 #define	TF_ECHO			0x1000
 #define	TF_SGA			0x2000
+#define TF_GMCP         0x4000
+
 
 /*
  * Telnet Input States.
@@ -109,10 +112,14 @@ typedef struct {
 #define	TS_IAC_DO		8
 #define	TS_IAC_DONT		9
 
+#define TELOPT_GMCP     201
 #define	TELOPT_CDM		205
 
 void telnet_detach(telnet_t *);
 int  telnet_output(telnet_t *, u_char *);
+int  telnet_output_gmcp(telnet_t *, u_char *);
 void telnet_enable_echo(telnet_t *);
 void telnet_disable_echo(telnet_t *);
+void telnet_enable_gmcp(telnet_t *);
+void telnet_disable_gmcp(telnet_t *);
 void telnet_init(u_short);

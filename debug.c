@@ -136,6 +136,8 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 {
     static struct svalue retval;
     int dbnum, dbi, il;
+    char buff[200];
+
 
     for (dbi = -1, dbnum = 0; debc[dbnum]; dbnum++)
     {
@@ -673,7 +675,6 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	    retval.u.vec = allocate_array(argv[0].u.ob->prog->num_functions);
 	    for (il = 0; il < (int)argv[0].u.ob->prog->num_functions; il++)
 	    {
-	        char buff[200]; 
 
 	        (void)snprintf(buff, sizeof(buff), "%016lld:%020lld: %s",
 		        (long long)argv[0].u.ob->prog->functions[il].num_calls,

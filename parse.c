@@ -1983,6 +1983,11 @@ break_string(char *str, int width, struct svalue *indent)
     else
 	indlen = 0;
     
+    l = strlen(str);
+    if (l == 0) {
+        return make_mstring("");
+    }
+
     /*
      * Split with newlines
      */
