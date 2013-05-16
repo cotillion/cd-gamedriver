@@ -2554,7 +2554,7 @@ f_write_socket(int num_arg)
 static void
 f_write_socket_gmcp(int num_arg)
 {
-    const char *json;
+    char *json;
     char *str;
 
     if (current_object->interactive)
@@ -2567,6 +2567,7 @@ f_write_socket_gmcp(int num_arg)
 
         write_gmcp(current_object, (char *)str);
         free(str);
+        free(json);
     }
 
     pop_stack();
