@@ -34,6 +34,9 @@ Loading /tests/test-024.c -> Ok.
 Loading /tests/test-025.c -> Ok.
 Loading /tests/test-026.c -> Ok.
 Loading /tests/test-027.c -> *Too deep recursion
+Loading /tests/test-028.c -> Ok.
 Setting up ipc.
-Shutting down ipc...
+Listening to telnet port: 0.0.0.0:3011
 exec of hname failed.
+Listening to telnet port: :::3011
+Shutting down ipc...

@@ -32,7 +32,7 @@ fix_name(string file)
     string name;
 
     if (sscanf(file, "%s.c", name) != 1)
-	return "/tests/ " +file;
+        return "/tests/ " +file;
     return "/tests/" + name;
 }
 
@@ -54,15 +54,15 @@ preload_boot(string file)
     object ob;
 
     if (file_size(file + ".c") == -1)
-	return;
+        return;
 
     write("Loading " + file + ".c -> ");
     if (err = catch(call_other(file, "???")))
-	write(err);
+        write(err);
     else
-	write("Ok.\n");
+        write("Ok.\n");
     if (ob = find_object(file))
-	debug("destroy", ob);
+        debug("destroy", ob);
 }
 
 static void

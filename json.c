@@ -126,14 +126,18 @@ value_to_json(struct svalue *sp)
     return ret;
 }
 
-const char *
+char *
 val2json(struct svalue *sp)
 {
     json_object *json;
-    const char *str;
+    const char *ptr;
+    char *str = NULL;
 
     json = value_to_json(sp);
-    str = json_object_to_json_string(json);
+    ptr = json_object_to_json_string(json);
+    str = strdup(ptr);
+    json_object_put(json);
+
     return str;
 }
 
