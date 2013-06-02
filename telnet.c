@@ -64,10 +64,10 @@
 /*
  * Queue Sizes.
  */
-#define	TELNET_CANQ_SIZE	512
-#define	TELNET_RAWQ_SIZE	256
-#define	TELNET_OPTQ_SIZE	512
-#define	TELNET_OUTQ_SIZE	(16*1024 + 1024)
+#define	TELNET_CANQ_SIZE	(1024 * 8)
+#define	TELNET_RAWQ_SIZE    (1024 * 4)	
+#define	TELNET_OPTQ_SIZE    (1024)	
+#define	TELNET_OUTQ_SIZE	(16*1024)
 
 /*
  * Output Queue Flow Control Parameters.
@@ -102,6 +102,8 @@
 #define	LF			10
 #define	CR			13
 #define	DEL			127
+
+#define TRUNCATED   "*** Truncated. ***\r\n" 
 
 static void telnet_interactive(void *vp);
 static void telnet_input(telnet_t *tp);
@@ -265,7 +267,7 @@ telnet_output(telnet_t *tp, u_char *cp)
             tp->t_flags |= TF_OVFLOUTQ;
             buf[TELNET_OUTQ_HIWAT - nq_len(tp->t_outq)] = '\0';
             nq_puts(tp->t_outq, buf);
-            nq_puts(tp->t_outq, (u_char *)"*** Truncated. ***\r\n");
+            nq_puts(tp->t_outq, (u_char *)TRUNCATED);
 
             telnet_enabw(tp);
             return 1;
@@ -392,10 +394,15 @@ telnet_interactive(void *vp)
     }
     if (tp->t_flags & TF_INPUT) {
         tp->t_flags &= ~TF_INPUT;
-        if (nq_full(tp->t_canq))
-            cp = "";
-        else
+
+        cp = (char *)nq_rptr(tp->t_canq);
+        if (nq_full(tp->t_canq) && 
+            (nq_size(tp->t_canq) > (strlen(TRUNCATED) + 1))) {
+
+            cp += nq_size(tp->t_canq) - (strlen(TRUNCATED) + 1);
+            strcpy(cp, TRUNCATED);
             cp = (char *)nq_rptr(tp->t_canq);
+        }
         interactive_input(tp->t_ip, cp);
         nq_init(tp->t_canq);
     }
