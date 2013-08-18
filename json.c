@@ -18,8 +18,8 @@
  */
 #include <setjmp.h>
 #include <stdio.h>
-#include <json/json.h>
-#include <json/bits.h>
+#include <json-c/json.h>
+#include <json-c/bits.h>
 #include <string.h>
 
 #include "simulate.h"

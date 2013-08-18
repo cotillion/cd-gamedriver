@@ -37,7 +37,7 @@ CFLAGS=  $(SYS_CFLAGS) $(SYS_OPT) $(WARN) $(DEBUG)
 #
 # Add extra libraries here.
 #
-LIBS= -lm -ljson $(SYS_LIBS)
+LIBS= -lm -ljson-c $(SYS_LIBS)
 MFLAGS = "BINDIR=$(BINDIR)" "MUD_LIB=$(MUD_LIB)"
 
 all: driver
