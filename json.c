@@ -18,8 +18,7 @@
  */
 #include <setjmp.h>
 #include <stdio.h>
-#include <json-c/json.h>
-#include <json-c/bits.h>
+#include <json.h>
 #include <string.h>
 
 #include "simulate.h"
@@ -98,7 +97,7 @@ value_to_json(struct svalue *sp)
     if (++depth > MAX_DEPTH)
     {
         depth = 0;
-        error("Too deep recursion");
+        error("Too deep recursion\n");
     }
 
     switch(sp->type) {
@@ -118,7 +117,8 @@ value_to_json(struct svalue *sp)
             ret = float_to_json(sp);
             break;
         default:
-            error("Unsupported data type in val2json");
+            depth = 0;
+            error("Unsupported data type in val2json (%d)\n", sp->type);
             break;
     }
 

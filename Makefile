@@ -37,8 +37,11 @@ CFLAGS=  $(SYS_CFLAGS) $(SYS_OPT) $(WARN) $(DEBUG)
 #
 # Add extra libraries here.
 #
-LIBS= -lm -ljson-c $(SYS_LIBS)
+LIBS= -lm $(SYS_LIBS)
 MFLAGS = "BINDIR=$(BINDIR)" "MUD_LIB=$(MUD_LIB)"
+
+CFLAGS += $(shell pkg-config --cflags json)
+LIBS += $(shell pkg-config --libs json)
 
 all: driver
 
