@@ -2180,21 +2180,23 @@ fatal(char *fmt, ...)
     in_fatal = 1;
 
     va_start(argp, fmt);
-    (void)vfprintf(stderr, fmt, argp);
-
-    (void)fflush(stderr);
-    if (current_object)
-	(void) fprintf(stderr, "Current object was %s\n",
-		      current_object->name);
-    (void)vsprintf(buf, fmt, argp);
-    /* LINTED: expression has null effect */
+    vfprintf(stderr, fmt, argp);
     va_end(argp);
+    fflush(stderr);
+
+    if (current_object)
+	fprintf(stderr, "Current object was %s\n", current_object->name);
+
+    va_start(argp, fmt);
+    vsprintf(buf, fmt, argp);
+    va_end(argp);
+
     debug_message("%s", buf);
 
     if (current_object)
 	debug_message("Current object was %s\n", current_object->name);
     debug_message("Dump of variables:\n");
-    (void) dump_trace(1);
+    dump_trace(1);
     abort();
 }
 
