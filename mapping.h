@@ -3,20 +3,20 @@
 struct apair {
     struct apair *next;		/* next pair in hashed at this value */
     struct svalue arg, val;	/* index and value for this element */
-    short hashval;		/* cashed hash value */
+    unsigned int hashval;	/* cached hash value */
 };
 
 struct mapping {
-    short size;			/* current size (no of pairs entries) */
+    unsigned int size;	        /* current size (no of pairs entries) */
     unsigned int ref;		/* reference count */
-    short card;			/* number of elements in the mapping */
-    short mcard;		/* extend when card exceeds this value */
+    unsigned int card;			/* number of elements in the mapping */
+    unsigned int mcard;		/* extend when card exceeds this value */
     struct apair **pairs;	/* array of lists of elements */
 };    
 
 void free_mapping (struct mapping *);
-struct mapping *allocate_map (short);
-short card_mapping (struct mapping *);
+struct mapping *allocate_map (unsigned int);
+unsigned int card_mapping (struct mapping *);
 struct svalue * get_map_lvalue (struct mapping *, struct svalue *, int);
 struct vector * map_domain (struct mapping *);
 struct vector * map_codomain (struct mapping *);

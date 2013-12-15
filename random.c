@@ -29,7 +29,7 @@ unsigned int JKISS()
 } 
 
 unsigned int 
-devrand(void) 
+secure_rand(void) 
 { 
     int fn; 
     unsigned int r; 
@@ -49,13 +49,13 @@ devrand(void)
 void 
 init_random() 
 { 
-    x = devrand(); 
-    while (!(y = devrand())); /* y must not be zero! */ 
-    z = devrand(); 
+    x = secure_rand(); 
+    while (!(y = secure_rand())); /* y must not be zero! */ 
+    z = secure_rand(); 
 
     /* We don’t really need to set c as well but let's anyway… */ 
     /* NOTE: offset c by 1 to avoid z=c=0 */ 
-    c = devrand() % 698769068 + 1; /* Should be less than 698769069 */ 
+    c = secure_rand() % 698769068 + 1; /* Should be less than 698769069 */ 
 } 
 
 /* Called when random requires a new seed, clear_random_seed must be called

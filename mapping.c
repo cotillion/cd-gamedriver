@@ -59,7 +59,7 @@ free_apairs(struct apair *p)
 void
 free_mapping(struct mapping *m)
 {
-    short i;
+    unsigned int i;
 
     if (!m->ref || --m->ref > 0)
 	return;
@@ -73,11 +73,11 @@ free_mapping(struct mapping *m)
 }
 
 struct mapping *
-allocate_map(short msize)
+allocate_map(unsigned int msize)
 {
     struct mapping *m;
     unsigned u;
-    short size;
+    unsigned int size;
 
     for(size = 1, u = (msize*100)/FILL_FACTOR; u && size < MAX_MAPPING_SIZE; size <<= 1, u >>= 1)
 	;
@@ -95,14 +95,14 @@ allocate_map(short msize)
     return m;
 }
 
-short
+unsigned int
 card_mapping(struct mapping *m)
 {
     return m->card;
 }
 
 static INLINE struct apair *
-newpair(struct apair *n, struct svalue *k, struct svalue *v, short h)
+newpair(struct apair *n, struct svalue *k, struct svalue *v, unsigned int h)
 {
     struct apair *p = (struct apair *)xalloc(sizeof(struct apair));
 
@@ -114,43 +114,43 @@ newpair(struct apair *n, struct svalue *k, struct svalue *v, short h)
     return p;
 }
 
-static INLINE short
+static INLINE unsigned int 
 hashsvalue(struct svalue *v)
 {
     switch(v->type) {
-    case T_NUMBER:
-	return (unsigned short)v->u.number;
-    case T_POINTER:
-	return (unsigned short)((unsigned long)v->u.vec >> 4);
-    case T_MAPPING:
-	return (unsigned short)((unsigned long)v->u.map >> 4);
-    case T_STRING:
-	return hashstr16(v->u.string, 20);
-    case T_OBJECT:
-	return (unsigned short)((unsigned long)v->u.ob >> 4);
-    case T_FLOAT:
-	return (unsigned short)v->u.number;
-    default:
-        return 0;
+        case T_NUMBER:
+            return (unsigned int)v->u.number;
+        case T_POINTER:
+            return ((unsigned long)v->u.vec >> 4);
+        case T_MAPPING:
+            return ((unsigned long)v->u.map >> 4);
+        case T_STRING:
+            return hash_string(v->u.string);
+        case T_OBJECT:
+            return ((unsigned long)v->u.ob >> 4);
+        case T_FLOAT:
+            return (unsigned long)v->u.number;
+        default:
+            return 0;
     }
 }
 
 struct svalue *
 get_map_lvalue(struct mapping *m, struct svalue *k, int c)
 {
-    short h, h16;
+    unsigned int hash, h;
     struct apair *p;
 
-    h16 = hashsvalue(k);
-    h = h16 & (m->size-1);
+    hash = hashsvalue(k);
+    h = hash % m->size;
 
-    for(p = m->pairs[h]; p; p = p->next) {
-	if (p->hashval == h16 && equal_svalue(k, &p->arg))
+    for (p = m->pairs[h]; p; p = p->next) {
+	if (p->hashval == hash && equal_svalue(k, &p->arg))
 	    break;
     }
     if (!p) {
 	if (c) {
-	    m->pairs[h] = p = newpair(m->pairs[h], k, &const0, h16);
+	    m->pairs[h] = p = newpair(m->pairs[h], k, &const0, hash);
 	    if (++m->card > m->mcard) {
 		/* We need to extend the hash table */
 		rehash_map(m);
@@ -168,7 +168,7 @@ map_domain(m)
 struct mapping *m;
 {
     struct vector *d;
-    short cnt, i, k;
+    unsigned int cnt, i, k;
     struct apair *p;
     
     cnt = m->card;
@@ -183,7 +183,7 @@ struct vector *
 map_codomain(struct mapping *m)
 {
     struct vector *d;
-    short cnt, i, k;
+    unsigned int cnt, i, k;
     struct apair *p;
     
     cnt = m->card;
@@ -199,7 +199,7 @@ make_mapping(struct vector *ind, struct vector *val)
 {
     struct mapping *m;
     struct svalue tmp;
-    short i, max;
+    unsigned int i, max;
 
     tmp.type = T_NUMBER;
 #ifdef PURIFY
@@ -240,9 +240,9 @@ add_mapping(struct mapping *m1, struct mapping *m2)
 {
     struct mapping *retm;
     struct apair *p;
-    short i;
+    unsigned int i;
 
-    retm = allocate_map((short)(m1->card + m2->card));
+    retm = allocate_map(m1->card + m2->card);
 
     for (i = 0 ; i < m1->size ; i++)
     {
@@ -261,7 +261,7 @@ void
 addto_mapping(struct mapping *m1, struct mapping *m2)
 {
     struct apair *p;
-    short i;
+    unsigned int i;
 
     for (i = 0 ; i < m2->size ; i++)
     {
@@ -274,9 +274,9 @@ void
 remove_from_mapping(struct mapping *m, struct svalue *val)
 {
     struct apair **p;
-    short h;
+    unsigned int h;
 
-    h = hashsvalue(val) & (m->size-1);
+    h = hashsvalue(val) % m->size;
 
     for (p = &m->pairs[h]; *p; p = &(*p)->next)
       if (equal_svalue(val, &(*p)->arg)) {
@@ -296,7 +296,7 @@ remove_mapping(struct mapping *m, struct svalue *val)
 {
     struct mapping *retm;
     struct apair *p;
-    short i, h;
+    unsigned int i, h;
 
     retm = allocate_map(m->size);
     h = hashsvalue(val) & (m->size-1);
@@ -321,12 +321,12 @@ static void
 rehash_map(struct mapping *map)
 {
     register struct apair **pairs, *next, *ptr;
-    short i, hval;
+    unsigned int i, hval;
     unsigned int nsize;
 
     nsize = map->size * 2;
     if (nsize > MAX_MAPPING_SIZE) {
-	error("Warning, too large mapping.\n");
+	error("Too large mapping.\n");
 	return;
     }
 
@@ -355,7 +355,7 @@ copy_mapping(struct mapping *m)
 {
     struct mapping *cm;
     struct apair *pair;
-    short i;
+    unsigned int i;
     
     num_mappings++;
     cm = (struct mapping *) xalloc(sizeof(struct mapping));
@@ -382,7 +382,7 @@ map_map(struct mapping *map, struct closure *fun)
     extern void push_mapping(struct mapping *, bool_t);
     struct mapping *r;
     struct apair *p;
-    short i;
+    unsigned int i;
 
     r = copy_mapping(map);	/* copy entire mapping */
     push_mapping(r, 0);
@@ -410,7 +410,7 @@ filter_map(struct mapping *map, struct closure *fun)
 {
     struct mapping *r;
     struct apair **p;
-    short i;
+    unsigned int i;
 
     r = copy_mapping(map);
     for (i = 0; i < r->size; i++) {

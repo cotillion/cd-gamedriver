@@ -20,24 +20,15 @@
 /*
  * hash table - list of pointers to heads of object chains.
  * Each object in chain has a pointer, next_hash, to the next object.
- * OTABLE_SIZE is in config.h, and should be a prime, probably between
- * 100 and 1000.  You can have a quite small table and still get very good
- * performance!  Our database is 8Meg; we use about 500.
+ * OTABLE_SIZE is in config.h
  */
 
 static struct object *(obj_table[OTABLE_SIZE]);
 
 /*
- * Object hash function, ripped off from stralloc.c.
+ * Object hash function
  */
-
-
-#if BITNUM(OTABLE_SIZE) == 1
-/* This one only works for even power-of-2 table size, but is faster */
-#define ObjHash(s) (hashstr16((s), 100) & ((OTABLE_SIZE)-1))
-#else
-#define ObjHash(s) (hashstr((s), 100, OTABLE_SIZE))
-#endif
+#define ObjHash(s) (hash_string(s) % (OTABLE_SIZE))
 
 /*
  * Looks for obj in table, moves it to head.
@@ -49,8 +40,7 @@ static struct object *
 find_obj_n(char *s)
 {
     struct object * curr, *prev;
-    
-    int h = ObjHash(s);
+    unsigned int h = ObjHash(s);
     
     curr = obj_table[h];
     prev = 0;
@@ -89,7 +79,7 @@ enter_object_hash(struct object *ob)
     struct object *s, *sibling;
     int h = ObjHash(ob->name);
 
-   /* Add to object list */
+    /* Add to object list */
     if (ob->flags & O_CLONE && ob->prog->clones) {
 	sibling = ob->prog->clones;
 	ob->next_all = sibling;

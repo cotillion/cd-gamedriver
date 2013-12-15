@@ -18,7 +18,7 @@
  */
 #include <setjmp.h>
 #include <stdio.h>
-#include <json.h>
+#include <json-c/json.h>
 #include <string.h>
 
 #include "simulate.h"

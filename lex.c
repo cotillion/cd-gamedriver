@@ -1895,7 +1895,7 @@ add_input(char *p)
 
 #define DEFHASH 1999
 struct defn *defns[DEFHASH];
-#define defhash(s) hashstr(s, 10, DEFHASH)
+#define defhash(s) (hash_string(s) % DEFHASH)
 
 void
 add_pre_define(char *define)
@@ -1913,7 +1913,7 @@ static void
 add_define(char *name, int nargs, char *exps)
 {
     struct defn *p;
-    int h;
+    unsigned int h;
 
     if ((p = lookup_define(name)) != NULL)
     {

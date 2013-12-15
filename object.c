@@ -999,13 +999,7 @@ static struct object *hashed_living[LIVING_HASH_SIZE];
 
 static int num_living_names, num_searches = 1, search_length = 1;
 
-#if BITNUM(LIVING_HASH_SIZE) == 1
-/* This one only works for even power-of-2 table size, but is faster */
-#define LivHash(s) (hashstr16((s), 100) & ((LIVING_HASH_SIZE)-1))
-#else
-#define LivHash(s) (hashstr((s), 100, LIVING_HASH_SIZE))
-#endif
-
+#define LivHash(s) (hash_string(s) % (LIVING_HASH_SIZE))
 
 struct object *
 find_living_object(char *str)

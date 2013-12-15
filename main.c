@@ -23,6 +23,7 @@
 #include "main.h"
 #include "backend.h"
 #include "random.h"
+#include "hash.h"
 
 extern int current_line;
 
@@ -196,6 +197,7 @@ main(int argc, char **argv)
     init_num_args();
     init_machine();
     init_cfuns();
+    init_hash();
 
     /*
      * Set up the signal handling.

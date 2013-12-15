@@ -1,2 +1,2 @@
-int hashstr16(const char *s, int maxn);
-int hashstr(const char *s, int maxn, int hashs);
+void init_hash();
+unsigned long long hash_string(const char *s);

@@ -213,12 +213,12 @@
 /*
  * This is the maximum array size allowed for one single array.
  */
-#define MAX_ARRAY_SIZE 30000
+#define MAX_ARRAY_SIZE 131072 
 
 /*
  * Maximum size of a mapping.
  */
-#define MAX_MAPPING_SIZE 30000
+#define MAX_MAPPING_SIZE 131072 
 
 /*
  * Some LPmuds on sun4 and sparcstations have had problems with the
@@ -265,7 +265,7 @@
  * need more, and you will still get good results with a smaller table.
  * THIS IS NOT IMPLEMENTED YET.
  */
-#define	HTABLE_SIZE	0x8000	/* there is a table of some primes too */
+#define	HTABLE_SIZE 262144  
 
 /*
  * Object hash table size.
@@ -273,7 +273,7 @@
  * the number of objects in a game, as the distribution of accesses to
  * objects is somewhat more uniform than that of strings.
  */
-#define OTABLE_SIZE	0x40000	/* we have several thousand obs usually */
+#define OTABLE_SIZE	262144	/* we have several thousand obs usually */
 
 /*
  * Define SYSV if you are running system V with a lower release level than
@@ -362,31 +362,6 @@
  * Rereading the file is done by calling debug("update snoops");
  */
 #define SUPER_SNOOP
-
-/************************************************************************/
-/*	END OF CONFIG -- DO NOT ALTER ANYTHING BELOW THIS LINE		*/
-/************************************************************************/
-
-/*
- * some generic large primes used by various hash functions in different files
- * You can alter these if you know of a better set of numbers!  Be sure
- * they are primes...
- */
-
-#define	P1		701	/* 3 large, different primes */
-#define	P2		14009	/* There's a file of them here somewhere :-) */
-#define	P3		54001
-
-/* Calculate the number of set bits in the argument n 
-   (note the octal numbers) */
-#define BITNUM(n) (( \
-         ((n)&010101010101)+\
-        (((n)&020202020202)>>1)+\
-        (((n)&000404040404)>>2)+\
-        (((n)&001010101010)>>3)+\
-        (((n)&002020202020)>>4)+\
-        (((n)&004040404040)>>5)\
-) % 63)
 
 #endif
 

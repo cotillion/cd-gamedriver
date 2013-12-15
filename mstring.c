@@ -156,7 +156,7 @@ reference_sstring(char *cp)
 char *
 find_sstring(char *cp)
 {
-    unsigned short hash;
+    unsigned int hash;
     char *xp;
 
     hash = HASH_SSTRING(cp);
@@ -192,7 +192,7 @@ char *
 make_sstring(const char *cp)
 {
     size_t len;
-    unsigned short hash;
+    unsigned int hash;
     char *xp;
 
     hash = HASH_SSTRING(cp);

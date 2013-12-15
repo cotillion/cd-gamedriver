@@ -69,7 +69,7 @@ struct sstring_hdr {
 	char	*next;
 	u_int	length;
 	u_short	count;
-	u_short	hash;
+	unsigned int	hash;
 };
 
 #define	sstring_header \
@@ -104,7 +104,7 @@ char *make_sstring(const char *);
 void free_sstring(char *);
 char *find_sstring(char *);
 
-#define	HASH_SSTRING(cp)	(hashstr16((cp), 64) % HTABLE_SIZE)
+#define	HASH_SSTRING(cp)	(hash_string(cp) % HTABLE_SIZE)
 
 #ifdef DEBUG
 void dump_sstrings(void);

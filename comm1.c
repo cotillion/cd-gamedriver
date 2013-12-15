@@ -35,6 +35,7 @@
 #include "mapping.h"
 #include "json.h"
 #include "inline_svalue.h"
+#include "comm1.h"
 
 void set_prompt (char *);
 void prepare_ipc (void);
@@ -154,7 +155,7 @@ void write_socket(char *, struct object *);
 /*VARARGS1*/
 
 void
-add_message2(struct object *ob, char *fmt, ...)
+add_message2(struct object *ob, char *fmt, ...) 
 {
     char buff[10000];
     va_list argp;
