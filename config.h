@@ -7,12 +7,6 @@
 #define __lpc_config_h_
 
 /*
- * Pick one of these as your random number generator.
- */
-#undef RANDOM
-#define DRAND48
-
-/*
  * If you want driver support for word-wrapped output enable this.
  */
 #define WORD_WRAP

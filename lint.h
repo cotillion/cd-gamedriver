@@ -150,7 +150,6 @@ void init_machine (void);
 void reset_machine (void);
 void clear_state (void);
 void preload_objects (int);
-long long random_number (long long, int, char *);
 int replace_interactive (struct object *ob, struct object *obf, char *);
 void set_current_time (void);
 char *time_string (time_t);

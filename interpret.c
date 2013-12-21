@@ -32,6 +32,7 @@
 #include "main.h"
 #include "sent.h"
 #include "json.h"
+#include "random.h"
 
 #include "inline_eqs.h"
 #include "inline_svalue.h"
@@ -1895,16 +1896,16 @@ f_fact(int num_arg)
 static void
 f_rnd(int num_arg)
 {
-    extern double random_float(int, char *);
-
     if (num_arg > 0)
     {
-	long long seed = sp->u.number;
-	pop_stack();
-	push_float(random_float(sizeof(seed), (char *)&seed));
+        long long seed = sp->u.number;
+        pop_stack();
+        set_random_seed(seed);
+        push_float(random_double());
+        clear_random_seed();
     }
     else
-	push_float(random_float(0, NULL));
+        push_float(random_double());
 }
 
 /* ARGSUSED */
@@ -1912,24 +1913,23 @@ static void
 f_nrnd(int num_arg)
 {
     double x1, x2, w, m = 0.0, s = 1.0;
-    extern double random_float(int, char *);
 
     switch (num_arg)
     {
-    case 2:
-	s = sp->u.real;
-	sp--;
+        case 2:
+            s = sp->u.real;
+            sp--;
 
-    case 1:
-	m = sp->u.real;
-	sp--;
+        case 1:
+            m = sp->u.real;
+            sp--;
     }
 
     do
     {
-	x1 = 2.0 * random_float(0, NULL) - 1.0;
-	x2 = 2.0 * random_float(0, NULL) - 1.0;
-	w = (x1 * x1) + (x2 * x2);
+        x1 = 2.0 * random_double() - 1.0;
+        x2 = 2.0 * random_double() - 1.0;
+        w = (x1 * x1) + (x2 * x2);
     }
     while (w >= 1.0 || w == 0.0);
 
@@ -4731,7 +4731,7 @@ build_salt(int length)
     
     str = xalloc(length + 1);    
     for (i = 0; i < length; i++)
-        str[i] = choise[random_number((int)strlen(choise), 0, NULL)];
+        str[i] = choise[random_number((int)strlen(choise))];
 
     if (length > 0)
         str[length] = '\0';
@@ -4796,12 +4796,14 @@ f_random(int num_arg)
 
     if (num_arg > 1)
     {
-	seed = arg[1].u.number;
-	pop_stack();
-	sp->u.number = random_number(arg[0].u.number, sizeof(seed), (char *)&seed);
+        seed = arg[1].u.number;
+        pop_stack();
+        set_random_seed(seed);
+        sp->u.number = random_number(arg[0].u.number);
+        clear_random_seed();
     }
     else
-	sp->u.number = random_number(arg[0].u.number, 0, NULL);
+        sp->u.number = random_number(arg[0].u.number);
 }
 
 /* ARGSUSED */

@@ -22,6 +22,7 @@
 #include "simulate.h"
 #include "main.h"
 #include "backend.h"
+#include "random.h"
 
 extern int current_line;
 
@@ -180,23 +181,16 @@ main(int argc, char **argv)
 	exit(1);
     }
     set_current_time();
+
 #ifdef PROFILE_LPC
     set_profile_timebase(60.0); /* One minute */
 #endif
 
-#ifdef DRAND48
-    srand48((long)current_time);
-#else
-#ifdef RANDOM
-    srandom(current_time);
-#else
-#error No random generator specified!\n
-#endif /* RANDOM */
-#endif /* DRAND48 */
-
 #if RESERVED_SIZE > 0
     reserved_area = malloc(RESERVED_SIZE);
 #endif
+
+    init_random();
     init_tasks();
     query_load_av();
     init_num_args();
