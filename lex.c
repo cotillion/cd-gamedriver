@@ -1,6 +1,8 @@
+/* vim: set ts=8 : */
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -212,16 +214,22 @@ gobble(int c)
 }
 
 static void
-lexerror(char *s)
+lexerror(char *fmt, ...)
 {
-    yyerror(s);
+    char buffer[1024];
+    va_list ap; 
+
+    va_start(ap, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, ap);
+    yyerror(buffer);
+    va_end(ap);
     lex_fatal++;
 }
 
 static void
 lexwarning(char *str)
 {
-    (void)fprintf(stderr, "%s: Warning: %s line %d\n", current_file, str,
+    (void)fprintf(stderr, "/%s: Warning: %s line %d\n", current_file, str,
           current_line);
     (void)fflush(stderr);
     smart_log(current_file, current_line, str);
@@ -236,59 +244,59 @@ skip_to(char *token, char *atoken)
 
     for (nest = 0;;)
     {
-    c = mygetc();
-    if (c == '#')
-    {
-        do
+        c = mygetc();
+        if (c == '#')
         {
-	    c = mygetc();
-        } while (isspace(c));
-        for (p = b; c != '\n' && c != EOF; )
-        {
-	    if (p < b+sizeof b-1)
-		*p++ = c;
-	    c = mygetc();
+            do
+            {
+                c = mygetc();
+            } while (isspace(c));
+            for (p = b; c != '\n' && c != EOF; )
+            {
+                if (p < b+sizeof b-1)
+                    *p++ = c;
+                c = mygetc();
+            }
+            *p++ = 0;
+            for (p = b; *p && !isspace(*p); p++)
+                ;
+            *p = 0;
+            /*(void)fprintf(stderr, "skip checks %s\n", b);*/
+            if (strcmp(b, "if") == 0 || strcmp(b, "ifdef") == 0 ||
+                strcmp(b, "ifndef") == 0)
+            {
+                nest++;
+            }
+            else if (nest > 0)
+            {
+                if (strcmp(b, "endif") == 0)
+                    nest--;
+            }
+            else
+            {
+                if (strcmp(b, token) == 0)
+                    return 1;
+                else if (atoken && strcmp(b, atoken) == 0)
+                    return 0;
+            }
         }
-        *p++ = 0;
-        for (p = b; *p && !isspace(*p); p++)
-	    ;
-        *p = 0;
-	/*(void)fprintf(stderr, "skip checks %s\n", b);*/
-        if (strcmp(b, "if") == 0 || strcmp(b, "ifdef") == 0 ||
-	    strcmp(b, "ifndef") == 0)
-	{
-	    nest++;
-        }
-        else if (nest > 0)
+        else 
         {
-	    if (strcmp(b, "endif") == 0)
-		nest--;
+            /*(void)fprintf(stderr, "skipping (%d) %c", c, c);*/
+            while (c != '\n' && c != EOF) 
+            {
+                c = mygetc();
+                /*(void)fprintf(stderr, "%c", c);*/
+            } 
+            if (c == EOF)
+            {
+                lexerror("Unexpected end of file while skipping");
+                return 1;
+            }
         }
-        else
-        {
-	    if (strcmp(b, token) == 0)
-		return 1;
-	    else if (atoken && strcmp(b, atoken) == 0)
-		return 0;
-        }
-    }
-    else 
-    {
-        /*(void)fprintf(stderr, "skipping (%d) %c", c, c);*/
-	while (c != '\n' && c != EOF) 
-        {
-	    c = mygetc();
-	    /*(void)fprintf(stderr, "%c", c);*/
-        } 
-        if (c == EOF)
-        {
-	    lexerror("Unexpected end of file while skipping");
-	    return 1;
-        }
-    }
-    store_line_number_info(current_incfile, current_line);
-    current_line++;
-    total_lines++;
+        store_line_number_info(current_incfile, current_line);
+        current_line++;
+        total_lines++;
     }
 }
 
@@ -377,7 +385,7 @@ inc_try(char *buf)
 
 /* Find and open a file that has been specified in a "#include <file>" */
 static INLINE FILE *
-inc_open(char *buf, char *name)
+inc_open(char *buf, size_t len, char *name)
 {
     int i;
     FILE *f;
@@ -396,7 +404,7 @@ inc_open(char *buf, char *name)
      */
     for (i = 0; i < inc_list_size; i++) 
     {
-        (void)sprintf(buf, "%s%s", inc_list[i], name);
+        (void)snprintf(buf, len, "%s%s", inc_list[i], name);
 	if ((f = inc_try(buf)) != NULL)
 	    return f;
     }
@@ -447,12 +455,12 @@ handle_include(char *name, int ignore_errors)
     }
     *p = 0;
     
-    if ((f = inc_open(buf, name)) == NULL)
+    if ((f = inc_open(buf, sizeof(buf), name)) == NULL)
     {
         if (!ignore_errors) {
-	    (void)sprintf(buf, "Cannot #include %s\n", name);
-	    lexerror(buf);
+	    lexerror("Cannot #include %s\n", name);
         }
+
         return 0;
     }
 
@@ -1266,8 +1274,9 @@ yylex1(void)
     }
   badlex:
     {
-	char buff[100]; (void)sprintf(buff, "Illegal character (hex %02x) '%c'", c, c);
-	lexerror(buff); return ' '; }
+	lexerror("Illegal character (hex %02x) '%c'", c, c);
+        return ' '; 
+    }
 }
 
 int
@@ -1467,7 +1476,7 @@ ltoa(long long intval)
 {
     static char buffer[25];
 
-    sprintf(buffer, "%lld", intval);
+    snprintf(buffer, sizeof(buffer), "%lld", intval);
     return buffer;
 }
 
@@ -1667,7 +1676,7 @@ get_f_name(int n)
     else
     {
 	static char buf[30];
-	(void)sprintf(buf, "<OTHER %d>", n);
+	(void)snprintf(buf, sizeof(buf), "<OTHER %d>", n);
 	return buf;
     }
 }
@@ -1910,9 +1919,7 @@ add_define(char *name, int nargs, char *exps)
     {
 	if (nargs != p->nargs || strcmp(exps, p->exps) != 0)
 	{
-	    char buf[200+NSIZE];
-	    (void)sprintf(buf, "Redefinition of #define %s", name);
-	    lexerror(buf);
+	    lexerror("Redefinition of #define %s", name);
 	}
 	return;
     }

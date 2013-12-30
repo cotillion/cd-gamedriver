@@ -2110,9 +2110,9 @@ yyerror(char *str)
 
     if (num_parse_error > 5)
 	return;
-    (void)fprintf(stderr, "%s: %s line %d\n", current_file, str,
-		  current_line);
-    (void)fflush(stderr);
+
+    fprintf(stderr, "/%s: %s line %d\n", current_file, str, current_line);
+    fflush(stderr);
     smart_log(current_file, current_line, str);
     num_parse_error++;
 }

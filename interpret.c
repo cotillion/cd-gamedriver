@@ -1,4 +1,4 @@
-
+/* vim: set ts=8 : */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -713,7 +713,7 @@ push_control_stack(struct object *ob, struct program *prog, struct function *fun
 		fprintf(trace_calls_file, "%.3f %.6f\n",
                         (now - last_execution) * 1000.0, now);
 	    fprintf(trace_calls_file, "%*s%s %s %s()\n",
-		    (csp - control_stack) * 4, "",
+		    (int)(csp - control_stack) * 4, "",
 		    ob->name, prog->name, funp ? funp->name : "???");
 	}
 	if (csp != control_stack) {
@@ -766,7 +766,7 @@ pop_control_stack()
 	    last_execution = now;
 	if (trace_calls) {
 	    fprintf(trace_calls_file, "%*s--- %.3f / %.3f\n",
-		    (csp - control_stack) * 4, "",
+		    (int)(csp - control_stack) * 4, "",
 		    delta * 1000.0,
 		    tot_delta * 1000.0);
             if (csp == control_stack)
@@ -974,7 +974,7 @@ push_pop_error_context (int push)
 		    update_func_profile(csp->funp, now, csp->frame_cpu, frame_tot_cpu, 1);
 		if (trace_calls) {
 		    fprintf(trace_calls_file, "%*s--- %.3f / %.3f\n",
-			    (csp - control_stack) * 4, "",
+			    (int)(csp - control_stack) * 4, "",
 			    csp->frame_cpu * 1000.0,
 			    frame_tot_cpu * 1000.0);
 		}
@@ -5565,7 +5565,7 @@ f_switch(int num_arg)
 
     int tab_head, tab_tail, tab_mid;
     unsigned int tab_start, tab_end;
-    searchval_t search_val;
+    searchval_t search_val = { 0 };
     short tab_type, is_str;
 
     tab_type = (*pc) & 0xff;
@@ -7951,7 +7951,7 @@ reset_machine()
 	    }
 	    if (trace_calls) {
 		fprintf(trace_calls_file, "%*s--- %.3f / %.3f\n",
-			(csp - control_stack) * 4, "",
+			(int)(csp - control_stack) * 4, "",
 			csp->frame_cpu * 1000.0,
 			tot_delta * 1000.0);
 	    }

@@ -246,8 +246,8 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 
     if (stat(real_name, &c_st) == -1)
     {
-	(void)fprintf(stderr, "File not found: %s\n", real_name);
-	error("File not found: %s\n", real_name);
+	(void)fprintf(stderr, "File not found: /%s\n", real_name);
+	error("File not found: /%s\n", real_name);
 	/* NOTREACHED */
     }
     /*
@@ -2408,7 +2408,7 @@ smart_log(char *error_file, int line, char *what)
 	what = "...[too long error message]...";
     if (strlen(what) + strlen(error_file) > sizeof buff - 100)
 	error_file = "...[too long filename]...";
-    (void)sprintf(buff, "%s line %d:%s\n", error_file, line, what);
+    (void)snprintf(buff, sizeof(buff), "/%s line %d:%s\n", error_file, line, what);
     *last = (struct error_msg *)xalloc(sizeof(struct error_msg));
     (*last)->next = NULL;
     (*last)->file = make_mstring(error_file);
