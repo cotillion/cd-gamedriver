@@ -350,7 +350,7 @@ debug_message(char *fmt, ...)
 	(void)gethostname(name,sizeof name);
 	if ((f = strchr(name, '.')) != NULL)
 	    *f = '\0';
-	(void)sprintf(deb,"%s.debug.log",name);
+	snprintf(deb, sizeof(deb), "%s.debug.log", name);
 	fp = fopen(deb, "w");
 	if (fp == NULL) {
 	    perror(deb);
@@ -359,10 +359,9 @@ debug_message(char *fmt, ...)
     }
 
     va_start(argp, fmt);
-    (void)vfprintf(fp, fmt, argp);
-    /* LINTED: expression has null effect */
+    vfprintf(fp, fmt, argp);
     va_end(argp);
-    (void)fflush(fp);
+    fflush(fp);
 }
 
 void 
