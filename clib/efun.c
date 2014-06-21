@@ -312,11 +312,14 @@ efun_say(struct svalue *fp)
     else
 	tp = previous_ob;
 
-    tp_svalue.type=T_OBJECT; 
+    if (tp == NULL)
+        return;
+
+    tp_svalue.type = T_OBJECT; 
 #ifdef PURIFY
     tp_svalue.string_type = -1;
 #endif
-    tp_svalue.u.ob=tp;    
+    tp_svalue.u.ob = tp;    
     
     switch (fp[1].type)
     {
