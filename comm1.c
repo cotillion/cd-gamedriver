@@ -1133,6 +1133,10 @@ gmcp_input(struct interactive *ip, char *cp)
         exception_frame.e_exception = NULL;
         exception_frame.e_catch = 0;
 
+        command_giver = ip->ob;
+        current_object = NULL;
+        current_interactive = command_giver;
+
         if (setjmp(exception_frame.e_context)) {
             exception = exception_frame.e_exception;
             clear_state();
