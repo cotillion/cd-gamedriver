@@ -341,20 +341,17 @@ hname_init(hname_callback_t callback, void (*shutdown_callback)(void *))
 
     if (pid == 0)
     {
-	(void)close(sockets[0]);
-
-	(void)dup2(sockets[1], 0);
-	(void)dup2(sockets[1], 1);
+	close(sockets[0]);
+	dup2(sockets[1], 0);
+	dup2(sockets[1], 1);
 
 	for (int i = 3; i < FD_SETSIZE; i++)
 	    (void)close(i);
 
-	strncpy(path, BINDIR, sizeof (path));
-	strncat(path, "/hname", sizeof (path));
+        snprintf(path, sizeof(path), "%s/hname", BINDIR);
+        execl(path, "hname", NULL);
 
-	(void)execl(path, "hname", NULL);
-
-        (void)fprintf(stderr, "exec of hname failed.\n");
+        fprintf(stderr, "exec of hname failed.\n");
 
 	exit(1);
     }

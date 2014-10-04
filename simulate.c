@@ -1461,8 +1461,9 @@ move_object(struct object *dest)
     struct object *save_cmd = command_giver, *item = current_object;
     struct svalue *ret;
 
-    if (item->flags & O_DESTRUCTED)
+    if (item == NULL || dest == NULL || item->flags & O_DESTRUCTED)
 	return;
+
     /* Recursive moves are not allowed. */
     for (ob = dest; ob; ob = ob->super)
 	if (ob == item) {

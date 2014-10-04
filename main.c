@@ -325,13 +325,14 @@ main(int argc, char **argv)
     return 0;
 }
 
-char *string_copy(str)
-    char *str;
+char *
+string_copy(char *str)
 {
-    char *p;
-
-    p = xalloc(strlen(str)+1);
-    (void)strcpy(p, str);
+    size_t len = strlen(str) + 1;
+    char *p = xalloc(len);
+    if (p == NULL)
+        return NULL;
+    strncpy(p, str, len);
     return p;
 }
 
