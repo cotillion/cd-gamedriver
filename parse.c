@@ -863,72 +863,78 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
     }
 
     pval = 0;
-    ch = (pat[0] == '%' ? pat[1] : pat[0]); 
 
-    switch (ch)
-    {
-    case 'i':
-	pval = item_parse(obvec, wvec, cix_in, fail);
-	break;
+    switch (pat[0]) {
+	case '%':
+	    switch (pat[1]) {
+		case 'i':
+		    pval = item_parse(obvec, wvec, cix_in, fail);
+		    break;
 
-    case 'l':
-	pval = living_parse(obvec, wvec, cix_in, fail);
-	break;
+		case 'l':
+		    pval = living_parse(obvec, wvec, cix_in, fail);
+		    break;
 
-    case 's':
-	*fail = 0; /* This is double %s in pattern, skip it */
-	break;
+		case 's':
+		    *fail = 0; /* This is double %s in pattern, skip it */
+		    break;
 
-    case 'w':
-	free_svalue(&stmp);
-	stmp.type = T_STRING;
-	stmp.string_type = STRING_SSTRING;
-	stmp.u.string = make_sstring(wvec->item[*cix_in].u.string);
-	pval = &stmp;
-	(*cix_in)++;
-	*fail = 0;
-	break;
+		case 'w':
+		    free_svalue(&stmp);
+		    stmp.type = T_STRING;
+		    stmp.string_type = STRING_SSTRING;
+		    stmp.u.string = make_sstring(wvec->item[*cix_in].u.string);
+		    pval = &stmp;
+		    (*cix_in)++;
+		    *fail = 0;
+		    break;
 
-    case 'o':
-	pval = single_parse(obvec, wvec, cix_in, fail);
-	break;
+		case 'o':
+		    pval = single_parse(obvec, wvec, cix_in, fail);
+		    break;
 
-    case 'p':
-	pval = prepos_parse(wvec, cix_in, fail, prep_param);
-	break;
+		case 'p':
+		    pval = prepos_parse(wvec, cix_in, fail, prep_param);
+		    break;
 
-    case 'd':
-	pval = number_parse(wvec, cix_in, fail);
-	break;
+		case 'd':
+		    pval = number_parse(wvec, cix_in, fail);
+		    break;
+		default:
+		     warning("Invalid pattern in parse_command: %s\n", pat);
+		     break;
+	    }
+	    break;
 
-    case '\'':
-	str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
-	if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
-	    (strlen(str1) == strlen(str2) + 1))
-	{
-	    *fail = 0;
-	    (*cix_in)++;
-	}
-	else
-	    *fail = 1;
-	break;
+	case '\'':
+	    str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
+	    if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
+		(strlen(str1) == strlen(str2) + 1))
+	    {
+		*fail = 0;
+		(*cix_in)++;
+	    }
+	    else
+		*fail = 1;
+	    break;
 
-    case '[':
-	str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
-	if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
-	    (strlen(str1) == strlen(str2) + 1))
-	{
-	    (*cix_in)++;
-	    *fail = 0;
-	}
-	else
-	{
-	    *fail = 2;
-	}
-	break;
+	case '[':
+	    str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
+	    if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
+		(strlen(str1) == strlen(str2) + 1))
+	    {
+		(*cix_in)++;
+		*fail = 0;
+	    }
+	    else
+	    {
+		*fail = 2;
+	    }
+	    break;
 
-    default:
-	*fail = 0; /* Skip invalid patterns */
+	default:
+	    warning("%s: Invalid pattern in parse_command: %s\n", current_object->name, pat);
+	    *fail = 0; /* Skip invalid patterns */
     }
     return pval;
 }
