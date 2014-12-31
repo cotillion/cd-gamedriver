@@ -77,7 +77,7 @@ clear_random_seed() {
 long long
 random_number(long long n)
 {
-    if (!n)
+    if (n <= 0)
         return 0;
     return ((unsigned long long)JKISS() * 4294967296 + (unsigned long long)JKISS()) % n;
 }
