@@ -214,7 +214,7 @@ json_to_mapping(json_object *ob)
     ret.u.map = allocate_map(10);
 
     json_object_object_foreach(ob, name, val) {
-        struct svalue key = {};
+        struct svalue key = { 0 };
         key.type = T_STRING;
         key.string_type = STRING_MSTRING;
         key.u.string = make_mstring(name);

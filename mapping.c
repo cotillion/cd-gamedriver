@@ -1,3 +1,4 @@
+/* vim: set ts=8 : */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -29,15 +30,6 @@ static void rehash_map(struct mapping *);
 #define FILL_FACTOR 250
 #define FSIZE(s) (((s)*FILL_FACTOR)/100)
 int num_mappings = 0, total_mapping_size = 0;
-
-#if 0
-void
-abortmap(char *s)
-{
-    (void)fprintf(stderr, "Mapping %s\n", s);
-    error("Mappings not implemented");
-}
-#endif
 
 int
 free_apairs(struct apair *p)
@@ -149,8 +141,13 @@ get_map_lvalue(struct mapping *m, struct svalue *k, int c)
 	    break;
     }
     if (!p) {
-	if (c) {
-	    m->pairs[h] = p = newpair(m->pairs[h], k, &const0, hash);
+        if (c) {
+            if (m->card >= MAX_MAPPING_SIZE) {
+                error("Too large mapping.\n");
+                return &const0;
+            }
+
+            m->pairs[h] = p = newpair(m->pairs[h], k, &const0, hash);
 	    if (++m->card > m->mcard) {
 		/* We need to extend the hash table */
 		rehash_map(m);
