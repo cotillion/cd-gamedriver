@@ -644,9 +644,9 @@ set_profile_timebase(long double timebase) {
 double
 current_cpu(void)
 {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return tv.tv_sec +  tv.tv_usec * 1e-6;
+    static struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + (ts.tv_nsec / 1e9);
 }
 
 void
