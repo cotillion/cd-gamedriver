@@ -32,11 +32,11 @@
 #define _NDESC_H
 typedef struct ndesc {
     int                 nd_fd;
-    int			nd_mask;
+    int		        nd_mask;
+    int                 nd_poll;
     void                (*nd_rfunc)(struct ndesc *, void *);
     void                (*nd_wfunc)(struct ndesc *, void *);
     void                (*nd_xfunc)(struct ndesc *, void *);
-    void                (*nd_cfunc)(struct ndesc *, void *);
     void                (*nd_sfunc)(struct ndesc *, void *);
     void *              nd_vp;
     struct ndesc *      nd_next;
@@ -46,15 +46,14 @@ typedef struct ndesc {
 #define	ND_R	0x01
 #define	ND_W	0x02
 #define	ND_X	0x04
-#define	ND_C	0x08
-#define	ND_MASK	0x0f
+#define	ND_MASK	0x07
 
 struct timeval;
 
 void nd_init(void);
 int nd_fd(ndesc_t *);
 void *nd_vp(ndesc_t *);
-ndesc_t *nd_attach(int, void *, void *, void *, void *, void *, void *);
+ndesc_t *nd_attach(int, void *, void *, void *, void *, void *);
 void nd_detach(ndesc_t *);
 void nd_enable(ndesc_t *, int);
 void nd_disable(ndesc_t *, int);

@@ -361,8 +361,7 @@ hname_init(hname_callback_t callback, void (*shutdown_callback)(void *))
     hp = hname_alloc();
     hp->callback = callback;
     hp->shutdown_callback = shutdown_callback;
-    hp->h_nd = nd_attach(sockets[0], hname_read, hname_write, NULL,
-			 NULL, hname_disconnect, hp);
+    hp->h_nd = nd_attach(sockets[0], hname_read, hname_write, NULL, hname_disconnect, hp);
     nd_enable(hp->h_nd, ND_R);
     return hp;
 }

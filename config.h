@@ -221,22 +221,11 @@
 #define MAX_MAPPING_SIZE 131072 
 
 /*
- * Some LPmuds on sun4 and sparcstations have had problems with the
- * call of inet_ntoa() in comm1.c.
- * If the game crash in query_ip_number() wen using inet_ntoa(),
- * then undefine the following symbol.
- * The query_ip_number() is called when doing the 'people' command
- * for example.
- * This should be defined on a NeXT
- */
-#define INET_NTOA_OK
-
-/*
  * Maximum number of players in the game.
  *
  * This is the absolute maximum, the mudlib will probably set a lower level. 
  */
-#define MAX_PLAYERS	500
+#define MAX_PLAYERS	4000
 
 /*
  * When uploading files, we want fast response; however, normal players

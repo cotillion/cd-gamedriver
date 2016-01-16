@@ -216,8 +216,7 @@ udpsvc_init(int port)
     enable_nbio(s);
     svc = xalloc(sizeof(*udpsvc));
     svc->nq = nq_alloc(UDPSVC_RAWQ_SIZE);
-    svc->nd = nd_attach(s, udpsvc_read, NULL, NULL, NULL, udpsvc_shutdown,
-			svc);
+    svc->nd = nd_attach(s, udpsvc_read, NULL, NULL, udpsvc_shutdown, svc);
     nd_enable(svc->nd, ND_R);
     return svc;
 }

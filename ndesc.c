@@ -29,10 +29,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include "config.h"
@@ -45,12 +47,12 @@
 
 static ndesc_t *nd_head;
 static ndesc_t *nd_tail;
-static int nd_max_fd;
-static fd_set nd_rfds;
-static fd_set nd_wfds;
-static fd_set nd_xfds;
-static ndesc_t *nd_ndesc[FD_SETSIZE];
-static int nd_do_gc;
+static ndesc_t **nd_ndesc;
+
+static struct pollfd *pollfds;
+static int pollfd_max = 0;
+static size_t ndesc_size = 256;
+static size_t pollfd_size = 256;
 
 /*
  * Initialize the state associated with a given file descriptor.  Clear the
@@ -60,11 +62,7 @@ static int nd_do_gc;
 static void
 nd_initfd(int fd)
 {
-    FD_CLR(fd, &nd_rfds);
-    FD_CLR(fd, &nd_wfds);
-    FD_CLR(fd, &nd_xfds);
-
-    nd_ndesc[fd] = NULL;
+   nd_ndesc[fd] = NULL;
 }
 
 /*
@@ -76,15 +74,8 @@ nd_init(void)
     nd_head = NULL;
     nd_tail = NULL;
 
-    nd_max_fd = -1;
-
-    FD_ZERO(&nd_rfds);
-    FD_ZERO(&nd_wfds);
-    FD_ZERO(&nd_xfds);
-
-    memset(nd_ndesc, 0, sizeof (nd_ndesc));
-
-    nd_do_gc = 0;
+    pollfds = malloc(sizeof(struct pollfd) * pollfd_size);
+    nd_ndesc = malloc(sizeof(ndesc_t) * ndesc_size);
 }
 
 /*
@@ -102,23 +93,6 @@ nd_append(ndesc_t *nd)
     nd_tail = nd;
 }
 
-/* Make a network descriptor the tail of the list */
-static void
-nd_set_tail(ndesc_t *nd)
-{
-    if (nd == nd_tail)
-        return;
-
-    /* Make the list circular */
-    nd_head->nd_prev = nd_tail;
-    nd_tail->nd_next = nd_head;
-    /* Move the head/tail */
-    nd_head = nd->nd_next;
-    nd_tail = nd;
-    /* Cut the circle */
-    nd_tail->nd_next = NULL;
-    nd_head->nd_prev = NULL;
-}
 /*
  * Remove a network descriptor object from the list of attached network
  * descriptors.
@@ -161,8 +135,7 @@ nd_vp(ndesc_t *nd)
  * Attach a file descriptor to the network descriptor manager.
  */
 ndesc_t *
-nd_attach(int fd, void *rfunc, void *wfunc, void *xfunc, void *cfunc,
-    void *sfunc, void *vp)
+nd_attach(int fd, void *rfunc, void *wfunc, void *xfunc, void *sfunc, void *vp)
 {
     ndesc_t *nd;
 
@@ -172,17 +145,26 @@ nd_attach(int fd, void *rfunc, void *wfunc, void *xfunc, void *cfunc,
     nd->nd_rfunc = rfunc;
     nd->nd_wfunc = wfunc;
     nd->nd_xfunc = xfunc;
-    nd->nd_cfunc = cfunc;
     nd->nd_sfunc = sfunc;
     nd->nd_vp = vp;
-
+    nd->nd_poll = -1;
     nd_append(nd);
 
-    if (nd_max_fd < fd)
-        nd_max_fd = fd;
-
+    if (fd >= ndesc_size) {
+        ndesc_size *= 2;
+        nd_ndesc = realloc(nd_ndesc, ndesc_size * sizeof(ndesc_t));
+    }
     nd_ndesc[fd] = nd;
 
+    nd->nd_poll = pollfd_max;
+    if (nd->nd_poll >= pollfd_size) {
+        pollfd_size *= 2;
+        pollfds = realloc(pollfds, pollfd_size * sizeof(struct pollfd));
+    }
+
+    pollfd_max++;
+    pollfds[nd->nd_poll].fd = fd;
+    pollfds[nd->nd_poll].events = 0;
     return nd;
 }
 
@@ -193,62 +175,16 @@ void
 nd_detach(ndesc_t *nd)
 {
     nd_remove(nd);
-
     nd_initfd(nd->nd_fd);
 
-    free(nd);
-
-    nd_do_gc++;
-}
-
-/*
- * Garbage collect file descriptors.  As file descriptors are detached
- * the network descriptor manager attempts to dup() file descriptors to
- * smaller numbers.  This reduces the number of file descriptors select()
- * has to process.
- */
-static void
-nd_gc(void)
-{
-    int fd;
-
-    nd_do_gc = 0;
-    
-    if (nd_max_fd == -1)
-        return;
-
-    for (;;)
-    {
-        while (nd_ndesc[nd_max_fd] == NULL)
-            if (--nd_max_fd == -1)
-                return;
-
-        fd = dup(nd_max_fd);
-        if (fd == -1)
-            return;
-
-        if (fd < nd_max_fd)
-        {
-            if (FD_ISSET(nd_max_fd, &nd_rfds))
-                FD_SET(fd, &nd_rfds);
-            if (FD_ISSET(nd_max_fd, &nd_wfds))
-                FD_SET(fd, &nd_wfds);
-            if (FD_ISSET(nd_max_fd, &nd_xfds))
-                FD_SET(fd, &nd_xfds);
-
-            nd_ndesc[fd] = nd_ndesc[nd_max_fd];
-            nd_ndesc[fd]->nd_fd = fd;
-
-            nd_initfd(nd_max_fd);
-
-            close(nd_max_fd);
-        }
-        else
-        {
-            close(fd);
-            return;
-        }
+    pollfd_max--;
+    if (nd->nd_poll < pollfd_max) {
+        ndesc_t *tail = nd_ndesc[pollfds[pollfd_max].fd];
+        pollfds[nd->nd_poll] = pollfds[pollfd_max];
+        tail->nd_poll = nd->nd_poll;
     }
+
+    free(nd);
 }
 
 /*
@@ -258,18 +194,14 @@ nd_gc(void)
 void
 nd_enable(ndesc_t *nd, int mask)
 {
-    int fd;
-
     nd->nd_mask |= mask & ND_MASK;
 
-    fd = nd->nd_fd;
-
     if (mask & ND_R)
-        FD_SET(fd, &nd_rfds);
+        pollfds[nd->nd_poll].events |= POLLIN;
     if (mask & ND_W)
-        FD_SET(fd, &nd_wfds);
+        pollfds[nd->nd_poll].events |= POLLOUT;
     if (mask & ND_X)
-        FD_SET(fd, &nd_xfds);
+        pollfds[nd->nd_poll].events |= POLLPRI;
 }
 
 /*
@@ -286,33 +218,13 @@ nd_disable(ndesc_t *nd, int mask)
     fd = nd->nd_fd;
 
     if (mask & ND_R)
-        FD_CLR(fd, &nd_rfds);
+        pollfds[nd->nd_poll].events &= ~POLLIN;
     if (mask & ND_W)
-        FD_CLR(fd, &nd_wfds);
+        pollfds[nd->nd_poll].events &= ~POLLOUT;
     if (mask & ND_X)
-        FD_CLR(fd, &nd_xfds);
+        pollfds[nd->nd_poll].events &= ~POLLPRI;
 }
 
-/* Call cleanup on one network descriptor and return true.
- * If no descriptor needs cleanup return 0.
- */
-static int
-nd_cleanup(void)
-{
-    ndesc_t *nd;
-    for (nd = nd_head; nd != NULL; nd = nd->nd_next)
-    {
-	if (nd->nd_mask & ND_C)
-	{
-            nd_set_tail(nd);
-	    (*nd->nd_cfunc)(nd, nd->nd_vp);
-	    if (nd_do_gc)
-		nd_gc();
-	    return 1;
-	}
-    }
-    return 0;
-}
 /*
  * Perform a select() on all network descriptors and call the read, write
  * and exception callback functions for those descriptors which select()
@@ -323,52 +235,38 @@ nd_cleanup(void)
 void
 nd_select(struct timeval *tvp)
 {
-    int nfds, fd;
-    fd_set rfds, wfds, xfds;
+    int nfds;
     ndesc_t *nd;
     struct timeval tv = *tvp;
-    rfds = nd_rfds;
-    wfds = nd_wfds;
-    xfds = nd_xfds;
+    struct timespec ts;
 
-    for (nd = nd_head; nd != NULL; nd = nd->nd_next)
-        if (nd->nd_mask & ND_C) {
-            tv.tv_sec = tv.tv_usec = 0;
-            break;
-        }
+    ts.tv_sec = tv.tv_sec;
+    ts.tv_nsec = tv.tv_usec * 1000;
 
     /* Nothing else to process so wait on I/O */
-    nfds = select(nd_max_fd + 1, &rfds, &wfds, &xfds, &tv);
+    nfds = ppoll(pollfds, pollfd_max, &ts, NULL);
 
     if (nfds == -1) /* Error!!! */
         return;
 
-    for (nd = nd_head; nd != NULL; nd = nd->nd_next)
-    {
-        fd = nd->nd_fd;
+    for (int pfd = 0; pfd < pollfd_max; pfd++) {
+        nd = nd_ndesc[pollfds[pfd].fd];
 
-        if (FD_ISSET(fd, &xfds))
-	    (*nd->nd_xfunc)(nd, nd->nd_vp);
+        if (pollfds[pfd].revents & POLLPRI) {
+            (*nd->nd_xfunc)(nd, nd->nd_vp);
+            pollfds[pfd].revents = 0;
+        }
 
-        if (FD_ISSET(fd, &wfds))
-	    (*nd->nd_wfunc)(nd, nd->nd_vp);
+        if (pollfds[pfd].revents & POLLOUT) {
+            (*nd->nd_wfunc)(nd, nd->nd_vp);
+            pollfds[pfd].revents = 0;
+        }
 
-        if (FD_ISSET(fd, &rfds))
-	    (*nd->nd_rfunc)(nd, nd->nd_vp);
-    }
-
-    for (nd = nd_head; nd != NULL; nd = nd->nd_next)
-    {
-        if (nd->nd_mask & ND_C)
-        {
-            nd_set_tail(nd);
-	    (*nd->nd_cfunc)(nd, nd->nd_vp);
-	    break;
+        if (pollfds[pfd].revents & POLLIN) {
+            (*nd->nd_rfunc)(nd, nd->nd_vp);
+            pollfds[pfd].revents = 0;
         }
     }
-
-    if (nd_do_gc)
-        nd_gc();
 }
 
 /*
@@ -380,19 +278,14 @@ nd_shutdown(void)
     struct timeval tv;
     ndesc_t *nd, *next;
 
-    while(nd_cleanup())
-        ;
     tv.tv_sec = tv.tv_usec = 0;
     nd_select(&tv);
-    while(nd_cleanup())
-        ;
+
     for (nd = nd_head; nd != NULL; nd = next)
     {
         next = nd->nd_next;
-        
+
 	if (nd->nd_sfunc != NULL)
 	    (*nd->nd_sfunc)(nd, nd->nd_vp);
     }
-    while(nd_cleanup())
-        ;
 }

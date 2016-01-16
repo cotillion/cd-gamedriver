@@ -1509,7 +1509,7 @@ telnet_accept(void *vp)
 
     tp = telnet_alloc();
     tp->t_nd = nd_attach(s, telnet_read, telnet_write, telnet_exception,
-                         NULL, telnet_shutdown, tp);
+                         telnet_shutdown, tp);
 
     /* Start negotiation of optional features */
     telnet_enable_gmcp(tp);
@@ -1576,7 +1576,7 @@ telnet_init(u_short port_nr)
             if (listen(s, 5) == -1)
                 fatal("telnet_init: listen() error = %d.\n", errno);
 
-            nd = nd_attach(s, telnet_ready, NULL, NULL, NULL, telnet_shutdown, NULL);
+            nd = nd_attach(s, telnet_ready, NULL, NULL, telnet_shutdown, NULL);
             nd_enable(nd, ND_R);
 
         }

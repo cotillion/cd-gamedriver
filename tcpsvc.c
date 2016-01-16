@@ -371,8 +371,7 @@ tcpsvc_accept(void *vp)
     enable_nbio(s);
 
     tsp = tcpsvc_alloc();
-    tsp->ts_nd = nd_attach(s, tcpsvc_read, tcpsvc_write, NULL, NULL,
-			   tcpsvc_shutdown, tsp);
+    tsp->ts_nd = nd_attach(s, tcpsvc_read, tcpsvc_write, NULL, tcpsvc_shutdown, tsp);
 
     if (++tcpsvc_count > TCPSVC_MAX)
     {
@@ -449,7 +448,7 @@ tcpsvc_init(u_short port_nr)
                 return;
             }
 
-            nd = nd_attach(s, tcpsvc_ready, NULL, NULL, NULL, tcpsvc_shutdown, NULL);
+            nd = nd_attach(s, tcpsvc_ready, NULL, NULL, tcpsvc_shutdown, NULL);
             nd_enable(nd, ND_R);
 
         } else {
