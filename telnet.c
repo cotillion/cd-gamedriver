@@ -1529,4 +1529,6 @@ telnet_init(u_short port_nr)
             }
         }
     }
+
+    freeaddrinfo(res);
 }

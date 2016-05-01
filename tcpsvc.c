@@ -458,6 +458,7 @@ tcpsvc_init(u_short port_nr)
             close(s);
         }
     }
+    freeaddrinfo(res);
 }
 
 #endif
