@@ -186,7 +186,7 @@ typedef struct ColumnSlashTable
 {
     union CSTData 
     {
-	char *col;			/* column data */
+	char *col;			/* column text position */
 	char **tab;			/* table data */
     } d;				/* d == data */
     unsigned short int nocols;	/* number of columns in table *sigh* */
@@ -635,7 +635,7 @@ add_commas(char *strp)
  * if it risks being free()ed).
  */
 char *
-string_print_formatted(int call_master, char *format_str, int argc, struct svalue *argv)
+string_print_formatted(int call_master, char *format_input, int argc, struct svalue *argv)
 {
     format_info finfo;
     cst *csts;		/* list of columns/tables to be done */
@@ -648,6 +648,8 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
     unsigned int i;
     char *pad;		/* fs pad string */
     format_info format;
+    char *format_str = string_copy(format_input);
+    char *arg_string = NULL;
 
     nelemno = 0;
     call_master_ob = call_master;
@@ -669,6 +671,14 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 	    saves = saves->next;
 	    free(tmp);
 	}
+
+        if (arg_string != NULL) {
+            free(arg_string);
+            arg_string = NULL;
+        }
+
+        free(format_str);
+
 	switch(i)
 	{
 	case ERR_BUFF_OVERFLOW:
@@ -958,7 +968,14 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 		    
 		    if (carg->type != T_STRING)
 			ERROR(ERR_INCORRECT_ARG_S);
-		    slen = strlen(carg->u.string);
+
+                    if (arg_string != NULL) {
+                        free(arg_string);
+                    }
+
+                    arg_string = string_copy(carg->u.string);
+		    slen = strlen(arg_string);
+
 		    if ((finfo & INFO_COLS) || (finfo & INFO_TABLE))
 		    {
 			cst **temp;
@@ -973,16 +990,15 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 			{
 			    *temp = (cst *)xalloc(sizeof(cst));
 			    (*temp)->next = 0;
-			    (*temp)->d.col = carg->u.string;
+                            (*temp)->d.col = arg_string;
 			    (*temp)->pad = pad;
 			    (*temp)->size = fs;
 			    (*temp)->prec = (prec) ? prec : fs;
 			    (*temp)->info = finfo;
 			    (*temp)->start = curpos;
-			    if ((add_column(temp, (((format_str[fpos] != '\n')
-						    && (format_str[fpos] != '\0')) || ((finfo & INFO_ARRAY)
-										       && (nelemno < (argv+arg)->u.vec->size)))) == 2)
-				&& !format_str[fpos])
+                            if ((add_column(temp, (((format_str[fpos] != '\n') && (format_str[fpos] != '\0')) 
+                                                   || ((finfo & INFO_ARRAY) && (nelemno < (argv+arg)->u.vec->size)))) == 2)
+                                && !format_str[fpos])
 			    {
 				ADD_CHAR('\n');
 			    }
@@ -991,8 +1007,8 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 			{ /* (finfo & INFO_TABLE) */
 			    unsigned int n, len, max;
 			    
-#define TABLE carg->u.string
 			    (*temp) = (cst *)xalloc(sizeof(cst));
+#define TABLE (arg_string) 
 			    (*temp)->pad = pad;
 			    (*temp)->info = finfo;
 			    (*temp)->start = curpos;
@@ -1045,8 +1061,6 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 				{
 				    if (++n >= len)
 				    {
-					if (carg != clean)
-					    SAVE_CHAR(((TABLE) + fs));
 					TABLE[fs] = '\0';
 					(*temp)->d.tab[i++] = TABLE+fs+1;
 					if (i >= prec)
@@ -1066,23 +1080,21 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 		    { /* not column or table */
 			if (prec && prec < slen)
 			{
-			    if (carg != clean)
-				SAVE_CHAR(((carg->u.string)+prec));
-			    carg->u.string[prec] = '\0';
+			    arg_string[prec] = '\0';
 			    slen = prec;
 			}
-			if (fs && fs>slen) {
-			    add_justified(carg->u.string, pad, fs, finfo,
-					  (((format_str[fpos] != '\n') &&
-					    (format_str[fpos] != '\0'))
-					   || ((finfo & INFO_ARRAY) &&
-					       (nelemno < (argv + arg)->u.vec->size)))
-					  || carg->u.string[slen - 1] != '\n');
+			if (fs && fs > slen) {
+                            add_justified(arg_string, pad, fs, finfo,
+                                          (
+                                           ((format_str[fpos] != '\n') && (format_str[fpos] != '\0'))
+					   || ((finfo & INFO_ARRAY) && (nelemno < (argv + arg)->u.vec->size))
+                                          )
+                                          || (slen > 0 && (arg_string[slen - 1] != '\n')));
 			}
 			else
 			{
 			    for (i = 0; i < slen; i++)
-				ADD_CHAR(carg->u.string[i]);
+				ADD_CHAR(arg_string[i]);
 			}
 		    }
 		} else if (finfo & INFO_T_INT) { /* one of the integer types */
@@ -1129,8 +1141,11 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 		    {
 			int tmpl = strlen(temp);
 
-			if (prec && tmpl > prec)
+			if (prec && tmpl > prec) {
 			    temp[prec] = '\0'; /* well.... */
+                            tmpl = prec;
+                        }
+
 			if (tmpl < fs)
 			    add_justified(temp, pad, fs, finfo,
 					  (((format_str[fpos] != '\n') &&
@@ -1245,5 +1260,11 @@ string_print_formatted(int call_master, char *format_str, int argc, struct svalu
 	saves = saves->next;
 	free((char *)tmp);
     }
+
+    if (arg_string != NULL) {
+        free(arg_string);
+    }
+
+    free(format_str);
     return buff;
 } /* end of string_print_formatted() */
