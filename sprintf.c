@@ -445,7 +445,7 @@ add_justified(char *str, char *pad, unsigned int fs, format_info finfo, short tr
 	j = (fs - len) / 2 + (fs - len) % 2;
 	for (i = 0; i < j; i++)
 	{
-	    if (len && pad[i % len] == '\\')
+	    if (l && pad[i % l] == '\\')
 	    {
 		i++;
 		j++;
