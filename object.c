@@ -565,16 +565,20 @@ restore_one(struct svalue *v, char **msp)
 	}
 	break;
     case '"':
-	for(p = s+1, q = s; *p && *p != '"'; p++) 
+	for (p = s + 1, q = s; *p && *p != '"'; p++) 
 	{
 	    if (*p == '\\') {
 		switch (*++p) {
-		case 'n':
-		    *q++ = '\n';
-		    break;
-		default:
-		    *q++ = *p;
-		    break;
+                    case '\0':
+                        /* string can't end with \ */
+                        return 0;
+                        break;
+                    case 'n':
+                        *q++ = '\n';
+                        break;
+                    default:
+                        *q++ = *p;
+                        break;
 		}
 	    } else {
 		/* Have to be able to restore old format... */
