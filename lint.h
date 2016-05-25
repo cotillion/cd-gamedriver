@@ -14,6 +14,8 @@
 #undef calloc
 #endif
 
+#include "memory.h"
+
 /*
  * Some structure forward declarations are needed.
  */
@@ -60,7 +62,6 @@ int write_file (char *, char *);
 int file_size (char *);
 int file_time (char *);
 void remove_all_players (void);
-void *xalloc (unsigned int);
 void *tmpalloc (size_t);
 long long new_call_out (struct closure *, double, double);
 void add_action (struct closure *, struct svalue *, int);

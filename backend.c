@@ -115,49 +115,18 @@ parse_command(char *str, struct object *ob)
  *
  * Thanks to Marcus J Ranum (mjr@decuac.DEC.COM) for the idea.
  */
-static 	char	**tmpmem = 0;
-static 	size_t	tmp_size = 0;
-static 	int	tmp_cur = 0;
-
-#define TMPMEM_CHUNK 1024
+struct allocation_pool tmp_pool = EMPTY_ALLOCATION_POOL;
 
 void 
 tmpclean(void)
 {
-    int il;
-
-    for (il = tmp_cur - 1; il >=0; il--) /* Reversed order is probably good */
-	free(tmpmem[il]);
-    tmp_cur = 0;
-#ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
-    if (tmp_size > 0)
-    {
-	free(tmpmem);
-	tmpmem = NULL;
-	tmp_size = 0;
-    }
-#endif
+    pool_free(&tmp_pool);
 }
 
 void *
 tmpalloc(size_t size)
 {
-    char  **list;
-
-    if (tmp_cur >= tmp_size)
-    {
-	list = (char **)xalloc((tmp_size + TMPMEM_CHUNK) * sizeof(char *));
-
-	if (tmp_size > 0)
-	{
-	    (void)memcpy(list, tmpmem, tmp_size * sizeof(char *));
-	    free((char *)tmpmem);
-	}
-
-	tmpmem = list;
-	tmp_size += TMPMEM_CHUNK;
-    }
-    return tmpmem[tmp_cur++] = xalloc(size);
+    return pool_alloc(&tmp_pool, size);
 }
 
 char *

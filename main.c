@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 
+#include "memory.h"
 #include "config.h"
 #include "lint.h"
 #include "interpret.h"
@@ -398,38 +399,3 @@ debug_message_svalue(struct svalue *v)
 }
 
 int slow_shut_down_to_do = 0;
-
-#ifdef malloc
-#undef malloc
-#endif
-
-void *
-xalloc(unsigned int size)
-{
-    char *p;
-    static int going_to_exit;
-
-    if (going_to_exit)
-	exit(3);
-    if (size == 0)
-	size = 1;
-    p = (char *)malloc(size);
-    if (p == 0)
-    {
-	if (reserved_area)
-	{
-	    free(reserved_area);
-	    reserved_area = 0;
-	    p = "Temporary out of MEMORY. Freeing reserve.\n";
-	    (void)write(1, p, strlen(p));
-	    slow_shut_down_to_do = 6;
-	    return xalloc(size);	/* Try again */
-	}
-	going_to_exit = 1;
-	p = "Totally out of MEMORY.\n";
-	(void)write(1, p, strlen(p));
-	(void)dump_trace(0);
-	exit(2);
-    }
-    return p;
-}

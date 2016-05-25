@@ -470,7 +470,11 @@ add_justified(char *str, char *pad, unsigned int fs, format_info finfo, short tr
     default: { /* std (s)printf defaults to right justification */
 	int l;
 	
-	fs -= len;
+        if (fs > len) 
+            fs -= len;
+        else
+            fs = 0;
+
 	l = strlen(pad);
 	for (i = 0; i < fs; i++)
 	{
@@ -649,7 +653,7 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
     char *pad;		/* fs pad string */
     format_info format;
     char *format_str = string_copy(format_input);
-    char *arg_string = NULL;
+    struct allocation_pool pool = EMPTY_ALLOCATION_POOL;
 
     nelemno = 0;
     call_master_ob = call_master;
@@ -672,12 +676,9 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 	    free(tmp);
 	}
 
-        if (arg_string != NULL) {
-            free(arg_string);
-            arg_string = NULL;
-        }
-
         free(format_str);
+
+        pool_free(&pool);
 
 	switch(i)
 	{
@@ -964,17 +965,16 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 		    ADD_CHAR('%');
 		} else if ((finfo & INFO_T) == INFO_T_STRING)
 		{
-		    int slen;
+		    size_t slen;
 		    
 		    if (carg->type != T_STRING)
 			ERROR(ERR_INCORRECT_ARG_S);
 
-                    if (arg_string != NULL) {
-                        free(arg_string);
-                    }
+		    slen = strlen(carg->u.string);
+                    char *input_copy = pool_alloc(&pool, slen + 1);
+                    strncpy(input_copy, carg->u.string, slen + 1);
 
-                    arg_string = string_copy(carg->u.string);
-		    slen = strlen(arg_string);
+                        
 
 		    if ((finfo & INFO_COLS) || (finfo & INFO_TABLE))
 		    {
@@ -990,7 +990,7 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 			{
 			    *temp = (cst *)xalloc(sizeof(cst));
 			    (*temp)->next = 0;
-                            (*temp)->d.col = arg_string;
+                            (*temp)->d.col = input_copy;
 			    (*temp)->pad = pad;
 			    (*temp)->size = fs;
 			    (*temp)->prec = (prec) ? prec : fs;
@@ -1008,21 +1008,20 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 			    unsigned int n, len, max;
 			    
 			    (*temp) = (cst *)xalloc(sizeof(cst));
-#define TABLE (arg_string) 
 			    (*temp)->pad = pad;
 			    (*temp)->info = finfo;
 			    (*temp)->start = curpos;
 			    (*temp)->next = 0;
 			    max = len = 0;
 			    n = 1;
-			    for (i = 0; TABLE[i]; i++)
+			    for (i = 0; input_copy[i]; i++)
 			    {
-				if (TABLE[i] == '\n')
+				if (input_copy[i] == '\n')
 				{
 				    if (len > max)
 					max = len;
 				    len = 0;
-				    if (TABLE[i + 1])
+				    if (input_copy[i + 1])
 					n++;
 				    continue;
 				}
@@ -1050,19 +1049,19 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 				prec -= (prec - n % prec) / len;
 			    (*temp)->d.tab = (char **)xalloc(prec*sizeof(char *));
 			    (*temp)->nocols = prec; /* heavy sigh */
-			    (*temp)->d.tab[0] = TABLE;
+			    (*temp)->d.tab[0] = input_copy;
 			    if (prec == 1)
 				goto add_table_now;
 			    i = 1; /* the next column number */
 			    n = 0; /* the current "word" number in this column */
-			    for (fs = 0; TABLE[fs]; fs++)
+			    for (fs = 0; input_copy[fs]; fs++)
 			    { /* throwing away fs... */
-				if (TABLE[fs] == '\n')
+				if (input_copy[fs] == '\n')
 				{
 				    if (++n >= len)
 				    {
-					TABLE[fs] = '\0';
-					(*temp)->d.tab[i++] = TABLE+fs+1;
+					input_copy[fs] = '\0';
+					(*temp)->d.tab[i++] = input_copy + fs + 1;
 					if (i >= prec)
 					    goto add_table_now;
 					n = 0;
@@ -1080,21 +1079,21 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 		    { /* not column or table */
 			if (prec && prec < slen)
 			{
-			    arg_string[prec] = '\0';
+			    input_copy[prec] = '\0';
 			    slen = prec;
 			}
 			if (fs && fs > slen) {
-                            add_justified(arg_string, pad, fs, finfo,
+                            add_justified(input_copy, pad, fs, finfo,
                                           (
                                            ((format_str[fpos] != '\n') && (format_str[fpos] != '\0'))
 					   || ((finfo & INFO_ARRAY) && (nelemno < (argv + arg)->u.vec->size))
                                           )
-                                          || (slen > 0 && (arg_string[slen - 1] != '\n')));
+                                          || (slen > 0 && (input_copy[slen - 1] != '\n')));
 			}
 			else
 			{
 			    for (i = 0; i < slen; i++)
-				ADD_CHAR(arg_string[i]);
+				ADD_CHAR(input_copy[i]);
 			}
 		    }
 		} else if (finfo & INFO_T_INT) { /* one of the integer types */
@@ -1261,10 +1260,7 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 	free((char *)tmp);
     }
 
-    if (arg_string != NULL) {
-        free(arg_string);
-    }
-
+    pool_free(&pool);
     free(format_str);
     return buff;
 } /* end of string_print_formatted() */
