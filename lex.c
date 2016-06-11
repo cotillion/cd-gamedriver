@@ -188,7 +188,12 @@ mygetc(void)
             return EOF;
         } 
 
-        nbuf  = (int)fread(buffer, sizeof(char), (DEFMAX / 2), yyin);
+        nbuf = (int)fread(buffer, sizeof(char), (DEFMAX / 2), yyin);
+        if (!nbuf)
+        {
+            return EOF;
+        }
+
         outp -= nbuf;
         memcpy(outp, buffer, nbuf);
     }
