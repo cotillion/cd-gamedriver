@@ -4,6 +4,13 @@ This is the CD Gamedriver.
 Primarly developed to run the Genesis LPMUD running on http://www.genesismud.org/
 
 Changelog:
+===============================================================================
+README CD.06.05
+- MSSP Protcol support
+  http://tintin.sourceforge.net/mssp/
+- GMCP Protocol Support
+- Fixed 64 bit random numbers
+- A number of GD crarshers fixed
 
 ===============================================================================
 README CD.06.04
