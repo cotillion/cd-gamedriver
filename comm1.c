@@ -1162,3 +1162,83 @@ gmcp_input(struct interactive *ip, char *cp)
         }
     } 
 }
+
+void
+mssp_request(struct interactive *ip)
+{
+    struct svalue *ret = NULL;
+    struct gdexception exception_frame;
+    struct allocation_pool pool = EMPTY_ALLOCATION_POOL;
+
+    exception_frame.e_exception = NULL;
+    exception_frame.e_catch = 0;
+
+    command_giver = ip->ob;
+    current_object = NULL;
+    current_interactive = command_giver;
+
+    if (setjmp(exception_frame.e_context)) {
+        exception = exception_frame.e_exception;
+        clear_state();
+    } else {
+        exception = &exception_frame;
+        push_object(ip->ob);
+        ret = apply_master_ob(M_INCOMING_MSSP, 1);
+        exception = NULL;
+
+        if (ret == NULL || ret->type != T_MAPPING) {
+            printf("incoming_mssp in the master did not return a mapping\n");
+            return;
+        }
+
+        struct mapping *m = ret->u.map;
+        mssp_t *mssp[card_mapping(m)];
+        size_t mssp_count = 0;
+
+        for (int i = 0; i < m->size; i++) {
+            for (struct apair *p = m->pairs[i]; p; p = p->next) {
+                struct svalue key = p->arg;
+                struct svalue val = p->val;
+                mssp_t *variable = NULL;
+
+                if (key.type != T_STRING)
+                    continue;
+
+                if (val.type == T_STRING || val.type == T_NUMBER) {
+                    variable = pool_alloc(&pool, sizeof(mssp_t) + 1 * sizeof(char *));
+                    variable->name = (u_char *)key.u.string;
+                    variable->size = 1;
+
+                    if (val.type == T_STRING) {
+                        variable->values[0] = (u_char *)val.u.string;
+                    } else {
+                        size_t needed = snprintf(NULL, 0, "%lld", val.u.number) + 1;
+                        char *str = pool_alloc(&pool, needed);
+                        snprintf(str, needed, "%lld", val.u.number);
+                        variable->values[0] = (u_char *)str;
+                    }
+                }
+
+                if (val.type == T_POINTER) {
+                    variable = pool_alloc(&pool, sizeof(mssp_t) + val.u.vec->size * sizeof(char *));
+                    variable->name = (u_char *)key.u.string;
+                    variable->size = val.u.vec->size;
+
+                    for (int y = 0; y < val.u.vec->size; y++) {
+                        struct svalue *aval = &val.u.vec->item[y];
+                        variable->values[y] = (u_char *)""; 
+                        if (aval->type == T_STRING) {
+                            variable->values[y] = (u_char *)aval->u.string;
+                        }
+                    }
+                }
+
+                if (variable != NULL) 
+                    mssp[mssp_count++] = variable;
+            }
+        }
+
+        telnet_output_mssp(ip->tp, mssp, mssp_count);
+        pool_free(&pool);
+    }
+}

@@ -840,7 +840,6 @@ struct svalue *
 one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
 	  int *fail, struct svalue *prep_param)
 {
-    char ch;
     struct svalue	*pval;
     static struct svalue stmp = { T_NUMBER };
     char		*str1, *str2;

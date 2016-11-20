@@ -41,3 +41,4 @@ void remove_interactive(struct interactive *, int);
 void interactive_input(struct interactive *, char *);
 void gmcp_input(struct interactive *, char *);
 void *new_player(void *, struct sockaddr_storage *, socklen_t, u_short);
+void mssp_request(struct interactive *ip);

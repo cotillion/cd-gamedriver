@@ -67,7 +67,7 @@
 #define	TELNET_CANQ_SIZE	(1024 * 8)
 #define	TELNET_RAWQ_SIZE    (1024 * 4)	
 #define	TELNET_OPTQ_SIZE    (1024)	
-#define	TELNET_OUTQ_SIZE	(16*1024)
+#define	TELNET_OUTQ_SIZE	(32*1024)
 
 /*
  * Output Queue Flow Control Parameters.
@@ -291,6 +291,34 @@ telnet_output_gmcp(telnet_t *tp, u_char *cp)
         telnet_send_sb(tp, TELOPT_GMCP, cp);
         return 0;
     }
+    return 1;
+}
+
+
+int
+telnet_output_mssp(telnet_t *tp, mssp_t *vars[], size_t count)
+{
+    nqueue_t *nq;
+    nq = tp->t_outq;
+
+    nq_putc(nq, IAC);
+    nq_putc(nq, SB);
+    nq_putc(nq, TELOPT_MSSP);
+
+    for (size_t i = 0; i < count; i++) {
+        nq_putc(nq, MSSP_VAR);
+        nq_puts(nq, vars[i]->name); 
+
+        for (size_t k = 0; k < vars[i]->size; k++) {
+            nq_putc(nq, MSSP_VAL);
+            nq_puts(nq, vars[i]->values[k]);
+        }
+    }
+
+    nq_putc(nq, IAC);
+    nq_putc(nq, SE);
+
+    telnet_enabw(tp);
     return 1;
 }
 
@@ -529,6 +557,9 @@ telnet_get_optp(telnet_t *tp, u_char opt)
         case TELOPT_GMCP:
             return &tp->t_optb[OP_GMCP];
 
+        case TELOPT_MSSP:
+            return &tp->t_optb[OP_MSSP];
+
         default:
             return NULL;
     }
@@ -683,6 +714,8 @@ telnet_ack_lenab(telnet_t *tp, u_char opt)
             break;
         case TELOPT_GMCP:
             tp->t_flags |= TF_GMCP;
+            break;
+        case TELOPT_MSSP:
             break;
     }
 }
@@ -861,6 +894,29 @@ telnet_disable_gmcp(telnet_t *tp)
     telnet_neg_ldisab(tp, TELOPT_GMCP);
 }
 
+/*
+ * Enable MSSP
+ */
+void
+telnet_enable_mssp(telnet_t *tp)
+{
+    if (nq_avail(tp->t_outq) < 3)
+        return;
+
+    telnet_neg_lenab(tp, TELOPT_MSSP);
+}
+
+/*
+ * Disable MSSP
+ */
+void
+telnet_disable_mssp(telnet_t *tp)
+{
+    if (nq_avail(tp->t_outq) < 3)
+        return;
+
+    telnet_neg_ldisab(tp, TELOPT_MSSP);
+}
 
 /*
  * Process IAC WILL <option>.
@@ -1003,6 +1059,12 @@ telnet_do(telnet_t *tp, u_char opt)
     if (op == NULL)
     {
         telnet_send_wont(tp, opt);
+        return;
+    }
+
+    if (opt == TELOPT_MSSP)
+    {
+        mssp_request(tp->t_ip);
         return;
     }
 
@@ -1449,8 +1511,9 @@ telnet_accept(void *vp)
     tp->t_nd = nd_attach(s, telnet_read, telnet_write, telnet_exception,
                          NULL, telnet_shutdown, tp);
 
-    /* Start negotiation of GMCP */
+    /* Start negotiation of optional features */
     telnet_enable_gmcp(tp);
+    telnet_enable_mssp(tp);
 
     ip = (void *)new_player(tp, &addr, addrlen, local_port);
     if (ip == NULL)
