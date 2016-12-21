@@ -95,7 +95,8 @@ receive_hname(const char *addr, int lport, int rport,
 	if (ip == NULL)
 	    continue;
 
-        if (!strcmp(addr, query_ip_number(ip->ob)))
+        const char *ip_number = query_ip_number(ip->ob);
+        if (ip_number != NULL && !strcmp(addr, query_ip_number(ip->ob)))
         {
             if (strlen(ip_name)) 
             {
