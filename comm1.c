@@ -415,10 +415,16 @@ remove_interactive(struct interactive *ip, int link_dead)
 	    free_sentence(ob->interactive->input_to);
 	    ob->interactive->input_to = 0;
 	}
-	if(ob->interactive->rname)
+
+        if (ob->interactive->host_name)
+            free(ob->interactive->host_name);
+
+	if (ob->interactive->rname)
 	    free(ob->interactive->rname);
+
 	if (current_interactive == ob)
 	    current_interactive = 0;
+
 	free((char *)ob->interactive);
 	ob->interactive = 0;
 	all_players[i] = 0;
