@@ -315,8 +315,8 @@ m_save_object(struct object *ob)
 		continue;
 	    free_svalue(&s);
 	    s.type = T_STRING;
-	    s.string_type = STRING_MSTRING;
-	    s.u.string = make_mstring(prog->variable_names[i].name);
+	    s.string_type = STRING_SSTRING;
+	    s.u.string = make_sstring(prog->variable_names[i].name);
 	    assign_svalue(get_map_lvalue(ret, &s, 1), v);
 	}
     }
@@ -593,8 +593,8 @@ restore_one(struct svalue *v, char **msp)
             return 0;
 	free_svalue(v);
 	v->type = T_STRING;
-	v->string_type = STRING_MSTRING;
-	v->u.string = make_mstring(s);
+	v->string_type = STRING_SSTRING;
+	v->u.string = make_sstring(s);
 	s = p+1;
 	break;
     case '$':
@@ -796,7 +796,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
 	struct svalue v;
 
 	v.type = T_STRING;
-	v.string_type = STRING_MSTRING;
+	v.string_type = STRING_SSTRING;
 
 	if (fgets(buff, (int)st.st_size + 1, f) == 0)
 	    break;
@@ -808,7 +808,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
 	    error("Illegal format when restoring %s.\n", file);
 	}
 	*space++ = '\0';
-	v.u.string = make_mstring(buff);
+	v.u.string = make_sstring(buff);
 	
 	if (!restore_one(get_map_lvalue(map,&v,1), &space)) {
 	    (void)fclose(f);
