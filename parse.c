@@ -988,7 +988,10 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 
     cix = *cix_in; *fail = 0;
 
-    if (sscanf(wvec->item[cix].u.string, "%lld", &num))
+    char *suffix;
+    int matches = sscanf(wvec->item[cix].u.string, "%lld%ms", &num, &suffix);
+
+    if (matches == 1)
     {
 	if (num > 0)
 	{
@@ -999,6 +1002,32 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 	}
 	*fail = 1;
 	return 0; /* Only positive numbers */
+    }
+
+    if (matches == 2)
+    {
+        const int ten = num % 100 / 10;
+        const int last = num % 10;
+        char *expected_suffix = "th";
+
+        if (ten != 1) {
+            if (last == 1) {
+                expected_suffix = "st";
+            } else if (last == 2) {
+                expected_suffix = "nd";
+            } else if (last == 3) {
+                expected_suffix = "rd";
+            }
+        }
+
+        if (EQ(suffix, expected_suffix)) {
+            (*cix_in)++;
+            stmp.type = T_NUMBER;
+            stmp.u.number = -num;
+            free(suffix);
+            return &stmp;
+        }
+        free(suffix);
     }
 
     if (gAllword && (strcmp(wvec->item[cix].u.string, gAllword) == 0))
@@ -1638,7 +1667,7 @@ parse_to_plural(char *str)
     
     for (changed = 0; il < words->size; il++) 
     {
-	if ((EQ(words->item[il].u.string,"of")) ||
+	if ((EQ(words->item[il].u.string, "of")) ||
 	    (il + 1 == words->size))
 	{
 	    spl = parse_one_plural(words->item[il - 1].u.string);
