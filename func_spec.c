@@ -13,7 +13,7 @@
 mixed	abs(float|int);
 float	acos(float);
 float	acosh(float);
-void	add_action(string|function, void|string, void|int);
+void	add_action(string|function, string, void|int);
 object	*all_inventory(object default: F_THIS_OBJECT);
 mixed	*allocate(int);
 float	asin(float);
