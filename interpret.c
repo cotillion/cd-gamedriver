@@ -4772,12 +4772,15 @@ f_crypt(int num_arg)
     } else {
         salt = build_salt(2);
     }
-    
-    res = make_mstring((char *)crypt((sp-1)->u.string, salt));
+
+    char *encrypted = crypt((sp-1)->u.string, salt);
     free(salt);
-    
     pop_n_elems(2);
-    push_mstring(res);
+
+    if (NULL != encrypted)
+        push_string(encrypted, STRING_MSTRING);
+    else
+        error("Invalid salt\n");
 }
 
 /* ARGSUSED */
