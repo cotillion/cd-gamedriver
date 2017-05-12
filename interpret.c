@@ -1166,6 +1166,7 @@ extern char *string_print_formatted (int , char *, int, struct svalue *);
 extern char *break_string (char *, int, struct svalue *);
 extern struct mapping *copy_mapping(struct mapping *);
 extern char *query_ip_number (struct object *);
+extern char *query_port_number (struct object *);
 extern char *query_ip_name (struct object *);
 extern struct vector *get_local_commands (struct object *);
 extern struct vector *subtract_array (struct vector *,struct vector*);
@@ -3045,6 +3046,42 @@ f_query_snoop(int num_arg)
     push_object(ob);
 }
 
+
+static void
+f_query_port_number(int num_arg)
+{
+    struct svalue *ret;
+    char *tmp;
+    struct object *ob = command_giver;
+	    
+    if (num_arg == 1)
+    {
+	if (sp->type != T_OBJECT)
+	    error("Bad optional argument to query_port_number()\n");
+	else
+	    ob = sp->u.ob;
+    }
+
+    push_object(current_object);
+    push_object(ob);
+    ret = apply_master_ob(M_VALID_QUERY_PORT_NUMBER, 2);
+    if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+    {
+	if (num_arg)
+	    pop_stack();
+	push_number(0);
+	return;
+    }
+
+    tmp = query_port_number(num_arg ? sp->u.ob : 0);
+
+    if (num_arg)
+	pop_stack();
+    if (tmp == 0)
+	push_number(0);
+    else
+	push_string(tmp, STRING_MSTRING);
+}
 
 static void
 f_query_ip_number_name(int name, int num_arg)
