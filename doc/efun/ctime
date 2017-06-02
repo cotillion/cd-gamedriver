@@ -6,6 +6,7 @@ SYNOPSIS
 
 DESCRIPTION
 	This funtion converts the given `time' to a string.
+	If no 'time' is given, the value of time() is used by default.
 
 SEE ALSO
 	time

@@ -6218,15 +6218,19 @@ f_assign(int num_arg)
 static void
 f_ctime(int num_arg)
 {
-    char *cp1, *cp2;
+    char *time = time_string(sp->u.number);
 
-    cp1 = time_string(sp->u.number);
-    cp2 = strchr(cp1, '\n');
-    if (cp2)
-	*cp2 = '\0';
-    cp1 = make_mstring(cp1);
+    if (!time) {
+        error("Invalid time");
+        return;
+    }
+
+    char *nl = strchr(time, '\n');
+    if (nl)
+	*nl = '\0';
+
     pop_stack();
-    push_mstring(cp1);
+    push_string(time, STRING_MSTRING);
 }
 
 /* ARGSUSED */
