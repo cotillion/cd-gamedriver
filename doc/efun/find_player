@@ -1,0 +1,16 @@
+NAME
+	find_player - find a named player
+
+SYNOPSIS
+	object find_player(string name)
+
+DESCRIPTION
+	This function finds and returns the player object with the given
+	`name'.
+
+	The argument `name' must be given in lowercase for this function
+	to work.
+
+SEE ALSO
+	find_living, find_object
+

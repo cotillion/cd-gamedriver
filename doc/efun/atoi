@@ -1,0 +1,15 @@
+NAME
+        atoi - Convert a string to an integer.
+
+SYNOPSYS
+        int atoi(string number)
+
+DESCRIPTION
+        With this efun a string representing a number can be converted to
+        integer.
+
+EXAMPLE
+        atoi("5") returns the integer (int) 5.
+
+SEE ALSO
+        atof, ftoa, ftoi

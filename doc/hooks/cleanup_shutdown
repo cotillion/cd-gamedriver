@@ -1,0 +1,14 @@
+/*
+ * Function name: cleanup_shutdown
+ * Description  : This function is called for each interactive object when
+ *                the game is shutting down. It makes all those players
+ *                quit the game.
+ * Arguments    : object ob - the object to force to quit.
+ */
+private void
+cleanup_shutdown(object ob)
+{
+    set_this_player(ob);
+    ob->quit();
+}
+

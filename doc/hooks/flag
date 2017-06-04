@@ -1,0 +1,41 @@
+/*
+ * Called on startup of game if '-f' is given on the commandline.
+ *
+ * To test a new function xx in object yy, do
+ * driver "-fcall yy xx arg" "-fshutdown"
+ */
+private void
+flag(string str)
+{
+    string file, arg;
+
+    if (game_started)
+        return;
+
+    if (sscanf(str, "for %d", arg) == 1)
+    {
+        return;
+    }
+
+    if (str == "shutdown")
+    {
+        do_debug("shutdown");
+        return;
+    }
+
+    if (sscanf(str, "echo %s", arg) == 1)
+    {
+        write(arg + "\n");
+        return;
+    }
+
+    if (sscanf(str, "call %s %s", file, arg) == 2)
+    {
+        arg = (string)call_other(file, arg);
+        write("Got " + arg + " back.\n");
+        return;
+    }
+
+    write("Master: Unknown flag " + str + "\n");
+}
+

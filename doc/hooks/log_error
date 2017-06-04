@@ -1,0 +1,33 @@
+/*
+ * Function name: log_error
+ * Description  : This function is called from the game driver if there is
+ *                an error while compiling an object.
+ * Arguments    : string path  - the path of the object having the error.
+ *                string error - the error message.
+ */
+private void
+log_error(string path, string error)
+{
+    set_auth(this_object(), "root:root");
+
+    /* Display the message to interactive wizards. */
+    if (this_interactive())
+    {
+        if (this_interactive()->query_wiz_level() ||
+            this_interactive()->query_prop(PLAYER_I_SEE_ERRORS))
+        {
+            this_interactive()->catch_tell(error);
+        }
+    }
+
+    /* Create the log directory if necessary. */
+    path = query_wiz_path(creator_file(path)) + "/log";
+    if (file_size(path) != -2)
+    {
+        mkdir(path);
+    }
+
+    path += "/errors";
+    write_file(path, error);
+}
+

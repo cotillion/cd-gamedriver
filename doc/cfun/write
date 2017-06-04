@@ -1,0 +1,25 @@
+NAME
+	write - write data (normally text) to the current player
+
+SYNOPSIS
+	void write(mixed data)
+
+DESCRIPTION
+	Writes data to the current 'command giver', ie the object returned
+	by this_player(). Data is normally text.
+
+NOTA BENE
+	Write sends unprocessed messages to the recieving object.
+	If the mudlib uses processing on messages then calling this
+	function will send a raw message.
+NOTES
+	This is actually a CFUN and must be activated within the mudlib
+	before it can be used.
+
+EXAMPLE
+	void
+	write(mixed data) = "write";
+
+SEE ALSO
+	this_player, set_this_player, this_interactive
+

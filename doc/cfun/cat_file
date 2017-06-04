@@ -1,0 +1,20 @@
+NAME
+	cat_file - print part of a file on the screen
+
+SYNOPSIS
+	int cat_file(string file, void|int start, void|int len)
+
+DESCRIPTION
+	This functions prints a file or a part of a file on to the
+	screen. `file' is the path the file, `start' (if given) is
+	the starting line and `len' (if given) the number of lines
+	to be printed
+
+NOTE
+	This is actually a CFUN and needs to be activated through
+	the mudlib before it can be used.
+
+EXAMPLE
+	varargs int
+	cat_file(string file, int start, int len) = "cat_file";
+

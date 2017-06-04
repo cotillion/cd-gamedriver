@@ -1,0 +1,13 @@
+NAME
+	json2val - converts a json string to  
+
+SYNOPSIS
+	string val2json(mixed val)
+
+DESCRIPTION
+	Attempts to conver the given value val to a JSON string.
+	The supported datatypes are: int, string, float, array and mapping.
+	Functions and objects will result in a runtime error. 
+
+SEE ALSO
+    val2str, str2val

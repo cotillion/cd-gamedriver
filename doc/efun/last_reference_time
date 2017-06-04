@@ -1,0 +1,9 @@
+NAME
+	last_reference_time
+
+SYNOPSIS
+	int last_reference_time()
+
+DESCRIPTION
+	Returns the last time the calling object was referenced.
+

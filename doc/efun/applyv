@@ -1,0 +1,22 @@
+NAME
+	applyv
+
+SYNOPSIS
+	mixed applyv(function func, mixed *array)
+
+DESCRIPTION
+	Apply function `func' to a vector of
+	arguments taken from `array'.
+
+	Doing a
+		applyv(func, ({ v1,v2,...vn }))
+	would be equivalent of doing
+		func(v1,v2,...vn)
+	But the second can only be used when the array elements
+	are explicitely available, whereas applyv always works.
+
+RETURN VALUES
+	The value returned is the value the function returns.
+
+SEE ALSO
+	functions, papplyv, mkfunction

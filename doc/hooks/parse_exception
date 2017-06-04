@@ -1,0 +1,44 @@
+/*
+ * Function name: parse_exception
+ * Description  : In case a parse exception error occurs, notify
+ *                the people who need to hear it.
+ * Arguments    : int action    - execption level, error or warning.
+ *                string msg    - error msg from the compiler.
+ *                int lin       - the line at which error occured.
+ *                string file   - the filename where error occured..
+ */
+private void
+parse_exception(int action, string msg, int line, string file)
+{
+    string fmt_error, cr, path;
+
+    if (this_interactive())
+    {
+        if (this_interactive()->query_wiz_level() ||
+            this_interactive()->query_prop(PLAYER_I_SEE_ERRORS))
+        {
+            fmt_error = "\n** Parse Exception Error **" +
+                "\n Exception: " + (action ? "Error" : "Warning") +
+                "\n   Message: " + msg +
+                "\n      Line: " + line +
+                "\n      File: " + file + "\n\n";
+            this_interactive()->catch_tell(fmt_error);
+        }
+        else
+        {
+            this_interactive()->catch_tell("Your sensitive mind notices " +
+                "a wrongness in the fabric of space.\n");
+        }
+    }
+    else
+    {
+        path = "/log/exception";
+        fmt_error = ctime(time()) +
+            "\nException: " + (action ? "Error" : "Warning") +
+            "\n  Message: " + msg +
+            "\n     Line: " + line +
+            "\n     File: " + file + "\n\n";
+        write_file(path, fmt_error);
+    }
+}
+

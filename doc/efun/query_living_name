@@ -1,0 +1,16 @@
+NAME
+	query_living_name - Query the living_name of an object
+
+SYNOPSIS
+	mixed query_living_name(object obj)
+
+DESCRIPTION
+	This function returns the living name of object `obj' as
+        set by calling set_living_name() on it previously.
+
+        If no living_name is found, or object 'obj' in invalid,
+        then this function will return 0.
+
+SEE ALSO
+	set_living_name, find_living
+

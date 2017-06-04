@@ -1,0 +1,14 @@
+Documentation of the driver callback hooks with examples of how
+they might be implemented in the master object inside the mudlib.
+
+The callback functions are named in master.n and are converted into
+M_* named defines that you should use within the driver.  Use apply_master()
+to call the master object with the M_* defines.  If you do not have a
+function declared within the master object, 0 will be returned.
+
+You must push the arguments you wish to use onto the stack and specify the
+number of arguments to use in the apply.  Scan interpret.c for examples on
+how to use driver callbacks in your driver code.
+
+The documentation is thus far incomplete.
+

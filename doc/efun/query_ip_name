@@ -10,13 +10,15 @@ DESCRIPTION
 	
 	The string returned is on the form: "milou.cd.chalmers.se"
 
-SEE ALSO
-	query_ip_number
+NOTES
+	The function valid_query_ip_number_name() is called in
+	"/secure/master" to allow filtering of the results based on caller.
 
-BUGS
+WARNING
 	This function demands an external process to be active on the
 	machine running the gamedriver. If that process is not active
 	query_ip_name will return the same as query_ip_number, always.
 
-
+SEE ALSO
+	query_ip_number
 	

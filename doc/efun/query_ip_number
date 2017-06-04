@@ -10,5 +10,10 @@ DESCRIPTION
 	
 	The string returned is on the form: "129.16.48.2"
 
+NOTES
+	The function valid_query_ip_number_name() is called in
+	"/secure/master" to allow filtering of the results based on caller.
+
 SEE ALSO
 	query_ip_name
+

@@ -1,0 +1,79 @@
+NAME
+	floating point package
+
+SYNOPSIS
+	GENERAL
+	float itof(int)
+	int ftoi(float)
+	string ftoa(float)
+
+	RANDOM
+	float rnd()
+
+	TRIGONOMETRIC
+	float sin(float)
+	float cos(float)
+	float tan(float)
+	float asin(float)
+	float acos(float)
+	float atan(float)
+	float atan2(float, float)
+
+	HYPERBOLIC
+	float sinh(float)
+	float cosh(float)
+	float tanh(float)
+	float asinh(float)
+	float acosh(float)
+	float atanh(float)
+
+	EXPONENTIAL
+	float exp(float)
+	float log(float)
+	float pow(float, float)
+
+	MISCELLANEOUS
+	float abs(float)
+	float fact(float)
+
+DESCRIPTION
+	Floating point constants take the form
+
+	[sign]<number>.<number>[e[sign]<number>]
+
+	where [ ] denotes optional parts.
+	Thus 1.0 and -14.3e-4 are both accepted as floats, 3 and 2e9 are not.
+	In expressions
+
+	f = 1/2.5;
+
+	won't work but
+
+	f = 1.0/2.5;
+
+	will.
+
+	All floats are 32 bits in length, with 24 bits in the mantissa and
+	8 bits in the exponent (IEEE format).
+
+	The function itof converts an integer argument to a float,
+	ftoi coverts a float argument to an integer, and ftoa converts
+	a float argument to an ascii string.
+	Type conversions must always be explicit, there are no automatic
+	typecasts, and the only coversions possible are the ones mentioned
+	above.
+
+	The function rnd will return a float in the interval [0,1).
+
+	The rest of the functions are either self explanatory, or can be
+	looked up in a Unix manual. (If you think this is too terse, you can
+	send additional material to mud@cd.chalmers.se)
+
+NOTA BENE
+	Only use floats when they are really needed. They are slower than
+	integer arithmetic.
+
+SEE ALSO
+	sscanf
+
+

@@ -1,0 +1,32 @@
+/*
+ * Function name: preload_boot
+ * Description  : This function is called from the gamedriver when the game
+ *                is started and after start_boot().  It is called for each
+ *                of the files in the array returned by start_boot() for the
+ *                purpose of preloading them.
+ */
+private void
+preload_boot(string file)
+{
+    string err, creator;
+
+    if (file_size(file + ".c") == -1)
+    {
+        printf("* File doesn't exist: %-s\n", file);
+        return;
+    }
+
+    creator = creator_file(file);
+    set_auth(this_object(), "root:" + creator);
+
+    if (err = (string)LOAD_ERR(file))
+    {
+        printf("* Can not load: %-s:\n\t%-s\n", file, err);
+        printf("!\tError: %-s\n", file + ".c");
+    }
+    else
+    {
+        printf("- %'.'-*s(%s)\n", 74 - strlen(creator), file + ".c", creator);
+    }
+}
+

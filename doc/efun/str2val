@@ -1,0 +1,17 @@
+NAME
+        str2val - Convert a string format variable back to a variable.
+
+SYNOPSYS
+        mixed str2val(string str)
+
+DESCRIPTION
+	The main use of this function is to process a variable that has
+	been converted into a string format via the efun 'val2str'.
+
+	Use of this function directly is discouraged.  You should be
+	using the save/restore_map, save/restore_object functions for
+	saving and retrieving data.
+
+SEE ALSO
+	val2str, save_object, save_map, restore_object, restore_map
+

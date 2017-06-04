@@ -1,0 +1,20 @@
+NAME
+	m_restore_object - load global variables in current object from mapping
+
+SYNOPSIS
+	void m_restore_object(mapping map)
+
+DESCRIPTION
+	Loads all nonstatic global variables from a specifically formatted
+	mapping given by 'map'. The format of the mapping is:
+
+		variable_name	variable_value
+
+		([  intvar:      number,
+		    stringvar:   "stringvalue",
+		    arrayvar:    ({ variable_values }),
+		    mappingvar:  ([ index:value ]), ])
+
+SEE ALSO
+	m_save_object
+

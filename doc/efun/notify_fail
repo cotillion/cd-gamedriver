@@ -2,7 +2,7 @@ NAME
 	notify_fail - give a message to be printed if all commands failed
 
 SYNOPSIS
-	void notify_fail(string message)
+	void notify_fail(string message, void|int priority)
 
 DESCRIPTION
 	With this function you can set a message that will be printed instead
@@ -11,5 +11,7 @@ DESCRIPTION
 	content of the string 'late' and also do other things in the
 	function(s) called through process_string.
 
-SEE ALSO
-	process_string		
+	If you set 'priority' to 0 (zero) then the previous default failure
+	message set, if any, will not be over-written and 'message'
+	will be discarded in favour of the message already assigned.
+

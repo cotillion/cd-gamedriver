@@ -1,10 +1,7 @@
-
-
 USAGE
 
-  string s;
-  s = sprintf(fmt, ...);
-    string fmt;
+  string sprintf(string fmt, ...);
+
 
 Most of the characters in the format string (FMT) get passed straight
 through to the output (ie: printed or put in the return string), to

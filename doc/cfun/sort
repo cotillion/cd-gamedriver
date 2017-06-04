@@ -1,0 +1,21 @@
+NAME
+	sort - sort an array through a specific sort function
+
+SYNOPSIS
+	mixed *sort(mixed *array, void|function sortfunc)
+
+DESCRIPTION
+	Sort the array 'array' through the function 'sortfunc' and
+	return the resulting array.  If you do not specify 'sortfunc'
+	then it will try to do a logical sort on 'array' based on type.
+
+	Strings in alphabetical order, ints in lowest-highest order, etc.
+
+NOTES
+	This is actually a CFUN and needs to be activated within the lib
+	before it can be used.
+
+EXAMPLE
+	varargs mixed
+	sort(mixed arr, function lfunc) = "sort";
+

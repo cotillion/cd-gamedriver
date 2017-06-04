@@ -1,0 +1,22 @@
+NAME
+	query_ip_ident - give the ident string for a player (if available)
+
+SYNOPSIS
+	string query_ip_ident(void|object player)
+
+DESCRIPTION
+	Gives the ident of an interactive player, ie the name the site
+	say the player is connecting to the game under.
+
+NOTES
+	The function valid_query_ip_ident() is called in "/secure/master"
+	to allow filtering of the results based on caller.
+
+WARNING
+	This function demands an external process to be active on the
+	machine running the gamedriver. If that process is not active
+	query_ip_ident will return 0 always.
+
+SEE ALSO
+	query_ip_name, query_ip_number
+

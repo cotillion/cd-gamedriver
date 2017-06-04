@@ -1,0 +1,16 @@
+NAME
+	obsolete - Print an OBSOLETE notification message to stderr.
+
+SYNOPSIS
+	string obsolete(string str)
+
+DESCRIPTION
+	This function will send a message to stderr on the host machine
+	(which is usually mapped to /lplog within the mud) of the format:
+
+	OBSOLETE: <calling_object>: <str>
+
+NOTES
+	This function is not always available and must be manually turned
+	on by a mud administrator.
+

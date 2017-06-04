@@ -1,0 +1,30 @@
+NAME
+        call_out - delayed execution of a function
+
+SYNOPSIS
+        int call_out(string func, int delay|float delay, void|mixed arg)
+
+******* This efun exists for compatibility reasons. Use set_alarm for *********
+******* new code.                                                     *********
+
+DESCRIPTION
+        With this function you can delay the call of a name function
+        `func' for `delay' seconds. If `arg' is specified it is passed as
+	an argument to the function. If `arg' is not specified the id of
+	the callout will be passed as an argument to the function.
+        The function returns the id of the callout.
+
+NOTA BENE
+        Neither "this_interactive()" nor "this_player()" is defined
+        in a function that has been called by "call_out()". If you
+        have a `write()' statement in the function that is called
+        with `call_out()' the output will end up in the game log.
+
+WARNING
+        Never, ever, make a repeating call_out inside a repeating
+        call_out.  The call_out's generated will be exponential, and
+        in less than a minute the entire mud will grind to a halt.
+
+SEE_ALSO
+        set_alarm, get_alarm, get_all_alarms, remove_alarm
+

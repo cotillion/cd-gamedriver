@@ -1,0 +1,13 @@
+/*
+ * Function name: start_shutdown
+ * Description  : This function is called by the gamedriver to get a list
+ *                of all interactive objects that need to be disconnected
+ *                from the game when it is shutting down.
+ * Returns      : object * - the interactive users in the game.
+ */
+private object *
+start_shutdown()
+{
+    return users();
+}
+

@@ -1,0 +1,81 @@
+/*
+ * Function name: start_boot()
+ * Description:   Loads master data, including list of all domains and
+ *                wizards. Then make a list of preload stuff
+ * Arguments:     load_empty: If true start_boot() does no preloading
+ * Return:        List of files to preload
+ */
+private string *
+start_boot(int load_empty)
+{
+    string *prefiles, *links;
+    object simf;
+    int size;
+
+    if (game_started)
+        return 0;
+
+    set_auth(this_object(), "root:root");
+
+    /* Fix the userids of the simul_efun object */
+    if (objectp(simf = find_object(SIMUL_EFUN)))
+    {
+        set_auth(simf, "root:root");
+    }
+
+    write("Retrieving master data for MUD: " + get_mud_name() + ".\n");
+    if (!restore_object(SAVEFILE))
+    {
+        write(SAVEFILE + " nonexistant...  Using defaults.\n");
+        load_fob_defaults();
+        load_guild_defaults();
+#ifdef ENABLE_GRAPH
+        reset_graph();
+#endif
+        runlevel = WIZ_MORTAL;
+        def_locations = ({ });
+        temp_locations = ({ });
+    }
+
+    /* Initialise the siteban structure. */
+    init_sitebans();
+
+    if (load_empty)
+    {
+        write("Not preloading.\n");
+        return 0;
+    }
+
+#ifdef PRELOAD_FIRST
+    /* In case PRELOAD_FIRST is a single string, it contains the path to a
+     * file with the paths to the files to preload, separated by newlines.
+     */
+    if (stringp(PRELOAD_FIRST) && file_size(PRELOAD_FIRST) > 1)
+    {
+        prefiles = explode(read_file(PRELOAD_FIRST), "\n");
+    }
+    /* In case PRELOAD_FIRST is an array, it should be an array of the paths
+     * of the files to preload.
+     */
+    else if (pointerp(PRELOAD_FIRST))
+    {
+        prefiles = PRELOAD_FIRST + ({}); 
+    }
+#endif PRELOAD_FIRST
+
+    write("\nLoading and setting up domain links:\n");
+    links = filter(query_domain_links() + query_mage_links(),
+                load_domain_link);
+
+    size = sizeof(links);
+    while (size--)
+    {
+        prefiles += links[size]->query_preload();
+    }
+
+    write("\nLoading and setting up preload files:  "+
+        sizeof(prefiles) + " files found.\n");
+
+    return prefiles;
+}
+

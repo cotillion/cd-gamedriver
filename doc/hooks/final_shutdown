@@ -1,0 +1,30 @@
+/*
+ * Function name: final_shutdown
+ * Description  : When all mortals are kicked out of the game, this function
+ *                is called last by the gamedriver before the game closes.
+ */
+private void
+final_shutdown()
+{
+    string *links;
+    int index;
+
+#ifdef ENABLE_GRAPH
+    /* Process the graph data even if this isn't the top of the hour. */
+    graph_process_data();
+#endif
+    /* Save the master. */
+    save_master();
+
+    /* Call the domain links. */
+    links = query_domain_links();
+    index = sizeof(links);
+    while(--index >= 0)
+    {
+        if (file_size(links[index] + ".c") != -1)
+        {
+            catch(links[index]->armageddon());
+        }
+    }
+}
+

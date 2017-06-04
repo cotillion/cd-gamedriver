@@ -1,0 +1,29 @@
+NAME
+	say - send message to other livings in the environment of
+              this_player()
+
+SYNOPSIS
+	varargs void say(mixed str, mixed oblist)
+
+DESCRIPTION
+        Sends a message (via catch_msg()) to other livings in
+        the environment of this_player().  Note that this_player()
+        will not receive the message.
+
+        The first argument is the message (see catch_msg).
+
+        The second argument is an object or an array of objects
+        which should _not_ receive the message.  This may be 0
+        if no objects should be excluded.
+
+NOTES
+	This is actually a CFUN and must be activated through the mudlib
+	before it can be used.
+
+EXAMPLE
+	varargs void
+	say(mixed str, mixed oblist) = "say";
+
+SEE ALSO
+        tell_room, write
+

@@ -1,0 +1,12 @@
+/*
+ * Function name: get_vbfc_object
+ * Description  : This function returns the objectpointer to the VBFC
+ *                object.
+ * Returns      : object - the objectpointer to the VBFC object.
+ */
+private object
+get_vbfc_object()
+{
+    return VBFC_OBJECT->ob_pointer();
+}
+

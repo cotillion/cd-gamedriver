@@ -1,0 +1,33 @@
+NAME
+	tell_room - send message to livings in a room
+
+SYNOPSIS
+	varargs void tell_room(mixed room, mixed str, mixed oblist,
+                               object from_player)
+
+DESCRIPTION
+        Sends a message (via catch_msg()) to livings in a given room.
+
+        The first argument is the room object or filename.
+
+        The second argument is the message (see catch_msg).
+
+        The third argument is an object or an array of objects
+        which should _not_ receive the message.  This may be 0
+        if no objects should be excluded.
+
+        The fourth argument is the object that generated the message.
+        This defaults to this_player().
+
+NOTES
+	This is actually a CFUN and needs to be activated within the mudlib
+	before it can be used.
+
+EXAMPLE
+	varargs void
+	tell_room(mixed room, mixed str, mixed oblist = 0,
+		  object from_player = this_player()) = "tell_room";
+
+SEE ALSO
+        say
+

@@ -1,0 +1,21 @@
+NAME
+	query_trigverb - give the currently active trigger verb
+
+SYNOPSIS
+	string query_trigverb()
+
+DESCRIPTION
+	This function return the ACTUAL verb that triggered an action.
+	The distincion is import from query_verb() which returns the
+	entire verb, whereas query_trigverb() returns only that which
+	was actually typed.  This is used mainly when you have actions
+	of the type:
+
+	  add_action("function","verb",1);
+
+	If the players types 've': query_verb() will return "verb";
+	whereas query_trigverb() will return "ve".
+
+SEE ALSO
+	query_verb
+

@@ -1,0 +1,13 @@
+NAME
+	break_point - an efun used when debugging the gamedriver
+
+SYNOPSIS
+	void break_point()
+
+DESCRIPTION
+	The function produces a fatal error if the parameter stack is of
+	the wrong size.
+
+	IF YOU ARE NOT DEBUGGING THE GAMEDRIVER YOU SHOULD NEVER CALL THIS
+	FUNCTION!!!!!
+

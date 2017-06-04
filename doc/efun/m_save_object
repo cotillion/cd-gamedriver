@@ -1,0 +1,21 @@
+NAME
+	m_save_object - save global variables in current object into a mapping
+
+SYNOPSIS
+	mapping m_save_object()
+
+DESCRIPTION
+	Saves all non static global variables of an object into a mapping
+	that it then returns.  All variables are saved except those currently
+	of the type object and function.
+
+		variable_name	variable_value
+
+		([ intvar:	number,
+		   stringvar:	"stringvalue",
+		   arrayvar:	({ variable_values }),
+		   mappingvar:	([ index:value ]), ])
+
+SEE ALSO
+	m_restore_object
+

@@ -1,0 +1,60 @@
+/*
+ * Function name: runtime_error
+ * Description  : In case a runtime error occurs, we tell the message to
+ *                the people who need to hear it.
+ * Arguments    : string error   - the error message.
+ *                object ob      - the object that has the error.
+ *                string program - the program name of the error.
+ *                string file    - the filename of the error.
+ */
+private void
+runtime_error(string error, object ob, string prog, string file)
+{
+    string fmt_error, cr, path, mortal;
+
+    /* Display the message to interactive wizards. */
+    if (this_interactive())
+    {
+        if (this_interactive()->query_wiz_level() ||
+            this_interactive()->query_prop(PLAYER_I_SEE_ERRORS))
+        {
+            fmt_error =
+                "\n\nRuntime error: " + error +
+                "       Object: " + (ob ? file_name(ob) : "<???>") +
+                "\n      Program: " + prog +
+                "\n         File: " + file + "\n\n";
+            this_interactive()->catch_tell(fmt_error);
+            return;
+        }
+        else
+        {
+            /* Tell the player an error occured, but not which error. */
+            mortal = capitalize(this_interactive()->query_real_name());
+            this_interactive()->catch_tell("Your sensitive mind notices " +
+                "a wrongness in the fabric of space.\n");
+        }
+    }
+
+    set_auth(this_object(), "root:root");
+    /* Create the log directory if necessary. */
+    if (objectp(ob))
+        path = query_wiz_path(creator_object(ob));
+    else
+        path = "";
+
+    path += "/log";
+    
+    if (file_size(path) != -2)
+        mkdir(path);
+    
+    path += "/runtime";
+    fmt_error = ctime(time()) + (strlen(mortal) ?
+        " (Interactive mortal: " + mortal + ")" : "") + "\n" +
+        "Runtime error: " + error +
+        "       Object: " + (ob ? file_name(ob) : "<???>") + "\n" +
+        "      Program: " + prog + "\n" +
+        "         File: " + file + "\n\n";
+
+    write_file(path, fmt_error);
+}
+

@@ -1,0 +1,12 @@
+/*
+ * Function name: object_name
+ * Description  : This function is called by sprintf() when
+ *                attempting to resolve an objects name.
+ * Returns      : string - name of this object.
+ */
+private string
+object_name(object ob)
+{
+    return geteuid(ob);
+}
+
