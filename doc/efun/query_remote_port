@@ -1,0 +1,19 @@
+NAME
+	query_remote_port - give the remote tcp port of the player 
+
+SYNOPSIS
+	int query_remote_port(void|object player)
+
+DESCRIPTION
+    Gives the remote port of an interactive object.
+    If the object is not interactive 0 will be returned.
+	
+	The number returned is in the range 0 - 65536.
+
+NOTES
+	The function valid_query_ip_number_name() is called in
+	"/secure/master" to allow filtering of the results based on caller.
+
+SEE ALSO
+	query_ip_number, query_ip_name
+

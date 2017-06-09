@@ -3048,23 +3048,23 @@ f_query_snoop(int num_arg)
 
 
 static void
-f_query_port_number(int num_arg)
+f_query_remote_port(int num_arg)
 {
     struct svalue *ret;
-    char *tmp;
     struct object *ob = command_giver;
 	    
     if (num_arg == 1)
     {
 	if (sp->type != T_OBJECT)
-	    error("Bad optional argument to query_port_number()\n");
+	    error("Bad optional argument to query_remote_port()\n");
 	else
 	    ob = sp->u.ob;
     }
 
     push_object(current_object);
     push_object(ob);
-    ret = apply_master_ob(M_VALID_QUERY_PORT_NUMBER, 2);
+
+    ret = apply_master_ob(M_VALID_QUERY_IP_NUMBER_NAME, 2);
     if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
     {
 	if (num_arg)
@@ -3073,14 +3073,20 @@ f_query_port_number(int num_arg)
 	return;
     }
 
-    tmp = query_port_number(num_arg ? sp->u.ob : 0);
+    char *port_str = query_port_number(ob);
+
+    if (num_arg)
+        pop_stack();
+
+    long long port = 0;
+    if (port_str) {
+        port = strtoll(port_str, NULL, 10);
+    }
 
     if (num_arg)
 	pop_stack();
-    if (tmp == 0)
-	push_number(0);
-    else
-	push_string(tmp, STRING_MSTRING);
+
+    push_number(port);
 }
 
 static void
@@ -3111,11 +3117,13 @@ f_query_ip_number_name(int name, int num_arg)
     }
 
     if (name)
-	tmp = query_ip_name(num_arg ? sp->u.ob : 0);
+	tmp = query_ip_name(ob);
     else
-	tmp = query_ip_number(num_arg ? sp->u.ob : 0);
+	tmp = query_ip_number(ob);
+
     if (num_arg)
 	pop_stack();
+
     if (tmp == 0)
 	push_number(0);
     else

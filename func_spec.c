@@ -113,7 +113,7 @@ int	query_interactive(object|int);
 string  query_ip_ident(object default: F_THIS_OBJECT);
 string	query_ip_name(void|object);
 string	query_ip_number(void|object);
-string  query_port_number(void|object);
+int     query_remote_port(void|object);
 string	query_living_name(object);
 object	query_snoop(object);
 string	query_trigverb();

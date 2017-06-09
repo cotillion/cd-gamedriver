@@ -35,7 +35,6 @@ valid_exec
 valid_snoop
 valid_query_ip_ident
 valid_query_ip_number_name
-valid_query_port_number
 #
 # Other communication.
 #######
