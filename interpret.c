@@ -3083,9 +3083,6 @@ f_query_remote_port(int num_arg)
         port = strtoll(port_str, NULL, 10);
     }
 
-/*    if (num_arg)
-	pop_stack();
-*/
     push_number(port);
 }
 
