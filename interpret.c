@@ -2571,8 +2571,8 @@ f_write_socket_gmcp(int num_arg)
         free(json);
     }
 
-    pop_stack();
-    pop_stack();
+    pop_n_elems(2);
+    push_number(0);
 }
 
 static void
