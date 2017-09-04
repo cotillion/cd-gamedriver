@@ -1597,7 +1597,6 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
 		continue;
             else
 	    {
-		il = back + 1;  /* Match "adj[il] adj[il+1] .. adj[back]" */
                 back = 0;
 		break;
 	    }

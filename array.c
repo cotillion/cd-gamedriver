@@ -252,7 +252,6 @@ implode_string(struct vector *arr, char *del)
     ret = allocate_mstring(size + (num-1) * len);
     p = ret;
     p[0] = '\0';
-    size = 0;
     num = 0;
     for (i = 0; i < arr->size; i++) 
     {

@@ -420,7 +420,6 @@ tcpsvc_init(u_short port_nr)
         exit(1);
     }
 
-    s = -1;
     for (rp = res; rp != NULL; rp = rp->ai_next)
     {
         s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);

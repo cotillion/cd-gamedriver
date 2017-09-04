@@ -1065,7 +1065,7 @@ validate_shadowing(struct object *ob)
 void 
 check_for_destr(struct svalue *arg)
 {
-    int i, change;
+    int i;
     struct vector *v;
     struct mapping *m;
     struct apair *p, **pp;
@@ -1107,33 +1107,28 @@ check_for_destr(struct svalue *arg)
 	    }
 	}
 	/* Index parts that has been destructed is removed */
-	change = 1;
-	do 
-	{
-	    for (i = 0 ; i < m->size ; i++) 
-	    {
-		for (pp = &m->pairs[i]; *pp; )
-		{
-		    p = *pp;
-		    if ((p->arg.type == T_OBJECT &&
-			 (p->arg.u.ob->flags & O_DESTRUCTED)) ||
-			(p->arg.type == T_FUNCTION &&
-			 !legal_closure(p->arg.u.func)))
-		    {
-			*pp = p->next;
-			free_svalue(&p->arg);
-			free_svalue(&p->val);
-			free((char *)p);
-			m->card--;
-		    } 
-		    else
-		    {
-			pp = &p->next;
-		    }
-		}
-	    }
-	    change = 0;
-	} while (change != 0);
+        for (i = 0 ; i < m->size ; i++) 
+        {
+            for (pp = &m->pairs[i]; *pp; )
+            {
+                p = *pp;
+                if ((p->arg.type == T_OBJECT &&
+                     (p->arg.u.ob->flags & O_DESTRUCTED)) ||
+                    (p->arg.type == T_FUNCTION &&
+                     !legal_closure(p->arg.u.func)))
+                {
+                    *pp = p->next;
+                    free_svalue(&p->arg);
+                    free_svalue(&p->val);
+                    free((char *)p);
+                    m->card--;
+                } 
+                else
+                {
+                    pp = &p->next;
+                }
+            }
+        }
 	break;
 	
     default:
@@ -3233,7 +3228,6 @@ f_object_clones(int num_arg)
 	v = allocate_array(0);
     else
     {
-	ob = sp->u.ob;
 	num_clones = sp->u.ob->prog->num_clones;
 	v = allocate_array(num_clones);
 	for (i = 0, ob = sp->u.ob->prog->clones;

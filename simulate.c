@@ -1127,14 +1127,13 @@ get_dir(char *path)
      */
     for (de = readdir(dirp); de; de = readdir(dirp))
     {
-	namelen = strlen(de->d_name);
 	if (!do_match && (strcmp(de->d_name, ".") == 0 ||
 			  strcmp(de->d_name, "..") == 0))
 	    continue;
 	if (do_match && !match_string(regexp, de->d_name))
 	    continue;
 	count++;
-	if ( count >= MAX_ARRAY_SIZE)
+	if (count >= MAX_ARRAY_SIZE)
 	    break;
     }
     /*

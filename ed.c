@@ -623,7 +623,6 @@ doread(int lin, char *fname)
     unsigned int	lines;
     static char	str[MAXLINE];
 
-    err = 0;
     P_NONASCII = P_NULLCHAR = P_TRUNCATED = 0;
 
     if (P_DIAG)
@@ -634,7 +633,7 @@ doread(int lin, char *fname)
         return( ERR );
     }
     setCurLn( lin );
-    for(lines = 0, bytes = 0;(err = egets(str,MAXLINE,fp)) > 0;)
+    for (lines = 0, bytes = 0; (err = egets(str,MAXLINE,fp)) > 0; )
     {
         bytes += err;
         if(ins(str) < 0)

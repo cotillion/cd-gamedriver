@@ -218,6 +218,8 @@ gobble(int c)
     return 0;
 }
 
+
+__attribute__((format(printf, 1, 2)))
 static void
 lexerror(char *fmt, ...)
 {
@@ -2280,7 +2282,7 @@ cond_get_exp(int priority)
 	case BNOT  : value = ~value; break;
 	case LNOT  : value = !value; break;
 	case UMINUS: value = -value; break;
-	case UPLUS : value =  value; break;
+	case UPLUS : /* value =  value; */ break;
 	default :
 	    lexerror("illegal unary operator in #if");
 	    return 0;
