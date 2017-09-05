@@ -389,7 +389,7 @@ defined_function(char *s)
     else
 	if (sub_name - s > 2)
 	{
-	    super_name = xalloc((size_t)(sub_name - s - 1));
+	    super_name = alloca((size_t)(sub_name - s - 1));
 	    (void)memcpy(super_name, s, (size_t)(sub_name - s - 2));
 	    super_name[sub_name - s - 2] = 0;
 	    if (strcmp(super_name, "this") == 0)
