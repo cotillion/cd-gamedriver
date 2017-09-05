@@ -469,8 +469,6 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	    (void)sprintf(tdb,"extra_ref   : %d\n", ob->extra_ref);
 	    (void)strcat(db_buff, tdb);
 #endif
-	    (void)sprintf(tdb,"swap_num    : %d\n", ob->swap_num);
-	    (void)strcat(db_buff, tdb);
 	    (void)snprintf(tdb, sizeof(tdb), "name        : '%s'\n", ob->name);
 	    (void)strcat(db_buff, tdb);
 	    (void)snprintf(tdb, sizeof(tdb), "next_all    : OBJ(%s)\n",

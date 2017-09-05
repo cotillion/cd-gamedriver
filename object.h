@@ -31,7 +31,6 @@ struct object {
 #ifdef DEBUG
     int extra_ref;		/* Used to check ref count. */
 #endif
-    int swap_num;		/* Swap file offset. -1 is not swapped yet. */
     struct program *prog;
     char *name;
     struct task *callout_task;
