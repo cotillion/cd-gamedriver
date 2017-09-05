@@ -10,6 +10,8 @@
  */
 #include "config.h"
 
+#include "interpret.h"
+
 #define O_CREATED		0x02  /* Has 'create()' been called */
 #define O_ENABLE_COMMANDS	0x04  /* Can it execute commands ? */
 #define O_CLONE			0x08  /* Is it cloned from a master copy ? */
@@ -46,6 +48,7 @@ struct object {
     struct object *next_hashed_living;
     char *living_name;			/* Name of living object if in hash */
     struct svalue *variables;		/* All variables to this program */
+    struct svalue auth;                 /* The protected auth variable */ 
 };
 
 #define WARNOBSOLETE(ob, msg)	if (((ob)->flags & O_OBSOLETE_WARNING) == 0) \

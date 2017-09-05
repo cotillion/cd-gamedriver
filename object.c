@@ -888,6 +888,7 @@ get_empty_object()
      */
     *ob = NULL_object;
     ob->ref = 1;
+    ob->auth = const0;
     return ob;
 }
 

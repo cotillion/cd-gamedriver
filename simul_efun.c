@@ -80,18 +80,15 @@ get_simul_efun()
 	int num_var, i;
 	extern int tot_alloc_variable_size;
 
-	num_var = ob->prog->num_variables +
-	    ob->prog->inherit[ob->prog->num_inherited - 1]
-		.variable_index_offset + 1;
+	num_var = ob->prog->num_variables + ob->prog->inherit[ob->prog->num_inherited - 1].variable_index_offset;
+
 	if (ob->variables)
-	    fatal("Object allready initialized!\n");
+	    fatal("Object already initialized!\n");
 	
-	ob->variables = (struct svalue *)
-	    xalloc(num_var * sizeof(struct svalue));
+	ob->variables = (struct svalue *)xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
-	for (i= 0; i<num_var; i++)
+	for (i = 0; i < num_var; i++)
 	    ob->variables[i] = const0;
-	ob->variables++;
     }
     current_object = 0;
 #else

@@ -1,3 +1,8 @@
+#ifndef INTERPRET_H
+#define INTERPRET_H
+
+#include <setjmp.h>
+
 #define push_svalue(val) \
     { \
 	if (sp + 1 >= &start_of_stack[EVALUATOR_STACK_SIZE]) \
@@ -155,8 +160,8 @@ extern struct control_stack *csp;	/* Points to last element pushed */
 #define DECREF(x) if (x) x--
 
 void push_pop_error_context(int push);
-INLINE void pop_stack(void);
-INLINE int search_for_function(char *name, struct program *prog);
+void pop_stack(void);
+int search_for_function(char *name, struct program *prog);
 void free_closure(struct closure *f);
 void push_control_stack(struct object*, struct program *, struct function *funp);
 void pop_control_stack(void);

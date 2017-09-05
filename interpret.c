@@ -2710,13 +2710,15 @@ f_set_auth(int num_arg)
 	push_svalue(arg + 1);
 	ret = apply_master_ob(M_VALID_SET_AUTH, 3);
     }
+
     if (!ret)
     {
 	pop_n_elems(2);
 	push_number(0);
 	return;
     }
-    assign_svalue(&(arg->u.ob->variables[-1]), ret);
+    assign_svalue(&arg->u.ob->auth, ret);
+    free_svalue(ret);
     pop_n_elems(2);
     push_number(0);
 }
@@ -2729,20 +2731,20 @@ f_query_auth(int num_arg)
     struct object *ob = sp->u.ob;
 
     pop_stack();
-    switch(ob->variables[-1].type)
+
+    switch (ob->auth.type)
     {
     case T_POINTER:
-	push_vector(allocate_array(ob->variables[-1].u.vec->size), FALSE);
-	for(i = 0; i < ob->variables[-1].u.vec->size; i++)
-	    assign_svalue_no_free(&(sp->u.vec->item[i]),
-				  &(ob->variables[-1].u.vec->item[i]));
+	push_vector(allocate_array(ob->auth.u.vec->size), FALSE);
+	for (i = 0; i < ob->auth.u.vec->size; i++)
+	    assign_svalue_no_free(&(sp->u.vec->item[i]), &(ob->auth.u.vec->item[i]));
 	break;
     case T_MAPPING:
-	push_mapping(copy_mapping(ob->variables[-1].u.map), FALSE);
+	push_mapping(copy_mapping(ob->auth.u.map), FALSE);
 	break;
 	/* I think functions are handled correctly be default.  -- LA */
     default:
-	push_svalue(&(ob->variables[-1]));
+	push_svalue(&(ob->auth));
 	break;
     }
 }

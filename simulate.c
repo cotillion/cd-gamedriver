@@ -375,16 +375,14 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 
 	num_var = ob->prog->num_variables +
 	    ob->prog->inherit[ob->prog->num_inherited - 1]
-		.variable_index_offset + 1;
+		.variable_index_offset;
 	if (ob->variables)
 	    fatal("Object allready initialized!\n");
 	
-	ob->variables = (struct svalue *)
-	    xalloc(num_var * sizeof(struct svalue));
+	ob->variables = (struct svalue *) xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
-	for (i= 0; i<num_var; i++)
+	for (i = 0; i < num_var; i++)
 	    ob->variables[i] = const0;
-	ob->variables++;
     }
     /* 
 	We ought to add a flag here marking the object as unfinished
@@ -399,7 +397,9 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	push_object(ob);
 	save_resident = ob->prog->flags & PRAGMA_RESIDENT;
 	ob->prog->flags &= ~PRAGMA_RESIDENT;
-	(void)apply_master_ob(M_LOADED_OBJECT, 2);
+
+	apply_master_ob(M_LOADED_OBJECT, 2);
+
 	if ((ob->flags & O_DESTRUCTED) == 0)
 	    ob->prog->flags |= save_resident;
     }
@@ -473,22 +473,22 @@ clone_object(char *str1)
 
 	num_var = new_ob->prog->num_variables +
 	    new_ob->prog->inherit[ob->prog->num_inherited - 1]
-	    .variable_index_offset + 1;
+	    .variable_index_offset;
 	if (new_ob->variables)
 	    fatal("Object allready initialized!\n");
 	
 	new_ob->variables = (struct svalue *)
 	    xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
-	for (i= 0; i<num_var; i++)
+	for (i = 0; i < num_var; i++)
 	    new_ob->variables[i] = const0;
-	new_ob->variables++;
     }
     if (master_ob)
     {
 	push_object(current_object);
 	push_object(new_ob);
-	(void)apply_master_ob(M_CLONED_OBJECT, 2);
+	apply_master_ob(M_CLONED_OBJECT, 2);
+
 	if (new_ob->flags & O_DESTRUCTED)
 	    return 0;
     }
@@ -940,19 +940,19 @@ destruct2(struct object *ob)
 	int i;
 	num_var = ob->prog->num_variables +
 	    ob->prog->inherit[ob->prog->num_inherited - 1].
-		variable_index_offset + 1;
+		variable_index_offset;
 
-	ob->variables--;
-	for (i=0; i < num_var; i++) {
+	for (i = 0; i < num_var; i++) {
 	    free_svalue(&ob->variables[i]);
 	    ob->variables[i].type = T_NUMBER;
 	    ob->variables[i].u.number = 0;
 	}
 	free((char *)(ob->variables));
-	ob->variables = 0;
+	ob->variables = NULL;
 	tot_alloc_variable_size -= num_var * sizeof(struct svalue);
     }
 
+    free_svalue(&ob->auth);
     free_prog(ob->prog);
     ob->prog = 0;
 
