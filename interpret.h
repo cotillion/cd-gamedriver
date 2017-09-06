@@ -169,3 +169,5 @@ void push_vector(struct vector*i, bool_t);
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
 void clear_closure_cache(void);
 #endif
+
+#endif
