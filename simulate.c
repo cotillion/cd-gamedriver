@@ -1950,7 +1950,7 @@ get_gamedriver_info(char *str)
     extern int num_distinct_strings_shared, num_distinct_strings_malloced;
     extern long bytes_distinct_strings_shared, bytes_distinct_strings_malloced;
     extern long overhead_bytes_shared, overhead_bytes_malloced;
-    extern int num_call, call_out_size;
+    extern long long num_call, call_out_size;
     extern unsigned long long globcache_tries, globcache_hits;
     extern struct vector null_vector;
     extern unsigned long long cache_tries, cache_hits;
@@ -1986,7 +1986,7 @@ get_gamedriver_info(char *str)
 		    num_arrays,	total_array_size);
 	    (void)strcat(debinf, tmp);
 
-	    (void)sprintf(tmp,"Call_outs:\t\t%12d %12d\n", num_call,
+	    (void)sprintf(tmp,"Call_outs:\t\t%12lld %12lld\n", num_call,
 			call_out_size);
 	    (void)strcat(debinf, tmp);
 

@@ -88,8 +88,10 @@ send_signals(void *x)
     else
         signal_task = 0;
     if (i < MAX_SIGNALS)
+    {
         push_string(disp[i].name, STRING_CSTRING);
-        (void)apply_master_ob(M_EXTERNAL_SIGNAL, 1);
+        apply_master_ob(M_EXTERNAL_SIGNAL, 1);
+    }
 }
 
 void
