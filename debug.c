@@ -1494,11 +1494,12 @@ mem_variables(FILE *f, struct object *ob)
     num_num = 0;
     num_float = 0;
 
-    num_var = ob->prog->num_variables +
-	ob->prog->inherit[ob->prog->num_inherited - 1].variable_index_offset;
+    mem_incr(&ob->auth);
+
+    num_var = ob->prog->num_variables + ob->prog->inherit[ob->prog->num_inherited - 1].variable_index_offset;
     if (!ob->variables)
-	num_var = -1;
-    for (i = -1; i < num_var; i++)
+	num_var = 0;
+    for (i = 0; i < num_var; i++)
     {
 	mem_incr(&ob->variables[i]);
     }
