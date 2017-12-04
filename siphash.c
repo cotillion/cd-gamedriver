@@ -44,7 +44,6 @@ siphash(const unsigned char key[16], const unsigned char *m, size_t len) {
 		mi = U8TO64_LE(m + i);
 		v3 ^= mi;
 		sipcompress()
-		sipcompress()
 		v0 ^= mi;
 	}
 
@@ -61,10 +60,8 @@ siphash(const unsigned char key[16], const unsigned char *m, size_t len) {
 	};
 	v3 ^= last7;
 	sipcompress()
-	sipcompress()
 	v0 ^= last7;
 	v2 ^= 0xff;
-	sipcompress()
 	sipcompress()
 	sipcompress()
 	sipcompress()
