@@ -213,7 +213,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     if (name_length > sizeof name - 4)
 	name_length = sizeof name - 4;
     name[name_length] = '\0';
-    while (name[name_length-2] == '.' && name[name_length-1] == 'c') {
+    while (name_length >= 2 && name[name_length-2] == '.' && name[name_length-1] == 'c') {
 	name[name_length-2] = '\0';
 	name_length -= 2;
     }
