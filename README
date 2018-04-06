@@ -1,9 +1,17 @@
 
-This is the CD Gamedriver. 
+This is the CD Gamedriver.
 
 Primarly developed to run the Genesis LPMUD running on http://www.genesismud.org/
 
 Changelog:
+===============================================================================
+README CD.06.06
+- A number of memory leaks have been fixed
+- A number of efun related crashes have been fixed
+- New efun query_remote_port() (thanks Bithir)
+- ctime() now has a default argument (thanks Lucius)
+- parse_command %d will now properly handle 0-<x>
+
 ===============================================================================
 README CD.06.05
 - MSSP Protcol support
@@ -14,12 +22,12 @@ README CD.06.05
 
 ===============================================================================
 README CD.06.04
-- IPv6 support has been added to all services except udp. 
+- IPv6 support has been added to all services except udp.
   The UDP service is not secure and should be disabled in active muds.
   This also requires a new version of the hname binary to be installed.
 - Bibopmalloc has been disabled as it appears Linux system malloc is alot faster
   and not much different in memory consumption.
-- Refcounters changed to unsigned int as short could be overflowed fairly easily 
+- Refcounters changed to unsigned int as short could be overflowed fairly easily
   crashing the GD.
 - Fixed an issue where self referencing arrays would crash the GD.
 
@@ -399,7 +407,7 @@ arguments are not legal.
 The new efuns set_alarm(), get_alarm(), remove_alarm() and get_all_alarms()
 implement the new call_out system.
 
-The driver calls the function runtime_error() in the master object when 
+The driver calls the function runtime_error() in the master object when
 a runtime error is encountered. It is then up to the master object to
 send the information to the player/to the responsible wizard etc.
 
@@ -468,7 +476,7 @@ per callout in the object.
     int    id_of_callout = calls[i][0];
     string function      = calls[i][1]; // name of the callout function
     float  time_left     = calls[i][2]; // how soon until it gets called?
-    float  delay         = calls[i][3]; // the original delay asked for 
+    float  delay         = calls[i][3]; // the original delay asked for
                                         // (might be negative)
     mixed  arg           = calls[i][4]; // Argument 3 to call_out().
     }
@@ -490,7 +498,7 @@ also
     debug("query_swap"); /* or */ debug("query_swap", 0);
         // Returns the current swapping parameters.
 
-    debug("query_swap", 1); 
+    debug("query_swap", 1);
         // Returns swapin/swapout statistics as an (int ret[4][3])
         // ({ // Objects in.
         //    ({ /* last second */, /* last minute */, /* last hour */ }),
@@ -500,7 +508,7 @@ also
         //    ({ /* last second */, /* last minute */, /* last hour */ }),
               // Programs out.
         //    ({ /* last second */, /* last minute */, /* last hour */ }),
-        // }) 
+        // })
     debug("query_swap", 2);
         // Returns age of oldest object/program not swapped out.
 
@@ -543,7 +551,7 @@ postconditions are bit 9 (0x200) and invatiants bit 10 (0x400).
         // Sets which assertions to execute in the program prog.
     debug("query_debug_prog", prog);
         // Returns which assertions are being executed in program prog.
-        
+
     debug("set_debug_obj", ob, bitmask);
         // Controles which assertions to execute in the object ob.
     debug("query_debug_obj", ob);
@@ -560,7 +568,7 @@ An alternate form of ordinary assertions exists.
                     // invariants or ordinary assertions are turned on.
     @ 0xffff : expr; // Will be executed when any assertions are turned on.
 
-Constructors/destructors functions that are called when an object is 
+Constructors/destructors functions that are called when an object is
 created/destructed.
 A constructor is called before create() is called and after all constructors
 in inherited classes have been called.
@@ -610,12 +618,12 @@ version. We will make extensive changes to the LPC language, to the reset,
 heart_beat and call_out systems in the next version, so we will be upping
 the version numbers to CD.03.XX. (Don't worry, the changes will require
 very minor muldib changes.)
-A version of the CD mudlib that should work with this driver version is 
+A version of the CD mudlib that should work with this driver version is
 released together with this driver version.
 Changes since the previous release:
-There are now working cfuns for a number of heavily used functions. They work 
+There are now working cfuns for a number of heavily used functions. They work
 with the CDLIB mudlib. The original lfuns are left intact in the mudlib
-release, so if you have problems with the cfuns, you can revert to the lfuns 
+release, so if you have problems with the cfuns, you can revert to the lfuns
 at any time.
 The rusage calls have been fixed, so now you can use top_ten_cpu and
 getprofile options to the debug() efun. (If you have enabled the options in
@@ -625,7 +633,7 @@ distributed with the mudlib. In the future I plan to distribute the efundocs
 separately.
 The error logs look neater.
 Hname now supports the user identification protocol.
-A bunch of minor bugs have been fixed. Among them some obscure bugs in 
+A bunch of minor bugs have been fixed. Among them some obscure bugs in
 parse_command. There are a few known bugs remaining. The most important
 ones are that very long lines sent to write_socket hang the driver and that
 virtual inheritance doesn't work properly under some circumstances.
@@ -661,7 +669,7 @@ uids and euids. It also avoids the problems with errors during vbfc calls.
 ===============================================================================
 README from the third beta release of the CD.02.02 driver.
 
-The differences from the previous beta versions are that I fixed the little 
+The differences from the previous beta versions are that I fixed the little
 makefile problem, and that cfuns now should work properly. The ones that I have
 tested with cdlib are write, check_call and query_prop. The others were
 used with the kingdoms mudlib, and are probably not working they way
@@ -672,7 +680,7 @@ yacc and bison. (Compiles faster and creates faster code.) You can get
 a bit better speed by installing it and changing the makefile to use it instead
 of bison.
 
-If you want to try your hands at coding cfuns the following functions are 
+If you want to try your hands at coding cfuns the following functions are
 strong candidates:
 
 In /secure/simul_efun:
