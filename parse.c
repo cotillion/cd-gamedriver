@@ -10,6 +10,7 @@
 */
 
 #include <alloca.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,8 +61,8 @@ extern int tolower (int);
   In earlier versions it used the normal id() lfun in the LPC objects to
   find out if a given object was identified by a certain string. This was
   highly inefficient as it could result in hundreds or maybe thousands of
-  calls when very long commands were parsed. 
-  
+  calls when very long commands were parsed.
+
   The new version relies on the LPC objects to give it three lists of 'names'.
 
        1 - The normal singular names.
@@ -75,7 +76,7 @@ extern int tolower (int);
        3 - string *parse_command_adjectiv_id_list();
 
   The only really needed list is the first. If the second does not exist
-  than the efun will try to create one from the singular list. For 
+  than the efun will try to create one from the singular list. For
   grammatical reasons it does not always succeed in a perfect way. This is
   especially true when the 'names' are not single words but phrases.
 
@@ -103,7 +104,7 @@ extern int tolower (int);
                 - Would normally return ({ "iffish" })
 
   The last two are the default list of the prepositions and a single so called
-  'all' word. 
+  'all' word.
 
        string *parse_command_prepos_list()
                  - Would normally return: ({ "in", "on", "under" })
@@ -119,13 +120,13 @@ extern int tolower (int);
     * Language configured parse.c
     *
     #define PARSE_FOREIGN
-   
+
     char *parse_to_plural(str)
         char *str;
     {
 
         * Your own plural converter for your language *
-     
+
     }
 
       * The numberwords below should be replaced for the new language *
@@ -133,12 +134,12 @@ extern int tolower (int);
     static char *ord1[] = {"", "first", "second", "third", "fourth", "fifth",
 			   "sixth", "seventh", "eighth", "ninth", "tenth",
 			   "eleventh", "twelfth", "thirteenth", "fourteenth",
-			   "fifteenth", "sixteenth", "seventeenth", 
+			   "fifteenth", "sixteenth", "seventeenth",
 			   "eighteenth","nineteenth"};
 
     static char *ord10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
 			    "seventy", "eighty","ninety"};
-    
+
     static char *sord10[] = {"", "", "twentieth", "thirtieth", "fortieth",
 			     "fiftieth", "sixtieth","seventieth", "eightieth",
 			     "ninetieth"};
@@ -154,7 +155,7 @@ extern int tolower (int);
     #include "parse_english.c"      * This parse.c file *
 
 #endif
-  
+
   When all these things are defined parse_command() works best and most
   efficient. What follows is the docs for how to use it from LPC:
 
@@ -167,7 +168,7 @@ int parse_command(string, object/object*, string, destargs...)
 
 	string		Given command
 
-	object*		if arr 
+	object*		if arr
 	object			array holding the accessible objects
 			if ob
 				object from which to recurse and create
@@ -200,7 +201,7 @@ int parse_command(string, object/object*, string, destargs...)
 				   if array: array[0]=matched word
 			%i	Returns a special array on the form:
 				[0] = (int) +(wanted) -(order) 0(all)
-				[1..n] (object) Objectpointers	
+				[1..n] (object) Objectpointers
 			%l	Returns a special array on the form:
 				[0] = (int) +(wanted) -(order) 0(all)
 				[1..n] (object) Objectpointers
@@ -214,7 +215,7 @@ int parse_command(string, object/object*, string, destargs...)
   The return values of %i and %l is also the most complex. They return an
   array consisting of first a number and then all possible objects matching.
   As the typical string matched by %i/%l looks like: 'three red roses',
-  'all nasty bugs' or 'second blue sword' the number indicates which 
+  'all nasty bugs' or 'second blue sword' the number indicates which
   of these numerical constructs was matched:
 
          if numeral >0 then three, four, five etc were matched
@@ -233,15 +234,15 @@ int parse_command(string, object/object*, string, destargs...)
        to the caller to decide which of the objects are actually visible
        meaning that 'second' might not at all mean the second object in
        the returned array of objects.
-			
+
 Example:
 
  if (parse_command("spray car",environment(this_player()),
-                      " 'spray' / 'paint' [paint] %i ",items))  
+                      " 'spray' / 'paint' [paint] %i ",items))
  {
       If the pattern matched then items holds a return array as described
         under 'destargs' %i above.
-     
+
  }
 
  BUGS / Features
@@ -258,27 +259,27 @@ Example:
             This will be fixed in the future
 
 
-*/ 
+*/
 
 /* Some useful string macros
 */
 #define EQ(x,y) (strcmp(x,y)==0)
 
-/* Function in LPC which returns a list of ids 
+/* Function in LPC which returns a list of ids
 */
-#define QGET_ID "parse_command_id_list"		
+#define QGET_ID "parse_command_id_list"
 #define M_QGET_ID M_PARSE_COMMAND_ID_LIST
-/* Function in LPC which returns a list of plural ids 
+/* Function in LPC which returns a list of plural ids
 */
-#define QGET_PLURID "parse_command_plural_id_list"   
+#define QGET_PLURID "parse_command_plural_id_list"
 #define M_QGET_PLURID M_PARSE_COMMAND_PLURAL_ID_LIST
-/* Function in LPC which returns a list of adjectiv ids 
+/* Function in LPC which returns a list of adjectiv ids
 */
-#define QGET_ADJID "parse_command_adjectiv_id_list" 
+#define QGET_ADJID "parse_command_adjectiv_id_list"
 #define M_QGET_ADJID M_PARSE_COMMAND_ADJECTIV_ID_LIST
 /* Function in LPC which returns a list of prepositions
 */
-#define QGET_PREPOS "parse_command_prepos_list" 
+#define QGET_PREPOS "parse_command_prepos_list"
 #define M_QGET_PREPOS M_PARSE_COMMAND_PREPOS_LIST
 /* Function in LPC which returns the 'all' word
 */
@@ -321,7 +322,7 @@ load_parse_information()
 	gId_list_d = 0;
 
     pval = apply_master_ob(M_QGET_PLURID,0);
-    if (pval && pval->type == T_POINTER)	
+    if (pval && pval->type == T_POINTER)
     {
 	gPluid_list_d = pval->u.vec;
 	INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
@@ -372,27 +373,27 @@ load_lpc_info(int ix, struct object *ob)
     int il, make_plural = 0;
     char *str;
     char *parse_to_plural(char *);
-    
+
     if (!ob)
 	return;
-    
-    if (gPluid_list && 
-	gPluid_list->size > ix && 
+
+    if (gPluid_list &&
+	gPluid_list->size > ix &&
 	gPluid_list->item[ix].type == T_NUMBER &&
 	gPluid_list->item[ix].u.number == 0)
     {
 	ret = apply(QGET_PLURID, ob, 0, 1);
-	if (ret && ret->type == T_POINTER) 
+	if (ret && ret->type == T_POINTER)
 	    assign_svalue_no_free(&gPluid_list->item[ix], ret);
-	else 
+	else
 	{
 	    make_plural = 1;
 	    gPluid_list->item[ix].u.number = 1;
 	}
     }
-    
-    if (gId_list && 
-	gId_list->size > ix && 
+
+    if (gId_list &&
+	gId_list->size > ix &&
 	gId_list->item[ix].type == T_NUMBER &&
 	gId_list->item[ix].u.number == 0)
     {
@@ -404,7 +405,7 @@ load_lpc_info(int ix, struct object *ob)
 	    {
 		tmp = allocate_array(ret->u.vec->size);
 		sing = ret->u.vec;
-		
+
 		sval.type = T_STRING;
 		sval.string_type = STRING_MSTRING;
 		for (il = 0; il < tmp->size; il++)
@@ -428,9 +429,9 @@ load_lpc_info(int ix, struct object *ob)
 	    gId_list->item[ix].u.number = 1;
 	}
     }
-    
-    if (gAdjid_list && 
-	gAdjid_list->size > ix && 	
+
+    if (gAdjid_list &&
+	gAdjid_list->size > ix &&
 	gAdjid_list->item[ix].type == T_NUMBER &&
 	gAdjid_list->item[ix].u.number == 0)
     {
@@ -445,16 +446,16 @@ load_lpc_info(int ix, struct object *ob)
 void
 free_parse_information()
 {
-    if (gId_list_d) 
-	free_vector(gId_list_d); 
+    if (gId_list_d)
+	free_vector(gId_list_d);
     gId_list_d = 0;
-    if (gPluid_list_d) 
-	free_vector(gPluid_list_d); 
+    if (gPluid_list_d)
+	free_vector(gPluid_list_d);
     gPluid_list_d = 0;
-    if (gAdjid_list_d) 
+    if (gAdjid_list_d)
 	free_vector(gAdjid_list_d);
     gAdjid_list_d = 0;
-    if (gPrepos_list) 
+    if (gPrepos_list)
 	free_vector(gPrepos_list);
     gPrepos_list = 0;
     if (gAllword)
@@ -472,7 +473,7 @@ free_parse_information()
  *			a set of objects (see args below). For details
  *			see LPC documentation of the efun.
  * Arguments:		cmd: The command to parse
- *			ob_or_array: A list of objects or one object from 
+ *			ob_or_array: A list of objects or one object from
  *			             which to make a list of objects by
  *				     using the objects deep_inventory
  *			pattern: The given parse pattern somewhat like sscanf
@@ -512,7 +513,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
     patvec = explode_string(pattern," ");  /* Array of pattern elements */
 
     /*
-     * Explode can return '0'. 
+     * Explode can return '0'.
      */
     if (!wvec)
 	wvec = allocate_array(0);
@@ -540,14 +541,14 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 
     /* Copy and  make space for id arrays
     */
-    old_id      = gId_list; 
-    old_plid    = gPluid_list; 
+    old_id      = gId_list;
+    old_plid    = gPluid_list;
     old_adjid   = gAdjid_list;
 
     gId_list    = allocate_array(obvec->size);
     gPluid_list  = allocate_array(obvec->size);
     gAdjid_list = allocate_array(obvec->size);
-    
+
     /* Loop through the pattern. Handle %s but not '/'
     */
     pix = 0;
@@ -575,8 +576,8 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 		cix = wvec->size;
 		stack_put(pval, stack_args, six++, num_arg);
 	    }
-	    else 
-	    /* 
+	    else
+	    /*
 	       There is something after %s, try to parse with the
                next pattern. Begin with the current word and step
 	       one word for each fail, until match or end of words.
@@ -594,7 +595,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 		    			      if it is a fill-in pattern
 		     */
 		    pval = sub_parse(obvec, patvec, &pix, wvec, &cix, &fail,
-				     ((six + 1) < num_arg) ? 
+				     ((six + 1) < num_arg) ?
 				     stack_args[six + 1].u.lvalue
 				     : 0);
 		    if (fail)
@@ -604,7 +605,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 		    }
 		} while ((fail) && (cix < wvec->size));
 
-		/* 
+		/*
 		    We found something matching the pattern after %s.
 		    First
 		        stack_args[six + 1] = result of match
@@ -627,7 +628,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 			pval = slice_words(wvec, fword, ocix - 1);
 			stack_put(pval, stack_args, six++, num_arg);
 		    }
-		    pval = 0; 
+		    pval = 0;
 		}
 	    }
 	}
@@ -649,7 +650,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 	if (fail)
 	    break;
     }
-  
+
     /* Also fail when there are words left to parse and pattern exhausted
     */
     if (cix < wvec->size)
@@ -657,24 +658,24 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 
     /* Delete and free the id arrays
     */
-    if (gId_list) 
+    if (gId_list)
     {
 	free_vector(gId_list);
     }
-    if (gPluid_list) 
+    if (gPluid_list)
     {
 	free_vector(gPluid_list);
     }
-    if (gAdjid_list) 
+    if (gAdjid_list)
     {
 	free_vector(gAdjid_list);
     }
 
     gId_list = old_id;
-    gPluid_list = old_plid; 
+    gPluid_list = old_plid;
     gAdjid_list = old_adjid;
 
-    DECREF(wvec->ref); 
+    DECREF(wvec->ref);
     DECREF(patvec->ref);
     DECREF(obvec->ref);
     free_vector(wvec);
@@ -685,7 +686,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
      */
     if (ob_or_array->type == T_OBJECT)
     {
-	free_vector(obvec); 
+	free_vector(obvec);
     }
 
     return !fail;
@@ -699,7 +700,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
  *			pos: Position on stack to put value
  *			max: The number of args on the stack
  */
-void 
+void
 stack_put(struct svalue	*pval, struct svalue *msp, int pos, int max)
 {
     if (pos >= max)
@@ -789,7 +790,7 @@ sub_parse(struct vector *obvec, struct vector *patvec, int *pix_in,
 
 	if (!subfail && (pix < patvec->size))
 	{
-	    pval = one_parse(obvec, patvec->item[pix].u.string, wvec, &cix, 
+	    pval = one_parse(obvec, patvec->item[pix].u.string, wvec, &cix,
 			     &subfail, msp);
 	}
 	else if (subfail == 2) /* failed optional */
@@ -822,7 +823,7 @@ sub_parse(struct vector *obvec, struct vector *patvec, int *pix_in,
     *fail = 0;
     return pval;
 }
-    
+
 
 /*
  * Function name: 	one_parse
@@ -852,7 +853,7 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
     /*
 	Fail if we have a pattern left but no words to parse
      */
-    if (*cix_in >= wvec->size) 
+    if (*cix_in >= wvec->size)
     {
 	if (pat[0] == '[')
 	    *fail = 0;
@@ -938,6 +939,34 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
     return pval;
 }
 
+
+/*
+ * Parse a number %d style, restricted to range 0-<x>
+ */
+struct svalue *
+number_parse(struct vector *wvec, int *cix_in, int *fail)
+{
+    int64_t num;
+    int cix = *cix_in; *fail = 0;
+    static struct svalue ret;
+
+    ret = const0;
+
+    if (sscanf(wvec->item[cix].u.string, "%" SCNd64, &num))
+    {
+        if (num >= 0)
+        {
+            (*cix_in)++;
+            ret.type = T_NUMBER;
+            ret.u.number = num;
+            return &ret;
+        }
+    }
+    *fail = 1;
+    return NULL;
+}
+
+
 /*
    We normally define these, see initial documentation (top of file)
 */
@@ -946,12 +975,12 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
     static char *ord1[] = {"", "first", "second", "third", "fourth", "fifth",
 			   "sixth", "seventh", "eighth", "ninth", "tenth",
 			   "eleventh", "twelfth", "thirteenth", "fourteenth",
-			   "fifteenth", "sixteenth", "seventeenth", 
+			   "fifteenth", "sixteenth", "seventeenth",
 			   "eighteenth","nineteenth"};
 
     static char *ord10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
 			    "seventy", "eighty","ninety"};
-    
+
     static char *sord10[] = {"", "", "twentieth", "thirtieth", "fortieth",
 			     "fiftieth", "sixtieth","seventieth", "eightieth",
 			     "ninetieth"};
@@ -979,7 +1008,7 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
  * Returns:		svalue holding result of parse.
  */
 struct svalue *
-number_parse(struct vector *wvec, int *cix_in, int *fail)
+item_number_parse(struct vector *wvec, int *cix_in, int *fail)
 {
     int cix, ten, ones;
     long long num;
@@ -1037,7 +1066,7 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 	stmp.u.number = 0;
 	return &stmp;
     }
-    
+
     for (ten = 0; ten < 10; ten++)
 	for(ones = 0; ones < 10; ones++)
 	{
@@ -1051,7 +1080,7 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 		return &stmp;
 	    }
 	}
-    
+
     for (ten = 0; ten < 10; ten++)
 	for(ones = 0; ones < 10; ones++)
 	{
@@ -1098,7 +1127,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     int			match_object(int, struct vector *, int *, int *);
 
     tmp = allocate_array(obvec->size + 1);
-    if ( (pval = number_parse(wvec, cix_in, fail)) != NULL )
+    if ((pval = item_number_parse(wvec, cix_in, fail)) != NULL )
 	assign_svalue_no_free(&tmp->item[0],pval);
 
     if ((pval) && (pval->u.number>1))
@@ -1111,7 +1140,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	plur_flag = 1;
 	match_all = 1;
     }
-    else 
+    else
     {
 	plur_flag = 0;
 	match_all = 0;
@@ -1128,7 +1157,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	{
 	    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
 	    continue;
-	}	    
+	}
 	load_lpc_info(obix, obvec->item[obix].u.ob);
 
 	if (match_object(obix, wvec, &cix, &plur_flag))
@@ -1159,7 +1188,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	free_vector(tmp);
     }
 
-    /* stmp is static, and may contain old info that must be freed 
+    /* stmp is static, and may contain old info that must be freed
     */
     free_svalue(&stmp);
     stmp.type = T_POINTER;
@@ -1198,10 +1227,10 @@ living_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     int			obix, tix;
 
     live = allocate_array(obvec->size);
-    tix = 0; 
+    tix = 0;
     *fail = 0;
 
-    for (obix = 0; obix < obvec->size; obix++) 
+    for (obix = 0; obix < obvec->size; obix++)
 	if (obvec->item[obix].type == T_OBJECT &&
 	    obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS)
 	    assign_svalue_no_free(&live->item[tix++], &obvec->item[obix]);
@@ -1215,7 +1244,7 @@ living_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	    return pval;
 	}
     }
-    
+
     free_vector(live);
 
     /* find_living */
@@ -1253,7 +1282,7 @@ single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     {
 	if (obvec->item[obix].type != T_OBJECT)
 	    continue;
-	*fail = 0; 
+	*fail = 0;
 	cix = *cix_in;
 	load_lpc_info(obix, obvec->item[obix].u.ob);
 	plur_flag = 0;
@@ -1271,7 +1300,7 @@ single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 /*
  * Function name: 	prepos_parse
  * Description:		This is a general sentencelist matcher with some hard-
- *			coded prepositions as the default list. The list is 
+ *			coded prepositions as the default list. The list is
  *			sent as a parameter which will be replaced in the
  *			destination values. If no list is given the return
  *			value on match with the hardcoded prepositions will be
@@ -1291,7 +1320,7 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
     static struct svalue stmp = { T_NUMBER };
     char *tmp;
     int pix, tix;
-    
+
     if ((!prepos) || (prepos->type != T_POINTER))
     {
 	pvec = gPrepos_list;
@@ -1300,12 +1329,12 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
     {
 	pvec = prepos->u.vec;
     }
-    
+
     for (pix = 0; pix < pvec->size; pix++)
     {
 	if (pvec->item[pix].type != T_STRING)
 	    continue;
-	
+
 	tmp = pvec->item[pix].u.string;
 	if (strchr(tmp,' ') == NULL)
 	{
@@ -1315,7 +1344,7 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
 		break;
 	    }
 	}
-	else 
+	else
 	{
 	    tvec = explode_string(tmp, " ");
 	    for (tix = 0; tix < tvec->size; tix++)
@@ -1331,9 +1360,9 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
 		break;
 	}
     }
-    
+
     free_svalue(&stmp);
-    
+
     if (pix == pvec->size)
     {
 	stmp.type = T_NUMBER;
@@ -1355,9 +1384,9 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
 	stmp.u.string = make_mstring(pvec->item[pix].u.string);
 	*fail = 0;
     }
-    
+
     return &stmp;
-    
+
 }
 
 /*
@@ -1370,7 +1399,7 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
  *			plur: This arg gets set if the noun was on pluralform
  * Returns:		True if object matches.
  */
-int 
+int
 match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 {
     struct vector	*ids;
@@ -1381,7 +1410,7 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 
     for (cplur = (*plur * 2); cplur < 4; cplur++)
     {
-	switch (cplur) 
+	switch (cplur)
 	{
 	case 0:
 	    if (!gId_list_d)
@@ -1390,8 +1419,8 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 	    break;
 
 	case 1:
-	    if (!gId_list || 
-		gId_list->size <= obix || 
+	    if (!gId_list ||
+		gId_list->size <= obix ||
 		gId_list->item[obix].type != T_POINTER)
 		continue;
 	    ids = gId_list->item[obix].u.vec;
@@ -1404,8 +1433,8 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 	    break;
 
 	case 3:
-	    if (!gPluid_list || 
-		gPluid_list->size <= obix || 
+	    if (!gPluid_list ||
+		gPluid_list->size <= obix ||
 		gPluid_list->item[obix].type != T_POINTER)
 		continue;
 	    ids = gPluid_list->item[obix].u.vec;
@@ -1443,18 +1472,18 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
     }
     return 0;
 }
-			
-		
+
+
 /*
  * Function name: 	find_string
  * Description:		Finds out if a given string exist within an
  *			array of words.
- * Arguments:		str: String of some words 
+ * Arguments:		str: String of some words
  *			wvec: Array of words
  *			cix_in: Startpos in word array
  * Returns:		Pos in array if string found or -1
  */
-int 
+int
 find_string(char *str, struct vector *wvec, int *cix_in)
 {
     int fpos;
@@ -1489,17 +1518,17 @@ find_string(char *str, struct vector *wvec, int *cix_in)
 	    wvec->size - *cix_in ==	2: One extra word
 				3: Two extra words
         */
-	if (!split || (split->size > (wvec->size - *cix_in))) 
+	if (!split || (split->size > (wvec->size - *cix_in)))
 	{
 	    if (split)
 		free_vector(split);
 	    continue;
 	}
-	
+
 	fpos = *cix_in;
 	for (; (*cix_in-fpos) < split->size; (*cix_in)++)
 	{
-	    if (strcmp(split->item[*cix_in-fpos].u.string, 
+	    if (strcmp(split->item[*cix_in-fpos].u.string,
 		       wvec->item[*cix_in].u.string))
 		break;
 	}
@@ -1525,7 +1554,7 @@ find_string(char *str, struct vector *wvec, int *cix_in)
  *			to:   last cmdword to test
  * Returns:		True if a match is made.
  */
-int 
+int
 check_adjectiv(int obix, struct vector *wvec, int from, int to)
 {
     int il, back, fail;
@@ -1541,7 +1570,7 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
 
     sum = 0;
     fail = 0;
-    for (il = from; il<= to; il++) 
+    for (il = from; il<= to; il++)
     {
 	sum += strlen(wvec->item[il].u.string) + 1;
 	if ((member_string(wvec->item[il].u.string, ids) < 0) &&
@@ -1554,12 +1583,12 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
     /* Simple case: all adjs were single word
     */
     if (!fail)
-	return 1;    
+	return 1;
 
     if (from == to)
 	return 0;
 
-    adstr = alloca(sum); 
+    adstr = alloca(sum);
 
     /*
      * If we now have: "adj1 adj2 adj3 ... adjN"
@@ -1580,9 +1609,9 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
     for (il = from; il <= to;)                /* adj1 .. adjN */
 #endif
     {
-	for (back = to; back >= il; back--)   /* back from adjN to adj[il] */ 
+	for (back = to; back >= il; back--)   /* back from adjN to adj[il] */
 	{
-	    /* 
+	    /*
              * Create teststring with "adj[il] .. adj[back]"
              */
 	    (void)strcpy(adstr, "");
@@ -1615,7 +1644,7 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
  *			svec: vector of strings
  * Returns:		Pos if found else -1.
  */
-int 
+int
 member_string(char *str, struct vector *svec)
 {
     int il;
@@ -1663,8 +1692,8 @@ parse_to_plural(char *str)
 	    break;
     il++;
 #endif
-    
-    for (changed = 0; il < words->size; il++) 
+
+    for (changed = 0; il < words->size; il++)
     {
 	if ((EQ(words->item[il].u.string, "of")) ||
 	    (il + 1 == words->size))
@@ -1679,7 +1708,7 @@ parse_to_plural(char *str)
 		changed = 1;
 		free_svalue(&stmp);
 	    }
-	} 
+	}
     }
     if (!changed)
     {
@@ -1690,7 +1719,7 @@ parse_to_plural(char *str)
     free_vector(words);
     return str;
 }
-    
+
 
 /*
  * Function name: 	parse_one_plural
@@ -1705,8 +1734,8 @@ parse_one_plural(char *str)
     char 	ch, ch2, ch3;
     int 	sl;
     static char	pbuf[100];   /* Words > 100 letters? In Wales maybe... */
-    
-    sl = strlen(str) - 1; 
+
+    sl = strlen(str) - 1;
     if ((sl < 2) || (sl > 90))
 	return str;
 
@@ -1742,14 +1771,14 @@ parse_one_plural(char *str)
 	    return strcat(pbuf, "ves");
 	}
     }
-    
+
     if (EQ(str,"corpse")) return "corpses";
     if (EQ(str,"tooth")) return "teeth";
     if (EQ(str,"foot")) return "feet";
     if (EQ(str,"man")) return "men";
     if (EQ(str,"woman")) return "women";
     if (EQ(str,"child")) return "children";
-    if (EQ(str,"goose")) return "geese";   
+    if (EQ(str,"goose")) return "geese";
     if (EQ(str,"mouse")) return "mice";
     if (EQ(str,"deer")) return "deer";
     if (EQ(str,"moose")) return "moose";
@@ -1759,7 +1788,7 @@ parse_one_plural(char *str)
     return strcat(pbuf, "s");
 }
 #endif
- 
+
 /*
 
    End of Parser
@@ -1777,10 +1806,10 @@ parse_one_plural(char *str)
  *		  description, that description will not be replaced.
  *                Example (added after reading TMI docs :-)
  *                "You are chased by @@query_name:/obj/monster#123@@ eastward."
- *                 is replaced by: 
+ *                 is replaced by:
  *                "You are chased by Orc eastward."
  *                               (if query_name in monster#123 returns "Orc")
- *                 
+ *
  *                Note that both object and arguments are optional.
  * Arguments:     str: A string containing text and function descriptions as
  *		  as described above.
@@ -1798,7 +1827,7 @@ process_string(char *str, int other_ob)
     if (str == NULL || strstr(str,"@@") == NULL)
 	return 0;
 
-    /* This means we are called from notify_ in comm1 
+    /* This means we are called from notify_ in comm1
        We must temporary set eff_user to backbone uid for
        security reasons.
     */
@@ -1806,7 +1835,7 @@ process_string(char *str, int other_ob)
     {
 	current_object = command_giver;
     }
-	
+
     vec = explode_string(str, "@@");
 
     /* If the first two chars is '@@' then vec[0] is a potential VBFC
@@ -1818,20 +1847,20 @@ process_string(char *str, int other_ob)
 #endif
 
     /* Loop over each VBFC
-       Terminating space is no longer allowed. 
+       Terminating space is no longer allowed.
        A VBFC must be terminated with '@@'.
     */
-    for (changed = 0, il = pr_start; il < vec->size; il += 2) 
+    for (changed = 0, il = pr_start; il < vec->size; il += 2)
     {
 	p2 = process_part(vec->item[il].u.string, other_ob);
 
 	if (p2 == vec->item[il].u.string)  /* VBFC not resolved */
 	{
-	    /* Put back the leading and trailing '@@'. 
+	    /* Put back the leading and trailing '@@'.
 	       If some other VBFC resolves, this is needed.
 	    */
 	    p3 = xalloc(5 + strlen(p2));
-	    (void)strcpy(p3, "@@"); 
+	    (void)strcpy(p3, "@@");
 	    (void)strcat(p3, p2);
 	    (void)strcat(p3, "@@");
 	    p2 = p3;
@@ -1908,7 +1937,7 @@ process_value(char *str, int other_ob)
 
     /* Find the objectpointer
     */
-    if (!obj) 
+    if (!obj)
 	ob = current_object;
     else
 	ob = find_object2(obj);
@@ -1923,20 +1952,20 @@ process_value(char *str, int other_ob)
     for (numargs = 0; arg; arg = narg)
     {
 	narg = strchr(arg,'|');
-	if (narg) 
-	    *narg = 0; 
+	if (narg)
+	    *narg = 0;
 	push_string(arg, STRING_MSTRING);
 	numargs++;
-	if (narg) 
+	if (narg)
 	{
-	    *narg = '|'; 
+	    *narg = '|';
 	    narg++;
 	}
     }
 
     if (ob->flags & O_DESTRUCTED)
 	error("object used by process_string/process_value destructed\n");
-    
+
     if (other_ob)
     {
 	extern char *pc;
@@ -1950,9 +1979,9 @@ process_value(char *str, int other_ob)
 	previous_ob = current_object;
 	current_object = vbfc_object;
 	csp->ext_call = 1;
-	
+
     }
-    
+
     /*
      * Apply the function and see if adequate answer is returned
      */
@@ -1960,7 +1989,7 @@ process_value(char *str, int other_ob)
 
     if (other_ob)
 	pop_control_stack();
-    
+
     if (!ret)
 	return &const0;
     else
@@ -1975,7 +2004,7 @@ process_value(char *str, int other_ob)
  *		  number of spaces.
  * Arguments:     str: Original message
  *		  width: The total maximum width of each line.
- *		  indent: (optional) How many spaces to indent with or 
+ *		  indent: (optional) How many spaces to indent with or
  *                        indent string. (Max 1000 in indent)
  * Returns:       A string with newline separated strings
  */
@@ -1995,7 +2024,7 @@ break_string(char *str, int width, struct svalue *indent)
     {
 	l = indent->u.number;
 	istr = xalloc((size_t)l + 1);
-	for (il = 0; il < l; il++) 
+	for (il = 0; il < l; il++)
 	    istr[il] = ' ';
 	istr[il] = 0;
     }
@@ -2015,7 +2044,7 @@ break_string(char *str, int width, struct svalue *indent)
     }
     else
 	indlen = 0;
-    
+
     l = strlen(str);
     if (l == 0) {
         return make_mstring("");
@@ -2056,7 +2085,7 @@ break_string(char *str, int width, struct svalue *indent)
     }
 
     /*
-     * Explode into array 
+     * Explode into array
      */
     lines = explode_string(fstr, "\n");
     space = fstr[strlen(fstr) - 1] == '\n';
@@ -2071,7 +2100,7 @@ break_string(char *str, int width, struct svalue *indent)
     {
 	nchar += indlen + strlen(lines->item[il].u.string) + 1;
     }
-    
+
     fstr = allocate_mstring((size_t)nchar);
     fstr[0] = 0;
 
