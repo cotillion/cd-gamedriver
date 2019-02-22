@@ -118,7 +118,7 @@ static struct {
     YYSTYPE lval;
 } keep1, keep2, keep3, keep4;
 
-static void 
+static void
 calculate_include_path(char *name, char *dest)
 {
     char *current;
@@ -186,7 +186,7 @@ mygetc(void)
         if (feof(yyin))
         {
             return EOF;
-        } 
+        }
 
         nbuf = (int)fread(buffer, sizeof(char), (DEFMAX / 2), yyin);
         if (!nbuf)
@@ -197,12 +197,12 @@ mygetc(void)
         outp -= nbuf;
         memcpy(outp, buffer, nbuf);
     }
- 
+
     lastchar = slast;
     slast = *outp;
     nbuf--;
     outp++;
- 
+
     return slast;
 }
 
@@ -224,7 +224,7 @@ static void
 lexerror(char *fmt, ...)
 {
     char buffer[1024];
-    va_list ap; 
+    va_list ap;
 
     va_start(ap, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, ap);
@@ -287,14 +287,14 @@ skip_to(char *token, char *atoken)
                     return 0;
             }
         }
-        else 
+        else
         {
             /*(void)fprintf(stderr, "skipping (%d) %c", c, c);*/
-            while (c != '\n' && c != EOF) 
+            while (c != '\n' && c != EOF)
             {
                 c = mygetc();
                 /*(void)fprintf(stderr, "%c", c);*/
-            } 
+            }
             if (c == EOF)
             {
                 lexerror("Unexpected end of file while skipping");
@@ -313,14 +313,14 @@ handle_cond(int c)
     struct ifstate *p;
 
     /*(void)fprintf(stderr, "cond %d\n", c);*/
-    if (c || skip_to("else", "endif")) 
+    if (c || skip_to("else", "endif"))
     {
 	p = (struct ifstate *)xalloc(sizeof(struct ifstate));
 	p->next = iftop;
 	iftop = p;
 	p->state = c ? EXPECT_ELSE : EXPECT_ENDIF;
     }
-    if (!c) 
+    if (!c)
     {
 	store_line_number_info(current_incfile, current_line);
 	current_line++;
@@ -336,7 +336,7 @@ check_valid_compile_path(char *path, char *file_name, char *calling_function)
     struct svalue *ret;
 #endif
     char *p = path;
-    
+
     while (*p)
     {
 	if (p[0] == '.' && p[1] == '.')
@@ -375,7 +375,7 @@ inc_try(char *buf)
     if (new_name && (f = fopen(new_name, "r")) != NULL)
     {
 #ifdef WARN_INCLUDES
-	for (inc = inctop ; inc ; inc = inc->next) 
+	for (inc = inctop ; inc ; inc = inc->next)
 	    if (strcmp(inc->file, new_name) == 0)
 	    {
 		(void)snprintf(errbuf, sizeof(errbuf), "File /%s already included,", buf);
@@ -409,7 +409,7 @@ inc_open(char *buf, size_t len, char *name)
     /*
      * Search all include dirs specified.
      */
-    for (i = 0; i < inc_list_size; i++) 
+    for (i = 0; i < inc_list_size; i++)
     {
         (void)snprintf(buf, len, "%s%s", inc_list[i], name);
 	if ((f = inc_try(buf)) != NULL)
@@ -455,13 +455,13 @@ handle_include(char *name, int ignore_errors)
 	return 0;
     }
     if (strlen(name) > sizeof(buf) - 100)
-    { 
+    {
         if (!ignore_errors)
 	    lexerror("Include name too long.");
 	return 0;
     }
     *p = 0;
-    
+
     if ((f = inc_open(buf, sizeof(buf), name)) == NULL)
     {
         if (!ignore_errors) {
@@ -518,13 +518,13 @@ handle_exception(int action, char *message)
     else
 	(void)strcat(buf, message);
     (void)strcat(buf, "\"");
-    
+
     push_number(action);
     push_string(buf, STRING_MSTRING);
     push_number(current_line);
     push_string(current_file, STRING_MSTRING);
     (void)apply_master_ob(M_PARSE_EXCEPTION, 4);
-    
+
     if (action == ERROR)
 	lexerror("Parse aborted on #error statement,");
 }
@@ -543,18 +543,18 @@ skip_comment(void)
 		lexerror("End of file in a comment");
 		return;
 	    }
-	    if (c == '\n') 
+	    if (c == '\n')
 	    {
 		nexpands=0;
 		store_line_number_info(current_incfile, current_line);
 		current_line++;
 	    }
 	}
-	do 
+	do
 	{
 	    if ((c = mygetc()) == '/')
 		return;
-	    if (c == '\n') 
+	    if (c == '\n')
 	    {
 		nexpands=0;
 		store_line_number_info(current_incfile, current_line);
@@ -606,7 +606,7 @@ deltrail(char *ap)
        break;\
     }
 
-static void 
+static void
 handle_pragma(char *str)
 {
     if (strcmp(str, "strict_types") == 0)
@@ -681,7 +681,7 @@ static int
 lookupword(char *s, struct keyword *words, int h)
 {
     int i, l, r;
-    
+
     l = 0;
     for (;;)
     {
@@ -710,7 +710,7 @@ yylex1(void)
     register char *yyp;
     register int c;
     register int c1, c2;
-    
+
     for (;;)
     {
 	if (lex_fatal)
@@ -736,7 +736,7 @@ yylex1(void)
 		slast = p->slast;
 		lastchar = p->lastchar;
 		inctop = p->next;
-		
+
 		if (p->nbuf)
 		{
 		    nbuf = p->nbuf;
@@ -749,10 +749,10 @@ yylex1(void)
 		    nbuf = 0;
 		    outp = defbuf + DEFMAX;
 		}
-		
+
 		store_line_number_info(current_incfile, current_line);
 		incdepth--;
-		
+
 		free((char *)p);
 		break;
 	    }
@@ -866,34 +866,34 @@ yylex1(void)
 	    }
 	    return c;
 	case '#':
-	    if (lastchar == '\n') 
+	    if (lastchar == '\n')
 	    {
 		char *ssp = 0;
 		int quote;
-		
+
 		yyp = yytext;
-		do 
+		do
 		{
 		    c = mygetc();
 		} while (isspace(c));
-		
-		for (quote = 0;;) 
+
+		for (quote = 0;;)
 		{
 		    if (c == '"')
 			quote ^= 1;
-		    
+
 		    /*gc - handle comments cpp-like! 1.6.91 @@@*/
-		    while (!quote && c == '/')  
+		    while (!quote && c == '/')
 		    {
-			if (gobble('*')) 
-			{ 
+			if (gobble('*'))
+			{
 			    skip_comment();
 			    c = mygetc();
 			}
-			else 
+			else
 			    break;
 		    }
-		    
+
 		    if (!ssp && isspace(c))
 			ssp = yyp;
 		    if (c == '\n' || c == EOF)
@@ -901,22 +901,22 @@ yylex1(void)
 		    SAVEC;
 		    c = mygetc();
 		}
-		if (ssp) 
+		if (ssp)
 		{
 		    *ssp++ = 0;
 		    while (isspace(*ssp))
 			ssp++;
-		} 
-		else 
+		}
+		else
 		{
 		    ssp = yyp;
 		}
 		*yyp = 0;
-		if (strcmp("define", yytext) == 0) 
+		if (strcmp("define", yytext) == 0)
 		{
 		    handle_define(ssp);
-		} 
-		else if (strcmp("if", yytext) == 0) 
+		}
+		else if (strcmp("if", yytext) == 0)
 		{
 #if 0
 		    short int nega=0; /*@@@ allow #if !VAR gc 1.6.91*/
@@ -964,11 +964,11 @@ yylex1(void)
 			lexerror("Condition too complex in #if");
 #else
 		    int cond;
-            
+
 		    myungetc(0);
 		    add_input(ssp);
 		    cond = cond_get_exp(0);
-		    if (mygetc()) 
+		    if (mygetc())
 		    {
 			lexerror("Condition too complex in #if");
 			while (mygetc())
@@ -978,7 +978,7 @@ yylex1(void)
 			handle_cond(cond);
 #endif
 		}
-		else if (strcmp("ifdef", yytext) == 0) 
+		else if (strcmp("ifdef", yytext) == 0)
 		{
 		    deltrail(ssp);
 		    handle_cond(lookup_define(ssp) != 0);
@@ -987,13 +987,13 @@ yylex1(void)
 		{
 		    deltrail(ssp);
 		    handle_cond(lookup_define(ssp) == 0);
-		} 
-		else if (strcmp("else", yytext) == 0) 
+		}
+		else if (strcmp("else", yytext) == 0)
 		{
-		    if (iftop && iftop->state == EXPECT_ELSE) 
+		    if (iftop && iftop->state == EXPECT_ELSE)
 		    {
 			struct ifstate *p = iftop;
-			
+
 			/*(void)fprintf(stderr, "found else\n");*/
 			iftop = p->next;
 			free((char *)p);
@@ -1006,36 +1006,36 @@ yylex1(void)
 		    {
 			lexerror("Unexpected #else");
 		    }
-		} 
-		else if (strcmp("endif", yytext) == 0) 
+		}
+		else if (strcmp("endif", yytext) == 0)
 		{
 		    if (iftop && (iftop->state == EXPECT_ENDIF ||
-				  iftop->state == EXPECT_ELSE)) 
+				  iftop->state == EXPECT_ELSE))
 		    {
 			struct ifstate *p = iftop;
-			
+
 			/*(void)fprintf(stderr, "found endif\n");*/
 			iftop = p->next;
 			free((char *)p);
-		    } 
-		    else 
+		    }
+		    else
 		    {
 			lexerror("Unexpected #endif");
 		    }
-		} 
-		else if (strcmp("undef", yytext) == 0) 
+		}
+		else if (strcmp("undef", yytext) == 0)
 		{
 		    struct defn *d;
-		    
+
 		    deltrail(ssp);
 		    if ((d = lookup_define(ssp)) != NULL )
 			d->undef++;
-		} 
-		else if (strcmp("echo", yytext) == 0) 
+		}
+		else if (strcmp("echo", yytext) == 0)
 		{
 		    (void)fprintf(stderr, "%s\n", ssp);
-		} 
-		else if (strcmp("include", yytext) == 0) 
+		}
+		else if (strcmp("include", yytext) == 0)
 		{
 		    /*(void)fprintf(stderr, "including %s\n", ssp);     */
 		    handle_include(ssp, 0);
@@ -1044,7 +1044,7 @@ yylex1(void)
 		{
 		    deltrail(ssp);
 		    handle_pragma(ssp);
-		} 
+		}
 		else if (strcmp("error", yytext) == 0)
 		{
 		    handle_exception(ERROR, ssp);
@@ -1053,7 +1053,7 @@ yylex1(void)
 		{
 		    handle_exception(WARNING, ssp);
 		}
-		else 
+		else
 		{
 		    lexerror("Unrecognised # directive");
 		}
@@ -1115,12 +1115,12 @@ yylex1(void)
 			store_line_number_info(current_incfile, current_line);
 			current_line++;
 			total_lines++;
-		    } 
-		    else if ( c == EOF ) 
+		    }
+		    else if ( c == EOF )
 		    {
 			/* some operating systems give EOF only once */
-			myungetc(c); 
-		    } 
+			myungetc(c);
+		    }
 		    else
 			*yyp++ = c;
 		}
@@ -1130,7 +1130,7 @@ yylex1(void)
 
 	case '0':
 	    c = mygetc();
-	    if ( c == 'X' || c == 'x' || c == 'o') 
+	    if ( c == 'X' || c == 'x' || c == 'o')
 	    {
                 char *endptr;
                 long long value;
@@ -1138,10 +1138,10 @@ yylex1(void)
                 if (c == 'o')
                     base = 8;
 
-                
+
 		yyp = yytext;
 
-		for (;;) 
+		for (;;)
 		{
 		    c = mygetc();
 		    if (!isxdigit(c))
@@ -1150,14 +1150,14 @@ yylex1(void)
 		}
 		myungetc(c);
                 *yyp = '\0';
-                
+
                 value = strtoll(yytext, &endptr, base);
                 if (*endptr != '\0')
                 {
                     fprintf(stderr, "%s\n", yytext);
                     lexwarning("Invalid digits in octal number number");
                 }
-                
+
                 return number(value);
 	    }
 	    myungetc(c);
@@ -1244,14 +1244,14 @@ yylex1(void)
 
                 if (value != 0)
                     lexwarning("Obsolete octal format used. Use 0o111 syntax");
-                
+
 		return number(value);
             }
 	    return number(atoll(yytext));
 	default:
 	    if (isalpha(c) || c == '_') {
 		int r;
-		
+
 		yyp = yytext;
 		*yyp++ = c;
 		for (;;)
@@ -1262,7 +1262,7 @@ yylex1(void)
 		    SAVEC;
 		}
 		*yyp = 0;
-		
+
 		myungetc(c);
 		if (!expand_define())
 		{
@@ -1282,7 +1282,7 @@ yylex1(void)
   badlex:
     {
 	lexerror("Illegal character (hex %02x) '%c'", c, c);
-        return ' '; 
+        return ' ';
     }
 }
 
@@ -1376,17 +1376,17 @@ yylex(void)
     /*    (void)fprintf(stderr, "lex=%d(%s) ", r, yytext);*/
     return r;
 }
- 
+
 extern YYSTYPE yylval;
 
-static int 
+static int
 ident(char *str)
 {
     yylval.string = tmpstring_copy(str);
     return F_IDENTIFIER;
 }
 
-static int 
+static int
 string(char *str)
 {
     char *p;
@@ -1427,7 +1427,7 @@ string(char *str)
     return F_STRING;
 }
 
-static int 
+static int
 number(long long i)
 {
     yylval.number = i;
@@ -1441,7 +1441,7 @@ real(double f)
     return F_FLOATC;
 }
 
-void 
+void
 end_new_file(void)
 {
     while (inctop)
@@ -1453,18 +1453,18 @@ end_new_file(void)
 	current_file = p->file;
 	yyin = p->yyin;
 	inctop = p->next;
-	
+
 	if (p->outp != NULL)
 	{
 	    free((char *)p->outp);
 	}
-	
+
 	free((char *)p);
     }
     while (iftop)
     {
 	struct ifstate *p;
-	
+
 	p = iftop;
 	iftop = p->next;
 	free((char *)p);
@@ -1506,11 +1506,11 @@ start_new_file(FILE *f)
     add_define("T_ARRAY"   , -1, ltoa(T_POINTER));
     add_define("T_MAPPING" , -1, ltoa(T_MAPPING));
 
-    for (tmpf = lpc_predefs; tmpf; tmpf = tmpf->next) 
+    for (tmpf = lpc_predefs; tmpf; tmpf = tmpf->next)
     {
 	char namebuf[NSIZE];
 	char mtext[MLEN];
-	
+
 	*mtext='\0';
 	(void)sscanf(tmpf->flag, "%[^=]=%[ -~=]", namebuf, mtext);
 	if (strlen(namebuf) >= NSIZE)
@@ -1531,7 +1531,7 @@ start_new_file(FILE *f)
     incdepth = 0;
     nbuf = 0;
     outp = defbuf+DEFMAX;
-    pragma_strict_types = 0;        
+    pragma_strict_types = 0;
     pragma_no_inherit = pragma_no_clone = pragma_no_shadow = pragma_resident = 0;
     nexpands = 0;
 }
@@ -1550,14 +1550,14 @@ start_new_file(FILE *f)
  * only by the runtime.
  */
 
-static void 
+static void
 add_instr_name(char *name, int n)
 {
     instrs[n - EFUN_FIRST].name = name;
 }
 
 #define T_ANY T_STRING|T_NUMBER|T_POINTER|T_OBJECT|T_MAPPING|T_FLOAT|T_FUNCTION
-static void 
+static void
 add_instr_opname(char *name, int n, int ret, int arg1, int arg2)
 {
     n -= EFUN_FIRST;
@@ -1569,7 +1569,7 @@ add_instr_opname(char *name, int n, int ret, int arg1, int arg2)
     instrs[n].ret_type = ret;
 }
 
-static void 
+static void
 add_instr_opname_prefix(char *name, int n, int ret, int arg)
 {
     n -= EFUN_FIRST;
@@ -1581,7 +1581,7 @@ add_instr_opname_prefix(char *name, int n, int ret, int arg)
     instrs[n].ret_type = ret;
 }
 
-void 
+void
 init_num_args(void)
 {
     int i, n;
@@ -1818,7 +1818,7 @@ handle_define(char *yyt)
 		{
 		    size_t l, idlen = p - ids;
 		    int n;
-		    
+
 		    for (n = 0; n < arg; n++)
 		    {
 			l = strlen(args[n]);
@@ -1908,9 +1908,9 @@ void
 add_pre_define(char *define)
 {
     struct lpc_predef_s *tmp;
-    
+
     tmp = (struct lpc_predef_s *)xalloc(sizeof(struct lpc_predef_s));
-    
+
     tmp->flag = string_copy(define);
     tmp->next = lpc_predefs;
     lpc_predefs = tmp;
@@ -2146,7 +2146,7 @@ static int
 exgetc(void)
 {
     register char c, *yyp;
-    
+
     c = mygetc();
     while (isalpha(c) || c == '_')
     {
@@ -2164,7 +2164,7 @@ exgetc(void)
 	    do
 		c = mygetc();
 	    while (isspace(c));
-	    
+
 	    if (c != '(')
 	    {
 		lexerror("Missing ( in defined");
@@ -2173,7 +2173,7 @@ exgetc(void)
 	    do
 		c = mygetc();
 	    while (isspace(c));
-	    
+
 	    yyp = yytext;
 	    while (isalunum(c))
 	    {
@@ -2192,7 +2192,7 @@ exgetc(void)
 	    /* Skip whitespace */
 	    do
 		c = mygetc();
-	    while (isspace(c)); 
+	    while (isspace(c));
 	    myungetc(c);
 
 	    if (lookup_define(yytext))
@@ -2245,16 +2245,16 @@ static char optab2[]=
 0,'=',EQ,7,0,0,0,'&',LAND,3,0,BAND,6,0,'|',LOR,2,0,BOR,4,
 0,0,XOR,5,0,0,QMARK,1};
 
-static int 
+static int
 cond_get_exp(int priority)
 {
     int c;
     int value, value2, x;
-    
+
     do
 	c = exgetc();
     while (isspace(c));
-    
+
     if (c == '(')
     {
 	value = cond_get_exp(0);
@@ -2291,7 +2291,7 @@ cond_get_exp(int priority)
     else
     {
 	int base;
-	
+
 	if (!isdigit(c))
 	{
 	    if (!c)
@@ -2340,7 +2340,7 @@ cond_get_exp(int priority)
 	do
 	    c = exgetc();
 	while (isspace(c));
-	
+
 	if (!ispunct(c))
 	    break;
 	x = (_optab-' ')[c];
@@ -2372,8 +2372,6 @@ cond_get_exp(int priority)
 	switch ( optab2[x + 1] )
 	{
 	case MULT   : value *=  value2;                    break;
-	case DIV    : value /=  value2;                    break;
-	case MOD    : value %=  value2;                    break;
 	case BPLUS  : value +=  value2;                    break;
 	case BMINUS : value -=  value2;                    break;
 	case LSHIFT : value <<= value2;                    break;
@@ -2389,6 +2387,20 @@ cond_get_exp(int priority)
 	case BOR    : value |=  value2;                    break;
 	case LAND   : value =  value && value2;            break;
 	case LOR    : value =  value || value2;            break;
+	case MOD:
+            if (!value2) {
+                lexerror("Modulo by zero in #if");
+                return 0;
+            }
+            value %= value2;
+            break;
+	case DIV:
+            if (!value2) {
+                lexerror("Division by zero in #if");
+                return 0;
+            }
+            value /= value2;
+            break;
 	case QMARK  :
 	    do
 		c = exgetc();
@@ -2399,7 +2411,7 @@ cond_get_exp(int priority)
 		myungetc(c);
 		return 0;
 	    }
-	    if (value) 
+	    if (value)
 	    {
 		(void)cond_get_exp(1);
 		value = value2;
@@ -2429,14 +2441,14 @@ free_inc_list(void)
 
 /* Set the global list of include directories.
    Affects globals inc_list and inc_list_size */
-void 
+void
 set_inc_list(struct svalue *sv)
 {
     int i;
     struct vector *v;
     char *p, *end;
     char **tmp_inc_list;
-    
+
     free_inc_list();
     if (sv == 0)
     {
