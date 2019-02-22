@@ -211,11 +211,7 @@ nd_enable(ndesc_t *nd, int mask)
 void
 nd_disable(ndesc_t *nd, int mask)
 {
-    int fd;
-
     nd->nd_mask &= ~mask;
-
-    fd = nd->nd_fd;
 
     if (mask & ND_R)
         pollfds[nd->nd_poll].events &= ~POLLIN;
