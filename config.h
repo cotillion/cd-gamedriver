@@ -357,11 +357,11 @@
  *
  * When defined, ANSI color sequences are ignored when
  * calculating the length of strings for display
- * (i.e. strlen, break_string, write_socket efuns).
+ * (i.e. strlen & break_string efuns, and write_socket()).
  * This functionality only handles ANSI SGR sequences.
  * Further color support is to be handled by the mudlib.
  */
-#define ANSI_COLOR
+#undef ANSI_COLOR
 
 #endif
 
