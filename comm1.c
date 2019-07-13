@@ -305,9 +305,7 @@ write_socket(char *cp, struct object *ob)
 
 #ifdef ANSI_COLOR
 	    if (!in_ansi && *cp == ANSI_START)
-            {
 	        in_ansi = 1;
-            }
 #endif
 	    len = 1;
 	    while (cp[len] > ' ' && cp[len - 1] != '-')
@@ -364,9 +362,6 @@ write_socket(char *cp, struct object *ob)
 	    current_column += len;
 	    for (; len > 0; len--)
 		*bp++ = *cp++;
-#ifdef ANSI_COLOR
-	    ansi_len = 0;
-#endif
 	}
 
 	ip->current_column = current_column;
