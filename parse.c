@@ -2057,18 +2057,43 @@ break_string(char *str, int width, struct svalue *indent)
     nchar = 0;
     l = strlen(str);
     fstr = str;
+#ifdef ANSI_COLOR
+#define ANSI_START 27
+#define ANSI_END 'm'
+    int ansi_len = 0;
+    int in_ansi = 0;
+#endif
     for (il = 0; il < l; il++)
     {
+#ifdef ANSI_COLOR
+        if (!in_ansi && fstr[il] == ANSI_START)
+            in_ansi = 1;
+
+        if (in_ansi && fstr[il] == ANSI_END)
+        {
+            ansi_len++;
+            in_ansi = 0;
+        }
+
+        if (in_ansi)
+            ansi_len++;
+#endif
 	if (fstr[il] == ' ')
 	    space = il;
-
-	if ((il - nchar) >= (width - indlen) && space >= 0)
+#ifdef ANSI_COLOR
+        if ((il - nchar - ansi_len) >= (width - indlen) && space >= 0)
+#else
+        if ((il - nchar) >= (width - indlen) && space >= 0)
+#endif
 	{
             if (fstr == str)
                 fstr = make_mstring(str);
 	    fstr[space] = '\n';
 	    nchar = space + 1;
 	    space = -1;
+#ifdef ANSI_COLOR
+	    ansi_len = 0;
+#endif
 	}
     }
 
