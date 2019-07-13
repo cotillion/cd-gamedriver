@@ -2058,8 +2058,6 @@ break_string(char *str, int width, struct svalue *indent)
     l = strlen(str);
     fstr = str;
 #ifdef ANSI_COLOR
-#define ANSI_START 27
-#define ANSI_END 'm'
     int ansi_len = 0;
     int in_ansi = 0;
 #endif

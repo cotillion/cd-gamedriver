@@ -359,6 +359,7 @@
  * calculating the length of strings for display
  * (i.e. strlen, break_string, write_socket efuns).
  * This functionality only handles ANSI SGR sequences.
+ * Further color support is to be handled by the mudlib.
  */
 #define ANSI_COLOR
 

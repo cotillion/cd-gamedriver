@@ -5721,8 +5721,6 @@ f_strlen(int xxx)
 	i = 0;
     else
 #ifdef ANSI_COLOR
-#define ANSI_START 27
-#define ANSI_END 'm'
     {
         char *chr = sp->u.string;
         int ansi_len = 0;

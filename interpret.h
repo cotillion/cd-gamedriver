@@ -159,6 +159,11 @@ extern struct control_stack *csp;	/* Points to last element pushed */
 #define INCREF(x) if (x) x++
 #define DECREF(x) if (x) x--
 
+#ifdef ANSI_COLOR
+#define ANSI_START 27
+#define ANSI_END 'm'
+#endif
+
 void push_pop_error_context(int push);
 void pop_stack(void);
 int search_for_function(char *name, struct program *prog);
