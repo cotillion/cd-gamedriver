@@ -98,9 +98,69 @@ test_break_string()
     }
 }
 
+/*
+ * Interesting issue, in that we can't capture the output.
+ * It's up to the user to verify the match.
+ */
+void
+test_write_socket()
+{
+    object ob;
+
+    call_other("/tests/xyzzy", "???");
+    ob = find_object("/tests/xyzzy");
+
+    set_this_player(ob);
+
+    set_screen_width(10);
+
+    // 0: input
+    // 1: expected output with ANSI_COLOR defined
+    // 2: expected output without ANSI_COLOR defined
+    mixed *strings = ({
+        ({
+            "Hello my Nice Friends. How are you today?\n",
+            "Hello my\nNice\nFriends.\nHow are\nyou\ntoday?\n",
+            "Hello my\nNice\nFriends.\nHow are\nyou\ntoday?\n"
+        }),
+            ({
+                sprintf(
+                    "%c[31mRed Tacos%c[0m %c[38;5;208mOrange Tacos%c[0m\n",
+                    ESC, ESC, ESC, ESC),
+                sprintf(
+                    "%c[31mRed Tacos%c[0m\n%c[38;5;208mOrange\nTacos%c[0m\n",
+                    ESC, ESC, ESC, ESC),
+                sprintf(
+                    "%c[31mRed\nTacos%c[0m\n%c[38;5;208mOrange\nTacos%c[0m\n",
+                    ESC, ESC, ESC, ESC)
+            }),
+            ({
+                0, 0, 0
+            }),
+            ({
+                "", "", ""
+            })
+    });
+
+    int i, sz;
+
+    for(i = 0, sz = sizeof(strings); i < sz; i++)
+    {
+        string *triplet = strings[i];
+
+        write("output starts on next line:\n");
+//        write_socket(triplet[0]);
+        "/secure/master"->write_console(triplet[0]);
+        write("end of output.\n");
+        write("with ANSI we expect\n" + triplet[1] + "\n");
+        write("without ANSI we expect\n" + triplet[2] + "\n");
+    }
+}
+
 void
 create()
 {
     test_strlen();
     test_break_string();
+    test_write_socket();
 }
