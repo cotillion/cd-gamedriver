@@ -27,7 +27,7 @@ test_strlen()
 
     foreach(string *triplet: strings)
     {
-        write("strlen() of [" + str + "] is " + strlen(triplet[0]) + ". " +
+        write("strlen() of [" + triplet[0] + "] is " + strlen(triplet[0]) + ". " +
               "When ANSI_COLOR is defined, we expect " + triplet[1] + ". " +
               "When not defined, we expect " + triplet[2] + ".\n");
     }
