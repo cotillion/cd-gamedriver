@@ -5721,32 +5721,34 @@ f_strlen(int xxx)
 	i = 0;
     else
 #ifdef ANSI_COLOR
+#define ANSI_START 27
+#define ANSI_END 'm'
     {
         char *chr = sp->u.string;
-        int j = 0;
+        int ansi_len = 0;
         i = 0;
 
         while (*chr)
         {
             i++;
 
-            if (j > 0)
+            if (ansi_len > 0)
             {
                 /* end of sequence */
-                if ((*chr) == 'm')
+                if ((*chr) == ANSI_END)
                 {
                     /* subtract the length of just-finished sequence */
-                    i -= j + 1;
-                    j = 0;
+                    i -= ansi_len + 1;
+                    ansi_len = 0;
                 }
                 else
                 {
-                    j++;
+                    ansi_len++;
                 }
             }
-            else if ((*chr) == '\033') /* ASCII escape */
+            else if ((*chr) == ANSI_START)
             {
-                j++;
+                ansi_len++;
             }
 
             chr++;
