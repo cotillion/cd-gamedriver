@@ -270,7 +270,10 @@ write_socket(char *cp, struct object *ob)
 		bp = buf;
 		if (telnet_overflow)
 		    break;
-		continue;
+#ifdef ANSI_COLOR
+                ansi_len = 0;
+#endif
+                continue;
 	    }
 
 	    if (*cp == '\t')
@@ -289,6 +292,9 @@ write_socket(char *cp, struct object *ob)
 
 		    while (*cp == ' ' || *cp == '\t')
 			cp++;
+#ifdef ANSI_COLOR
+		    ansi_len = 0;
+#endif
 		}
 		else
 		{
@@ -343,7 +349,6 @@ write_socket(char *cp, struct object *ob)
 		    if (*cp == '\n')
 			cp++;
 #ifdef ANSI_COLOR
-                    in_ansi = 0;
                     ansi_len = 0;
 #endif
 		    continue;
@@ -359,6 +364,9 @@ write_socket(char *cp, struct object *ob)
 	    current_column += len;
 	    for (; len > 0; len--)
 		*bp++ = *cp++;
+#ifdef ANSI_COLOR
+	    ansi_len = 0;
+#endif
 	}
 
 	ip->current_column = current_column;
