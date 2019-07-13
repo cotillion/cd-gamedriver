@@ -9,38 +9,33 @@
 void
 test_strlen()
 {
-    /*
-     * Map string to a pair of lengths.
-     * First is expected length with ANSI_COLOR defined,
-     * second is without.
-     */
-    mapping strings = ([
-        "just a string\n": ({ 14, 14 }),
-        sprintf(
+    // 0: input
+    // 1: expected output with ANSI_COLOR defined
+    // 2: expected output without ANSI_COLOR defined
+    mixed *strings = ({
+        ({"just a string\n", 14, 14 }),
+        ({ sprintf(
             // The 'm' in 'normalizer' closes the sequence
             "%c[31mRed Tacos%c[0Forgot to close the normalizer sequence.%c[0m\n",
-            ESC, ESC, ESC): ({ 26, 62 }),
-        sprintf(
+            ESC, ESC, ESC), 26, 62 }),
+        ({ sprintf(
             "%c[31mRed Tacos%c[0m %c[38;5;208mOrange Tacos%c[0m\n",
-            ESC, ESC, ESC, ESC): ({ 23, 47 }),
-        0: ({ 0, 0 }),
-        "": ({ 0, 0 })
-    ]);
+            ESC, ESC, ESC, ESC), 23, 47 }),
+        ({ 0, 0, 0 }),
+        ({ "", 0, 0 })
+    });
 
-    foreach(string str, string *lengths: strings)
+    foreach(string *triplet: strings)
     {
-        write("strlen() of [" + str + "] is " + strlen(str) + ". " +
-              "When ANSI_COLOR is defined, we expect " + lengths[0] + ". " +
-              "When not defined, we expect " + lengths[1] + ".\n");
+        write("strlen() of [" + str + "] is " + strlen(triplet[0]) + ". " +
+              "When ANSI_COLOR is defined, we expect " + triplet[1] + ". " +
+              "When not defined, we expect " + triplet[2] + ".\n");
     }
 }
 
 void
 test_break_string()
 {
-    // 0: input
-    // 1: expected output with ANSI_COLOR defined
-    // 2: expected output without ANSI_COLOR defined
     mixed *strings = ({
         ({
             "Hello my Nice Friends. How are you today?\n",
