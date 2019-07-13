@@ -219,6 +219,9 @@ write_socket(char *cp, struct object *ob)
 #ifdef WORD_WRAP
     int len, current_column;
     char *bp, buf[MAX_WRITE_SOCKET_SIZE + 2];
+#ifdef ANSI_COLOR
+    int ansi_len = 0, in_ansi = 0;
+#endif
 #endif
 
     if (ob == NULL || ob->flags & O_DESTRUCTED ||
@@ -294,11 +297,32 @@ write_socket(char *cp, struct object *ob)
 		continue;
 	    }
 
+#ifdef ANSI_COLOR
+	    if (!in_ansi && *cp == ANSI_START)
+            {
+	        in_ansi = 1;
+            }
+#endif
 	    len = 1;
 	    while (cp[len] > ' ' && cp[len - 1] != '-')
-		len++;
+            {
+#ifdef ANSI_COLOR
+                if (in_ansi)
+                {
+                    ansi_len++;
 
-	    if (current_column + len >= ip->screen_width)
+                    if (cp[len] == ANSI_END)
+                        in_ansi = 0;
+                }
+#endif
+                len++;
+            }
+
+#ifdef ANSI_COLOR
+            if (current_column + len - ansi_len >= ip->screen_width)
+#else
+            if (current_column + len >= ip->screen_width)
+#endif
 	    {
 		if (current_column > ip->screen_width * 4 / 5)
 		{
@@ -314,6 +338,10 @@ write_socket(char *cp, struct object *ob)
 			cp++;
 		    if (*cp == '\n')
 			cp++;
+#ifdef ANSI_COLOR
+                    in_ansi = 0;
+                    ansi_len = 0;
+#endif
 		    continue;
 		}
 	    }
