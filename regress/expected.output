@@ -10,8 +10,8 @@ Loading /tests/test-008.c -> Ok.
 Loading /tests/test-009.c -> Ok.
 Loading /tests/test-010.c -> Ok.
 Loading /tests/test-011.c -> *too many alarms in object
-Loading /tests/test-012.c -> tests/test-012.c: redefinition of variable 'i' line 7
-tests/test-012.c: Type mismatch ( int * vs int ) when initializing i line 7
+Loading /tests/test-012.c -> /tests/test-012.c: redefinition of variable 'i' line 7
+/tests/test-012.c: Type mismatch ( int * vs int ) when initializing i line 7
 *Error in loading object
 Loading /tests/test-013.c -> eval_cost too big 5000001 (/tests/test-013.c Line: 9)
 *Too long evaluation. Execution aborted.
@@ -19,12 +19,12 @@ Loading /tests/test-014.c -> Ok.
 Loading /tests/test-015.c -> Ok.
 Loading /tests/test-016.c -> Ok.
 Loading /tests/test-017.c -> Ok.
-Loading /tests/test-018.c -> tests/test-018.c: Function watchmecrashthisdriverwithareallyreallyreallyreallyreallreallyreallyreallyreallyreallyreallyreallyreallyreallreallylongfunctionnameohitneedstobereallyreallyreallylongofcoursebutIcandoityesicanithinkicanithinkicaniknowicaniknowcanhahahahahabutthisisreallyboringsozzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz line 9
+Loading /tests/test-018.c -> /tests/test-018.c: Function watchmecrashthisdriverwithareallyreallyreallyreallyreallreallyreallyreallyreallyreallyreallyreallyreallyreallreallylongfunctionnameohitneedstobereallyreallyreallylongofcoursebutIcandoityesicanithinkicanithinkicaniknowicaniknowcanhahahahahabutthisisreallyboringsozzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz line 9
 *Error in loading object
-Loading /tests/test-019.c -> tests/test-019.c: redefinition of variable 'vic' line 11
-tests/test-019.c: Incorrect number of arguments line 11
-tests/test-019.c: Incorrect number of arguments line 13
-tests/test-019.c: Function touch_me declared but never defined line 14
+Loading /tests/test-019.c -> /tests/test-019.c: redefinition of variable 'vic' line 11
+/tests/test-019.c: Incorrect number of arguments line 11
+/tests/test-019.c: Incorrect number of arguments line 13
+/tests/test-019.c: Function touch_me declared but never defined line 14
 *Error in loading object
 Loading /tests/test-020.c -> Ok.
 Loading /tests/test-021.c -> Ok.
@@ -34,9 +34,10 @@ Loading /tests/test-024.c -> Ok.
 Loading /tests/test-025.c -> Ok.
 Loading /tests/test-026.c -> Ok.
 Loading /tests/test-027.c -> *Too deep recursion
-Loading /tests/test-028.c -> Ok.
+Loading /tests/test-028.c -> /tests/test-028.c: Variable str not declared! line 32
+*Error in loading object
 Setting up ipc.
 Listening to telnet port: 0.0.0.0:3011
-exec of hname failed.
 Listening to telnet port: :::3011
 Shutting down ipc...
+exec of hname failed.
