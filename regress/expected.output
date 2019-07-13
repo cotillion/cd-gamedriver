@@ -34,8 +34,19 @@ Loading /tests/test-024.c -> Ok.
 Loading /tests/test-025.c -> Ok.
 Loading /tests/test-026.c -> Ok.
 Loading /tests/test-027.c -> *Too deep recursion
-Loading /tests/test-028.c -> /tests/test-028.c: Variable str not declared! line 32
-*Error in loading object
+Loading /tests/test-029.c -> strlen() of [just a string
+] is 14. When ANSI_COLOR is defined, we expect 14. When not defined, we expect 14.
+strlen() of [[31mRed Tacos[0Forgot to close the normalizer sequence.[0m
+] is 62. When ANSI_COLOR is defined, we expect 26. When not defined, we expect 62.
+strlen() of [[31mRed Tacos[0m [38;5;208mOrange Tacos[0m
+] is 47. When ANSI_COLOR is defined, we expect 23. When not defined, we expect 47.
+strlen() of [0] is 0. When ANSI_COLOR is defined, we expect 0. When not defined, we expect 0.
+strlen() of [] is 0. When ANSI_COLOR is defined, we expect 0. When not defined, we expect 0.
+break_string() example 1: Equal to ANSI expected. Equal to non-ANSI expected.
+break_string() example 2: Not equal to ANSI expected. Equal to non-ANSI expected.
+break_string() example 3: Equal to ANSI expected. Equal to non-ANSI expected.
+break_string() example 4: Equal to ANSI expected. Equal to non-ANSI expected.
+Ok.
 Setting up ipc.
 Listening to telnet port: 0.0.0.0:3011
 Listening to telnet port: :::3011
