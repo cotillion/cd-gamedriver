@@ -324,7 +324,11 @@ write_socket(char *cp, struct object *ob)
             if (current_column + len >= ip->screen_width)
 #endif
 	    {
-		if (current_column > ip->screen_width * 4 / 5)
+#ifdef ANSI_COLOR
+                if (current_column - ansi_len > ip->screen_width * 4 / 5)
+#else
+                if (current_column > ip->screen_width * 4 / 5)
+#endif
 		{
 		    current_column = 0;
 		    *bp++ = '\n';
