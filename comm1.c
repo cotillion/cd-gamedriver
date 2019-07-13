@@ -305,7 +305,14 @@ write_socket(char *cp, struct object *ob)
 
 #ifdef ANSI_COLOR
 	    if (!in_ansi && *cp == ANSI_START)
-	        in_ansi = 1;
+            {
+                in_ansi = 1;
+                /*
+                 * Escape won't fall into the range we check below,
+                 * so increment ansi_len now.
+                 */
+                ansi_len++;
+            }
 #endif
 	    len = 1;
 	    while (cp[len] > ' ' && cp[len - 1] != '-')
