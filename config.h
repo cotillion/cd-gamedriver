@@ -352,5 +352,15 @@
  */
 #define SUPER_SNOOP
 
+/*
+ * ANSI_COLOR
+ *
+ * When defined, ANSI color sequences are ignored when
+ * calculating the length of strings for display
+ * (i.e. strlen, break_string, write_socket efuns).
+ * This functionality only handles ANSI SGR sequences.
+ */
+#define ANSI_COLOR
+
 #endif
 

@@ -5720,7 +5720,41 @@ f_strlen(int xxx)
     if (sp->type == T_NUMBER)
 	i = 0;
     else
-	i = strlen(sp->u.string);
+#ifdef ANSI_COLOR
+    {
+        char *chr = sp->u.string;
+        int j = 0;
+        i = 0;
+
+        while (*chr)
+        {
+            i++;
+
+            if (j > 0)
+            {
+                /* end of sequence */
+                if ((*chr) == 'm')
+                {
+                    /* subtract the length of just-finished sequence */
+                    i -= j + 1;
+                    j = 0;
+                }
+                else
+                {
+                    j++;
+                }
+            }
+            else if ((*chr) == '\033') /* ASCII escape */
+            {
+                j++;
+            }
+
+            chr++;
+        }
+    }
+#else
+        i = strlen(sp->u.string);
+#endif
     pop_stack();
     push_number(i);
 }
