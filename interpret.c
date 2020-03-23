@@ -60,7 +60,7 @@ static void do_trace (char *, char *, char *);
 static int strpref (char *, char *);
 #endif
 static int apply_low (char *, struct object *, int, int);
-extern int do_rename (char *, char *);     
+extern int do_rename (char *, char *);
 static int inter_sscanf (int);
 extern int wildmat(char *, char *);
 static struct closure *alloc_objclosure(int ftype, int funinh, int funno, struct object *ob, char *refstr, int usecache);
@@ -74,7 +74,7 @@ struct program *current_prog;
 extern int  s_flag, unlimited;
 extern struct object *current_interactive;
 int variable_index_found;
-int variable_inherit_found;    
+int variable_inherit_found;
 int variable_type_mod_found;
 unsigned long long cache_tries = 0, cache_hits = 0;
 
@@ -112,7 +112,7 @@ static int tracedepth;
  (current_interactive->interactive->trace_prefix == 0 || \
   (current_object && strpref(current_interactive->interactive->trace_prefix, \
 			     current_object->name))) )
-    
+
 /*
  * Inheritance:
  * An object X can inherit from another object Y. This is done with
@@ -127,9 +127,9 @@ static int tracedepth;
  * loaded separetly. X will then be reloaded again.
  */
 extern int d_flag;
-    
+
 extern int current_line, eval_cost;
-    
+
 /*
  * These are the registers used at runtime.
  * The control stack saves registers to be restored when a function
@@ -151,12 +151,12 @@ struct control_stack *csp;	/* Points to last element pushed */
 static int num_call_self, num_call_down, num_call_other;
 #endif
 
-/* These are set by search_for_function if it is successful 
- * function_inherit_found == num_inherit if in top program 
- * function_prog_found	  == Implied by inherit_found 
+/* These are set by search_for_function if it is successful
+ * function_inherit_found == num_inherit if in top program
+ * function_prog_found	  == Implied by inherit_found
  */
-int    		function_inherit_found 	= -1; 
-struct 	program *function_prog_found	= 0; 	
+int    		function_inherit_found 	= -1;
+struct 	program *function_prog_found	= 0;
 int 		function_index_found	= -1;
 unsigned  short	function_type_mod_found = 0;
 
@@ -203,7 +203,7 @@ extend_stack(void)
  * incremented.
  * A destructed object must never be pushed onto the stack.
  */
-INLINE void 
+INLINE void
 push_object(struct object *ob)
 {
     extend_stack();
@@ -222,7 +222,7 @@ push_object(struct object *ob)
 /*
  * Push a number on the value stack.
  */
-INLINE void 
+INLINE void
 push_number(long long n)
 {
     extend_stack();
@@ -230,7 +230,7 @@ push_number(long long n)
     sp->u.number = n;
 }
 
-INLINE void 
+INLINE void
 push_float(double f)
 {
     extend_stack();
@@ -251,7 +251,7 @@ push_function(struct closure *func, bool_t reference)
 /*
  * Push a string on the value stack.
  */
-INLINE void 
+INLINE void
 push_string(char *p, int type)
 {
     extend_stack();
@@ -297,7 +297,7 @@ find_value(int inh, int rnum)
 #endif
     num =  current_object->prog->
 	inherit[inh_offset + inh].variable_index_offset + rnum;
-    
+
     return &current_object->variables[num];
 }
 
@@ -306,7 +306,7 @@ find_value(int inh, int rnum)
  * itself.
  */
 #if defined(PROFILE)
-void 
+void
 free_svalue(struct svalue *v)
 {
     if (v->type & T_LVALUE)
@@ -407,12 +407,12 @@ add_slash(char *cp)
  * (as all identifiers are kept in a vector pointed to by the object).
  */
 
-INLINE void 
+INLINE void
 assign_svalue_no_free(struct svalue *to, struct svalue *from)
 {
     if (to == from)
 	return;
-    
+
 #ifdef DEBUG
     if (from == 0)
 	fatal("Null pointer to assign_svalue().\n");
@@ -448,12 +448,12 @@ assign_svalue_no_free(struct svalue *to, struct svalue *from)
     }
 }
 
-INLINE void 
+INLINE void
 assign_svalue(struct svalue *dest, struct svalue *v)
 {
     if (dest == v)
 	return;
-    
+
     /* First deallocate the previous value. */
     free_svalue(dest);
     assign_svalue_no_free(dest, v);
@@ -463,7 +463,7 @@ assign_svalue(struct svalue *dest, struct svalue *v)
 /* This function has been replaced with a macro to save speed. Macro is defined
  * in interpret.h
  */
-void 
+void
 push_svalue(struct svalue *v)
 {
     extend_stack();
@@ -476,8 +476,8 @@ push_svalue(struct svalue *v)
  * Don't do this if it is a value that will be used afterwards, as the
  * data may be sent to free(), and destroyed.
  */
-INLINE 
-void pop_stack() 
+INLINE
+void pop_stack()
 {
 #ifdef DEBUG
     if (sp < start_of_stack)
@@ -489,13 +489,13 @@ void pop_stack()
 /*
  * Compute the address of an array element.
  */
-INLINE static void 
+INLINE static void
 push_indexed_lvalue(int needlval)
 {
     struct svalue *i, *vec, *item;
     long long ind = 0;		/* = 0 to make Wall quiet */
     long long org_ind = 0;
-    
+
     i = sp;
     vec = sp - 1;
     if (vec->type != T_MAPPING)
@@ -513,7 +513,7 @@ push_indexed_lvalue(int needlval)
 
         if (ind < 0)
             ind = strlen(vec->u.string) + ind;
-        
+
 	if (ind > strlen(vec->u.string) || ind < 0)
 	    one_character.u.number = 0;
 	else
@@ -527,7 +527,7 @@ push_indexed_lvalue(int needlval)
 
         if (ind < 0)
             ind = vec->u.vec->size + ind;
-        
+
 	if (ind >= vec->u.vec->size || ind < 0)
 	    error("Index out of bounds. Vector size: %d, index: %lld\n",
                 vec->u.vec->size, org_ind);
@@ -539,7 +539,7 @@ push_indexed_lvalue(int needlval)
 	    assign_svalue (&quickfix, item);
 	    item = &quickfix;
 	}
-        
+
 	free_svalue(sp);	  /* This will make 'vec' invalid to use */
 	sp->type = T_LVALUE;
 	sp->u.lvalue = item;
@@ -584,7 +584,7 @@ void pop_n_elems(int n)
 char *
 get_typename(int type)
 {
-    
+
     switch(type)
     {
     case T_NUMBER:
@@ -602,17 +602,17 @@ get_typename(int type)
     case T_FUNCTION:
 	return "Function";
     }
-    
+
     return "Unknown";
 }
 
-void 
+void
 bad_arg(int arg, int instr, struct svalue *sv)
 {
     error("Bad argument %d to %s(), received type was %s \n", arg, get_f_name(instr), get_typename(sv->type));
 }
 
-void 
+void
 bad_arg_op(int instr, struct svalue *arg1, struct svalue *arg2)
 {
     error("Bad arguments to %s(), received types were %s and %s\n",
@@ -621,7 +621,7 @@ bad_arg_op(int instr, struct svalue *arg1, struct svalue *arg2)
 
 #if defined(PROFILE_LPC)
 /* profile_exp_mtimebase should equal (1.0 - exp(-1.0/profile_timebase)) */
-static long double profile_timebase = 60.0l, profile_exp_mtimebase = 0x8.766dfa92ba7052ep-9l; 
+static long double profile_timebase = 60.0l, profile_exp_mtimebase = 0x8.766dfa92ba7052ep-9l;
 
 long double
 get_profile_timebase() {
@@ -696,7 +696,7 @@ save_control_context(struct control_stack *csp1)
     csp1->inh_offset = inh_offset;
 }
 
-void 
+void
 push_control_stack(struct object *ob, struct program *prog, struct function *funp)
 {
     if (csp >= &control_stack[MAX_TRACE-1])
@@ -744,8 +744,8 @@ restore_control_context(struct control_stack *csp1)
     inh_offset = csp1->inh_offset;
 }
 
-void 
-pop_control_stack() 
+void
+pop_control_stack()
 {
 #ifdef DEBUG
     if (csp == control_stack - 1)
@@ -783,7 +783,7 @@ pop_control_stack()
  * is incremented. Newly created vectors normally have a reference count
  * initialized to 1.
  */
-INLINE void 
+INLINE void
 push_vector(struct vector *v, bool_t reference)
 {
     extend_stack();
@@ -793,7 +793,7 @@ push_vector(struct vector *v, bool_t reference)
     sp->u.vec = v;
 }
 
-INLINE void 
+INLINE void
 push_mapping(struct mapping *v, bool_t reference)
 {
     extend_stack();
@@ -818,7 +818,7 @@ push_mstring(char *p)
 extern char *string_print_formatted (int , char *, int, struct svalue *);
 
 #ifdef TRACE_CODE
-static void 
+static void
 do_trace_call(struct function *funp)
 {
     do_trace("Call direct ", funp->name, " ");
@@ -917,7 +917,7 @@ setup_new_frame(struct function *funp)
  * The stack is implemented as a linked list of stack-objects, allocated
  * from the heap, and deallocated when popped.
  */
-void 
+void
 push_pop_error_context (int push)
 {
     static struct error_context_stack
@@ -927,9 +927,9 @@ push_pop_error_context (int push)
 	struct object *save_command_giver;
 	struct svalue *save_sp;
 	struct error_context_stack *next;
-	struct control_stack cstack;    
+	struct control_stack cstack;
     } *ecsp = 0, *p;
-    
+
     if (push == 1) {
 	/*
 	 * Save some global variables that must be restored separately
@@ -939,7 +939,7 @@ push_pop_error_context (int push)
 	p = (struct error_context_stack *)xalloc (sizeof *p);
 	save_control_context(&(p->cstack));
 	p->save_sp = sp;
-	p->save_csp = csp;	
+	p->save_csp = csp;
 	p->save_command_giver = command_giver;
 	p->exception = exception;
 	p->next = ecsp;
@@ -998,7 +998,7 @@ push_pop_error_context (int push)
  * function names are pointers to shared strings, which means that equality
  * can be tested simply through pointer comparison.
  */
-int 
+int
 validate_shadowing(struct object *ob)
 {
     struct program *shadow = current_object->prog, *victim = ob->prog;
@@ -1015,17 +1015,17 @@ validate_shadowing(struct object *ob)
 	error("Can't shadow a shadow.\n");
 
     /* Loop structure copied from search_for_function... *shrug* /Dark */
-    for (inh = ob->prog->num_inherited - 1; inh >= 0; inh--) 
+    for (inh = ob->prog->num_inherited - 1; inh >= 0; inh--)
     {
 	struct program *progp = victim->inherit[inh].prog;
 	int fun;
 
 	if (progp->flags & PRAGMA_NO_SHADOW)
 	    return 0;
-	for (fun = progp->num_functions - 1; fun >= 0; fun--) 
+	for (fun = progp->num_functions - 1; fun >= 0; fun--)
 	{
 	    /* Should static functions 'shadowing' nomask functions
-	     * be allowed? They do not do any harm... 
+	     * be allowed? They do not do any harm...
 	     */
  	    if ((progp->functions[fun].type_flags & TYPE_MOD_NO_MASK) &&
 		search_for_function(progp->functions[fun].name, shadow))
@@ -1062,14 +1062,14 @@ validate_shadowing(struct object *ob)
  * to save space it is preferable that destructed objects are freed soon.
  *   amylaar
  */
-void 
+void
 check_for_destr(struct svalue *arg)
 {
     int i;
     struct vector *v;
     struct mapping *m;
     struct apair *p, **pp;
-    
+
     switch (arg->type)
     {
     case T_FUNCTION:
@@ -1078,7 +1078,7 @@ check_for_destr(struct svalue *arg)
     case T_POINTER:
 	v = arg->u.vec;
     arrtest:
-	for (i = 0; i < v->size; i++) 
+	for (i = 0; i < v->size; i++)
 	{
 	    if (v->item[i].type == T_OBJECT)
 	    {
@@ -1092,14 +1092,14 @@ check_for_destr(struct svalue *arg)
 	    assign_svalue(&v->item[i], &const0);
 	}
 	break;
-	
+
     case T_MAPPING:
 	m = arg->u.map;
 	/* Value parts that have been destructed are kept but set = 0. */
 	for (i = 0 ; i < m->size ; i++) {
-	    for (p = m->pairs[i]; p ; p = p->next) 
+	    for (p = m->pairs[i]; p ; p = p->next)
 	    {
-		if ((p->val.type == T_OBJECT && 
+		if ((p->val.type == T_OBJECT &&
 		     (p->val.u.ob->flags & O_DESTRUCTED)) ||
 		    (p->val.type == T_FUNCTION &&
 		     !legal_closure(p->val.u.func)))
@@ -1107,7 +1107,7 @@ check_for_destr(struct svalue *arg)
 	    }
 	}
 	/* Index parts that has been destructed is removed */
-        for (i = 0 ; i < m->size ; i++) 
+        for (i = 0 ; i < m->size ; i++)
         {
             for (pp = &m->pairs[i]; *pp; )
             {
@@ -1122,7 +1122,7 @@ check_for_destr(struct svalue *arg)
                     free_svalue(&p->val);
                     free((char *)p);
                     m->card--;
-                } 
+                }
                 else
                 {
                     pp = &p->next;
@@ -1130,7 +1130,7 @@ check_for_destr(struct svalue *arg)
             }
         }
 	break;
-	
+
     default:
 	error("Strange type to check_for_destr.\n");
 	break;
@@ -1211,13 +1211,13 @@ f_call_virt(int xxx)
     num_call_self++;
 #endif
     cache_tries++;
-    
+
     fiix = EXTRACT_UCHAR(pc);
     pc++;
     ((char *)&fix)[0] = pc[0];
     ((char *)&fix)[1] = pc[1];
     pc += 2;
-    
+
     num_arg = EXTRACT_UCHAR(pc);
     pc++;
 
@@ -1226,7 +1226,7 @@ f_call_virt(int xxx)
 	cache_hits++;
 #ifdef CACHE_STATS
 	call_first_saves += current_prog->num_inherited - fiix;
-#endif	
+#endif
 	function_prog_found = current_object->prog->
 	    inherit[fiix].prog;
 	function_inherit_found = fiix;
@@ -1243,8 +1243,8 @@ f_call_virt(int xxx)
     }
 
     funp = &(function_prog_found->functions[function_index_found]);
-    /* Urgle. There should probably be a function for all this. |D| 
-     * See call-self for comments 
+    /* Urgle. There should probably be a function for all this. |D|
+     * See call-self for comments
      */
     push_control_stack (current_object, function_prog_found, funp);
     inh_offset = function_inherit_found;
@@ -1253,7 +1253,7 @@ f_call_virt(int xxx)
     csp->num_local_variables = num_arg;
     pc = setup_new_frame(funp);
     csp->extern_call = 0;
-    
+
 }
 
 static void
@@ -1279,10 +1279,10 @@ f_call_self(int num_arg)
     num_arg--;
     (void)memmove(arg, &arg[1], num_arg * sizeof(struct svalue));
     sp--;
-    
+
     funp = &(function_prog_found->functions[function_index_found]);
-    /* Urgle. There should probably be a function for all this. |D| 
-     * See call-self for comments 
+    /* Urgle. There should probably be a function for all this. |D|
+     * See call-self for comments
      */
     push_control_stack (current_object, function_prog_found, funp);
     inh_offset = function_inherit_found;
@@ -1291,7 +1291,7 @@ f_call_self(int num_arg)
     csp->num_local_variables = num_arg;
     pc = setup_new_frame(funp);
     csp->extern_call = 0;
-    
+
 }
 
 /* ARGSUSED */
@@ -1324,25 +1324,25 @@ f_call_non_virt(int xxx)
     struct function *funp;
     int inh, num_arg;
     unsigned short fix, fiix;
-    
+
 #ifdef COUNT_CALLS
     num_call_down++;
 #endif
-    
+
     fiix = EXTRACT_UCHAR(pc);
     pc++;
     ((char *)&fix)[0] = pc[0];
     ((char *)&fix)[1] = pc[1];
     pc += 2;
-    
+
     num_arg = EXTRACT_UCHAR(pc);
     pc++;
     inh = fiix - (current_prog->num_inherited - 1);
     function_prog_found = current_prog->inherit[fiix].prog;
     funp = &(function_prog_found->functions[fix]);
-    
-    /* Urgle. There should probably be a function for all this. |D| 
-     * See call-self for comments 
+
+    /* Urgle. There should probably be a function for all this. |D|
+     * See call-self for comments
      */
     push_control_stack (current_object, function_prog_found, funp);
     inh_offset += inh;
@@ -1350,7 +1350,7 @@ f_call_non_virt(int xxx)
     csp->ext_call = 0;
     csp->num_local_variables = num_arg;
     pc = setup_new_frame(funp);
-    csp->extern_call = 0;    
+    csp->extern_call = 0;
 }
 
 /* ARGSUSED */
@@ -1442,10 +1442,10 @@ f_calling_program(int num_arg)
 /* ARGSUSED */
 static void
 f_calling_object(int num_arg)
-{ 
+{
     long long n = sp->u.number;
     struct control_stack *cspi;
-    
+
     pop_stack();
     if (n > 0 || -n > MAX_TRACE)
     {
@@ -2022,7 +2022,7 @@ f_regexp(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_shadow(int num_arg)
 {
     struct object *ob;
@@ -2035,7 +2035,7 @@ f_shadow(int num_arg)
 	push_object(ob);
 	return;
     }
-    if (validate_shadowing(ob)) 
+    if (validate_shadowing(ob))
     {
 	/*
 	 * The shadow is entered first in the chain.
@@ -2070,14 +2070,14 @@ f_dup(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_jump_when_zero(int num_arg)
 {
     unsigned short offset;
-    
+
     ((char *)&offset)[0] = pc[0];
     ((char *)&offset)[1] = pc[1];
-    
+
     if (sp->u.number == 0)
     {
 	pc = current_prog->program + offset;
@@ -2098,12 +2098,12 @@ f_skip_nz(int num_arg)
     pc += 2;
     if (sp->type == T_NUMBER && sp->u.number == 0)
 	pop_stack();
-    else 
+    else
 	pc = current_prog->program + offset;
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_jump(int num_arg)
 {
     unsigned short offset;
@@ -2114,7 +2114,7 @@ f_jump(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_jump_when_non_zero(int num_arg)
 {
     unsigned short offset;
@@ -2129,7 +2129,7 @@ f_jump_when_non_zero(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_indirect(int num_arg)
 {
 #ifdef DEBUG
@@ -2151,7 +2151,7 @@ f_indirect(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_identifier(int num_arg)
 {
     extend_stack();
@@ -2186,7 +2186,7 @@ f_push_indexed_lvalue(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_index(int num_arg)
 {
     push_indexed_lvalue(0);
@@ -2206,7 +2206,7 @@ f_index(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_local_name(int num_arg)
 {
     extend_stack();
@@ -2242,7 +2242,7 @@ f_return(int num_arg)
     fatal("f_return should not be called.\n");
 }
 
-static void 
+static void
 f_break_string(int num_arg)
 {
     struct svalue *arg = sp- num_arg + 1;
@@ -2250,7 +2250,7 @@ f_break_string(int num_arg)
 
     if (arg[0].type == T_STRING)
     {
-        str = break_string(arg[0].u.string, arg[1].u.number, 
+        str = break_string(arg[0].u.string, arg[1].u.number,
                            (num_arg > 2 ? &arg[2] : (struct svalue *)0));
         pop_n_elems(num_arg - 1);
         if (str) {
@@ -2266,7 +2266,7 @@ f_break_string(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_clone_object(int num_arg)
 {
     struct object *ob;
@@ -2277,7 +2277,7 @@ f_clone_object(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_aggregate(int num_arg)
 {
     struct vector *v;
@@ -2295,7 +2295,7 @@ f_aggregate(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_m_aggregate(int num_arg)
 {
     struct mapping *m;
@@ -2372,7 +2372,7 @@ f_wildmatch(int num_arg)
     else
     {
         int  i;
-    
+
         i = wildmat(sp->u.string, (sp-1)->u.string);
         pop_n_elems(2);
         push_number(i);
@@ -2390,7 +2390,7 @@ f_write_file(int num_arg)
     push_number(i);
 }
 
-static void 
+static void
 f_read_file(int num_arg)
 {
     char *str;
@@ -2415,7 +2415,7 @@ f_read_file(int num_arg)
     }
 }
 
-static void 
+static void
 f_read_bytes(int num_arg)
 {
     char *str;
@@ -2431,7 +2431,7 @@ f_read_bytes(int num_arg)
 	    bad_arg(2, F_READ_BYTES, &arg[2]);
 	len = arg[2].u.number;
     }
-	    
+
     str = read_bytes(arg[0].u.string, start, len);
     pop_n_elems(num_arg);
     if (str == 0)
@@ -2446,11 +2446,13 @@ f_read_bytes(int num_arg)
 static void
 f_write_bytes(int num_arg)
 {
-    int i;
+    if (sp->type != T_STRING)
+	bad_arg(3, F_WRITE_BYTES, sp);
 
     if (sp->u.string == NULL)
 	error("Attempt to write empty string.\n");
-    i = write_bytes((sp-2)->u.string, (sp-1)->u.number, sp->u.string);
+
+    int i = write_bytes((sp-2)->u.string, (sp-1)->u.number, sp->u.string);
     pop_n_elems(3);
     push_number(i);
 }
@@ -2484,7 +2486,7 @@ f_find_living(int num_arg)
     struct object *ob = NULL;
     struct vector *obs = NULL;
     struct svalue *arg;
-    
+
     arg = sp - num_arg + 1;
 
     if (num_arg == 1 || arg[1].u.number == 0)
@@ -2525,11 +2527,11 @@ f_find_player(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_write_socket(int num_arg)
 {
     char tmpbuf[48];
-    
+
     if (sp->type == T_NUMBER)
     {
         snprintf(tmpbuf, sizeof(tmpbuf), "%lld", sp->u.number);
@@ -2557,7 +2559,7 @@ f_write_socket_gmcp(int num_arg)
     {
         json = val2json(sp);
         str = (char *)xalloc(strlen(json) + strlen((sp - 1)->u.string) + 2);
-        strcpy(str, (sp - 1)->u.string); 
+        strcpy(str, (sp - 1)->u.string);
         strcat(str, " ");
         strcat(str, json);
 
@@ -2600,7 +2602,7 @@ f_obsolete(int num_arg)
 }
 
 /* ARGSUSED */
-static void    
+static void
 f_val2str(int num_arg)
 {
     extern char *valtostr(struct svalue *);
@@ -2613,11 +2615,11 @@ f_val2str(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_restore_map(int num_arg)
 {
     struct mapping *map = allocate_map(0);
-	    
+
     restore_map(current_object, map, sp->u.string);
     pop_stack();
     push_mapping(map, FALSE);
@@ -2649,7 +2651,7 @@ f_m_restore_object(int num_arg)
 static void
 f_this_interactive(int num_arg)
 {
-    if (current_interactive && 
+    if (current_interactive &&
 	!(current_interactive->flags & O_DESTRUCTED))
 	push_object(current_interactive);
     else
@@ -2667,7 +2669,7 @@ f_this_player(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_set_this_player(int num_arg)
 {
     if (sp->type == T_NUMBER)
@@ -2697,12 +2699,12 @@ f_living(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_set_auth(int num_arg)
 {
     struct svalue *ret = 0;
     struct svalue *arg = sp - 1;
-	    
+
     if (master_ob)
     {
 	push_object(current_object);
@@ -2724,7 +2726,7 @@ f_set_auth(int num_arg)
 }
 
 /* ARGSUSED */
-static void 
+static void
 f_query_auth(int num_arg)
 {
     int i;
@@ -2764,7 +2766,7 @@ f_explode(int num_arg)
     }
 }
 
-static void 
+static void
 f_filter(int num_arg)
 {
     struct svalue *arg;
@@ -2779,7 +2781,7 @@ f_filter(int num_arg)
 
 	if (arg[2].type == T_OBJECT)
 	    ob = arg[2].u.ob;
-	else if (arg[2].type == T_STRING) 
+	else if (arg[2].type == T_STRING)
 	    ob = find_object(arg[2].u.string);
 	else
 	    ob = 0;
@@ -3049,7 +3051,7 @@ f_query_remote_port(int num_arg)
 {
     struct svalue *ret;
     struct object *ob = command_giver;
-	    
+
     if (num_arg == 1)
     {
 	if (sp->type != T_OBJECT)
@@ -3089,7 +3091,7 @@ f_query_ip_number_name(int name, int num_arg)
     struct svalue *ret;
     char *tmp;
     struct object *ob = command_giver;
-	    
+
     if (num_arg == 1)
     {
 	if (sp->type != T_OBJECT)
@@ -3142,7 +3144,7 @@ f_query_ip_ident(int num_arg)
 {
     struct object *ob = sp->u.ob;
     struct svalue *ret;
-    
+
     sp--;
     push_object(current_object);
     push_object(ob);
@@ -3225,7 +3227,7 @@ f_object_clones(int num_arg)
     struct object *ob;
     int i;
     int num_clones;
-    
+
     if (sp->type == T_NUMBER)
 	v = allocate_array(0);
     else
@@ -3249,7 +3251,7 @@ static void
 f_commands(int num_arg)
 {
     struct vector *vec;
-	    
+
     if (sp->type == T_NUMBER)
 	vec = allocate_array(0);
     else
@@ -3439,7 +3441,7 @@ f_add(int num_arg)
     {
 	FLOATASGOP((sp-1)->u.real, += , sp->u.real);
 	sp--;
-    } 
+    }
     else if ((sp-1)->type == T_POINTER && sp->type == T_POINTER)
     {
 	struct vector *v;
@@ -3469,7 +3471,7 @@ static void
 f_subtract(int num_arg)
 {
 
-    if ((sp-1)->type == T_POINTER && sp->type == T_POINTER) 
+    if ((sp-1)->type == T_POINTER && sp->type == T_POINTER)
     {
 	struct vector *v;
 
@@ -3481,18 +3483,18 @@ f_subtract(int num_arg)
 	pop_stack();
 	pop_stack();
 
-	if (v == 0) 
+	if (v == 0)
 	{
 	    push_number(0);
-	} 
-	else 
+	}
+	else
 	{
 	    push_vector(v, FALSE);
 	}
 
 	return;
     }
-    if ((sp-1)->type == T_FLOAT && sp->type == T_FLOAT) 
+    if ((sp-1)->type == T_FLOAT && sp->type == T_FLOAT)
     {
 	FLOATASGOP((sp-1)->u.real, -= , sp->u.real);
 	sp--;
@@ -3517,11 +3519,11 @@ f_and(int num_arg)
 
 	pop_stack();
 	pop_stack();
-	if (v == 0) 
+	if (v == 0)
 	{
 	    push_number(0);
-	} 
-	else 
+	}
+	else
 	{
 	    push_vector(v, FALSE);
 	}
@@ -3547,9 +3549,9 @@ f_or(int num_arg)
 	pop_stack();
 	pop_stack();
 
-	if (v == NULL) 
+	if (v == NULL)
 	    push_number(0);
-	else 
+	else
 	    push_vector(v, FALSE);
 
 	return;
@@ -3594,7 +3596,7 @@ f_rsh(int num_arg)
 	sp->type != T_NUMBER)
       bad_arg_op(F_RSH, sp-1, sp);
     i = (long long)((unsigned long long)(sp-1)->u.number >> sp->u.number);
-    sp--;	
+    sp--;
     sp->u.number = i;
 }
 
@@ -3686,7 +3688,7 @@ f_mod(int num_arg)
       (sp-1)->u.real = fmod((sp-1)->u.real, sp->u.real);
       if (errno)
 	error("Modulus by zero.\n");
-    } 
+    }
     sp--;
 }
 
@@ -3906,7 +3908,7 @@ f_post_dec(int num_arg)
     sp->u.number++;
 }
 
-static void 
+static void
 f_call_other(int num_arg)
 {
     struct object *ob;
@@ -3914,7 +3916,7 @@ f_call_other(int num_arg)
 
 #ifdef COUNT_CALLS
     num_call_other++;
-#endif	
+#endif
     arg = sp - num_arg + 1;
     if (arg[0].type == T_NUMBER)
     {
@@ -3947,7 +3949,7 @@ f_call_other(int num_arg)
 	    for (j = 0; j < v->size; j++)
 		push_svalue(&v->item[j]);
 #ifdef TRACE_CODE
-	    if (TRACEP(TRACE_CALL_OTHER)) 
+	    if (TRACEP(TRACE_CALL_OTHER))
 	    {
 		char buff[1024];
 		(void)sprintf(buff,"%s->%s", ob->name,arg[1].u.string);
@@ -3958,7 +3960,7 @@ f_call_other(int num_arg)
 		continue;	/* function not found */
 	    w->item[i] = *sp--;
 	}
-	
+
 	pop_n_elems(2);
 	push_vector(w, FALSE);
 	free_vector(v);
@@ -3990,7 +3992,7 @@ f_call_other(int num_arg)
 	    for (j = 0; j < v->size; j++)
 		push_svalue(&v->item[j]);
 #ifdef TRACE_CODE
-	    if (TRACEP(TRACE_CALL_OTHER)) 
+	    if (TRACEP(TRACE_CALL_OTHER))
 	    {
 		char buff[1024];
 		(void)sprintf(buff,"%s->%s", ob->name, arg[1].u.string);
@@ -4001,7 +4003,7 @@ f_call_other(int num_arg)
 		continue;	/* function not found */
 	    w->item[i] = *sp--;
 	}
-	
+
 	pop_n_elems(2);
 	push_mapping(make_mapping(ix,w), FALSE);
 	free_vector(o);
@@ -4012,13 +4014,13 @@ f_call_other(int num_arg)
     }
     if (arg[0].type == T_OBJECT)
 	ob = arg[0].u.ob;
-    else 
+    else
     {
 	ob = find_object(arg[0].u.string);
 	if (ob == 0)
 	    error("call_other() failed\n");
     }
-    if (current_object->flags & O_DESTRUCTED) 
+    if (current_object->flags & O_DESTRUCTED)
     {
 	/*
 	 * No external calls may be done when this object is
@@ -4032,15 +4034,15 @@ f_call_other(int num_arg)
      * Send the remaining arguments to the function.
      */
 #ifdef TRACE_CODE
-    if (TRACEP(TRACE_CALL_OTHER)) 
+    if (TRACEP(TRACE_CALL_OTHER))
     {
 	char buff[1024];
 	(void)sprintf(buff,"%s->%s", ob->name, arg[1].u.string);
 	do_trace("Call other ", buff, "\n");
     }
 #endif
-        
-    if (apply_low(arg[1].u.string, ob, num_arg - 2, 1) == 0) 
+
+    if (apply_low(arg[1].u.string, ob, num_arg - 2, 1) == 0)
     {
 	/* Function not found */
 	pop_n_elems(2);
@@ -4179,7 +4181,7 @@ f_extract(int num_arg)
     long long len, from, to;
     struct svalue *arg;
     char *res;
-	    
+
     arg = sp - num_arg + 1;
     len = strlen(arg[0].u.string);
     if (num_arg == 1)
@@ -4327,7 +4329,7 @@ static void
 f_file_name(int num_arg)
 {
     char *name,*res;
-	    
+
     /* This function now returns a leading '/', except when -o flag */
     name = sp->u.ob->name;
     res = add_slash(name);
@@ -4478,7 +4480,7 @@ static void
 f_remove_alarm(int num_arg)
 {
     extern void delete_call(struct object *, long long);
-    
+
     delete_call(current_object, sp->u.number);
 }
 
@@ -4511,7 +4513,7 @@ f_get_alarm(int num_arg)
     }
     else
 	push_number(0);
-}	
+}
 
 
 #ifdef WORD_WRAP
@@ -4561,9 +4563,9 @@ f_sprintf(int num_arg)
     s = string_print_formatted(1, (sp-num_arg+1)->u.string,
 			       num_arg-1, sp-num_arg+2);
     pop_n_elems(num_arg);
-    if (s == NULL) 
-	push_number(0); 
-    else 
+    if (s == NULL)
+	push_number(0);
+    else
 	push_string(s, STRING_MSTRING);
 }
 
@@ -4650,16 +4652,16 @@ f_snoop(int num_arg)
 {
     struct object *ob;
 
-    /* 
+    /*
      * This one takes a variable number of arguments. It returns
      * 0 or an object.
      */
-    if (!command_giver) 
+    if (!command_giver)
     {
 	pop_n_elems(num_arg);
 	push_number(0);
-    } 
-    else 
+    }
+    else
     {
 	ob = 0;			/* Do not remove this, it is not 0 by default */
 	switch (num_arg) {
@@ -4756,7 +4758,7 @@ f_ed(int num_arg)
 	}
 	ed_start((sp-1)->u.string, f);
 	pop_stack();
-    } else 
+    } else
 	error("Bad arg to ed()\n");
 }
 
@@ -4766,14 +4768,14 @@ build_salt(int length)
     char *str;
     int i;
     static char *choise = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
-    
-    str = xalloc(length + 1);    
+
+    str = xalloc(length + 1);
     for (i = 0; i < length; i++)
         str[i] = choise[random_number((int)strlen(choise))];
 
     if (length > 0)
         str[length] = '\0';
-    
+
     return str;
 }
 
@@ -4786,7 +4788,7 @@ f_crypt(int num_arg)
     char *salt;
     char *res;
     int i, count = 0;
-    
+
     if (sp->type == T_STRING && strlen(sp->u.string) >= 2)
     {
         /* If the string matches. $<id>$ then we add a salt.
@@ -4910,7 +4912,7 @@ f_foreach(int num_arg)
     pc += 2;
     assign_svalue(loopvar->u.lvalue, array->u.vec->item + ix->u.number);
     ix->u.number++;
- 
+
 }
 
 /******** function stuff *********/
@@ -4971,7 +4973,7 @@ papply(int num_arg)	/* num_arg does not include the function */
 	assign_svalue(&items->item[i++], &args[j]);
     if (i != newsize)
 	fatal("papply\n");
-    
+
     pop_n_elems(num_arg+1);	/* remove function and args */
     push_function(f, FALSE);
 }
@@ -5133,11 +5135,11 @@ call_var(int num_arg, struct closure *f)
     switch(f->funtype)
     {
     case FUN_LFUNO:
-    case FUN_LFUN: 
+    case FUN_LFUN:
     case FUN_SFUN:
 	ob = f->funobj;
 	break;
-    case FUN_EFUN: 
+    case FUN_EFUN:
 	efun = f->funno;
 	break;
     case FUN_EMPTY:
@@ -5195,7 +5197,7 @@ call_var(int num_arg, struct closure *f)
 		push_svalue(&f->funargs->item[i]);
 	    }
 	}
-	 
+
 	/* The remaining stack arguments now need to be moved into
 	   place.  emptyargs have already been moved, go on until
 	   num_arg.
@@ -5215,7 +5217,7 @@ call_var(int num_arg, struct closure *f)
 	call_efun(efun, num_arg);
     }
 
-if (sp-1 != insp) 
+if (sp-1 != insp)
 (void)printf("Bad sp in call_var %d\n", (int)(sp-1-insp));
     return 1;
 }
@@ -5324,7 +5326,7 @@ alloc_objclosure(int ftype, int inh, int no, struct object *ob, char *refstr, in
 
     if (ftype == FUN_EMPTY)
         fatal("Empty closure allocated");
-    
+
     if (usecache) {
 	/* Avoid repeated closure construction in some cases.
 	 * Occurs a lot in add_action.
@@ -5356,7 +5358,7 @@ alloc_objclosure(int ftype, int inh, int no, struct object *ob, char *refstr, in
     {
     	free_closure(funccache[next]);
     }
-    
+
     funccache[next] = fun;
     INCREF(fun->ref);		/* can be referenced from the cache now */
     next = (next+1) % FUNCCACHE;
@@ -5424,10 +5426,10 @@ f_build_closure(int num_arg)
     int ftype;
     struct object *obj;
     unsigned short funno, fun_inh;
-    
+
     ftype = EXTRACT_UCHAR(pc);
     pc++;
-    
+
     if (ftype == FUN_EMPTY) {
 	probe_stack(1);
 	*++sp = constempty;
@@ -5515,7 +5517,7 @@ free_closure(struct closure *f)
 {
     if (f->funtype == FUN_EMPTY)
         return;
-    
+
     if (!f->ref || --f->ref > 0)
 	return;
 /*(void)printf("free_closure %lx %s\n", f, show_closure(f));*/
@@ -5530,7 +5532,7 @@ free_closure(struct closure *f)
     }
 #endif
 
-    
+
     free_vector(f->funargs);
     if (f->funobj)
 	free_object(f->funobj, "free_closure");
@@ -5571,7 +5573,7 @@ typedef union {
     long long i;
     char *str;
 } searchval_t;
-	
+
 static long long
 cmp_values(searchval_t val, long long cmp, int as_str)
 {
@@ -5617,7 +5619,7 @@ f_switch(int num_arg)
 
     tab_head = 0;
     tab_tail = (tab_end - tab_start) / ENTRY_SIZE - 1;
-    
+
     if (is_str)
     {
 	/* This table has 0 as case label as first entry in the table */
@@ -5669,7 +5671,7 @@ f_switch(int num_arg)
 		return;
 	    }
 	}
-	else 
+	else
 	{
 	    /* It is an ordinary entry */
 	    long value;
@@ -6094,7 +6096,7 @@ f_parse_command(int num_arg)
 	check_for_destr(&arg[1]);
 
     i = parse(arg[0].u.string, &arg[1], arg[2].u.string, &arg[3],
-	      num_arg-3); 
+	      num_arg-3);
     pop_n_elems(num_arg);	/* Get rid of all arguments */
     push_number(i);		/* Push the result value */
 }
@@ -6246,10 +6248,10 @@ f_add_eq(int num_arg)
     if (sp[-1].type != T_LVALUE)
       error("Non-lvalue argument to +=");
     argp = sp[-1].u.lvalue;
-    switch(argp->type) 
+    switch(argp->type)
     {
 	case T_STRING:
-	    if (sp->type == T_STRING) 
+	    if (sp->type == T_STRING)
 	    {
 		int l = strlen(argp->u.string);
 		new_str = allocate_mstring(l + strlen(sp->u.string));
@@ -6257,8 +6259,8 @@ f_add_eq(int num_arg)
 		(void)strcpy(new_str+l, sp->u.string);
 		pop_n_elems(2);
 		push_mstring(new_str);
-	    } 
-	    else if (sp->type == T_NUMBER) 
+	    }
+	    else if (sp->type == T_NUMBER)
 	    {
 		char buff[20];
 		(void)sprintf(buff, "%lld", sp->u.number);
@@ -6267,32 +6269,32 @@ f_add_eq(int num_arg)
 		(void)strcat(new_str, buff);
 		pop_n_elems(2);
 		push_mstring(new_str);
-	    } 
-	    else 
+	    }
+	    else
 	    {
 		bad_arg_op(F_ADD_EQ, argp, sp);
 	    }
 	    break;
 	case T_NUMBER:
-	    if (sp->type == T_NUMBER) 
+	    if (sp->type == T_NUMBER)
 	    {
 		i = argp->u.number + sp->u.number;
 		pop_n_elems(2);
 		push_number(i);
-	    } 
-	    else 
+	    }
+	    else
 	    {
 		bad_arg_op(F_ADD_EQ, argp, sp);
 	    }
 	    break;
 	case T_FLOAT:
-	    if (sp->type == T_FLOAT) 
+	    if (sp->type == T_FLOAT)
 	    {
 		fl = argp->u.real + sp->u.real;
 		pop_n_elems(2);
 		push_float(fl);
-	    } 
-	    else 
+	    }
+	    else
 	    {
 		bad_arg_op(F_ADD_EQ, argp, sp);
 	    }
@@ -6326,7 +6328,7 @@ f_add_eq(int num_arg)
 		pop_n_elems(2);
 		push_vector(v, FALSE);
 	    }
-	    break;	      
+	    break;
 	default:
 	  bad_arg_op(F_ADD_EQ, argp, sp);
     }
@@ -6358,7 +6360,7 @@ f_sub_eq(int num_arg)
 	case T_POINTER:
 	    {
 		struct vector *v;
-		
+
 		if (sp->type != T_POINTER)
 		  bad_arg_op(F_SUB_EQ, argp, sp);
 
@@ -6366,19 +6368,19 @@ f_sub_eq(int num_arg)
 		check_for_destr(sp);
 
 		v = subtract_array(argp->u.vec,  sp->u.vec);
-		
+
 		pop_stack();
 		pop_stack();
-		
-		if (v == 0) 
+
+		if (v == 0)
 		{
 		    push_number(0);
-		} 
-		else 
+		}
+		else
 		{
 		    push_vector(v, FALSE);
 		}
-		
+
 		assign_svalue(argp, sp);
 		break;
 	    }
@@ -6476,24 +6478,24 @@ f_and_eq(int num_arg)
 	case T_POINTER:
 	    {
 		struct vector *v;
-		
+
 		if (sp->type != T_POINTER)
 		  bad_arg_op(F_AND_EQ, argp, sp);
-		
+
 		v = intersect_array(argp->u.vec,  sp->u.vec);
-		
+
 		pop_stack();
 		pop_stack();
-		
-		if (v == 0) 
+
+		if (v == 0)
 		{
 		    push_number(0);
-		} 
-		else 
+		}
+		else
 		{
 		    push_vector(v, FALSE);
 		}
-		
+
 		assign_svalue(argp, sp);
 		break;
 	    }
@@ -6663,7 +6665,7 @@ f_mod_eq(int num_arg)
 	error("Modulus by zero.\n");
       pop_n_elems(2);
       push_float(d);
-    } 
+    }
 }
 
 /* ARGSUSED */
@@ -6706,7 +6708,7 @@ f_unique_array(int num_arg)
         assign_svalue_no_free(&fun->funargs->item[1], &arg[1]);
     }
     else
-    {        
+    {
         fun = arg[1].u.func;
     }
 
@@ -6722,12 +6724,12 @@ f_unique_array(int num_arg)
 	pop_stack ();
     }
 
-    
+
     if (arg[1].type == T_STRING)
     {
         free_closure(fun);
     }
-    
+
     pop_n_elems(2);
 
     if (res)
@@ -6768,7 +6770,7 @@ f_map(int num_arg)
 
 	if (arg[2].type == T_OBJECT)
 	    ob = arg[2].u.ob;
-	else if (arg[2].type == T_STRING) 
+	else if (arg[2].type == T_STRING)
 	    ob = find_object(arg[2].u.string);
 	else
 	    ob = 0;
@@ -6891,7 +6893,7 @@ f_match_path(int num_arg)
 #include "efun_table.h"
 #undef EFUN_TABLE
 
-static void 
+static void
 eval_instruction(char *p)
 {
     int num_arg;
@@ -6944,7 +6946,7 @@ eval_instruction(char *p)
      * from LPC must return a value. This does not apply to control
      * instructions, like F_JUMP.
      */
-    { 
+    {
 #ifdef DEBUG
 	int xnum_arg;
 #endif
@@ -7025,7 +7027,7 @@ eval_instruction(char *p)
     case F_RETURN:
 	{
 	    int do_return = csp->extern_call;
-	    
+
 	    if (sp > fp) {
 		struct svalue *sv;
 
@@ -7035,16 +7037,16 @@ eval_instruction(char *p)
 		 */
                 while (sp >= fp)
 		    pop_stack();
-		
+
 		*++sp = *sv;	/* This way, the same ref counts are maintained */
 	    }
 #ifdef DEBUG
 	    if (sp != fp) {
 		fatal("Bad stack at F_RETURN\n"); /* marion */
 	    }
-	    
+
 #endif
-	    
+
 	    pop_control_stack();
 	    tracedepth--;
 #ifdef TRACE_CODE
@@ -7061,9 +7063,9 @@ eval_instruction(char *p)
 	    if (do_return) {	/* The control stack was popped just before */
 		return;
 	    }
-	    
+
 	}
-	
+
 	break;
 
     case F_TRY:
@@ -7078,7 +7080,7 @@ eval_instruction(char *p)
 	    catch_level++;
 
 	    pc += 3;
-	    
+
 #ifdef DEBUG
 	    stack = expected_stack;
 	    ins = instruction;
@@ -7098,7 +7100,7 @@ eval_instruction(char *p)
 		num_arg = args;
 		instruction = ins;
 		expected_stack = 0;
-#endif		      
+#endif
 		push_pop_error_context (-1);
 		catch_level--;
 		new_pc = current_prog->program + read_short(pc);
@@ -7124,7 +7126,7 @@ eval_instruction(char *p)
 
 		eval_instruction(pc);
 	    }
-	    
+
 	    /* next error will return 1 by default */
 	    assign_svalue(&catch_value, &const1);
 	    break;
@@ -7191,7 +7193,7 @@ eval_instruction(char *p)
 		push_pop_error_context (-1);
 		catch_level--;
 		push_svalue(&catch_value);
-		
+
 		/* If it was eval_cost too big when cant really catch it */
 		if (eval_cost == 0) {
 		    eval_cost = MAX_COST;
@@ -7210,7 +7212,7 @@ eval_instruction(char *p)
 
 		eval_instruction(pc);
 	    }
-	    
+
 	    /* next error will return 1 by default */
 	    assign_svalue(&catch_value, &const1);
 	    break;
@@ -7234,7 +7236,7 @@ eval_instruction(char *p)
 #endif /* DEBUG */
     goto again;
 }
-	    
+
 #ifdef GLOBAL_CACHE
 struct fcache1 {
     int		 	tp;
@@ -7257,13 +7259,13 @@ s_f_f(char *name, struct program *prog)
     extern unsigned long long globcache_hits;
     extern unsigned long long globcache_tries;
 #endif
-    
+
     if (!name)
 	return 0;
-    
+
 #ifdef GLOBAL_CACHE
-	    
-    /* 
+
+    /*
      * Are we looking for the same function in the same program again?
      * This is common for map, filter etc
      */
@@ -7273,7 +7275,7 @@ s_f_f(char *name, struct program *prog)
 			    ((unsigned long)prog >> 16) ^
 			    ((unsigned long)name / sizeof(void *)) ^
 			    ((unsigned long)name >> 16)) & (GLOBAL_CACHE - 1);
-    
+
     if (fc[global_hash_val].tp == prog->id_number &&
 	fc[global_hash_val].fn == name)
     {
@@ -7286,7 +7288,7 @@ s_f_f(char *name, struct program *prog)
 	if (function_inherit_found != -1)
 	{
 	    int type_mod1 = prog->inherit[function_inherit_found].type;
-	    
+
 	    function_prog_found = prog->inherit[function_inherit_found].prog;
 	    function_type_mod_found = function_prog_found->
 		functions[function_index_found].type_flags & TYPE_MOD_MASK ;
@@ -7304,7 +7306,7 @@ s_f_f(char *name, struct program *prog)
 	    function_prog_found = 0;
 	    return 0;
 	}
-	
+
     }
     fc[global_hash_val].tp = prog->id_number;
     fc[global_hash_val].fn = name;
@@ -7318,21 +7320,21 @@ s_f_f(char *name, struct program *prog)
     cprog = prog;
     for (;;)
     {
-	
+
 	/* Beware of empty function lists */
 #ifdef CACHE_STATS
 	    searches_done++;
 #endif
 	if (cprog->num_functions)
 	{
-	    /* hash 
+	    /* hash
 	     */
 	    probe = PTR_HASH(name, cprog->num_functions);
-	    /* Select the right one from the chain 
+	    /* Select the right one from the chain
 	     */
 	    while (name != cprog->func_hash[probe].name && probe >= 0)
 		probe = cprog->func_hash[probe].next_hashed_function;
-	    
+
 	    if (probe >= 0)
 	    {
 		probe = cprog->func_hash[probe].func_index;
@@ -7341,35 +7343,35 @@ s_f_f(char *name, struct program *prog)
 	}
 	if (--i < 0)
 	    return 0;
-	
+
 	cprog = prog->inherit[i].prog;
 
     }
 
-    /* Found. Undefined prototypes cannot occur in compiled programs 
+    /* Found. Undefined prototypes cannot occur in compiled programs
 	*/
 #ifdef CACHE_STATS
     searches_needed -= i;
 #endif
 
 #ifdef GLOBAL_CACHE
-    fc[global_hash_val].ff_inh = 
+    fc[global_hash_val].ff_inh =
 #endif
 	function_inherit_found = i;
-    
+
     function_prog_found = prog->inherit[i].prog;
 #ifdef GLOBAL_CACHE
     fc[global_hash_val].ff_ix =
 #endif
 	function_index_found = probe;
-    
+
     function_type_mod_found =
 	prog->inherit[i].prog->functions[probe].type_flags &
 	    TYPE_MOD_MASK ;
-    
+
     /* Correct function_type_mod_found */
     type_mod = prog->inherit[i].type;
-    
+
     if (function_type_mod_found & TYPE_MOD_PRIVATE)
 	type_mod &= ~TYPE_MOD_PUBLIC;
     if (function_type_mod_found & TYPE_MOD_PUBLIC)
@@ -7378,12 +7380,12 @@ s_f_f(char *name, struct program *prog)
     return 1;
 }
 
-INLINE int 
+INLINE int
 search_for_function(char *name, struct program *prog)
 {
     return s_f_f(find_sstring(name), prog);
 }
-	    
+
 /*
  * Apply a fun 'fun' to the program in object 'ob', with
  * 'num_arg' arguments (already pushed on the stack).
@@ -7416,14 +7418,14 @@ search_for_function(char *name, struct program *prog)
  * If the function failed to be called, then arguments must be deallocated
  * manually !
  */
-	    
+
 #ifdef DEBUG
 char debug_apply_fun[30]; /* For debugging */
 #endif
-	    
-unsigned long long globcache_tries = 0, globcache_hits = 0;	    
 
-    
+unsigned long long globcache_tries = 0, globcache_hits = 0;
+
+
 static int
 apply_low(char *fun, struct object *ob, int num_arg, int external)
 {
@@ -7434,26 +7436,26 @@ apply_low(char *fun, struct object *ob, int num_arg, int external)
      * This object will now be used, and is thus a target for
      * reset later on (when time due).
      */
-	    
+
 #ifdef DEBUG
     (void)strncpy(debug_apply_fun, fun, sizeof debug_apply_fun);
     debug_apply_fun[sizeof debug_apply_fun - 1] = '\0';
 #endif
     if (*fun == '.')
 	goto failure;
-	    
+
     /*
      * If there is a chain of objects shadowing, start with the first
      * of these.
      */
     while (ob->shadowed && ob->shadowed != current_object)
 	ob = ob->shadowed;
-	 
+
     sfun = find_sstring(fun);
 
  retry_for_shadow:
     progp = ob->prog;
-	    
+
 #ifdef DEBUG
     if (ob->flags & O_DESTRUCTED)
 	fatal("apply() on destructed object\n");
@@ -7462,28 +7464,28 @@ apply_low(char *fun, struct object *ob, int num_arg, int external)
 	create_object(ob);
     if (ob->flags & O_DESTRUCTED)
 	goto failure;
-    
-    if (s_f_f(sfun, progp)) 
+
+    if (s_f_f(sfun, progp))
     {
 	/* Static or private functions may not be called from outside. */
-	if (((ob != current_object || external) && 
+	if (((ob != current_object || external) &&
 	     function_type_mod_found & (TYPE_MOD_STATIC | TYPE_MOD_PRIVATE)) ||
-	    (function_type_mod_found & TYPE_MOD_PRIVATE && 
+	    (function_type_mod_found & TYPE_MOD_PRIVATE &&
 	     function_prog_found != ob->prog))
 	    ; /* Do nothing */
 	else
         {
 	    call_function(ob, function_inherit_found,
 			  (unsigned int)function_index_found, num_arg);
-	    
+
 	    return 1;
-	    
+
  	}
-	    
+
     }
-    
+
     /* Not found */
-    if (ob->shadowing) 
+    if (ob->shadowing)
     {
 	/*
 	 * This is an object shadowing another. The function was not found,
@@ -7507,16 +7509,16 @@ apply_low(char *fun, struct object *ob, int num_arg, int external)
  * Reference counts will be updated for this value, to ensure that no pointers
  * are deallocated.
  */
-	    
+
 struct svalue *
 sapply(char *fun, struct object *ob, int num_arg, int ext)
 {
-	    
+
 #ifdef DEBUG
     struct svalue *expected_sp;
 #endif
     static struct svalue ret_value = { T_NUMBER };
-	    
+
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
     if (fun == NULL) {
 	free_svalue(&ret_value);
@@ -7525,7 +7527,7 @@ sapply(char *fun, struct object *ob, int num_arg, int ext)
 #endif
 
 #ifdef TRACE_CODE
-    if (TRACEP(TRACE_APPLY)) 
+    if (TRACEP(TRACE_APPLY))
     {
 	char buff[1024];
 	(void)sprintf(buff,"%s->%s", ob->name, fun);
@@ -7540,7 +7542,7 @@ sapply(char *fun, struct object *ob, int num_arg, int ext)
         pop_n_elems(num_arg);
 	return 0;
     }
-    
+
     if (apply_low(fun, ob, num_arg, ext) == 0)
 	return 0;
     assign_svalue(&ret_value, sp);
@@ -7551,15 +7553,15 @@ sapply(char *fun, struct object *ob, int num_arg, int ext)
 #endif
     return &ret_value;
 }
-	    
-	    
+
+
 struct svalue *
 apply(char *fun, struct object *ob, int num_arg, int ext)
 {
     tracedepth = 0;
     return sapply(fun, ob, num_arg, ext);
 }
-	    
+
 /*
  * This function is similar to apply(), except that it will not
  * call the function, only return object name if the function exists,
@@ -7576,25 +7578,25 @@ function_exists(char *fun, struct object *ob)
 	return 0;
     if ( search_for_function (fun, ob->prog)
 	&& (!(function_type_mod_found & (TYPE_MOD_STATIC|TYPE_MOD_PRIVATE))
-	    || current_object == ob) ) 
+	    || current_object == ob) )
 	return function_prog_found->name;
     /* Not found */
     return 0;
 }
-	    
+
 /*
  * Call a specific function address in an object. This is done with no
  * frame set up. It is expected that there are no arguments. Returned
  * values are removed.
  */
-	    
-void 
+
+void
 call_function(struct object *ob, int inh_index, unsigned int fun, int num_arg)
 {
     char *cp;
     struct function *funp;
     struct program *progp;
-    
+
     if (inh_index < 0 || /*fun < 0 ||*/ inh_index >= (int)ob->prog->num_inherited ||
 	fun >= ob->prog->inherit[inh_index].prog->num_functions)
     {
@@ -7605,10 +7607,10 @@ call_function(struct object *ob, int inh_index, unsigned int fun, int num_arg)
     }
     progp = ob->prog->inherit[inh_index].prog;
     funp = &progp->functions[fun];
-    
+
     if (funp->type_flags & NAME_PROTOTYPE) /* Cannot happen. */
 	return;
-    
+
     push_control_stack(ob, progp, funp);
     csp->ext_call = 1;
     csp->num_local_variables = num_arg;
@@ -7624,10 +7626,10 @@ call_function(struct object *ob, int inh_index, unsigned int fun, int num_arg)
     csp->extern_call = 1;
     eval_instruction(cp);
 }
-	    
+
 /*
  * Get srccode position including runtime errors in included files.
- * 
+ *
  */
 char *
 inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
@@ -7656,7 +7658,7 @@ inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
         (void)sprintf(buff, "/%s Line: %d", filename, hi->lineno);
         return buff;
     }
-    
+
     while (hi - lo > 1) {
         if (mid->code > code)
             hi = mid;
@@ -7665,7 +7667,7 @@ inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
         mid = lo + (hi - lo) / 2;
     }
     filenum = lo->file;
-    
+
     if (filenum == 0)
         filename = name;
     else {
@@ -7688,7 +7690,7 @@ get_srccode_position(int offset, struct program *progp)
 
     if (progp == 0)
 	return "";
-    
+
 #ifdef DEBUG
     if (offset > progp->program_size)
 	fatal("Illegal offset %d in object %s\n", offset, progp->name);
@@ -7728,7 +7730,7 @@ dump_trace(int how)
     if (how)
 	(void) last_instructions();
 #endif
-    for (p = &control_stack[0]; p < csp; p++) 
+    for (p = &control_stack[0]; p < csp; p++)
     {
 #define FORM "%-15s in /%s\n                   /%s\n                   %s\n"
 	line = get_srccode_position((int)p[1].pc, p[1].prog);
@@ -7749,7 +7751,7 @@ dump_trace(int how)
 }
 
 char *
-get_srccode_position_if_any() 
+get_srccode_position_if_any()
 {
     char *ret = "";
 
@@ -7758,7 +7760,7 @@ get_srccode_position_if_any()
 
     return ret;
 }
-	    
+
 static char *
 find_percent(char *str)
 {
@@ -7772,7 +7774,7 @@ find_percent(char *str)
 	str++;
     }
 }
-	    
+
 static int
 inter_sscanf(int num_arg)
 {
@@ -7781,7 +7783,7 @@ inter_sscanf(int num_arg)
     int number_of_matches;
     char *cp;
     struct svalue *arg = sp - num_arg + 1;
-	    
+
     /*
      * First get the string to be parsed.
      */
@@ -7815,7 +7817,7 @@ inter_sscanf(int num_arg)
 	 number_of_matches++, num_arg--, arg++)
     {
 	int i, type, base = 0;
-	    
+
 	if (fmt[0] == '\0')
 	{
 	    /*
@@ -7859,7 +7861,7 @@ inter_sscanf(int num_arg)
 	{
 	    char *tmp = in_string;
 	    long long tmp_num;
-	    
+
 	    tmp_num = (long long) strtoll(in_string, &in_string, base);
 	    if(tmp == in_string)
 	    {
@@ -7882,7 +7884,7 @@ inter_sscanf(int num_arg)
 	{
 	    char *tmp = in_string;
 	    double tmp_num;
-	    
+
 	    tmp_num = strtod(in_string, &in_string);
 	    if(tmp == in_string)
 	    {
@@ -7916,7 +7918,7 @@ inter_sscanf(int num_arg)
 	if (cp == fmt)
 	{
 	    free_svalue(arg->u.lvalue);
-	    
+
 	    arg->u.lvalue->type = T_STRING;
 	    arg->u.lvalue->u.string = make_mstring(in_string);
 	    arg->u.lvalue->string_type = STRING_MSTRING;
@@ -7953,21 +7955,21 @@ inter_sscanf(int num_arg)
     }
     return number_of_matches;
 }
-	    
+
 /* test stuff ... -- LA */
 #ifdef OPCPROF
 void
 opcdump(void)
 {
     int i;
-    
+
     for(i = 0; i < MAXOPC; i++)
 	if (opcount[i])
 	    (void)fprintf(stderr, "%-20s %12d: %12d\n", get_f_name(i), i,
 			  opcount[i]);
 }
 #endif
-	    
+
 /*
  * Reset the virtual stack machine.
  */
@@ -8009,14 +8011,14 @@ reset_machine()
 #endif
     pop_n_elems(sp - start_of_stack + 1);
 }
-	    
+
 #if defined(DEBUG) && defined(TRACE_CODE)
 static char *
 get_arg(unsigned long a, unsigned long b)
 {
     static char buff[10];
     char *from, *to;
-    
+
     from = previous_prog[a]->program + previous_pc[a];
     if (EXTRACT_UCHAR(from) + EFUN_FIRST == F_EXT)
 	from++;
@@ -8049,7 +8051,7 @@ get_arg(unsigned long a, unsigned long b)
     }
     return "";
 }
-	    
+
 int
 last_instructions()
 {
@@ -8072,18 +8074,18 @@ last_instructions()
     return last;
 }
 #endif /* DEBUG && TRACE_CODE */
-	    
-	    
+
+
 #ifdef DEBUG
-	    
+
 static void
 count_inherits(struct program *progp, struct program *search_prog)
 {
     int i;
-	    
+
     /* Clones will not add to the ref count of inherited progs */
     if (progp->extra_ref != 1)
-	return; 
+	return;
     for (i = 0; i < progp->num_inherited; i++)
     {
 	progp->inherit[i].prog->extra_ref++;
@@ -8092,12 +8094,12 @@ count_inherits(struct program *progp, struct program *search_prog)
 	count_inherits(progp->inherit[i].prog, search_prog);
     }
 }
-	    
+
 static void
 count_ref_in_vector(struct svalue *svp, int num)
 {
     struct svalue *p;
-    
+
     for (p = svp; p < svp + num; p++)
     {
 	switch(p->type)
@@ -8112,7 +8114,7 @@ count_ref_in_vector(struct svalue *svp, int num)
 	}
     }
 }
-	    
+
 /*
  * Clear the extra debug ref count for vectors
  */
@@ -8120,7 +8122,7 @@ void
 clear_vector_refs(struct svalue *svp, int num)
 {
     struct svalue *p;
-    
+
     for (p = svp; p < svp + num; p++)
     {
 	switch(p->type)
@@ -8132,7 +8134,7 @@ clear_vector_refs(struct svalue *svp, int num)
 	}
     }
 }
-	    
+
 /*
  * Loop through every object and variable in the game and check
  * all reference counts. This will surely take some time, and should
@@ -8143,7 +8145,7 @@ check_a_lot_ref_counts(struct program *search_prog)
 {
     extern struct object *master_ob;
     struct object *ob;
-    
+
     /*
      * Pass 1: clear the ref counts.
      */
@@ -8152,7 +8154,7 @@ check_a_lot_ref_counts(struct program *search_prog)
     {
 	ob->extra_ref = 0;
 	ob->prog->extra_ref = 0;
-	    
+
 	clear_vector_refs(ob->variables, ob->prog->num_variables +
 			  ob->prog->inherit[ob->prog->num_inherited - 1]
 			  .variable_index_offset);
@@ -8160,11 +8162,11 @@ check_a_lot_ref_counts(struct program *search_prog)
     } while (ob != obj_list);
 
     clear_vector_refs(start_of_stack, sp - start_of_stack + 1);
-	    
+
     /*
      * Pass 2: Compute the ref counts.
      */
-	    
+
     /*
      * List of all objects.
      */
@@ -8181,7 +8183,7 @@ check_a_lot_ref_counts(struct program *search_prog)
 	if (ob->prog->extra_ref == 1)
 	    count_inherits(ob->prog, search_prog);
     }
-	    
+
     /*
      * The current stack.
      */
@@ -8190,10 +8192,10 @@ check_a_lot_ref_counts(struct program *search_prog)
     count_ref_from_call_outs();
     if (master_ob)
 	master_ob->extra_ref++;
-	    
+
     if (search_prog)
 	return;
-	    
+
     /*
      * Pass 3: Check the ref counts.
      */
@@ -8210,9 +8212,9 @@ check_a_lot_ref_counts(struct program *search_prog)
 	}
     }
 }
-	    
+
 #endif /* DEBUG */
-	    
+
 #ifdef TRACE_CODE
 /* Generate a debug message to the player */
 static void
@@ -8220,7 +8222,7 @@ do_trace(char *msg, char *fname, char *post)
 {
     char buf[10000], *p;
     char *objname;
-	    
+
     objname = TRACETST(TRACE_OBJNAME) ? (current_object && current_object->name ? current_object->name : "??")  : "";
     (void)sprintf(buf, "*** %d %*s %s %s %s", tracedepth, tracedepth, "", msg, objname, fname);
     p = buf + strlen(buf);
@@ -8281,7 +8283,7 @@ apply_master_ob(int fun, int num_arg)
 }
 
 /*EOT*/
-	    
+
 /*
  * When an object is destructed, all references to it must be removed
  * from the stack.
@@ -8290,7 +8292,7 @@ void
 remove_object_from_stack(struct object *ob)
 {
     struct svalue *svp;
-    
+
     for (svp = start_of_stack; svp <= sp; svp++)
     {
 	if (svp->type != T_OBJECT)
@@ -8316,21 +8318,21 @@ stack_swap_objects(struct object *ob1, struct object *ob2)
 	previous_ob = ob2;
     else if (previous_ob == ob2)
 	previous_ob = ob1;
-    
+
     for (cspi = csp; cspi >= control_stack; cspi--)
     {
 	if (cspi->ob == ob1)
 	    cspi->ob = ob2;
 	else if (cspi->ob == ob2)
 	    cspi->ob = ob1;
-    
+
 	if (cspi->prev_ob == ob1)
 	    cspi->prev_ob = ob2;
 	else if (cspi->prev_ob == ob2)
 	    cspi->prev_ob = ob1;
     }
     /* FIXME: Process error-stack and data-stack as well. */
-}    
+}
 
 #ifdef TRACE_CODE
 static int
@@ -8351,10 +8353,10 @@ call_efun(int instruction, int numa)
 	      instruction);
     instruction -= EFUN_FIRST;
     if (instrs[instruction].min_arg != instrs[instruction].max_arg) {
-	if (instrs[instruction].min_arg != -1 && 
+	if (instrs[instruction].min_arg != -1 &&
 	    instrs[instruction].min_arg > numa)
 	    error("Too few arguments to efun.\n");
-	if (instrs[instruction].max_arg != -1 && 
+	if (instrs[instruction].max_arg != -1 &&
 	    instrs[instruction].max_arg < numa)
 	    error("Too many arguments to efun.\n");
     } else {
