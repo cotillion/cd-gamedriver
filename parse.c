@@ -1441,8 +1441,7 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 	    break;
 
 	default:
-	    ids = 0;
-
+            return 0;
 	}
 
 	for (il = 0; il < ids->size; il++)
