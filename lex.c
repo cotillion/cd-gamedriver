@@ -1671,6 +1671,7 @@ init_num_args(void)
     add_instr_name("range",F_RANGE);
     add_instr_name("foreach", F_FOREACH);
     add_instr_name("foreach", F_FOREACH_M);
+    add_instr_name("parse_command", F_PARSE_COMMAND);
     instrs[F_RANGE-EFUN_FIRST].type[0] = T_POINTER|T_STRING;
 }
 #undef T_ANY
