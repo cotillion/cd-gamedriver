@@ -88,11 +88,11 @@ find_status(struct program *prog, char *str, int not_type)
     char *sub_name;
     char *real_name;
     char *search;
-    
+
     variable_index_found = variable_inherit_found = 255;
     real_name = strrchr(str, ':') + 1;
     sub_name = strchr(str, ':') + 2;
-    
+
     if(!(real_name = (find_sstring((real_name == (char *)1) ? str : real_name))))
         return -1;
     if (sub_name == (char *)2)
@@ -119,7 +119,7 @@ find_status(struct program *prog, char *str, int not_type)
     }
     else
 	str = sub_name;
-    
+
     for(j =  prog->num_inherited - 2; j >= 0 ;j -= prog->inherit[j].prog->num_inherited)
     {
 	if (super_name &&
@@ -137,10 +137,10 @@ find_status(struct program *prog, char *str, int not_type)
 	    variable_type_mod_found |= type1 & TYPE_MOD_MASK;
 	    if (variable_type_mod_found & not_type)
 		continue;
-	    
+
 	    variable_inherit_found += j -
 		(prog->inherit[j].prog->num_inherited - 1);
-	    return prog->inherit[variable_inherit_found].variable_index_offset + 
+	    return prog->inherit[variable_inherit_found].variable_index_offset +
 		variable_index_found;
 	}
     }
@@ -155,15 +155,15 @@ swap_objects(struct object *ob1, struct object *ob2)
     extern void stack_swap_objects(struct object *, struct object *);
     struct program  *tmp_prog;
     struct svalue *tmp_var;
-    
+
     /* swap the objects */
     call_out_swap_objects(ob1, ob2);
     stack_swap_objects(ob1, ob2);
-    
+
     tmp_var = ob1->variables;
     ob1->variables = ob2->variables;
     ob2->variables = tmp_var;
-    
+
     tmp_prog = ob1->prog;
     ob1->prog = ob2->prog;
     ob2->prog = tmp_prog;
@@ -172,7 +172,7 @@ swap_objects(struct object *ob1, struct object *ob2)
     ob1->flags ^= ob2->flags & O_CREATED;
     ob2->flags ^= ob1->flags & O_CREATED;
     ob1->flags ^= ob2->flags & O_CREATED;
-    
+
 }
 
 
@@ -186,7 +186,7 @@ swap_objects(struct object *ob1, struct object *ob2)
  * Save the command_giver, because reset() in the new object might change
  * it.
  *
- * 
+ *
  */
 char *current_loaded_file = 0;
 
@@ -220,7 +220,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     if (old_ob)
     {
 	struct object *invalid_ob;
-	
+
 	(void)strcpy(new_ob_name, name);
 	(void)strcat(new_ob_name, "#0");
 	if ( (invalid_ob = find_object2(new_ob_name)) != NULL )
@@ -229,11 +229,11 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	    destruct_object(invalid_ob);
 	}
     }
-    
+
     /*
      * First check that the c-file exists.
      */
-    
+
     (void)strcpy(real_name, name);
     (void)strcat(real_name, ".c");
 
@@ -267,7 +267,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	num_fileread++;
 	num_compile++;
     }
-	
+
     if (f == 0)
     {
 	perror(real_name);
@@ -325,11 +325,11 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	}
         {
 	    char *t1 = tmp, *t2 = tmp + strlen(tmp);
-	    while (*t1=='/') 
+	    while (*t1=='/')
 		t1++;
-	    if (t2-t1 > 1) 
-		if (*(--t2)=='c') 
-		    if (*(--t2)=='.') 
+	    if (t2-t1 > 1)
+		if (*(--t2)=='c')
+		    if (*(--t2)=='.')
 			*t2='\000';
 
 	    if (strcmp(t1, name) == 0)
@@ -364,10 +364,10 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     }
     ob->prog = prog;
 
-    /*	
-	add name to fast object lookup table 
+    /*
+	add name to fast object lookup table
     */
-    enter_object_hash(ob);	
+    enter_object_hash(ob);
 
     {
 	int num_var, i;
@@ -378,13 +378,13 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 		.variable_index_offset;
 	if (ob->variables)
 	    fatal("Object allready initialized!\n");
-	
+
 	ob->variables = (struct svalue *) xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
 	for (i = 0; i < num_var; i++)
 	    ob->variables[i] = const0;
     }
-    /* 
+    /*
 	We ought to add a flag here marking the object as unfinished
 	so it can be removed if the following code causes an LPC error
      */
@@ -405,14 +405,14 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     }
     if (!(ob->flags & (O_CREATED | O_DESTRUCTED)) && !dont_reset)
 	create_object(ob);
-    
+
     if (ob->flags & O_DESTRUCTED)
 	return 0;
     command_giver = save_command_giver;
     if (d_flag & DEBUG_LOAD && ob)
 	debug_message("--%s loaded\n", ob->name);
 
-    
+
     if (master_ob && (ob->prog->flags & PRAGMA_RESIDENT))
     {
 	struct svalue *ret;
@@ -421,8 +421,8 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
 	    ob->prog->flags &= ~PRAGMA_RESIDENT;
     }
-	
-    
+
+
     return ob;
 }
 
@@ -436,7 +436,7 @@ make_new_name(char *str)
     i++;
     return p;
 }
-    
+
 
 /*
  * Save the command_giver, because reset() in the new object might change
@@ -453,7 +453,7 @@ clone_object(char *str1)
 	error("Cloning a bad object! (No Master, Master in environment or Master is clone)\n");
 	/* NOTREACHED */
     }
-    
+
     /* We do not want the heart beat to be running for unused copied objects */
 
     new_ob = get_empty_object();
@@ -465,8 +465,8 @@ clone_object(char *str1)
     enter_object_hash(new_ob);	/* Add name to fast object lookup table */
     if (!current_object)
 	fatal("clone_object() from no current_object !\n");
-    
-    
+
+
     {
 	int num_var, i;
 	extern int tot_alloc_variable_size;
@@ -476,7 +476,7 @@ clone_object(char *str1)
 	    .variable_index_offset;
 	if (new_ob->variables)
 	    fatal("Object allready initialized!\n");
-	
+
 	new_ob->variables = (struct svalue *)
 	    xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
@@ -528,7 +528,7 @@ environment(struct svalue *arg)
  * Return cost of the command executed if success (> 0).
  * When failure, return 0.
  */
-int 
+int
 command_for_object(char *str, struct object *ob)
 {
     char buff[1000];
@@ -563,7 +563,7 @@ object_present(struct svalue *v, struct svalue *where)
     int i;
     struct object *ret;
 
-    if (v->type == T_OBJECT) 
+    if (v->type == T_OBJECT)
 	if (v->u.ob->flags & O_DESTRUCTED)
 	    return 0;
 
@@ -573,7 +573,7 @@ object_present(struct svalue *v, struct svalue *where)
 	if (where->u.ob->flags & O_DESTRUCTED)
 	    break;
 
-	if (v->type == T_OBJECT) 
+	if (v->type == T_OBJECT)
 	{
 	    if (v->u.ob->super == where->u.ob)
 		return v->u.ob;
@@ -583,7 +583,7 @@ object_present(struct svalue *v, struct svalue *where)
 	else
 	    return object_present2(v->u.string, where->u.ob->contains);
     case T_POINTER:
-	if (v->type == T_OBJECT) 
+	if (v->type == T_OBJECT)
 	{
 	    for (i = 0 ; i < where->u.vec->size ; i++)
 	    {
@@ -599,8 +599,8 @@ object_present(struct svalue *v, struct svalue *where)
 	    {
 		if (where->u.vec->item[i].type != T_OBJECT)
 		    continue;
-		if ( (ret = 
-		      object_present2(v->u.string, 
+		if ( (ret =
+		      object_present2(v->u.string,
 				      where->u.vec->item[i].u.ob->contains)) != NULL )
 		    return ret;
 	    }
@@ -658,7 +658,7 @@ object_present2(char *str, struct object *ob)
 /*
  * Remove an object. It is first moved into the destruct list, and
  * not really destructed until later. (see destruct2()).
- * 
+ *
  * We will simply not allow the master object to be destructed, Ha!
  */
 void
@@ -718,7 +718,7 @@ destruct_object(struct object *ob)
 	ob->prog->flags &= ~PRAGMA_RESIDENT;
     }
 
-    
+
     push_object(ob);
     (void)apply_master_ob(M_DESTRUCTED_OBJECT, 1);
     if (ob->flags & O_DESTRUCTED) return;
@@ -792,7 +792,7 @@ destruct_object(struct object *ob)
 		destruct_object(ob->contains);
 	    if (ob->flags & O_DESTRUCTED) return;
 	}
-    } 
+    }
 
     if (ob->interactive)
     {
@@ -918,9 +918,9 @@ destruct2(struct object *ob)
     int num_var;
     extern int tot_alloc_variable_size;
 
-    if (d_flag & DEBUG_DESTRUCT) 
+    if (d_flag & DEBUG_DESTRUCT)
 	debug_message("Destruct-2 object %s (ref %d)\n", ob->name, ob->ref);
-    
+
     if (ob->interactive)
 	remove_interactive(ob->interactive, 0);
 
@@ -956,7 +956,7 @@ destruct2(struct object *ob)
     free_prog(ob->prog);
     ob->prog = 0;
 
-    for (s = ob->sent; s;) 
+    for (s = ob->sent; s;)
     {
 	struct sentence *next;
 	next = s->next;
@@ -1086,7 +1086,7 @@ get_dir(char *path)
 	 */
 	if ((p = strrchr(temppath, '/')) == 0)
 	    p = temppath;
-	if ((p[0] == '/' && p[1] == '.' && p[2] == '\0') || 
+	if ((p[0] == '/' && p[1] == '.' && p[2] == '\0') ||
 	    (p[0] == '/' && p[1] == '\0'))
 	    *p = '\0';
     }
@@ -1167,14 +1167,14 @@ get_dir(char *path)
     return v;
 }
 
-int 
+int
 tail(char *path)
 {
     char buff[1000];
     FILE *f;
     struct stat st;
     off_t offset;
- 
+
     path = check_valid_path(path, current_object, "tail", 0);
 
     if (path == 0)
@@ -1202,7 +1202,7 @@ tail(char *path)
 }
 
 
-int 
+int
 remove_file(char *path)
 {
     path = check_valid_path(path, current_object, "remove_file", 1);
@@ -1283,7 +1283,7 @@ find_object2(char *str)
 
 #if 0
 
-void 
+void
 apply_command(char *com)
 {
     struct value *ret;
@@ -1315,12 +1315,12 @@ apply_command(char *com)
  *
  * NOTE!
  *      It removes ALL actions defined by itself, including those added
- *	to itself. As actions added to onself is normally not done in init() 
+ *	to itself. As actions added to onself is normally not done in init()
  *	this will have to be taken care of specifically. This should be of
- *	little problem as living objects seldom export actions and would 
+ *	little problem as living objects seldom export actions and would
  *	therefore have little use of this efun.
  */
-void 
+void
 update_actions(struct object *aob)
 {
     struct object *pp, *ob, *next_ob;
@@ -1358,9 +1358,9 @@ update_actions(struct object *aob)
      * Beware that init() may have moved 'item' !
      */
 
-    /* Save where object is, so as to note a move in init() 
+    /* Save where object is, so as to note a move in init()
      */
-    ob = item->super; 
+    ob = item->super;
 
     /*
      * Add actions in objects environment and to objects in the
@@ -1379,7 +1379,7 @@ update_actions(struct object *aob)
 #else
 	    (void)apply("init", item, 0, 1);
 #endif
-	    if (ob != item->super || 
+	    if (ob != item->super ||
 		(item->flags & O_DESTRUCTED) ||
 		(ob->flags & O_DESTRUCTED))
 	    {
@@ -1453,7 +1453,7 @@ update_actions(struct object *aob)
  * living or not. Note that all objects in the same inventory are affected.
  *
  */
-void 
+void
 move_object(struct object *dest)
 {
     struct object **pp, *ob, *next_ob;
@@ -1484,8 +1484,8 @@ move_object(struct object *dest)
     if (item->super)
     {
 	int okey = 0;
-		
-	if (item->flags & O_ENABLE_COMMANDS) 
+
+	if (item->flags & O_ENABLE_COMMANDS)
 	    remove_sent(item->super, item);
 
 	if (item->super->flags & O_ENABLE_COMMANDS)
@@ -1567,7 +1567,7 @@ move_object(struct object *dest)
 #endif
 	    if (dest != item->super)
 	    {
-		command_giver = save_cmd; 
+		command_giver = save_cmd;
 		return;
 	    }
 	}
@@ -1619,7 +1619,7 @@ int tot_alloc_sentence;
 int tot_current_alloc_sentence;
 
 struct sentence *
-alloc_sentence() 
+alloc_sentence()
 {
     struct sentence *p;
 
@@ -1655,7 +1655,7 @@ free_all_sent()
 }
 #endif
 
-void 
+void
 free_sentence(struct sentence *p)
 {
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
@@ -1681,7 +1681,7 @@ free_sentence(struct sentence *p)
  * Find the sentence for a command from the player.
  * Return success status.
  */
-int 
+int
 player_parser(char *buff)
 {
     struct sentence *s;
@@ -1697,8 +1697,8 @@ player_parser(char *buff)
     if (d_flag & DEBUG_COMMAND)
 	debug_message("cmd [%s]: %s\n", cmd_giver->name, buff);
 #endif
-    /* 
-     * Strip trailing spaces. 
+    /*
+     * Strip trailing spaces.
      */
     for (p = buff + strlen(buff) - 1; p >= buff; p--)
     {
@@ -1721,12 +1721,12 @@ player_parser(char *buff)
     push_string(buff, STRING_MSTRING);
     push_object(cmd_giver);
     ret = apply_master_ob(M_MODIFY_COMMAND, 2);
-    
+
     if (ret && ret->type == T_STRING)
 	subst_buff = string_copy(ret->u.string);
     else if (ret == NULL)
 	subst_buff = string_copy(buff);
-    
+
     if (subst_buff == NULL)
 	return 1;
 
@@ -1740,10 +1740,10 @@ player_parser(char *buff)
 	return 1;
 
     clear_notify();
-    for (s = cmd_giver->sent; s; s = s->next) 
+    for (s = cmd_giver->sent; s; s = s->next)
     {
 	size_t len, copy_len;
-	
+
 	if (s->verb == 0) {
 	    error("An 'action' did something, but returned 0 or had an undefined verb.\n");
 	    /* NOTREACHED */
@@ -1818,11 +1818,11 @@ player_parser(char *buff)
 	}
 	if (cmd_giver == 0) {
 	    pop_stack();
-	    if (subst_buff) 
+	    if (subst_buff)
 		free(subst_buff);
 	    return 1;
 	}
-	    
+
 	current_object = save_current_object;
 	last_verb = 0;
 	trig_verb = 0;
@@ -1831,12 +1831,12 @@ player_parser(char *buff)
 	    /* Has the sentences been lost? */
 	    /* Does anyone know a better way of doing this? */
 	    struct sentence *s0;
-	    
+
 	    pop_stack();
-	    
+
 	    for (s0 = cmd_giver->sent; s0 && s0 != s; s0 = s0->next)
 		;
-		
+
 	    if (!s0) {
 		s = 0;
 		break;
@@ -1858,7 +1858,7 @@ player_parser(char *buff)
 
 /*
  * Associate a command with function in this object.
- * The optional second argument is the command name. 
+ * The optional second argument is the command name.
  *
  * The optional third argument is a flag that will state that the verb should
  * only match against leading characters.
@@ -1869,7 +1869,7 @@ player_parser(char *buff)
  * If the call is from a shadow, make it look like it is really from
  * the shadowed object.
  */
-void 
+void
 add_action(struct closure *func, struct svalue *cmd, int flag)
 {
     struct sentence *p;
@@ -1894,8 +1894,8 @@ add_action(struct closure *func, struct svalue *cmd, int flag)
     if (d_flag & DEBUG_ADD_ACTION)
 	debug_message("--Add action %s\n", getclosurename(func));
 #endif
-
-/*printf("add_action %lx %s\n", func, show_closure(func));*/
+    if (func->funobj)
+        func->funobj->flags |= O_ADDED_COMMAND;
 
     p = alloc_sentence();
     p->funct = func;
@@ -1913,10 +1913,18 @@ add_action(struct closure *func, struct svalue *cmd, int flag)
  * Remove all commands (sentences) defined by object 'ob' in object
  * 'player'
  */
-void 
+void
 remove_sent(struct object *ob, struct object *player)
 {
     struct sentence **s;
+    int found = 0;
+
+    if (!(ob->flags & O_ADDED_COMMAND)) {
+        if (d_flag & DEBUG_SENTENCE) {
+            debug_message("--Object has not added any actions %s, exiting early\n", ob->name);
+        }
+        return;
+    }
 
     for (s= &player->sent; *s;)
     {
@@ -1927,10 +1935,16 @@ remove_sent(struct object *ob, struct object *player)
 	    tmp = *s;
 	    *s = tmp->next;
 	    free_sentence(tmp);
+            found = 1;
 	} else
 	    s = &((*s)->next);
     }
-    
+
+    if (!found) {
+        if (d_flag & DEBUG_SENTENCE) {
+                debug_message("--No sentences had been added by %s in %s\n", ob->name, player->name);
+        }
+    }
 }
 
 
@@ -1955,7 +1969,7 @@ get_gamedriver_info(char *str)
     extern struct vector null_vector;
     extern unsigned long long cache_tries, cache_hits;
     extern int num_closures, total_closure_size;
-    
+
     (void)strcpy(debinf,"");
 
     if (strcmp(str, "status") == 0 || strcmp(str, "status tables") == 0)
@@ -2003,7 +2017,7 @@ get_gamedriver_info(char *str)
 		    bytes_distinct_strings_shared + bytes_distinct_strings_malloced,
 		    overhead_bytes_shared + overhead_bytes_malloced);
 	    (void)strcat(debinf, tmp);
-	    
+
 	    (void)sprintf(tmp,"Prog blocks:\t\t%12d %12d\n",
 		    total_num_prog_blocks, total_prog_block_size);
 	    (void)strcat(debinf, tmp);
@@ -2013,7 +2027,7 @@ get_gamedriver_info(char *str)
 
 	    (void)sprintf(tmp,"Memory reserved:\t\t     %12d\n", res);
 	    (void)strcat(debinf, tmp);
-	
+
 	}
 	if (verbose)
 	{
@@ -2043,8 +2057,8 @@ get_gamedriver_info(char *str)
 				    global_first_saves
 				    + call_first_saves))));
 	    (void)strcat(debinf, tmp);
-#endif	    
-	    
+#endif
+
 #ifdef GLOBAL_CACHE
 	    proc = 100.0 * (((double)globcache_hits * 1.0) / globcache_tries);
 	    (void)sprintf(tmp,"Global cache, Tries: %10lld Hits: %10lld Miss: %10lld Rate: %3.2f%%\n",
@@ -2093,7 +2107,7 @@ get_gamedriver_info(char *str)
 	    (void)sprintf(tmp, "Null vector: %d\n", null_vector.ref);
 	    (void)strcat(debinf, tmp);
         }
-    
+
 	tot =		   total_prog_block_size +
 	                   total_program_size +
 	                   tot_alloc_sentence * sizeof(struct sentence) +
@@ -2105,7 +2119,7 @@ get_gamedriver_info(char *str)
 			   bytes_distinct_strings_malloced + overhead_bytes_malloced +
 			   tot_alloc_object_size + res;
 
-	if (!verbose) 
+	if (!verbose)
 	{
 	    (void)strcat(debinf, "\t\t\t\t\t --------\n");
 	    (void)sprintf(tmp,"Total:\t\t\t\t\t %8ld\n", tot);
@@ -2123,7 +2137,7 @@ get_local_commands(struct object *ob)
     struct vector *ret2;
     int num;
 
-    for (num = 0, s = ob->sent; s; s = s->next) 
+    for (num = 0, s = ob->sent; s; s = s->next)
 	num++;
 
     ret2 = allocate_array(num);
@@ -2153,6 +2167,7 @@ get_local_commands(struct object *ob)
     }
     return ret2;
 }
+
 
 /*VARARGS1*/
 void
@@ -2216,8 +2231,8 @@ int num_error = 0;
  * want to replace it with the system's error string.
  */
 
-void 
-throw_error() 
+void
+throw_error()
 {
     extern struct svalue catch_value;
 
@@ -2275,7 +2290,7 @@ error(char *fmt, ...)
 			      object_name);
 	    }
 	}
-	/* 
+	/*
 	 * The stack must be brought in a usable state. After the
 	 * call to reset_machine(), all arguments to error() are invalid,
 	 * and may not be used any more. The reason is that some strings
@@ -2309,19 +2324,19 @@ error(char *fmt, ...)
 	    reset_machine();
 	}
 	else
-	{	    
+	{
 	    exception = &exception_frame;
 	    (void)apply_master_ob(M_RUNTIME_ERROR, 4);
 	}
 	num_error = 0;
 	exception = exception_frame.e_exception;
-	
+
     }
     else
     {
 	debug_message("Too many simultaneous errors.\n");
     }
-    
+
     if (exception != NULL)
 	longjmp(exception->e_context, 1);
     abort();
@@ -2331,7 +2346,7 @@ error(char *fmt, ...)
 /*
  * Check that it is an legal path. No '..' are allowed.
  */
-int 
+int
 legal_path(char *path)
 {
     char *p;
@@ -2395,7 +2410,7 @@ dump_smart_log()
     }
 }
 
-void 
+void
 smart_log(char *error_file, int line, char *what)
 {
     char buff[500];
@@ -2456,8 +2471,8 @@ check_valid_path(char *path, struct object *ob,
 int game_is_being_shut_down;
 
 /* ARGSUSED */
-void 
-startshutdowngame(int arg) 
+void
+startshutdowngame(int arg)
 {
     game_is_being_shut_down = 1;
 }
@@ -2467,8 +2482,8 @@ startshutdowngame(int arg)
  * We don't call it directly from HUP, because it is dangerous when being
  * in an interrupt.
  */
-void 
-shutdowngame() 
+void
+shutdowngame()
 {
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
     extern char *reserved_area, *inherit_file;
@@ -2514,7 +2529,7 @@ shutdowngame()
 #endif
 }
 
-int 
+int
 match_string(char *match, char *str)
 {
     int i;
@@ -2580,7 +2595,7 @@ void
 strip_trailing_slashes(char *path)
 {
     int last;
-    
+
     last = strlen (path) - 1;
     while (last > 0 && path[last] == '/')
 	path[last--] = '\0';
@@ -2595,13 +2610,13 @@ copy (char *from, char *to)
     int len;			/* Number of bytes read into buf. */
     int ifd;
     int ofd;
-  
+
     if (!S_ISREG (from_stats.st_mode))
     {
         error("cannot move `%s' across filesystems: Not a regular file\n", from);
 	/* NOTREACHED */
     }
-  
+
     if (unlink (to) && errno != ENOENT)
     {
 	error("cannot remove `%s'\n", to);
@@ -2629,12 +2644,12 @@ copy (char *from, char *to)
 	(void)unlink (to);
 	return 1;
     }
-  
+
     while ((len = read (ifd, buf, sizeof (buf))) > 0)
     {
 	int wrote = 0;
 	char *bp = buf;
-	
+
 	do
 	{
 	    wrote = write (ofd, bp, (size_t)len);
@@ -2670,7 +2685,7 @@ copy (char *from, char *to)
 	error ("%s: close failed", to);
 	return 1;
     }
-  
+
 #ifdef FCHMOD_MISSING
     if (chmod (to, from_stats.st_mode & 0777))
     {
@@ -2731,7 +2746,7 @@ do_move (char *from, char *to)
 
     if (copy (from, to))
 	return 0;
-  
+
     if (unlink (from))
     {
 	error ("cannot remove `%s'", from);
@@ -2740,7 +2755,7 @@ do_move (char *from, char *to)
 
     return 1;
 }
-    
+
 /*
  * do_rename is used by the efun rename. It is basically a combination
  * of the unix system call rename and the unix command mv. Please shoot
@@ -2761,7 +2776,7 @@ int
 do_rename(char * fr, char *t)
 {
     char *from, *to;
-    
+
     from = check_valid_path(fr, current_object, "do_rename_from", 1);
     if(!from)
 	return 0;
@@ -2779,13 +2794,13 @@ do_rename(char * fr, char *t)
 	/* Target is a directory; build full target filename. */
 	char *cp;
 	char *newto;
-	
+
 	cp = strrchr (from, '/');
 	if (cp)
 	    cp++;
 	else
 	    cp = from;
-	
+
 	newto = (char *) alloca (strlen (to) + 1 + strlen (cp) + 1);
 	(void)sprintf (newto, "%s/%s", to, cp);
 	return do_move (from, newto);

@@ -19,6 +19,7 @@
 #define O_SWAPPED		0x20  /* Is it swapped to file */
 #define O_ONCE_INTERACTIVE	0x40  /* Has it ever been interactive ? */
 #define O_OBSOLETE_WARNING	0x80  /* Object has already generated a warning */
+#define O_ADDED_COMMAND 	0x100 /* Has it created a sentence? */
 
 struct call;
 
@@ -47,7 +48,7 @@ struct object {
     struct object *next_hashed_living;
     char *living_name;			/* Name of living object if in hash */
     struct svalue *variables;		/* All variables to this program */
-    struct svalue auth;                 /* The protected auth variable */ 
+    struct svalue auth;                 /* The protected auth variable */
 };
 
 #define WARNOBSOLETE(ob, msg)	if (((ob)->flags & O_OBSOLETE_WARNING) == 0) \
