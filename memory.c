@@ -10,7 +10,7 @@
 #undef malloc
 #endif
 
-char *reserved_area;
+extern char *reserved_area;
 extern int slow_shut_down_to_do;
 
 #define INITIAL_POOL    256
