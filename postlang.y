@@ -8,11 +8,11 @@
 
 %}
 %right F_ELSE
-%token F_WHILE F_DO F_FOR F_STORE F_LAND F_LOR F_STATUS F_IF F_COMMA F_INT 
+%token F_WHILE F_DO F_FOR F_STORE F_LAND F_LOR F_STATUS F_IF F_COMMA F_INT
 %token F_CONTINUE F_INHERIT F_COLON_COLON F_VARARGS F_VARARG F_SUBSCRIPT
 %token F_BREAK
 %token F_OBJECT F_VOID F_MIXED F_PRIVATE F_NO_MASK F_MAPPING F_FLOAT
-%token F_PUBLIC F_FUNCTION F_OPERATOR 
+%token F_PUBLIC F_FUNCTION F_OPERATOR
 %token F_CASE F_DEFAULT
 
 %union
@@ -60,7 +60,7 @@ static int return_label;
 %%
 
 all: { block_depth = 0; } program ;
-	    
+
 program: program def possible_semi_colon
        | /* empty */ ;
 
@@ -70,7 +70,7 @@ possible_semi_colon: /* empty */
 inheritance: type_modifier_list F_INHERIT string_constant opt_inherit_name ';'
 		{
 		    struct object *ob;
-		    
+
                     if (mem_block[A_VARIABLES].current_size ||
 		        mem_block[A_FUNCTIONS].current_size)
                         yyerror("Inherit after other definitions\n");
@@ -101,7 +101,7 @@ inheritance: type_modifier_list F_INHERIT string_constant opt_inherit_name ';'
 opt_inherit_name: /* empty */
                 {
                     char *n = strrchr($<string>0, '/');
-                    
+
                     if (n)
                     {
                         char *s = tmpstring_copy(n + 1);
@@ -136,7 +136,7 @@ number: F_NUMBER
 optional_star: /* empty */ { $$ = 0; } | '*' { $$ = TYPE_MOD_POINTER; } ;
 
 block_or_semi: block { $$ = 0; }
-         | ';' { $$ = ';'; } 
+         | ';' { $$ = ';'; }
          | '=' string_con1 ';' { $<string>$ = $<string>2; }
 	 | '=' F_NUMBER ';'
          {
@@ -187,8 +187,8 @@ def: type optional_star fun_identifier
 	    else if ($1 & TYPE_MASK)
 	    {
 		exact_types = $1 | $2;
-	    } 
-	    else 
+	    }
+	    else
 	    {
 		if (pragma_strict_types)
 		    yyerror("\"#pragma strict_types\" requires type of function");
@@ -226,14 +226,14 @@ def: type optional_star fun_identifier
 	}
         block_or_semi
 	{
-		  
+
 	    /* Either a prototype or a block */
 	    if ($7 == ';') /* its only a prototype */
 	    {
 		(void)pop_address(); /* Not used here */
-		mem_block[A_PROGRAM].current_size = 
-		    pop_address(); 
-	    } 
+		mem_block[A_PROGRAM].current_size =
+		    pop_address();
+	    }
 	    else if ($7 == 0)
 	    {
 		define_new_function($3, (char)$5,
@@ -265,7 +265,7 @@ def: type optional_star fun_identifier
 				    (char)first_default_arg);
 		ins_f_byte(F_CALL_C);
 		funca = get_C_fun_address(current_file, $<string>7);
-		if (!funca) 
+		if (!funca)
                 {
 		    char buf[256];
 
@@ -296,7 +296,7 @@ new_arg_name: type optional_star F_IDENTIFIER
 	    else
 		first_default_arg++;
 	    push_init_arg_address(mem_block[A_PROGRAM].current_size);
-	} 
+	}
           | type optional_star F_IDENTIFIER
           {
               int var_num;
@@ -321,7 +321,7 @@ new_arg_name: type optional_star F_IDENTIFIER
 	      }
 	      ins_f_byte(F_ASSIGN);
 	      ins_f_byte(F_POP_VALUE);
-	  } 
+	  }
 
 fun_args: '(' /* empty */ ')'	{ $$ = 0; }
 	| '(' argument ')'	{ $$ = $2; }
@@ -383,7 +383,7 @@ basic_type: F_STATUS { $$ = TYPE_NUMBER; current_type = $$; }
 	| F_STRING_DECL { $$ = TYPE_STRING; current_type = $$; }
 	| F_OBJECT { $$ = TYPE_OBJECT; current_type = $$; }
 	| F_VOID {$$ = TYPE_VOID; current_type = $$; }
-	| F_MIXED { $$ = TYPE_ANY; current_type = $$; } 
+	| F_MIXED { $$ = TYPE_ANY; current_type = $$; }
 	| F_MAPPING { $$ = TYPE_MAPPING; current_type = $$; }
         | F_FLOAT { $$ = TYPE_FLOAT; current_type = $$; }
         | F_FUNCTION { $$ = TYPE_FUNCTION; current_type = $$; };
@@ -506,7 +506,7 @@ try: F_TRY
 	    try_level++;
 	} statement F_CATCH {start_block();} '(' basic_type new_local_name2 ')'
         {
-	    short try_start = pop_address();	    
+	    short try_start = pop_address();
 	    try_level--;
 	    ins_f_byte(F_END_TRY);
 	    ins_f_byte(F_JUMP);
@@ -599,7 +599,7 @@ foreach_m: F_FOREACH start_block '(' foreach_var ',' foreach_var ':' comma_expr 
           add_jump();
 	  ins_label(current_break_address);
 	}
-	statement 
+	statement
 	{
             ins_f_byte(F_JUMP);
             add_jump();
@@ -631,7 +631,7 @@ foreach: F_FOREACH start_block '(' foreach_var ':' comma_expr ')' {
           add_jump();
 	  ins_label(current_break_address);
 	}
-	statement 
+	statement
 	{
             ins_f_byte(F_JUMP);
             add_jump();
@@ -650,7 +650,7 @@ foreach: F_FOREACH start_block '(' foreach_var ':' comma_expr ')' {
 for_init_expr: for_expr
 	| basic_type local_name_list {;};
 
-for: F_FOR '('	start_block  { 
+for: F_FOR '('	start_block  {
     push_explicit(current_continue_address);
     push_explicit(continue_try_level);
     push_explicit(current_break_address);
@@ -733,7 +733,7 @@ switch: F_SWITCH '(' comma_expr ')'
 	  short default_addr;
 
 	  /* Wrap up switch */
-	  /* It is not unusual that the last case/default has no break 
+	  /* It is not unusual that the last case/default has no break
 	   */
 	  /* Default address */
 	  if (!(default_addr = read_short(current_case_address + 5)))
@@ -757,13 +757,13 @@ switch: F_SWITCH '(' comma_expr ')'
 	      block_index = A_CASE_NUMBERS;
 	      current_case_heap = current_case_number_heap;
 	      mem_block[A_PROGRAM].block[current_case_address] = 0;
-	  } 
-	  else 
+	  }
+	  else
 	  {
 	      block_index = A_CASE_STRINGS;
 	      current_case_heap = current_case_string_heap;
 	      mem_block[A_PROGRAM].block[current_case_address] = 1;
-	      if (zero_case_label & 0xffff) 
+	      if (zero_case_label & 0xffff)
 	      {
 		  ins_long_long(0); /* not used */
 		  ins_short((short)zero_case_label); /* the address */
@@ -774,7 +774,7 @@ switch: F_SWITCH '(' comma_expr ')'
 		  ins_short(default_addr); /* the address */
 	      }
 	  }
-	  
+
 	  /* Dump the table */
 	  {
 	      struct case_heap_entry *ent, *end;
@@ -792,9 +792,9 @@ switch: F_SWITCH '(' comma_expr ')'
 	  }
 
 	  /* Break address */
-	  upd_short(current_case_address + 3, 
+	  upd_short(current_case_address + 3,
 		    (short)mem_block[A_PROGRAM].current_size);
-	  set_label(current_break_address, 
+	  set_label(current_break_address,
 		    (short)mem_block[A_PROGRAM].current_size);
 
 	  mem_block[A_CASE_NUMBERS].current_size = current_case_number_heap;
@@ -813,7 +813,7 @@ case: F_CASE case_label ':'
 	/* Register label */
 	struct case_heap_entry temp;
 
-	if ( !current_case_address ) 
+	if ( !current_case_address )
 	{
 	    yyerror("Case outside switch");
 	    break;
@@ -829,7 +829,7 @@ case: F_CASE case_label ':'
 	/* Register range label */
 	struct case_heap_entry temp1, temp2;
 
-	if ( !current_case_address) 
+	if ( !current_case_address)
 	{
 	    yyerror("Case outside switch");
 	    break;
@@ -912,14 +912,14 @@ const9: F_NUMBER
 
 default: F_DEFAULT ':'
     {
-	if ( !current_case_address) 
+	if ( !current_case_address)
         {
 	    yyerror("Default outside switch");
 	    break;
 	}
 	if ( read_short(current_case_address + 5 ) )
 	    yyerror("Duplicate default");
-	upd_short(current_case_address + 5, 
+	upd_short(current_case_address + 5,
             (short)mem_block[A_PROGRAM].current_size);
     } ;
 
@@ -1088,10 +1088,10 @@ expr211: expr212
        | expr211 '|' expr212
           {
 	    int t1 = $1 & TYPE_MASK, t3 = $3 & TYPE_MASK;
-	    if (($1 & TYPE_MOD_POINTER && $3 & TYPE_MOD_POINTER) && 
+	    if (($1 & TYPE_MOD_POINTER && $3 & TYPE_MOD_POINTER) &&
 		 (t1 == t3))
 	      $$ = $1;
-	    else  if (((t1 == TYPE_ANY) && $3 & TYPE_MOD_POINTER) || 
+	    else  if (((t1 == TYPE_ANY) && $3 & TYPE_MOD_POINTER) ||
 		($1 & TYPE_MOD_POINTER && (t3 == TYPE_ANY)))
 	      $$ = TYPE_MOD_POINTER | TYPE_ANY;
 	    else if ((t1 == TYPE_ANY) && (t3 == TYPE_ANY))
@@ -1122,10 +1122,10 @@ expr213: expr22
        | expr213 '&' expr22
 	  {
 	    int t1 = $1 & TYPE_MASK, t3 = $3 & TYPE_MASK;
-	    if (($1 & TYPE_MOD_POINTER && $3 & TYPE_MOD_POINTER) && 
+	    if (($1 & TYPE_MOD_POINTER && $3 & TYPE_MOD_POINTER) &&
 		 (t1 == t3))
 	      $$ = $1;
-	    else  if (((t1 == TYPE_ANY) && $3 & TYPE_MOD_POINTER) || 
+	    else  if (((t1 == TYPE_ANY) && $3 & TYPE_MOD_POINTER) ||
 		($1 & TYPE_MOD_POINTER && (t3 == TYPE_ANY)))
 	      $$ = TYPE_MOD_POINTER | TYPE_ANY;
 	    else if ((t1 == TYPE_ANY) && (t3 == TYPE_ANY))
@@ -1212,7 +1212,7 @@ expr25: expr27
 		}
 	    }
 	    $$ = TYPE_ANY;
-	    if (($1 & TYPE_MOD_POINTER) || ($3 & TYPE_MOD_POINTER)) 
+	    if (($1 & TYPE_MOD_POINTER) || ($3 & TYPE_MOD_POINTER))
 		$$ = TYPE_MOD_POINTER | TYPE_ANY;
 	    if (!($1 & TYPE_MOD_POINTER) || !($3 & TYPE_MOD_POINTER)) {
 	      if (exact_types && $$ != TYPE_ANY && !bad_arg)
@@ -1230,7 +1230,7 @@ expr27: expr28
 	        !(TYPE($1, TYPE_NUMBER) || TYPE($1, TYPE_FLOAT) ||
 		TYPE($1, TYPE_STRING) || TYPE($1, TYPE_ANY | TYPE_MOD_POINTER)))
 		type_error("Bad argument number 1 to '*'", $1);
-	    if (exact_types && !TYPE($1, $3) && 
+	    if (exact_types && !TYPE($1, $3) &&
 	        !(TYPE($1, TYPE_STRING) && TYPE($3, TYPE_NUMBER)) &&
 	        !(TYPE($3, TYPE_STRING) && TYPE($1, TYPE_NUMBER)) &&
 		!(TYPE($1, TYPE_ANY | TYPE_MOD_POINTER) && TYPE($3, TYPE_NUMBER)) &&
@@ -1339,7 +1339,7 @@ expr3: expr31
 	    ins_f_byte(F_BUILD_CLOSURE);
 	    ins_byte(FUN_EFUN);
 	    ins_short(F_CALL_OTHER); /* call_other */
-	    
+
 	    ins_f_byte(F_BUILD_CLOSURE);
 	    ins_byte(FUN_EMPTY); /* empty arg */
 
@@ -1356,7 +1356,7 @@ expr3: expr31
 	}
      ;
 
-funexpr:	
+funexpr:
 	funident		{ $$ = $1; }
 	| string_or_id F_ARROW F_IDENTIFIER
 	{
@@ -1413,7 +1413,7 @@ oexpr0:	expr0				{ add_arg_type($1); }
 					}
 	;
 
-funident: F_IDENTIFIER 
+funident: F_IDENTIFIER
 	{
             int var_num = lookup_local_name($1);
             if (var_num != -1) {
@@ -1441,7 +1441,7 @@ funident: F_IDENTIFIER
 	        }
             }
         }
-	| funoperator 
+	| funoperator
 	{
  	    $$ = TYPE_FUNCTION;
 	};
@@ -1608,13 +1608,13 @@ expr4:  rvalue
 	   $$ = TYPE_MAPPING;
        }
 	   /* Function calls */
-/* ident, not name. Calls to :: functions are not allowed anyway /Dark 
+/* ident, not name. Calls to :: functions are not allowed anyway /Dark
 */
         | call_other_start
         {
 	    ins_f_byte(F_BUILD_CLOSURE);
 	    ins_byte(FUN_LFUNO);
-	    $$ = TYPE_FUNCTION;	    
+	    $$ = TYPE_FUNCTION;
 	}
         | expr4 '(' expr_list ')'
 	{
@@ -1636,7 +1636,7 @@ expr4:  rvalue
 	    $$ = TYPE_ANY;          /* TYPE_UNKNOWN forces casts */
 	}
         | identifier '(' expr_list ')' /* special case */
-        { 
+        {
           int var_num = lookup_local_name($1);
           if (var_num != -1) {
 	    int t;
@@ -1654,35 +1654,40 @@ expr4:  rvalue
 	    $$ = TYPE_ANY;
 #endif
           } else {
-          /* Note that this code could be made a lot cleaner if some 
-           * support functions were added. (efun_call() is a good one) 
+          /* Note that this code could be made a lot cleaner if some
+           * support functions were added. (efun_call() is a good one)
 	   */
 	  int inherited_override = strchr($1, ':') != NULL;
 	  int efun_override = inherited_override && strncmp($1,"efun::", 6) == 0;
 	  int is_sfun = 0;
 	  int f;
-  
+
+
           $$ = TYPE_ANY;		/* in case anything goes wrong we need a default type. /LA */
-	  if (inherited_override && !efun_override) 
+	  if (inherited_override && !efun_override)
 	  {
 	      struct function *funp;
 
-	      /* Find the right function to call 
-		         
-                   This assumes max 255 inherited programs
-		   and 32767 functions in one program.
-	       */
-	      if (defined_function($1)) 
+              /* Find the right function to call
+               * This assumes max 255 inherited programs
+               * and 32767 functions in one program.
+               */
+	      if (defined_function($1))
 	      {
+                  if (function_prog_found)
+                  {
+                      funp = &(function_prog_found->functions[function_index_found]);
+                  } else {
+                      funp = FUNCTION(function_index_found);
+                  }
 
-		  funp = &function_prog_found->functions[function_index_found];
 		  $$ = funp->type_flags & TYPE_MASK;
 		  ins_f_byte(F_CALL_NON_VIRT);
 		  ins_byte ((char)function_inherit_found);
                   ins_short ((short)function_index_found);
 		  ins_byte((char)$3); /* Number of arguments */
 	      }
-	      else 
+	      else
 	      {
 		  char buff[100];
 
@@ -1691,16 +1696,16 @@ expr4:  rvalue
               }
            }
 
-           /* All simul_efuns are considered defined. 
+           /* All simul_efuns are considered defined.
 	    */
-	   else if (!efun_override && 
-                  (defined_function ($1) || ((is_sfun = 1) && is_simul_efun ($1))) ) 
+	   else if (!efun_override &&
+                  (defined_function ($1) || ((is_sfun = 1) && is_simul_efun ($1))) )
 	   {
 	       struct function *funp;
 	       unsigned short *arg_indices;
-	       unsigned short *arg_types; 
- 
-	       if (function_prog_found) 
+	       unsigned short *arg_types;
+
+	       if (function_prog_found)
 	       {
 		   funp = &(function_prog_found->
 			    functions[function_index_found]);
@@ -1710,35 +1715,34 @@ expr4:  rvalue
 	       else
 	       {
 		   funp = FUNCTION(function_index_found);
-		   
-		   /* Beware... these are pointers to volatile structures 
+
+		   /* Beware... these are pointers to volatile structures
 		    */
 		   arg_indices = (unsigned short *) mem_block[A_ARGUMENT_INDEX].block;
 		   arg_types = (unsigned short *) mem_block[A_ARGUMENT_TYPES].block;
-		   /* Assumption: exact_types implies correct 
-		      values for arg_types 
+		   /* Assumption: exact_types implies correct
+		      values for arg_types
 		    */
 	       }
 
-	       /* Private functions in inherited programs may not be called. 
+	       /* Private functions in inherited programs may not be called.
 	        */
-	       if (function_prog_found && 
-		   function_type_mod_found & TYPE_MOD_PRIVATE) 
+	       if (function_prog_found &&
+		   function_type_mod_found & TYPE_MOD_PRIVATE)
 	       {
 		   char buff[100];
 
-		   (void)snprintf(buff, sizeof(buff), "Function %s marked 'private'", 
+		   (void)snprintf(buff, sizeof(buff), "Function %s marked 'private'",
 			    funp->name);
 		   yyerror (buff);
 	       }
 	       $$ = funp->type_flags & TYPE_MASK;
-              
+
                if (is_sfun)
 	       {
                    ins_f_byte(F_CALL_SIMUL);
 		   store_reloc_data(R_CALL,
-				    (unsigned short)mem_block[A_PROGRAM].current_size,
-				    $1,0,0);
+		  	(unsigned short)mem_block[A_PROGRAM].current_size, $1,0,0);
 	       }
                else if (function_type_mod_found & (TYPE_MOD_NO_MASK|TYPE_MOD_PRIVATE))
 	       {
@@ -1754,7 +1758,7 @@ expr4:  rvalue
 	       }
 	       ins_byte ((char)function_inherit_found);
                ins_short ((short)function_index_found);
-               /* Insert function name into string list and code its index 
+               /* Insert function name into string list and code its index
 		*/
 	       ins_byte ((char)$3);
 
@@ -1762,7 +1766,7 @@ expr4:  rvalue
 		* Check number of arguments.
 		*/
 	       if ((funp->type_flags & NAME_STRICT_TYPES) && exact_types &&
-		   funp->num_arg != $3 && 
+		   funp->num_arg != $3 &&
 
 		   /* An old varargs function */
 		   !((funp->type_flags & TYPE_MOD_VARARGS) &&
@@ -1785,20 +1789,20 @@ expr4:  rvalue
 		* Check the argument types.
 		*/
 	       if (funp->type_flags & NAME_STRICT_TYPES &&
-		   exact_types && arg_indices && 
-		   arg_indices[function_index_found] != INDEX_START_NONE) 
+		   exact_types && arg_indices &&
+		   arg_indices[function_index_found] != INDEX_START_NONE)
 	       {
 		   int i, first;
 		   int num_check = funp->num_arg;
-		   
+
 		   if (funp->type_flags & TYPE_MOD_TRUE_VARARGS)
 		       num_check--;
 
 		   first = arg_indices[function_index_found];
-		   for (i=0; i < num_check && i < $3; i++) 
+		   for (i=0; i < num_check && i < $3; i++)
 		   {
 		       int tmp = get_argument_type(i, $3);
-		       if (!TYPE(tmp, arg_types[first + i])) 
+		       if (!TYPE(tmp, arg_types[first + i]))
 		       {
 			   char buff[100];
 
@@ -1815,8 +1819,8 @@ expr4:  rvalue
 	   {
 	       int min, max, def, *argp;
 	       extern int efun_arg_types[];
- 
-	       if (efun_override) 
+
+	       if (efun_override)
 		   f = lookup_predef($1+6);
 
 	       if (f == -1) 	/* Only possible for efun_override */
@@ -1833,41 +1837,41 @@ expr4:  rvalue
 		   def = instrs[f-EFUN_FIRST].Default;
 		   $$ = instrs[f-EFUN_FIRST].ret_type;
 		   argp = &efun_arg_types[instrs[f-EFUN_FIRST].arg_index];
-		   if (def && $3 == min-1) 
+		   if (def && $3 == min-1)
 		   {
 		       ins_f_byte((unsigned)def);
 		       max--;
 		       min--;
-		   } 
-		   else if ($3 < min) 
+		   }
+		   else if ($3 < min)
 		   {
 		       char bff[100];
 
-		       (void)snprintf(bff, sizeof(bff), "Too few arguments to %s", 
+		       (void)snprintf(bff, sizeof(bff), "Too few arguments to %s",
 				      instrs[f-EFUN_FIRST].name);
 		       yyerror(bff);
-		   } 
-		   else if ($3 > max && max != -1) 
+		   }
+		   else if ($3 > max && max != -1)
 		   {
 		       char bff[100];
 
 		       (void)snprintf(bff, sizeof(bff), "Too many arguments to %s",
 				      instrs[f - EFUN_FIRST].name);
 		       yyerror(bff);
-		   } 
-		   else if (max != -1 && exact_types) 
+		   }
+		   else if (max != -1 && exact_types)
 		   {
 		       /*
 			* Now check all types of the arguments to efuns.
 			*/
 		       int i, argn;
 		       char buff[100];
-		       for (argn=0; argn < $3; argn++) 
+		       for (argn=0; argn < $3; argn++)
 		       {
 			   int tmp = get_argument_type(argn, $3);
 			   for(i=0; !TYPE(argp[i], tmp) && argp[i] != 0; i++)
 			       ;
-			   if (argp[i] == 0) 
+			   if (argp[i] == 0)
 			   {
 			       (void)snprintf(buff, sizeof(buff),
 				       "Bad argument %d type to efun %s()",
@@ -1887,8 +1891,8 @@ expr4:  rvalue
 		   if (max != min)
 		       ins_byte((char)$3); /* Number of actual arguments */
 	       }
-	   } 
-	   else 
+	   }
+	   else
 	   {
 	       int i;
 	       i = verify_declared($1);
@@ -1912,7 +1916,7 @@ expr4:  rvalue
 		       yyerror (buff);
 		   }
 
-		   /* Function not found 
+		   /* Function not found
 		    */
 		   ins_f_byte(F_CALL_VIRT);
 		   store_reloc_data(R_CALL,
@@ -2103,7 +2107,7 @@ static void ins_f_byte(unsigned int b)
     }
 }
 
-void 
+void
 yyerror(char *str)
 {
     extern int num_parse_error;
@@ -2117,31 +2121,31 @@ yyerror(char *str)
     num_parse_error++;
 }
 
-static int 
+static int
 check_declared(char *str)
 {
     struct variable *vp;
-    
+
     int offset;
     int inh;
     char *super_name = 0;
     char *sub_name;
     char *real_name;
     char *search;
-    
+
     variable_index_found = variable_inherit_found = 255;
     real_name = strrchr(str, ':') + 1;
     sub_name = strchr(str, ':') + 2;
-    
+
     if(!(real_name = (find_sstring((real_name == (char *)1) ? str : real_name))))
         return -1;
     if (sub_name == (char *)2)
 	for (offset = 0; offset < mem_block[A_VARIABLES].current_size;
-	     offset += sizeof (struct variable)) 
+	     offset += sizeof (struct variable))
 	    {
 		vp = (struct variable *)&mem_block[A_VARIABLES].block[offset];
 		/* Only index, prog, and type will be defined. */
-		if (real_name == vp->name) 
+		if (real_name == vp->name)
 		    {
 			variable_type_mod_found = vp->type;
 			variable_index_found = offset / sizeof (struct variable);
@@ -2160,13 +2164,13 @@ check_declared(char *str)
 	}
 	else
 	    str = sub_name;
-    
+
     /* Look for the variable in the inherited programs
 	*/
 
     for (inh = mem_block[A_INHERITS].current_size / sizeof (struct inherit) - 1;
           inh >= 0; inh -= ((struct inherit *)mem_block[A_INHERITS].block)[inh].prog->
-	 num_inherited) 
+	 num_inherited)
     {
 	if (super_name &&
 	    strcmp(super_name, ((struct inherit *)mem_block[A_INHERITS].block)[inh].name) == 0)
@@ -2178,7 +2182,7 @@ check_declared(char *str)
 	{
 	    /* Adjust for inherit-type */
 	    int type = ((struct inherit *)mem_block[A_INHERITS].block)[inh].type;
-	    
+
 	    if (variable_type_mod_found & TYPE_MOD_PRIVATE)
 		type &= ~TYPE_MOD_PUBLIC;
 	    if (variable_type_mod_found & TYPE_MOD_PUBLIC)
@@ -2194,7 +2198,7 @@ check_declared(char *str)
     return -1;
 }
 
-static int 
+static int
 handle_function_id(char *str)
 {
     short i;
@@ -2208,7 +2212,7 @@ handle_function_id(char *str)
 		functions[function_index_found].type_flags & TYPE_MOD_PRIVATE)
 	    {
 		char buff[100];
-		(void)snprintf(buff, sizeof(buff), "Function %s marked 'private'", 
+		(void)snprintf(buff, sizeof(buff), "Function %s marked 'private'",
 			       str);
 		yyerror (buff);
 	    }
@@ -2237,7 +2241,7 @@ handle_function_id(char *str)
     }
 }
 
-static int 
+static int
 verify_declared(char *str)
 {
     int r;
@@ -2255,7 +2259,7 @@ verify_declared(char *str)
 	    prog->variable_names[variable_index_found].type;
 }
 
-void 
+void
 free_all_local_names()
 {
     current_number_of_locals = 0;
@@ -2291,11 +2295,11 @@ lookup_local_name(char *str)
     return -1;
 }
 
-int 
+int
 add_local_name(char *str, int type)
 {
     int var_num = lookup_local_name(str);
-    if (var_num != -1) 
+    if (var_num != -1)
         if (local_blockdepth[var_num] == block_depth) {
             char buff[100];
 
@@ -2317,25 +2321,25 @@ add_local_name(char *str, int type)
 }
 
 
-int 
+int
 find_inherit(struct program *prog1, struct program *prog2)
 {
     int i;
-    
+
     for (i = 0; i < (int)prog1->num_inherited; i++)
 	if (prog1->inherit[i].prog == prog2)
 	    return i;
     return -1;
 }
 
-static void 
+static void
 copy_inherits(struct program *from, int type, char *name)
 {
     int i;
     struct inherit inh;
     int j[256], k = 0;
     char buf[256];
-    
+
     if (!has_inherited)
     {
 	free_sstring(((struct inherit *)mem_block[A_INHERITS].block)->name);
@@ -2375,7 +2379,7 @@ copy_inherits(struct program *from, int type, char *name)
 	/* Correct the type */
 	int new_type = type;
 	int old_type;
-	
+
 	i = j[--k];
 	old_type = from->inherit[i].type;
 
@@ -2383,12 +2387,12 @@ copy_inherits(struct program *from, int type, char *name)
 	    new_type &= ~TYPE_MOD_PUBLIC;
 	if (old_type & TYPE_MOD_PUBLIC)
 	    new_type &= ~TYPE_MOD_PRIVATE;
-	
+
 	copy_inherits(from->inherit[i].prog,
 		      old_type | new_type,
 		      from->inherit[i].name);
     }
-    
+
     inh = from->inherit[from->num_inherited - 1]; /* Make a copy */
 
     /* Adjust the info */
@@ -2404,7 +2408,7 @@ check_inherits(struct program *from)
     struct object *ob;
     size_t len = strlen(from->name) - 1;
     char *ob_name = alloca(len);
-    
+
     (void)strncpy(ob_name, from->name, len - 1);
     ob_name[len - 1] = 0;
     ob = find_object2(ob_name);
@@ -2517,7 +2521,7 @@ store_line_number_info(int file, int line)
     struct lineno tmp;
     unsigned int code = mem_block[A_PROGRAM].current_size;
     struct lineno *last_lineno =
-      (struct lineno *)(mem_block[A_LINENUMBERS].block + 
+      (struct lineno *)(mem_block[A_LINENUMBERS].block +
 			mem_block[A_LINENUMBERS].current_size) - 1;
 
     if (mem_block[A_LINENUMBERS].current_size &&
@@ -2532,7 +2536,7 @@ store_line_number_info(int file, int line)
     add_to_mem_block(A_LINENUMBERS, (char *)&tmp, sizeof(tmp));
 }
 
-static void 
+static void
 store_reloc_data(char type, unsigned short address, char *name,
 			     int value, char modifier)
 {
@@ -2579,7 +2583,7 @@ get_type_name(int type)
     return buff;
 }
 
-void 
+void
 type_error(char *str, int type)
 {
     static char buff[100];
@@ -2599,13 +2603,13 @@ type_error(char *str, int type)
     }
 }
 
-int 
-remove_undefined_prototypes (int num_functions, struct function *functions) 
+int
+remove_undefined_prototypes (int num_functions, struct function *functions)
 {
     int i;
     for (i = 0; i < num_functions;i++)
     {
-	if (functions[i].type_flags & NAME_PROTOTYPE) 
+	if (functions[i].type_flags & NAME_PROTOTYPE)
 	{
 	    char buff[500];
 
@@ -2621,7 +2625,7 @@ remove_undefined_prototypes (int num_functions, struct function *functions)
 /*
  * Compile an LPC file.
  */
-void 
+void
 compile_file()
 {
     int yyparse (void);
@@ -2648,13 +2652,13 @@ get_two_types(int type1, int type2)
   This is used as an index of includefiles for giving correct runtime error
   messages references.
 */
-void 
+void
 remember_include(char *buf)
 {
     struct stat sbuf;
     char number[128];
 
-    if (stat(buf, &sbuf)==-1) 
+    if (stat(buf, &sbuf)==-1)
         fatal("LIB not able to stat open file\n");
     (void)sprintf(number,"%ld:", (long)sbuf.st_mtime);
     add_to_mem_block(A_INCLUDES, number, (int)strlen(number));
@@ -2725,7 +2729,7 @@ load_segments(struct segment_desc *seg, struct mem_block *mem_block1)
 	size = 0;
 	for (sect = seg->sections; sect->section != -1; sect++)
 	    size += align(mem_block1[sect->section].current_size);
-	
+
 	if (size)
 	    block = xalloc((size_t)size);
 	else
@@ -2748,7 +2752,7 @@ load_segments(struct segment_desc *seg, struct mem_block *mem_block1)
 	    if (sect->ptr_offset != -1)
 		*(char **)(hdr + sect->ptr_offset) = block;
 	    if (sect->num_offset != -1)
-		*(unsigned short *)(hdr + sect->num_offset) = 
+		*(unsigned short *)(hdr + sect->num_offset) =
 		    mem_block1[sect->section].current_size /
 			sect->ent_size;
 
@@ -2770,12 +2774,12 @@ process_reloc(struct reloc *reloc, int num_relocs, int num_inherited)
 
     psize = mem_block[A_PROGRAM].current_size;
     link_errors = 0;
-    
+
     for (i = 0; i < num_relocs; i++, reloc++)
     {
 	if (reloc->address >= psize)
 	    fatal("Corrupt relocation address.\n");
-	
+
 	name = reloc->name;
 	switch (reloc->type)
 	{
@@ -2802,7 +2806,7 @@ process_reloc(struct reloc *reloc, int num_relocs, int num_inherited)
                             sizeof(struct lineno),
                             mem_block[A_INCLUDES].block,
                             current_file), name);
-                    
+
 		    (void)fflush(stderr);
 		    break;
 		}
@@ -2811,7 +2815,7 @@ process_reloc(struct reloc *reloc, int num_relocs, int num_inherited)
 		call_efun = F_CALL_NON_VIRT;
 	    else
 		call_efun = F_CALL_VIRT;
-	    
+
 	    fix = function_index_found;
 	    mem_block[A_PROGRAM].block[reloc->address - 1] =
 		call_efun - EFUN_FIRST;
@@ -2822,7 +2826,7 @@ process_reloc(struct reloc *reloc, int num_relocs, int num_inherited)
 	    mem_block[A_PROGRAM].block[reloc->address + 2] =
 		((char *)&fix)[1];
 	    break;
-	    
+
 	default:
 	    fatal("Unsupported reloc data.\n");
 	}
@@ -2835,7 +2839,7 @@ link_C_functions(char *name)
     int i, j;
     struct cfun_desc cfun;
     int num_inherited;
-    num_inherited = 
+    num_inherited =
 	mem_block[A_INHERITS].current_size /
 	    sizeof(struct inherit);
 
@@ -2988,7 +2992,7 @@ epilog()
 	if (has_ctor != -1)
 	{
 	    struct function *funp1;
-	    
+
 	    funp1 = &((struct function *)
 		    mem_block[A_FUNCTIONS].block)[has_ctor];
 	    upd_short(last_initializer_end, funp1->offset);
@@ -3016,7 +3020,7 @@ epilog()
     (struct function *)mem_block[A_FUNCTIONS].block);
 
     /* I don't like doing this, but I see no other way. |D| */
-    mem_block[A_FUNCTIONS].current_size = 
+    mem_block[A_FUNCTIONS].current_size =
         functions_left * sizeof (struct function);
 
 
@@ -3049,7 +3053,7 @@ epilog()
 
     add_to_mem_block(A_HEADER, (char *)&NULL_program, sizeof(NULL_program));
     {
-	int num_func = 
+	int num_func =
 	    mem_block[A_FUNCTIONS].current_size / sizeof(struct function);
 
 	    mem_block[A_FUNC_HASH].current_size = num_func *
@@ -3059,7 +3063,7 @@ epilog()
 	    mem_block[A_FUNC_HASH].block =
 		realloc(mem_block[A_FUNC_HASH].block, num_func *
 			sizeof(struct function_hash));
-	    	mem_block[A_FUNC_HASH].max_size = 
+	    	mem_block[A_FUNC_HASH].max_size =
 		    mem_block[A_FUNC_HASH].current_size;
 	}
 	hash_func(num_func, (struct function *)mem_block[A_FUNCTIONS].block,
@@ -3087,7 +3091,7 @@ epilog()
 	(pragma_no_clone ? PRAGMA_NO_CLONE : 0) |
 	(pragma_no_shadow ? PRAGMA_NO_SHADOW : 0) |
         (pragma_resident ? PRAGMA_RESIDENT : 0);
-    
+
     prog->inherit[prog->num_inherited - 1].prog = prog;
 
     for (i = ix = 0; i < (int)prog->num_inherited; i++)
@@ -3101,21 +3105,21 @@ epilog()
 	}
 	else
 	{
-	    prog->inherit[i].variable_index_offset = 
+	    prog->inherit[i].variable_index_offset =
 		prog->inherit[inh].variable_index_offset;
 	    prog->inherit[i].type |= TYPE_MOD_SECOND;
 	}
     }
 
     /*  don't forget the following:
-     *   prog->sizeof_argument_types = 
+     *   prog->sizeof_argument_types =
      *			mem_block[A_ARGUMENT_TYPES??].current_size);
      *   if you have fixed it one day .... ok ? :-=)
      *   remember to remove the above change to total_size !!!!!!!!
      */
     prog->sizeof_argument_types=0;
     /* NOTE: Don't forget to hash the argument types along with the functions
-     */  
+     */
     prog->argument_types = 0;	/* For now. Will be fixed someday */
 
     prog->type_start = 0;
@@ -3127,7 +3131,7 @@ epilog()
     }
 
     prog->load_time = current_time;
-    
+
     register_program(prog);
 
     /*  marion
@@ -3152,8 +3156,8 @@ epilog()
 /*
  * Initialize the environment that the compiler needs.
  */
-static void 
-prolog() 
+static void
+prolog()
 {
     int i;
 #ifdef AUTO_INCLUDE
@@ -3200,8 +3204,8 @@ prolog()
 /*
  * Add a trailing jump after the last initialization code.
  */
-void 
-add_new_init_jump() 
+void
+add_new_init_jump()
 {
     /*
      * Add a new jump.
@@ -3216,7 +3220,7 @@ search_for_ext_function(char *name, struct program *prog1)
 {
     char *ix;
     int i, res;
-    
+
     ix = strchr(name, ':');
     if (ix == NULL)
     {
@@ -3227,7 +3231,7 @@ search_for_ext_function(char *name, struct program *prog1)
     if (ix - name == 4 && strncmp(name, "this", 4) == 0)
 	return search_for_ext_function(ix + 2, prog1);
 
-    for (i = prog1->num_inherited - 2; i >= 0; i--) 
+    for (i = prog1->num_inherited - 2; i >= 0; i--)
     {
 	if (ix == name || (strlen(prog1->inherit[i].name) == ix - name &&
 			   strncmp(prog1->inherit[i].name, name, (size_t)(ix - name)) == 0))
@@ -3236,12 +3240,12 @@ search_for_ext_function(char *name, struct program *prog1)
 	    if (res)
 	    {
 		int type_mod;
-		
+
 		/* adjust values and return */
 		function_inherit_found += i -
 		    (prog1->inherit[i].prog->num_inherited - 1);
 		type_mod = prog1->inherit[function_inherit_found].type;
-		
+
 		/* Correct function_type_mod_found */
 		if (function_type_mod_found & TYPE_MOD_PRIVATE)
 		    type_mod &= ~TYPE_MOD_PUBLIC;
@@ -3256,9 +3260,9 @@ search_for_ext_function(char *name, struct program *prog1)
 		/* skip program and continue */
 		i -= prog1->inherit[i].prog->num_inherited - 1;
 	    }
-	    
+
 	}
-	
+
     }
     return 0;
 }
