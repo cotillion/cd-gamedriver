@@ -79,8 +79,8 @@ typedef struct {
 /*
  * Queue Sizes.
  */
-#define	TCPSVC_RAWQ_SIZE        32768	
-#define	TCPSVC_CANQ_SIZE        32768	
+#define	TCPSVC_RAWQ_SIZE        32768
+#define	TCPSVC_CANQ_SIZE        32768
 
 /*
  * Maximum # of concurrent TCP Service.
@@ -286,8 +286,8 @@ tcpsvc_write(ndesc_t *nd, tcpsvc_t *tsp)
 		break;
 
 	    default:
-		tcpsvc_disconnect(nd, tsp);
-                nd_disable(nd, ND_W);
+            tcpsvc_disconnect(nd, tsp);
+            nd_disable(nd, ND_W);
 	        tsp->task = create_task(tcpsvc_process, tsp);
 		return;
 	    }
@@ -343,7 +343,7 @@ tcpsvc_accept(void *vp)
     }
 
     getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
-    
+
     exception_frame.e_exception = exception;
     exception_frame.e_catch = 0;
     exception = &exception_frame;
@@ -427,7 +427,7 @@ tcpsvc_init(u_short port_nr)
             continue;
 
         enable_reuseaddr(s);
-       
+
         if (rp->ai_family == AF_INET6)
             enable_v6only(s);
 
