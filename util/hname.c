@@ -48,7 +48,7 @@ get_auth_name(char *addr, int local_port, int remote_port)
         close(s);
     }
 
-    freeaddrinfo(result);   
+    freeaddrinfo(result);
 
     if (rp == NULL)
         return "";
@@ -117,7 +117,7 @@ reverse_lookup(char *ip)
     static char             buf[NI_MAXHOST];
     struct addrinfo *addrs;
     struct addrinfo  hints;
-    int              ret; 
+    int              ret;
 
     memset(&hints, 0, sizeof (hints));
     hints.ai_family = PF_UNSPEC;
@@ -149,7 +149,8 @@ main(int argc, char *argv[])
     char *remote_port;
     char *addr;
     char *ptr;
-    char *ident, *reverse;
+    char *ident = "";
+    char *reverse;
 
 #ifndef SOLARIS
     (void)setlinebuf(stdout);
@@ -178,10 +179,11 @@ main(int argc, char *argv[])
         if (reverse == NULL)
             reverse = addr;
 
+#ifdef USE_IDENT
         ident = get_auth_name(addr, atoi(local_port), atoi(remote_port));
         if (ident == NULL)
             ident = "";
-
+#endif
 
         printf("%s,%s,%s,%s,%s\n", addr, local_port, remote_port, reverse, ident);
 
