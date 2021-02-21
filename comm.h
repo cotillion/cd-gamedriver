@@ -12,7 +12,7 @@ struct interactive {
     struct object *ob;		/* Points to the associated object */
     struct sentence *input_to;	/* To be called with next input line ! */
     struct sockaddr_storage addr;
-    char *host_name;    
+    char *host_name;
     socklen_t addrlen;
     char *prompt;
     int closing;		/* True when closing this socket. */
@@ -42,3 +42,6 @@ void interactive_input(struct interactive *, char *);
 void gmcp_input(struct interactive *, char *);
 void *new_player(void *, struct sockaddr_storage *, socklen_t, u_short);
 void mssp_request(struct interactive *ip);
+
+
+void set_ip_number(struct object *ob, char *ip);

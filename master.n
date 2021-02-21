@@ -33,6 +33,7 @@ modify_command
 valid_users
 valid_exec
 valid_snoop
+valid_set_ip_number
 valid_query_ip_ident
 valid_query_ip_number_name
 #

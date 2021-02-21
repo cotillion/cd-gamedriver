@@ -87,7 +87,7 @@ receive_hname(const char *addr, int lport, int rport,
     struct interactive *ip;
 
     if (addr == NULL || rname == NULL)
-	return;
+	    return;
 
     for (i = 0; i < MAX_PLAYERS; i++)
     {
@@ -98,7 +98,7 @@ receive_hname(const char *addr, int lport, int rport,
         const char *ip_number = query_ip_number(ip->ob);
         if (ip_number != NULL && !strcmp(addr, query_ip_number(ip->ob)))
         {
-            if (strlen(ip_name)) 
+            if (strlen(ip_name))
             {
                 if (ip->host_name)
                     free(ip->host_name);
@@ -119,13 +119,13 @@ receive_hname(const char *addr, int lport, int rport,
 }
 #endif
 
-void 
-prepare_ipc() 
+void
+prepare_ipc()
 {
     nd_init();
 #ifndef NO_IP_DEMON
     if (!no_ip_demon)
-	hname = hname_init(receive_hname, shutdown_hname);
+        hname = hname_init(receive_hname, shutdown_hname);
 #endif
     telnet_init((u_short)port_number);
 #ifdef SERVICE_PORT
@@ -141,8 +141,8 @@ prepare_ipc()
 /*
  * This one is called when shutting down the MUD.
  */
-void 
-ipc_remove() 
+void
+ipc_remove()
 {
     (void)printf("Shutting down ipc...\n");
     nd_shutdown();
@@ -156,7 +156,7 @@ void write_socket(char *, struct object *);
 /*VARARGS1*/
 
 void
-add_message2(struct object *ob, char *fmt, ...) 
+add_message2(struct object *ob, char *fmt, ...)
 {
     char buff[10000];
     va_list argp;
@@ -171,8 +171,8 @@ add_message2(struct object *ob, char *fmt, ...)
         }
    else
         write_socket(buff, (struct object *)0);
-    
-} 
+
+}
 
 void
 add_message(char *fmt, ...)
@@ -192,7 +192,7 @@ add_message(char *fmt, ...)
         write_socket(buff, (struct object *)0);
 }
 
-/* 
+/*
  * Outputs GMCP data to the client
  */
 void
@@ -200,8 +200,7 @@ write_gmcp(struct object *ob, char *data)
 {
     struct interactive *ip;
 
-    if (ob == NULL || ob->flags & O_DESTRUCTED || 
-        (ip = ob->interactive) == NULL || ip->do_close)
+    if (ob == NULL || ob->flags & O_DESTRUCTED || (ip = ob->interactive) == NULL || ip->do_close)
         return;
 
     telnet_output_gmcp(ip->tp, (u_char *)data);
@@ -221,9 +220,7 @@ write_socket(char *cp, struct object *ob)
     char *bp, buf[MAX_WRITE_SOCKET_SIZE + 2];
 #endif
 
-    if (ob == NULL || ob->flags & O_DESTRUCTED ||
-	(ip = ob->interactive) == NULL ||
-	ip->do_close)
+    if (ob == NULL || ob->flags & O_DESTRUCTED || (ip = ob->interactive) == NULL || ip->do_close)
     {
 	(void)fputs(cp, stderr);
 	(void)fflush(stderr);
@@ -350,7 +347,7 @@ write_socket(char *cp, struct object *ob)
 int	msecs_response[MSR_SIZE];
 int	msr_point		= -1;
 
-int 
+int
 get_msecs_response(int ix)
 {
     return (ix >= 0 && ix < MSR_SIZE) ? msecs_response[ix] : -1;
@@ -434,7 +431,7 @@ remove_interactive(struct interactive *ip, int link_dead)
 	push_object(ob);
 	push_number(link_dead);
 	(void)apply_master_ob(M_REMOVE_INTERACTIVE,2);
-	
+
 	command_giver = save;
 	return;
     }
@@ -442,11 +439,28 @@ remove_interactive(struct interactive *ip, int link_dead)
 }
 
 
+void
+set_interactive_address(struct interactive *ip, struct sockaddr_storage *addr, socklen_t len)
+{
+    memcpy(&ip->addr, (char *)addr, len);
+    ip->addrlen = len;
+
+    if (ip->host_name) {
+        free(ip->host_name);
+        ip->host_name = NULL;
+    }
+
+#ifndef NO_IP_DEMON
+	if (!no_ip_demon)
+	    hname_sendreq(hname, query_ip_number(ip->ob), (u_short)ip->lport, atoi(query_port_number(ip->ob)));
+#endif
+}
+
 /*
  * get the I'th player object from the interactive list, i starts at 0
  * and can go to num_player - 1.  For users(), etc.
  */
-struct object * 
+struct object *
 get_interactive_object(i)
 int i;
 {
@@ -473,20 +487,20 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local
     for (i = 0; i < MAX_PLAYERS; i++)
     {
         struct interactive *inter;
-	struct object *ob;
-	struct svalue *ret;
-	extern struct object *master_ob;
-	
-	if (all_players[i] != 0)
-	    continue;
-	command_giver = master_ob;
-	current_interactive = master_ob;
+        struct object *ob;
+        struct svalue *ret;
+        extern struct object *master_ob;
+
+        if (all_players[i] != 0)
+            continue;
+        command_giver = master_ob;
+        current_interactive = master_ob;
 
         inter = (struct interactive *)xalloc(sizeof (struct interactive));
         memset(inter, 0, sizeof(struct interactive));
-        
+
 	master_ob->interactive = inter;
-        master_ob->interactive->default_err_message = 0;
+    master_ob->interactive->default_err_message = 0;
 	master_ob->flags |= O_ONCE_INTERACTIVE;
 	/* This initialization is not pretty. */
 	master_ob->interactive->rname = 0;
@@ -508,22 +522,15 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local
 	master_ob->interactive->current_column = 0;
 	master_ob->interactive->screen_width = 0;
 #endif
+
 	all_players[i] = master_ob->interactive;
 	all_players[i]->tp = tp;
 	set_prompt(NULL);
-        
-	(void)memcpy((char *)&all_players[i]->addr, (char *)addr, len);
-        all_players[i]->addrlen = len;
-        all_players[i]->host_name = NULL;
-	all_players[i]->lport = local_port;
-	num_player++;
 
-#ifndef NO_IP_DEMON
-	if (!no_ip_demon)
-	    hname_sendreq(hname, query_ip_number(master_ob),
-			  (u_short)all_players[i]->lport,
-			  atoi(query_port_number(master_ob)));
-#endif
+        inter->lport = local_port;
+        set_interactive_address(inter, addr, len);
+        num_player++;
+
 	/*
 	 * The player object has one extra reference.
 	 * It is asserted that the master_ob is loaded.
@@ -564,11 +571,11 @@ new_player(void *tp, struct sockaddr_storage *addr, socklen_t len, u_short local
     return NULL;
 }
 
-int 
+int
 call_function_interactive(struct interactive *i, char *str)
 {
     struct closure *func;
-    
+
     if (!i->input_to)
 	return 0;
     func = i->input_to->funct;
@@ -620,11 +627,11 @@ remove_all_players()
 {
     struct svalue *ret;
     struct gdexception exception_frame;
-    
+
     exception_frame.e_exception = NULL;
     exception_frame.e_catch = 0;
 
-    if (setjmp(exception_frame.e_context)) 
+    if (setjmp(exception_frame.e_context))
     {
 	clear_state();
 	(void)add_message("Anomaly in the fabric of world space.\n");
@@ -640,11 +647,11 @@ remove_all_players()
     {
 	volatile int i;
 	struct vector *unload_vec = ret->u.vec;
-	
+
 	INCREF(unload_vec->ref);
-	
+
 	for (i = 0; i < unload_vec->size; i++)
-	    if (setjmp(exception_frame.e_context)) 
+	    if (setjmp(exception_frame.e_context))
 	    {
 		clear_state();
 		(void)add_message("Anomaly in the fabric of world space.\n");
@@ -658,7 +665,7 @@ remove_all_players()
 	    }
 	free_vector(unload_vec);
     }
-    if (setjmp(exception_frame.e_context)) 
+    if (setjmp(exception_frame.e_context))
     {
 	clear_state();
 	(void)add_message("Anomaly in the fabric of world space.\n");
@@ -702,15 +709,15 @@ set_snoop(struct object *me, struct object *you)
     struct svalue *ret;
     extern struct object *master_ob;
 
-    
+
     /* Stop if people managed to quit before we got this far */
     if (me->flags & O_DESTRUCTED)
 	return 0;
     if (you && (you->flags & O_DESTRUCTED))
 	return 0;
-    
+
     /* Find the snooper & snopee */
-    for(i = 0 ; i < MAX_PLAYERS && (on == 0 || by == 0); i++) 
+    for(i = 0 ; i < MAX_PLAYERS && (on == 0 || by == 0); i++)
     {
 	if (all_players[i] == 0)
 	    continue;
@@ -730,12 +737,12 @@ set_snoop(struct object *me, struct object *you)
 	else
 	    push_object(you);
 	ret = apply_master_ob(M_VALID_SNOOP, 3);
-	
+
 	if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
 	    return 0;
     }
     /* Stop snoop */
-    if (you == 0) 
+    if (you == 0)
     {
 	if (by == 0)
 	    error("Could not find snooper to stop snoop on.\n");
@@ -751,14 +758,14 @@ set_snoop(struct object *me, struct object *you)
 	return 0;
 
     /* Protect against snooping loops */
-    for (tmp = on; tmp; tmp = tmp->snoop_on) 
+    for (tmp = on; tmp; tmp = tmp->snoop_on)
     {
-	if (tmp == by) 
+	if (tmp == by)
 	    return 0;
     }
 
     /* Terminate previous snoop, if any */
-    if (by->snoop_on) 
+    if (by->snoop_on)
     {
 	by->snoop_on->snoop_by = 0;
 	by->snoop_on = 0;
@@ -772,7 +779,7 @@ set_snoop(struct object *me, struct object *you)
     on->snoop_by = by;
     by->snoop_on = on;
     return 1;
-    
+
 }
 
 char *
@@ -793,17 +800,61 @@ char *
 query_ip_number(struct object *ob)
 {
     static char host[NI_MAXHOST];
-            
-    if (ob == 0)
-	ob = command_giver;
+
+    if (ob == 0) {
+	    ob = command_giver;
+    }
 
     if (!ob || ob->interactive == 0)
-	return NULL;
+	    return NULL;
 
-    if (getnameinfo((struct sockaddr*)&ob->interactive->addr, ob->interactive->addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST) != 0)
+    if (getnameinfo((struct sockaddr * )&ob->interactive->addr, ob->interactive->addrlen, host, sizeof(host), NULL, 0, NI_NUMERICHOST) != 0)
         return NULL;
-    
+
     return host;
+}
+
+/*
+ * Set the ip number for an interactive.
+ */
+void
+set_ip_number(struct object *ob, char *ip)
+{
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+
+    if (!ob || ob->interactive == 0) {
+        error("Attempt to update ip number of non interactive\n");
+	    return;
+    }
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_NUMERICHOST | AI_NUMERICSERV;
+
+    query_port_number(ob);
+
+    int err;
+    if ((err = getaddrinfo(ip, query_port_number(ob), &hints, &result)) != 0) {
+        error("Invalid address: %s", gai_strerror(err));
+    }
+
+     for (rp = result; rp != NULL; rp = rp->ai_next) {
+         set_interactive_address(ob->interactive, (struct sockaddr_storage *)rp->ai_addr, rp->ai_addrlen);
+
+        memcpy(&ob->interactive->addr, (char *)rp->ai_addr, rp->ai_addrlen);
+        ob->interactive->addrlen = rp->ai_addrlen;
+
+        if (ob->interactive->host_name) {
+            free(ob->interactive->host_name);
+            ob->interactive->host_name = NULL;
+        }
+
+        break;
+    }
+
+    freeaddrinfo(rp);
 }
 
 char *
@@ -827,7 +878,7 @@ char *
 query_host_name()
 {
     static char name[64];
-    
+
     (void)gethostname(name, sizeof(name));
     name[sizeof(name) - 1] = '\0';	/* Just to make sure */
     return name;
@@ -858,10 +909,10 @@ notify_no_command()
     if (!command_giver || !command_giver->interactive)
 	return;
     p = command_giver->interactive->default_err_message;
-    if (p) 
+    if (p)
     {
 	/* We want 'value by function call' */
-	m = process_string(p, vbfc_object != 0); 
+	m = process_string(p, vbfc_object != 0);
         if (m) {
 	    (void)add_message("%s", m);
             free_mstring(m);
@@ -874,7 +925,7 @@ notify_no_command()
 	(void)add_message("What?\n");
 }
 
-void 
+void
 clear_notify()
 {
     if (!command_giver || !command_giver->interactive)
@@ -899,7 +950,7 @@ set_notify_fail_message(char *str, int pri)
     command_giver->interactive->default_err_message = make_sstring(str);
 }
 
-int 
+int
 replace_interactive(struct object *ob, struct object *obfrom,
 		    /*IGN*/char *name)
 {
@@ -946,7 +997,7 @@ replace_interactive(struct object *ob, struct object *obfrom,
     }
     else
 	remove_interactive(obfrom->interactive, 0);
-    if (obfrom == command_giver) 
+    if (obfrom == command_giver)
         command_giver = ob;
     return 1;
 }
@@ -1019,7 +1070,7 @@ interactive_input(struct interactive *ip, char *cp)
 		reset_machine();
 		if (!current_interactive)
 		    return;
-		
+
 		command_giver = ip->ob;
 		current_object = NULL;
 		current_interactive = command_giver;
@@ -1029,12 +1080,12 @@ interactive_input(struct interactive *ip, char *cp)
 		add_message2(ip->snoop_by->ob, "%% %s\n", cp);
 	    exception = exception_frame.e_exception;
 	}
-	
+
     }
 
     if (!current_interactive)
 	return;
-    
+
     /*
      * Now we have a string from the player. This string can go to
      * one of several places. If it is prepended with a '!', then
@@ -1099,13 +1150,13 @@ interactive_input(struct interactive *ip, char *cp)
 	exception_frame.e_exception = exception;
 	exception_frame.e_catch = 0;
 	exception = &exception_frame;
-	
+
 	if (setjmp(exception_frame.e_context))
 	{
 	    reset_machine();
 	    if (!current_interactive)
 		return;
-	    
+
 	    command_giver = ip->ob;
 	    current_object = NULL;
 	    current_interactive = command_giver;
@@ -1123,15 +1174,15 @@ interactive_input(struct interactive *ip, char *cp)
     current_interactive = 0;
 }
 
-void 
+void
 gmcp_input(struct interactive *ip, char *cp)
 {
     char *sep = strchr(cp, ' ');
-    if (sep != NULL) 
+    if (sep != NULL)
     {
         *sep = 0;
         sep++;
-    } 
+    }
 
     if (ip->ob)
     {
@@ -1154,20 +1205,20 @@ gmcp_input(struct interactive *ip, char *cp)
             push_string(cp, STRING_CSTRING);
 
             struct svalue *payload = (sep != NULL) ? json2val(sep) : NULL;
-            if (payload != NULL) 
+            if (payload != NULL)
             {
                 push_svalue(payload);
                 (void)apply_master_ob(M_INCOMING_GMCP, 3);
                 free_svalue(payload);
-            } 
+            }
             else if ((sep == NULL) || strlen(sep) == 0)
             {
-                (void)apply_master_ob(M_INCOMING_GMCP, 2);  
+                (void)apply_master_ob(M_INCOMING_GMCP, 2);
             }
 
             exception = NULL;
         }
-    } 
+    }
 }
 
 void
@@ -1233,14 +1284,14 @@ mssp_request(struct interactive *ip)
 
                     for (int y = 0; y < val.u.vec->size; y++) {
                         struct svalue *aval = &val.u.vec->item[y];
-                        variable->values[y] = (u_char *)""; 
+                        variable->values[y] = (u_char *)"";
                         if (aval->type == T_STRING) {
                             variable->values[y] = (u_char *)aval->u.string;
                         }
                     }
                 }
 
-                if (variable != NULL) 
+                if (variable != NULL)
                     mssp[mssp_count++] = variable;
             }
         }

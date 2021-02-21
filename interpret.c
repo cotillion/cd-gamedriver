@@ -3138,6 +3138,28 @@ f_query_ip_name(int num_arg)
     f_query_ip_number_name(1, num_arg);
 }
 
+static void
+f_set_ip_number(int num_arg)
+{
+    struct object *ob = (sp - 1)->u.ob;
+    char *ip = sp->u.string;
+
+    push_object(current_object);
+    push_object(ob);
+    push_string(ip, STRING_SSTRING);
+
+    struct svalue *ret = apply_master_ob(M_VALID_SET_IP_NUMBER, 3);
+    if (!ret || ret->type != T_NUMBER || ret->u.number != 0)
+    {
+        set_ip_number(ob, ip);
+    }
+
+    pop_stack();
+    pop_stack();
+    push_number(0);
+}
+
+
 /* ARGSUSED */
 static void
 f_query_ip_ident(int num_arg)
