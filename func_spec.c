@@ -104,8 +104,8 @@ int	pointerp(mixed);
 float	pow(float, float);
 object	present(int|object|string, object *|object default: F_THIS_OBJECT);
 object	previous_object(int default: F_CONST0);
-string	process_string(string, int default: F_CONST0); 
-mixed	process_value(string, int default: F_CONST0); 
+string	process_string(string, int default: F_CONST0);
+mixed	process_value(string, int default: F_CONST0);
 mixed	query_auth(object);
 string	query_host_name();
 int	query_idle(object);
@@ -120,7 +120,7 @@ string	query_trigverb();
 string	query_verb();
 int	random(int, void|int);
 string	read_bytes(string, void|int, void|int);
-string	read_file(string, void|int, void|int); 
+string	read_file(string, void|int, void|int);
 string  readable_string(string);
 mixed reduce(function, mixed, void|mixed);
 string	*regexp(string *, string);
@@ -169,6 +169,7 @@ int	write_file(string, string);
 void    write_socket(string|int);
 void    write_socket_gmcp(string, mixed);
 string  val2json(mixed);
+void    set_ip_number(object, string);
 
 #ifdef WORD_WRAP
 /*
