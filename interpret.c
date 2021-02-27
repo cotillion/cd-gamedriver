@@ -700,27 +700,28 @@ void
 push_control_stack(struct object *ob, struct program *prog, struct function *funp)
 {
     if (csp >= &control_stack[MAX_TRACE-1])
-	error("Too deep recursion.\n");
+	    error("Too deep recursion.\n");
+
     csp++;
     save_control_context(csp);
     csp->funp = funp;	/* Only used for tracebacks */
 #if defined(PROFILE_LPC)
     {
-	double now = current_cpu();
+    	double now = current_cpu();
 
-	if (trace_calls) {
-	    if (csp == control_stack)
-		fprintf(trace_calls_file, "%.3f %.6f\n",
-                        (now - last_execution) * 1000.0, now);
-	    fprintf(trace_calls_file, "%*s%s %s %s()\n",
-		    (int)(csp - control_stack) * 4, "",
-		    ob->name, prog->name, funp ? funp->name : "???");
-	}
-	if (csp != control_stack) {
-	    csp[-1].frame_cpu += now - csp[-1].startcpu;
-	}
-	csp->frame_start = csp->startcpu = now;
-	csp->frame_cpu = 0.0;
+        if (trace_calls) {
+            if (csp == control_stack)
+        	fprintf(trace_calls_file, "%.3f %.6f\n",
+                            (now - last_execution) * 1000.0, now);
+            fprintf(trace_calls_file, "%*s%s %s %s()\n",
+        	    (int)(csp - control_stack) * 4, "",
+        	    ob->name, prog->name, funp ? funp->name : "???");
+        }
+        if (csp != control_stack) {
+            csp[-1].frame_cpu += now - csp[-1].startcpu;
+        }
+        csp->frame_start = csp->startcpu = now;
+        csp->frame_cpu = 0.0;
     }
 #endif
 }
@@ -735,9 +736,9 @@ restore_control_context(struct control_stack *csp1)
     current_object = csp1->ob;
 
     current_prog = csp1->prog;
-    if(current_prog)
+    if (current_prog)
     {
-	pc = current_prog->program + csp1->pc;
+        pc = current_prog->program + csp1->pc;
     }
     previous_ob = csp1->prev_ob;
     fp = csp1->fp;
@@ -922,42 +923,42 @@ push_pop_error_context (int push)
 {
     static struct error_context_stack
     {
-	struct gdexception *exception;
-	struct control_stack *save_csp;
-	struct object *save_command_giver;
-	struct svalue *save_sp;
-	struct error_context_stack *next;
-	struct control_stack cstack;
+    	struct gdexception *exception;
+    	struct control_stack *save_csp;
+    	struct object *save_command_giver;
+    	struct svalue *save_sp;
+    	struct error_context_stack *next;
+    	struct control_stack cstack;
     } *ecsp = 0, *p;
 
     if (push == 1) {
-	/*
-	 * Save some global variables that must be restored separately
-	 * after a longjmp. The stack will have to be manually popped all
-	 * the way.
-	 */
-	p = (struct error_context_stack *)xalloc (sizeof *p);
-	save_control_context(&(p->cstack));
-	p->save_sp = sp;
-	p->save_csp = csp;
-	p->save_command_giver = command_giver;
-	p->exception = exception;
-	p->next = ecsp;
-	ecsp = p;
+        /*
+         * Save some global variables that must be restored separately
+         * after a longjmp. The stack will have to be manually popped all
+         * the way.
+         */
+        p = (struct error_context_stack *)xalloc (sizeof *p);
+        save_control_context(&(p->cstack));
+        p->save_sp = sp;
+        p->save_csp = csp;
+        p->save_command_giver = command_giver;
+        p->exception = exception;
+        p->next = ecsp;
+        ecsp = p;
     } else {
-	p = ecsp;
-	if (p == 0)
-	    fatal("Catch: error context stack underflow\n");
+        p = ecsp;
+        if (p == 0)
+            fatal("Catch: error context stack underflow\n");
 
-	if (push == 0) {
+        if (push == 0) {
 #ifdef DEBUG
 #if 0
-	    if (csp != p->save_csp-1)
-		fatal("Catch: Lost track of csp\n");
+            if (csp != p->save_csp-1)
+        	fatal("Catch: Lost track of csp\n");
 #endif
 #endif
-	    ;
-	} else {
+            ;
+    	} else {
 	    /* push == -1 !
 	     * They did a throw() or error. That means that the control
 	     * stack must be restored manually here.
@@ -967,17 +968,17 @@ push_pop_error_context (int push)
 	    struct program *prog = current_prog;
 	    csp->frame_cpu += (now - csp->startcpu);
 	    for (;csp != p->save_csp; (prog = csp->prog), csp--) {
-		double frame_tot_cpu = now - csp->frame_start;
-		if (prog)
-		    update_prog_profile(prog, now, csp->frame_cpu, frame_tot_cpu);
-		if (csp->funp)
-		    update_func_profile(csp->funp, now, csp->frame_cpu, frame_tot_cpu, 1);
-		if (trace_calls) {
-		    fprintf(trace_calls_file, "%*s--- %.3f / %.3f\n",
-			    (int)(csp - control_stack) * 4, "",
-			    csp->frame_cpu * 1000.0,
-			    frame_tot_cpu * 1000.0);
-		}
+    		double frame_tot_cpu = now - csp->frame_start;
+    		if (prog)
+    		    update_prog_profile(prog, now, csp->frame_cpu, frame_tot_cpu);
+    		if (csp->funp)
+    		    update_func_profile(csp->funp, now, csp->frame_cpu, frame_tot_cpu, 1);
+    		if (trace_calls) {
+    		    fprintf(trace_calls_file, "%*s--- %.3f / %.3f\n",
+    			    (int)(csp - control_stack) * 4, "",
+    			    csp->frame_cpu * 1000.0,
+    			    frame_tot_cpu * 1000.0);
+    		}
 	    }
 	    csp->startcpu = now;
 #else
@@ -986,6 +987,7 @@ push_pop_error_context (int push)
 	    pop_n_elems (sp - p->save_sp);
 	    command_giver = p->save_command_giver;
 	}
+
 	exception = p->exception;
 	ecsp = p->next;
 	restore_control_context(&(p->cstack));
@@ -5150,7 +5152,7 @@ call_var(int num_arg, struct closure *f)
 
 #ifdef FUNCDEBUG
     if (f->magic != FUNMAGIC || f->ref == 0 || f->ref > 100)
-	fatal("Bad closure in call_var\n");
+	    fatal("Bad closure in call_var\n");
 #endif
     efun = -1;
     ob = 0;
@@ -5180,11 +5182,11 @@ call_var(int num_arg, struct closure *f)
 #endif
 #endif
     if (!ob && efun == -1) {
-	error("ob=0 in call_var\n");
+	    error("ob=0 in call_var\n");
     }
 
     if (ob && (ob->flags & O_DESTRUCTED)) {
-	error("Call to function in destructed object\n");
+	    error("Call to function in destructed object\n");
     }
     narg = f->funargs->size;
     if (narg) {
@@ -7154,7 +7156,7 @@ eval_instruction(char *p)
 	    break;
 	case F_END_TRY:
 	    new_pc = pc;
-	    push_pop_error_context(-1);
+	    push_pop_error_context(0);
 	    catch_level--;
 	    pc = new_pc;
 	    return;
@@ -7239,7 +7241,7 @@ eval_instruction(char *p)
 	    assign_svalue(&catch_value, &const1);
 	    break;
 	case F_END_CATCH:
-	    push_pop_error_context(-1);
+	    push_pop_error_context(0);
 	    catch_level--;
 	    push_svalue(&const0);
 	    return;
