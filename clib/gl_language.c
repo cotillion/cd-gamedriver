@@ -29,14 +29,19 @@ char lower(char c)
 static void
 global_article(struct svalue *fp)
 {
-    char    *tmp;
-
-    if (fp[0].type != T_STRING)
+    if (fp->type != T_STRING)
     {
         push_number(0);
-	return;
+	    return;
     }
-    tmp = alloca((strlen(fp[0].u.string) + 2));
+
+    size_t len = strlen(fp->u.string);
+    if (len < 1 || len > 100) {
+        push_string("", STRING_CSTRING);
+        return;
+    }
+
+    char *tmp = alloca(len + 2);
     (void)strcpy(tmp, (char *)(fp[0].u.string));
     (void)strcat(tmp, " ");
     tmp[0] = (char)lower(tmp[0]);
