@@ -3,6 +3,8 @@
 
 #include <setjmp.h>
 
+#include "simulate.h"
+
 #define push_svalue(val) \
     { \
 	if (sp + 1 >= &start_of_stack[EVALUATOR_STACK_SIZE]) \
@@ -147,7 +149,7 @@ extern struct gdexception *exception;
 extern struct svalue const0, const1, constempty;
 
 extern int variable_index_found;
-extern int variable_inherit_found;    
+extern int variable_inherit_found;
 extern int variable_type_mod_found;
 
 extern int function_index_found;
