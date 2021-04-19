@@ -91,6 +91,7 @@ static char *irregular_plurals[][2] = {
     { "calf", "calves" },
     { "carp", "carp" },
     { "census", "censuses" },
+    { "cestus", "cesti" },
     { "chassis", "chassis" },
     { "cherub", "cherubim" },
     { "child", "children" },
@@ -107,6 +108,7 @@ static char *irregular_plurals[][2] = {
     { "diagnosis", "diagnoses" },
     { "die", "dice" },
     { "dwarf", "dwarves" },     /* We use the tolkien plural */
+    { "drow", "drow" },
     { "echo", "echoes" },
     { "elf", "elves" },
     { "elk", "elk" },
