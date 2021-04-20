@@ -1,6 +1,6 @@
 /*
    config.h
-   
+
    Some configuration parameters
 */
 #ifndef __lpc_config_h_
@@ -213,17 +213,17 @@
 /*
  * This is the maximum array size allowed for one single array.
  */
-#define MAX_ARRAY_SIZE 131072 
+#define MAX_ARRAY_SIZE 131072
 
 /*
  * Maximum size of a mapping.
  */
-#define MAX_MAPPING_SIZE 131072 
+#define MAX_MAPPING_SIZE 131072
 
 /*
  * Maximum number of players in the game.
  *
- * This is the absolute maximum, the mudlib will probably set a lower level. 
+ * This is the absolute maximum, the mudlib will probably set a lower level.
  */
 #define MAX_PLAYERS	4000
 
@@ -254,7 +254,7 @@
  * need more, and you will still get good results with a smaller table.
  * THIS IS NOT IMPLEMENTED YET.
  */
-#define	HTABLE_SIZE 262144  
+#define	HTABLE_SIZE 262144
 
 /*
  * Object hash table size.
@@ -351,6 +351,14 @@
  * Rereading the file is done by calling debug("update snoops");
  */
 #define SUPER_SNOOP
+
+/*
+ * DEFAULT_CHARSET
+ *
+ * The charset the server will request that clients use with the
+ * CHARSET telnet option.
+ */
+ #define DEFAULT_CHARSET  "ISO-8859-1"
 
 #endif
 

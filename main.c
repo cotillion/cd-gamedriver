@@ -39,6 +39,7 @@ int warnobsoleteflag = 0;
 char *flag = NULL;
 int driver_mtime;
 char *mudlib_path = MUD_LIB;
+char *default_charset = DEFAULT_CHARSET;
 
 void init_signals(void);
 void create_object(struct object *ob);
@@ -72,7 +73,7 @@ usage(int argc, char **argv)
     fprintf(stderr, "Additional flags:\n");
     fprintf(stderr, " -f <flag>   Flag sent to mudlib before preloading\n");
     fprintf(stderr, " -d <flag>   Set debug flag\n");
-    fprintf(stderr, " -D <define> Add a pre define\n"); 
+    fprintf(stderr, " -D <define> Add a pre define\n");
     fprintf(stderr, " -O          Warn of use of obsolete functions\n");
     fprintf(stderr, " -e          Skip preloading\n");
     fprintf(stderr, " -c          Additional information about file compilation\n");
@@ -106,7 +107,7 @@ parse_args(int argc, char **argv)
 #endif
             break;
         case 'p':
-#ifdef SERVICE_PORT            
+#ifdef SERVICE_PORT
             service_port = atoi(optarg);
 #endif
             break;
@@ -146,12 +147,12 @@ parse_args(int argc, char **argv)
         case '?':
             usage(argc, argv);
             break;
-            
-        }            
-    }    
+
+        }
+    }
 }
 
-int 
+int
 main(int argc, char **argv)
 {
     extern int game_is_being_shut_down;
@@ -165,13 +166,13 @@ main(int argc, char **argv)
     (void)setlinebuf(stdout);
 
     parse_args(argc, argv);
-    
+
     const0.type = T_NUMBER; const0.u.number = 0;
     const1.type = T_NUMBER; const1.u.number = 1;
     constempty.type = T_FUNCTION; constempty.u.func = &funcempty;
     funcempty.funtype = FUN_EMPTY;
     catch_value = const0;
-    
+
     /*
      * Check that the definition of EXTRACT_UCHAR() is correct.
      */
@@ -214,7 +215,7 @@ main(int argc, char **argv)
     {
 	clear_state();
 	add_message("Anomaly in the fabric of world space.\n");
-    } 
+    }
     else
     {
 	exception_frame.e_exception = NULL;
@@ -222,7 +223,7 @@ main(int argc, char **argv)
 	exception = &exception_frame;
 	auto_ob = 0;
 	master_ob = 0;
-	
+
 	if ((auto_ob = load_object("secure/auto", 1, 0, 0)) != NULL)
 	{
 	    add_ref(auto_ob, "main");
@@ -246,18 +247,18 @@ main(int argc, char **argv)
 	}
     }
     exception = NULL;
-    if (auto_ob == 0) 
+    if (auto_ob == 0)
     {
 	(void)fprintf(stderr, "The file secure/auto must be loadable.\n");
 	exit(1);
     }
-    if (master_ob == 0) 
+    if (master_ob == 0)
     {
 	(void)fprintf(stderr, "The file secure/master must be loadable.\n");
 	exit(1);
     }
     set_inc_list(apply_master_ob(M_DEFINE_INCLUDE_DIRS, 0));
-    
+
     {
 	struct svalue* ret1;
 
@@ -295,10 +296,10 @@ main(int argc, char **argv)
     if (ret && ret->type == T_STRING)
     {
 	struct lpc_predef_s *tmp;
-		
+
 	tmp = (struct lpc_predef_s *)
 	    xalloc(sizeof(struct lpc_predef_s));
-	if (!tmp) 
+	if (!tmp)
 	    fatal("xalloc failed\n");
 	tmp->flag = string_copy(ret->u.string);
 	tmp->next = lpc_predefs;
@@ -320,7 +321,7 @@ main(int argc, char **argv)
     init_call_out();
     preload_objects(e_flag);
     (void)apply_master_ob(M_FINAL_BOOT, 0);
-    
+
     mainloop();
 
     return 0;
@@ -366,7 +367,7 @@ debug_message(char *fmt, ...)
     fflush(fp);
 }
 
-void 
+void
 debug_message_svalue(struct svalue *v)
 {
     if (v == 0)

@@ -563,6 +563,9 @@ telnet_get_optp(telnet_t *tp, u_char opt)
         case TELOPT_MSSP:
             return &tp->t_optb[OP_MSSP];
 
+        case TELOPT_CHARSET:
+            return &tp->t_optb[OP_CHARSET];
+
         default:
             return NULL;
     }
@@ -922,6 +925,49 @@ telnet_disable_mssp(telnet_t *tp)
 }
 
 /*
+ * Enable charset negotiation
+ *
+ * The way we do this is actually not a proper negotiation yet.
+ * What we do is send a single charset and hope the client accept it.
+ *
+ * This is done primarily to get mudlet to config the connection correctly.
+ * This should be replaced with the ability to actually convert charsets.
+ */
+void
+telnet_enable_charset(telnet_t *tp)
+{
+    if (nq_avail(tp->t_outq) < 3)
+        return;
+
+    if (NULL == default_charset)
+        return;
+
+    telnet_neg_lenab(tp, TELOPT_CHARSET);
+}
+
+void
+telnet_output_charset(telnet_t *tp)
+{
+    nqueue_t *nq;
+    nq = tp->t_outq;
+
+    if (nq_avail(nq) < (8 + strlen(default_charset)))
+        return;
+
+    nq_putc(nq, IAC);
+    nq_putc(nq, SB);
+    nq_putc(nq, TELOPT_CHARSET);
+    nq_putc(nq, CHARSET_REQUEST);
+
+    nq_putc(nq, ';');
+    nq_puts(nq, (u_char *)default_charset);
+    nq_putc(nq, IAC);
+    nq_putc(nq, SE);
+
+    telnet_enabw(tp);
+}
+
+/*
  * Process IAC WILL <option>.
  */
 static void
@@ -1070,6 +1116,13 @@ telnet_do(telnet_t *tp, u_char opt)
         mssp_request(tp->t_ip);
         return;
     }
+
+    if (opt == TELOPT_CHARSET)
+    {
+        telnet_output_charset(tp);
+        return;
+    }
+
 
     switch (op->o_us)
     {
@@ -1518,6 +1571,7 @@ telnet_accept(void *vp)
     /* Start negotiation of optional features */
     telnet_enable_gmcp(tp);
     telnet_enable_mssp(tp);
+    telnet_enable_charset(tp);
 
     ip = (void *)new_player(tp, &addr, addrlen, local_port);
     if (ip == NULL)

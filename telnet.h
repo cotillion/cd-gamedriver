@@ -59,9 +59,10 @@ typedef struct {
 #define	OP_ECHO			0
 #define	OP_SGA			1
 #define	OP_CDM			2
-#define OP_GMCP         3 
+#define OP_GMCP         3
 #define OP_MSSP         4
-#define OP_SIZE         5
+#define OP_CHARSET      5
+#define OP_SIZE         6
 
 /*
  * Telnet Control Block.
@@ -113,7 +114,7 @@ typedef struct {
 #define	TS_IAC_DO		8
 #define	TS_IAC_DONT		9
 
-
+#define TELOPT_CHARSET  42
 #define TELOPT_MSSP     70
 #define TELOPT_GMCP     201
 #define	TELOPT_CDM		205
@@ -129,6 +130,10 @@ typedef struct {
 
 #define MSSP_VAR        1
 #define MSSP_VAL        2
+
+#define CHARSET_REQUEST     1
+#define CHARSET_ACCEPTED    2
+#define CHARSET_REJECTED    3
 
 void telnet_detach(telnet_t *);
 int  telnet_output(telnet_t *, u_char *);
