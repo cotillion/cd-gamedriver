@@ -189,6 +189,7 @@ swap_objects(struct object *ob1, struct object *ob2)
  *
  */
 char *current_loaded_file = 0;
+struct allocation_pool compilation_pool = EMPTY_ALLOCATION_POOL;
 
 struct object *
 load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
@@ -294,6 +295,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
     free(current_file);
     current_file = 0;
     dump_smart_log();
+
     /* Sorry, can not handle objects without programs yet. */
     if (inherit_file == 0 && (num_parse_error > 0 || prog == 0))
     {
@@ -316,6 +318,9 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
      */
     if (inherit_file)
     {
+        /* Ensure inherit_file memory will be freed */
+        pool_track(&compilation_pool, inherit_file);
+
 	char *tmp = inherit_file;
 
 	if (prog)
@@ -339,20 +344,19 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 		/* NOTREACHED */
 	    }
 	}
+
 	/* Extreme ugliness begins. inherit_file must be 0 when we call
 	   load_object, but tmp is used as a parameter, so we can not free
 	   the string until after the call
 	*/
 	inherit_file = NULL;
-
-	(void)load_object(tmp, 1, 0, depth + 1);
-	free(tmp);
-
+	load_object(tmp, 1, 0, depth + 1);
 	/* Extreme ugliness ends */
 
 	ob = load_object(name, dont_reset, old_ob, depth);
 	return ob;
     }
+
     ob = get_empty_object();
     if (!old_ob)
 	ob->name = string_copy(name);	/* Shared string is no good here */
@@ -377,7 +381,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	    ob->prog->inherit[ob->prog->num_inherited - 1]
 		.variable_index_offset;
 	if (ob->variables)
-	    fatal("Object allready initialized!\n");
+	    fatal("Object already initialized!\n");
 
 	ob->variables = (struct svalue *) xalloc(num_var * sizeof(struct svalue));
 	tot_alloc_variable_size += num_var * sizeof(struct svalue);
@@ -422,6 +426,9 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
 	    ob->prog->flags &= ~PRAGMA_RESIDENT;
     }
 
+    if (!depth) {
+	pool_free(&compilation_pool);
+    }
 
     return ob;
 }
@@ -2517,8 +2524,6 @@ shutdowngame()
     remove_string_hash();
     clear_otable();
     clear_ip_table();
-    if (inherit_file)
-	free(inherit_file);
     inherit_file = NULL;
     (void)apply(NULL, NULL, 0, 0);
     fputc('\n', stderr);

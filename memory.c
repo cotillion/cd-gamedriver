@@ -16,11 +16,13 @@ extern int slow_shut_down_to_do;
 #define INITIAL_POOL    256
 
 /*
- * Allocate a chunk of memory and keep track of it in a pool.
+ * Track the allocation in the pools list
  */
 void *
-pool_alloc(struct allocation_pool *pool, size_t size) 
+pool_track(struct allocation_pool *pool, void *ptr)
 {
+    if (ptr == NULL)
+        return NULL;
 
     if (!pool->size) {
         pool->allocations = malloc(sizeof(void *) * INITIAL_POOL);
@@ -30,7 +32,7 @@ pool_alloc(struct allocation_pool *pool, size_t size)
         }
 
         pool->size = INITIAL_POOL;
-    } 
+    }
 
     if (pool->size == pool->used) {
         size_t new_size = pool->size * 2;
@@ -43,15 +45,28 @@ pool_alloc(struct allocation_pool *pool, size_t size)
         pool->allocations = new_allocations;
     }
 
-    return pool->allocations[pool->used++] = xalloc(size);
-} 
+    return pool->allocations[pool->used++] = ptr;
+}
 
-/* 
- * Clear all allocations in the pool and prepare it for reuse 
+/*
+ * Allocate a chunk of memory and keep track of it in a pool.
+ */
+void *
+pool_alloc(struct allocation_pool *pool, size_t size)
+{
+    void *ptr = xalloc(size);
+    if (ptr != NULL)
+        pool_track(pool, ptr);
+    return ptr;
+}
+
+
+/*
+ * Clear all allocations in the pool and prepare it for reuse
  */
 void
 pool_free(struct allocation_pool *pool) {
-    
+
     if (!pool->size) {
         return;
     }
@@ -70,11 +85,11 @@ pool_free(struct allocation_pool *pool) {
 
 /*
  * xalloc is a malloc wrapper which keeps a pool of 'extra' memory
- 
- * 
+
  *
- */ 
-__attribute__((malloc)) 
+ *
+ */
+__attribute__((malloc))
 void *
 xalloc(size_t size)
 {
