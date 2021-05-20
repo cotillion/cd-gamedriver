@@ -66,11 +66,11 @@ allocate_array(long long nn)
     return p;
 }
 
-void 
+void
 free_vector(struct vector *p)
 {
     int i;
-    
+
     if (!p->ref || --p->ref > 0)
 	return;
 #if 0
@@ -106,7 +106,7 @@ multiply_array(struct vector *vec, long long factor)
     }
 
     if (factor > MAX_ARRAY_SIZE)
-	error("Illegal array size.\n"); 
+	error("Illegal array size.\n");
 
     newsize = size * factor;
     result = allocate_array(newsize);
@@ -134,7 +134,7 @@ explode_string(char *str, char *del)
      */
     if (len == 0)
     {
-	len = strlen(str); 
+	len = strlen(str);
 	ret = allocate_array((int)len);
 	for (num = 0; num < len; num++)
 	{
@@ -154,7 +154,7 @@ explode_string(char *str, char *del)
     /*
      * Skip leading 'del' strings, if any.
      */
-    while(strncmp(str, del, len) == 0) 
+    while(strncmp(str, del, len) == 0)
     {
       str += len;
       if (str[0] == '\0')
@@ -166,14 +166,14 @@ explode_string(char *str, char *del)
      */
     extra = 1;
     num = 0;
-    for (p = str; *p;) 
+    for (p = str; *p;)
     {
-	if (strncmp(p, del, len) == 0) 
+	if (strncmp(p, del, len) == 0)
 	{
 	    num++;
 	    p += len;
 	    extra = 0;
-	} 
+	}
 	else
 	{
 	    p += 1;
@@ -188,13 +188,13 @@ explode_string(char *str, char *del)
     if (extra)
 #endif
 	num++;
-    buff = alloca(strlen(str) + 1);
+    buff = tmpalloc(strlen(str) + 1);
     ret = allocate_array(num);
     beg = str;
     num = 0;
-    for (p = str; *p; ) 
+    for (p = str; *p; )
     {
-	if (strncmp(p, del, len) == 0) 
+	if (strncmp(p, del, len) == 0)
 	{
 	    (void)strncpy(buff, beg, (size_t)(p - beg));
 	    buff[p-beg] = '\0';
@@ -207,8 +207,8 @@ explode_string(char *str, char *del)
 	    num++;
 	    beg = p + len;
 	    p = beg;
-	} 
-	else 
+	}
+	else
 	{
 	    p += 1;
 	}
@@ -237,7 +237,7 @@ implode_string(struct vector *arr, char *del)
 
     size = 0;
     num = 0;
-    for (i=0; i < arr->size; i++) 
+    for (i=0; i < arr->size; i++)
     {
 	if (arr->item[i].type == T_STRING)
 	{
@@ -247,17 +247,17 @@ implode_string(struct vector *arr, char *del)
     }
     if (num == 0)
 	return make_mstring("");
-    
+
     len = strlen(del);
     ret = allocate_mstring(size + (num-1) * len);
     p = ret;
     p[0] = '\0';
     num = 0;
-    for (i = 0; i < arr->size; i++) 
+    for (i = 0; i < arr->size; i++)
     {
-	if (arr->item[i].type == T_STRING) 
+	if (arr->item[i].type == T_STRING)
 	{
-	    if (num > 0) 
+	    if (num > 0)
 	    {
 		(void)strcpy(p, del);
 		p += len;
@@ -271,14 +271,14 @@ implode_string(struct vector *arr, char *del)
 }
 
 struct vector *
-users() 
+users()
 {
     int i;
     struct vector *ret;
-    
+
     if (!num_player)
 	return allocate_array(0);
-    
+
     ret = allocate_array(num_player);
     for (i = 0; i < num_player; i++) {
 	ret->item[i].type = T_OBJECT;
@@ -296,7 +296,7 @@ slice_array(struct vector *p, long long from, long long to)
     struct vector *d;
     long long cnt;
 
-#ifdef NEGATIVE_SLICE_INDEX    
+#ifdef NEGATIVE_SLICE_INDEX
     if (from < 0)
 	from = p->size + from;
 #endif
@@ -311,17 +311,17 @@ slice_array(struct vector *p, long long from, long long to)
     if (to >= p->size)
 	to = p->size - 1;
     if (to < from)
-	return allocate_array(0); 
-    
+	return allocate_array(0);
+
     d = allocate_array(to - from + 1);
-    for (cnt = from; cnt <= to; cnt++) 
+    for (cnt = from; cnt <= to; cnt++)
 	assign_svalue_no_free (&d->item[cnt - from], &p->item[cnt]);
-    
+
     return d;
 }
 
 /* EFUN: filter (array part)
-   
+
    Runs all elements of an array through fun
    and returns an array holding those elements that fun
    returned 1 for.
@@ -332,25 +332,25 @@ filter_arr(struct vector *p, struct closure *fun)
     struct vector *r;
     char *flags;
     int cnt,res;
-    
+
     if (p->size<1)
 	return allocate_array(0);
 
     res = 0;
-    flags = tmpalloc((size_t)p->size + 1); 
+    flags = tmpalloc((size_t)p->size + 1);
     for (cnt = 0; cnt < p->size; cnt++) {
 	push_svalue(&p->item[cnt]);
 	(void)call_var(1, fun);
 	if (sp->type == T_NUMBER && sp->u.number) {
-	    flags[cnt] = 1; 
-	    res++; 
+	    flags[cnt] = 1;
+	    res++;
 	} else
 	    flags[cnt] = 0;
 	pop_stack();
     }
     r = allocate_array(res);
     for (cnt = res = 0; res < r->size && cnt < p->size; cnt++) {
-	if (flags[cnt]) 
+	if (flags[cnt])
 	    assign_svalue_no_free(&r->item[res++], &p->item[cnt]);
     }
 /*    tmpfree(flags); */
@@ -358,11 +358,11 @@ filter_arr(struct vector *p, struct closure *fun)
 }
 
 /* Unique maker
-   
+
    These routines takes an array of objects and calls the function 'func'
    in them. The return values are used to decide which of the objects are
    unique. Then an array on the below form are returned:
-   
+
    ({
    ({Same1:1, Same1:2, Same1:3, .... Same1:N }),
    ({Same2:1, Same2:2, Same2:3, .... Same2:N }),
@@ -373,10 +373,10 @@ filter_arr(struct vector *p, struct closure *fun)
    })
    i.e an array of arrays consisting of lists of objectpointers
    to all the nonunique objects for each unique set of objects.
-   
+
    The basic purpose of this routine is to speed up the preparing of the
    array used for describing.
-   
+
    */
 
 struct unique
@@ -388,19 +388,19 @@ struct unique
     struct unique *next;
 };
 
-static int 
+static int
 put_in(struct unique **ulist, struct svalue *marker, struct svalue *elem)
 {
     struct unique *llink, *slink, *tlink;
     int cnt,fixed;
-    
+
     llink = *ulist;
     cnt = 0; fixed = 0;
-    while (llink) 
+    while (llink)
     {
 	if ((!fixed) && (equal_svalue(marker, &(llink->mark))))
 	{
-	    for (tlink = llink; tlink->same; tlink = tlink->same) 
+	    for (tlink = llink; tlink->same; tlink = tlink->same)
 		(tlink->count)++;
 	    (tlink->count)++;
 	    slink = (struct unique *) tmpalloc(sizeof(struct unique));
@@ -415,7 +415,7 @@ put_in(struct unique **ulist, struct svalue *marker, struct svalue *elem)
 	llink = llink->next;
 	cnt++;
     }
-    if (fixed) 
+    if (fixed)
 	return cnt;
     llink = (struct unique *) tmpalloc(sizeof(struct unique));
     llink->count = 1;
@@ -433,25 +433,25 @@ make_unique(struct vector *arr, struct closure *fun, struct svalue *skipnum)
 {
     struct vector *res, *ret;
     struct unique *head, *nxt, *nxt2;
-    
+
     int cnt, ant, cnt2;
-    
+
     if (arr->size < 1)
 	return allocate_array(0);
 
-    head = 0; 
-    ant = 0; 
+    head = 0;
+    ant = 0;
     INCREF(arr->ref);
-    for(cnt = 0; cnt < arr->size; cnt++) 
+    for(cnt = 0; cnt < arr->size; cnt++)
     {
 	if (arr->item[cnt].type == T_OBJECT)
 	{
             push_svalue(&arr->item[cnt]);
             (void)call_var(1, fun);
 
-	    if ((!sp) || (sp->type != skipnum->type) || !equal_svalue(sp, skipnum)) 
+	    if ((!sp) || (sp->type != skipnum->type) || !equal_svalue(sp, skipnum))
 	    {
-		if (sp) 
+		if (sp)
 		{
 		    ant = put_in(&head, sp, &(arr->item[cnt]));
 		}
@@ -462,7 +462,7 @@ make_unique(struct vector *arr, struct closure *fun, struct svalue *skipnum)
     }
     DECREF(arr->ref);
     ret = allocate_array(ant);
-    
+
     for (cnt = ant - 1; cnt >= 0; cnt--) /* Reverse to compensate put_in */
     {
 	ret->item[cnt].type = T_POINTER;
@@ -470,7 +470,7 @@ make_unique(struct vector *arr, struct closure *fun, struct svalue *skipnum)
 	nxt2 = head;
 	head = head->next;
 	cnt2 = 0;
-	while (nxt2) 
+	while (nxt2)
 	{
 	    assign_svalue_no_free (&res->item[cnt2++], nxt2->val);
 	    free_svalue(&nxt2->mark);
@@ -478,7 +478,7 @@ make_unique(struct vector *arr, struct closure *fun, struct svalue *skipnum)
 /*	    tmpfree((char *) nxt2); */
 	    nxt2 = nxt;
 	}
-	if (!head) 
+	if (!head)
 	    break; /* It shouldn't but, to avoid skydive just in case */
     }
     return ret;
@@ -496,18 +496,18 @@ add_array(struct vector *p, struct vector *r)
 {
     int cnt,res;
     struct vector *d;
-    
+
     d = allocate_array(p->size + r->size);
     res = 0;
-    for (cnt = 0; cnt < p->size; cnt++) 
+    for (cnt = 0; cnt < p->size; cnt++)
     {
 	assign_svalue_no_free (&d->item[res],&p->item[cnt]);
-	res++; 
+	res++;
     }
     for (cnt = 0; cnt < r->size; cnt++)
     {
 	assign_svalue_no_free (&d->item[res],&r->item[cnt]);
-	res++; 
+	res++;
     }
     return d;
 }
@@ -521,18 +521,18 @@ all_inventory(struct object *ob)
     struct vector *d;
     struct object *cur;
     int cnt,res;
-    
+
     cnt = 0;
     for (cur = ob->contains; cur; cur = cur->next_inv)
 	cnt++;
-    
+
     if (!cnt)
 	return allocate_array(0);
 
     d = allocate_array(cnt);
     cur = ob->contains;
-    
-    for (res = 0; res < cnt; res++) 
+
+    for (res = 0; res < cnt; res++)
     {
 	d->item[res].type = T_OBJECT;
 	d->item[res].u.ob = cur;
@@ -567,8 +567,8 @@ map_array (struct vector *arr, struct closure *fun)
 /*
  * deep_inventory()
  *
- * This function returns the recursive inventory of an object. The returned 
- * array of objects is flat, ie there is no structure reflecting the 
+ * This function returns the recursive inventory of an object. The returned
+ * array of objects is flat, ie there is no structure reflecting the
  * internal containment relations.
  *
  */
@@ -645,7 +645,7 @@ match_regexp(struct vector *v, char *pattern)
     return ret;
 }
 
-/* 
+/*
     An attempt at rewrite using mappings
 */
 #define SETARR_SUBTRACT 	1
@@ -659,7 +659,7 @@ set_manipulate_array(struct vector *arr1, struct vector *arr2, int op)
     struct svalue tmp, *v;
     char *flags;
     int cnt, res;
-    
+
     if (arr1->size < 1 || arr2->size < 1)
     {
 	switch (op)
@@ -680,28 +680,28 @@ set_manipulate_array(struct vector *arr1, struct vector *arr2, int op)
 
     res = 0;
 
-    flags = alloca((size_t)arr1->size + 1); 
-    for (cnt = 0; cnt < arr1->size; cnt++) 
+    flags = alloca((size_t)arr1->size + 1);
+    for (cnt = 0; cnt < arr1->size; cnt++)
     {
 	flags[cnt] = 0;
 	v = get_map_lvalue(m, &(arr1->item[cnt]), 0);
 	if (op == SETARR_INTERSECT && v != &const0)
 	{
-	    flags[cnt] = 1; 
-	    res++; 
+	    flags[cnt] = 1;
+	    res++;
 	}
 	else if (op == SETARR_SUBTRACT && v == &const0)
 	{
-	    flags[cnt] = 1; 
-	    res++; 
+	    flags[cnt] = 1;
+	    res++;
 	}
     }
     r = allocate_array(res);
-    if (res) 
+    if (res)
     {
-	for (cnt = res = 0; cnt < arr1->size; cnt++) 
+	for (cnt = res = 0; cnt < arr1->size; cnt++)
 	{
-	    if (flags[cnt]) 
+	    if (flags[cnt])
 		assign_svalue_no_free(&r->item[res++], &arr1->item[cnt]);
 	}
     }

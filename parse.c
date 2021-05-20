@@ -1928,7 +1928,7 @@ process_value(char *str, int other_ob)
     if (!(*str) || (str[0] < 'A') || (str[0] > 'z'))
 	return &const0;
 
-    func = (char *) alloca(strlen(str) + 1);
+    func = (char *) tmpalloc(strlen(str) + 1);
     (void)strcpy(func, str);
 
     arg = strchr(func,'|'); if (arg) { *arg=0; arg++; }

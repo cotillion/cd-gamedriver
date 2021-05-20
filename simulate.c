@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
-#include <memory.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <time.h>
@@ -14,6 +14,8 @@
 
 #include "config.h"
 #include "lint.h"
+#include "master.h"
+#include "memory.h"
 #include "mstring.h"
 #include "stdio.h"
 #include "interpret.h"
@@ -23,7 +25,6 @@
 #include "exec.h"
 #include "comm.h"
 #include "mudstat.h"
-#include "incralloc.h"
 #include "call_out.h"
 #include "main.h"
 #include "comm1.h"
@@ -60,6 +61,8 @@ void tmpclean(void);
 #endif
 char *dump_malloc_data(void);
 void start_new_file (FILE *);
+
+static struct object *object_present2(char *str, struct object *ob);
 
 extern int d_flag, s_flag;
 
@@ -482,7 +485,7 @@ clone_object(char *str1)
 	    new_ob->prog->inherit[ob->prog->num_inherited - 1]
 	    .variable_index_offset;
 	if (new_ob->variables)
-	    fatal("Object allready initialized!\n");
+	    fatal("Object already initialized!\n");
 
 	new_ob->variables = (struct svalue *)
 	    xalloc(num_var * sizeof(struct svalue));
@@ -562,8 +565,6 @@ command_for_object(char *str, struct object *ob)
  * Search the inventory of the second argument 'ob' for instances
  * of the first.
  */
-static struct object *object_present2 (char *, struct object *);
-
 struct object *
 object_present(struct svalue *v, struct svalue *where)
 {
@@ -606,9 +607,7 @@ object_present(struct svalue *v, struct svalue *where)
 	    {
 		if (where->u.vec->item[i].type != T_OBJECT)
 		    continue;
-		if ( (ret =
-		      object_present2(v->u.string,
-				      where->u.vec->item[i].u.ob->contains)) != NULL )
+		if ((ret = object_present2(v->u.string, where->u.vec->item[i].u.ob->contains)) != NULL)
 		    return ret;
 	    }
 	}
@@ -1081,7 +1080,7 @@ get_dir(char *path)
      * writeable copy.
      * The path "" needs 2 bytes to store ".\0".
      */
-    temppath = (char *) alloca(strlen(path) + 2);
+    temppath = (char *) tmpalloc(strlen(path) + 2);
     if (strlen(path)<2) {
 	temppath[0] = path[0] ? path[0] : '.';
 	temppath[1] = '\000';
@@ -1102,7 +1101,7 @@ get_dir(char *path)
     {
 	if (*p == '\0')
 	    return 0;
-	regexp = (char *)alloca(strlen(p)+2);
+	regexp = (char *)tmpalloc(strlen(p)+2);
 	if (p != temppath)
 	{
 	    (void)strcpy(regexp, p + 1);
@@ -1265,24 +1264,28 @@ struct object *find_object_no_create(str)
 struct object *
 find_object2(char *str)
 {
-    register struct object *ob;
-    register int length;
+    struct object *ob;
 
     /* Remove leading '/' if any. */
     while(str[0] == '/')
 	str++;
     /* Truncate possible .c in the object name. */
-    length = strlen(str);
-    while (str[length-2] == '.' && str[length-1] == 'c') {
-	/* A new writreable copy of the name is needed. */
-	char *p;
-	p = (char *)alloca(strlen(str)+1);
-	(void)strcpy(p, str);
-	str = p;
-	str[length-2] = '\0';
-	length -= 2;
+    size_t length = strlen(str);
+    size_t tail = length;
+
+    while (tail >= 2 && str[tail-2] == '.' && str[tail-1] == 'c') {
+        tail -= 2;
     }
-    if ( (ob = lookup_object_hash(str)) != NULL ) {
+
+
+    if (tail != length) {
+	char *p = (char *)tmpalloc(tail + 1);
+	strncpy(p, str, tail + 1);
+	p[tail] = '\0';
+	str = p;
+    }
+
+    if ((ob = lookup_object_hash(str)) != NULL) {
 	return ob;
     }
     return 0;
@@ -2267,8 +2270,7 @@ error(char *fmt, ...)
 
     va_list argp;
     va_start(argp, fmt);
-    (void)vsprintf(emsg_buf + 1, fmt, argp);
-    /* LINTED: expression has null effect */
+    vsnprintf(emsg_buf + 1, sizeof(emsg_buf) - 1, fmt, argp);
     va_end(argp);
 
     emsg_buf[0] = '*';	/* all system errors get a * at the start */
@@ -2790,7 +2792,7 @@ do_rename(char * fr, char *t)
 	return 0;
     if(*to == '\0' && strcmp(t, "/") == 0)
     {
-	to = (char *)alloca(3);
+	to = (char *)tmpalloc(3);
 	(void)strcpy(to, "./");
     }
     strip_trailing_slashes (from);
@@ -2806,7 +2808,7 @@ do_rename(char * fr, char *t)
 	else
 	    cp = from;
 
-	newto = (char *) alloca (strlen (to) + 1 + strlen (cp) + 1);
+	newto = (char *) tmpalloc (strlen (to) + 1 + strlen (cp) + 1);
 	(void)sprintf (newto, "%s/%s", to, cp);
 	return do_move (from, newto);
     }

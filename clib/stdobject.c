@@ -27,7 +27,7 @@ static var obj_no_change = { "obj_no_change", 0 };
 fp[0]: string to be expanded
 fp[1]: target object
 */
-static void 
+static void
 object_check_call(struct svalue *fp)
 {
     extern struct svalue const0;
@@ -96,7 +96,7 @@ object_check_call(struct svalue *fp)
     assign_svalue(&VAR(obj_prev), &const0);
 }
 
-static func func_check_call = 
+static func func_check_call =
 {
     "check_call",
     object_check_call,
@@ -141,18 +141,18 @@ object_query_prop(struct svalue *fp)
     }
     else
 	assign_svalue(&VAR(obj_prev), &const0);
-	
+
 
     if (val->type == T_FUNCTION)
     {
 	fun = val->u.func;
-        
+
         if (!legal_closure(fun))
         {
             push_number(0);
             return;
         }
-        
+
 	(void)call_var(0, fun);
 	assign_svalue(&VAR(obj_prev), &const0);
 	return;
@@ -173,7 +173,7 @@ object_query_prop(struct svalue *fp)
 	else if (p2[2] == '\0')
 	{
 	    size_t len = strlen(p);
-	    p2 = (char *) alloca(len - 1);
+	    p2 = (char *) tmpalloc(len - 1);
 	    (void)strncpy(p2, p, len - 2);
 	    p2[len - 2] = '\0';
 	    ret = process_value(p2, 1);
@@ -200,7 +200,7 @@ object_query_prop(struct svalue *fp)
 }
 
 
-static func func_query_prop = 
+static func func_query_prop =
 {
     "query_prop",
     object_query_prop,
@@ -233,13 +233,13 @@ object_add_prop(struct svalue *fp)
    return;
 }
 
-static func func_add_prop = 
+static func func_add_prop =
 {
     "add_prop",
     object_add_prop,
 };
 
-static func func_change_prop = 
+static func func_change_prop =
 {
     "change_prop",
     object_add_prop,
@@ -264,7 +264,7 @@ static func *(funcs[]) =
 };
 
 
-struct interface stdobject = 
+struct interface stdobject =
 {
     "std/object.c",
     vars,

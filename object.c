@@ -58,7 +58,7 @@ add_strbuf(struct savebuf *sbuf, char *str)
 	fwrite(str, len, 1, sbuf->f);
 	return;
     }
-    
+
     if (sbuf->size + len + 1 > sbuf->max_size)
     {
 	char *nbuf;
@@ -84,7 +84,7 @@ save_string(struct savebuf *f, char *s)
     static char buf[2];
 
     buf[1] = '\0';
-    
+
     add_strbuf(f, "\"");
     while (*s)
     {
@@ -107,13 +107,13 @@ save_string(struct savebuf *f, char *s)
 	s++;
     }
     add_strbuf(f, "\"");
-    
+
 }
 
 /*
  * Encode an array of elements.
  */
-static void 
+static void
 save_array(struct savebuf *f, struct vector *v)
 {
     int i;
@@ -127,7 +127,7 @@ save_array(struct savebuf *f, struct vector *v)
     add_strbuf(f,"})");
 }
 
-static void 
+static void
 save_mapping(struct savebuf *f, struct mapping *m)
 {
     int i;
@@ -220,14 +220,14 @@ void save_object(struct object *ob, char *file)
 	error("Illegal use of save_object()\n");
 
     len = strlen(file);
-    name = alloca(len + 2 + 1);
+    name = tmpalloc(len + 2 + 1);
     (void)strcpy(name, file);
     (void)strcat(name, ".o");
     /*
      * Write the save-files to different directories, just in case
      * they are on different file systems.
      */
-    tmp_name = alloca(len + 2 + 4 + 1);
+    tmp_name = tmpalloc(len + 2 + 4 + 1);
     (void)sprintf(tmp_name, "%s.tmp", name);
     f = fopen(tmp_name, "w");
     if (s_flag)
@@ -236,12 +236,12 @@ void save_object(struct object *ob, char *file)
 	error("Could not open %s for a save.\n", tmp_name);
     }
     failed = 0;
-    
+
     sbuf.size = 0;
     sbuf.max_size = 80;
     sbuf.buf = xalloc(80);
     sbuf.f = f;
-    
+
     for (j = 0; j < (int)ob->prog->num_inherited; j++)
     {
 	struct program *prog = ob->prog->inherit[j].prog;
@@ -251,7 +251,7 @@ void save_object(struct object *ob, char *file)
 	for (i = 0; i < (int)prog->num_variables; i++) {
 	    struct svalue *v =
 		&ob->variables[i + ob->prog->inherit[j].variable_index_offset];
-	    
+
 	    if (ob->prog->inherit[j].prog->variable_names[i].type & TYPE_MOD_STATIC)
 		continue;
 	    if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
@@ -291,14 +291,14 @@ m_save_object(struct object *ob)
     int i, j;
     struct mapping *ret;
     struct svalue s = const0;
-    
+
     if (ob->flags & O_DESTRUCTED)
 	return allocate_map(0);	/* XXX is this right /LA */
 
     ret = allocate_map((short)(ob->prog->num_variables +
 			       ob->prog->inherit[ob->prog->num_inherited - 1].
 			       variable_index_offset));
-    
+
     for (j = 0; j < (int)ob->prog->num_inherited; j++)
     {
 	struct program *prog = ob->prog->inherit[j].prog;
@@ -310,7 +310,7 @@ m_save_object(struct object *ob)
 	    struct svalue *v =
 		&ob->variables[i + ob->prog->inherit[j].
 			       variable_index_offset];
-	    
+
 	    if (prog->variable_names[i].type & TYPE_MOD_STATIC)
 		continue;
 	    free_svalue(&s);
@@ -320,12 +320,12 @@ m_save_object(struct object *ob)
 	    assign_svalue(get_map_lvalue(ret, &s, 1), v);
 	}
     }
-    
+
     free_svalue(&s);
     return ret;
 }
 
-void 
+void
 save_map(struct object *ob, struct mapping *map, char *file)
 {
     char *name, *tmp_name;
@@ -353,14 +353,14 @@ save_map(struct object *ob, struct mapping *map, char *file)
     }
 
     len = strlen(file);
-    name = alloca(len + 2 + 1);
+    name = tmpalloc(len + 2 + 1);
     (void)strcpy(name, file);
     (void)strcat(name, ".o");
     /*
      * Write the save-files to different directories, just in case
      * they are on different file systems.
      */
-    tmp_name = alloca(len + 2 + 4 + 1);
+    tmp_name = tmpalloc(len + 2 + 4 + 1);
     (void)sprintf(tmp_name, "%s.tmp", name);
     f = fopen(tmp_name, "w");
     if (s_flag)
@@ -369,18 +369,18 @@ save_map(struct object *ob, struct mapping *map, char *file)
 	error("Could not open %s for a save.\n", tmp_name);
     }
     failed = 0;
-    
+
     sbuf.size = 0;
     sbuf.max_size = 80;
     sbuf.buf = xalloc(80);
     sbuf.f = f;
-    
+
     for (j = 0; j < map->size; j++)
     {
 	for (i = map->pairs[j]; i; i = i->next) {
 	    struct svalue *v =
 		&i->val;
-	    
+
 	    if (i->arg.type != T_STRING)
 		continue;
 	    if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
@@ -414,13 +414,13 @@ char *
 valtostr(struct svalue *sval)
 {
     struct savebuf sbuf;
-   
+
     sbuf.buf = xalloc(80);
     sbuf.size = 0;
     sbuf.max_size = 80;
     sbuf.buf[0] = 0;
     sbuf.f = NULL;
-    
+
     save_one(&sbuf, sval);
 
     return sbuf.buf;
@@ -436,7 +436,7 @@ restore_array(char **str)
     int nmax = BIG;
     int i, k;
 
-    tmp = (struct svalue *)alloca(nmax * sizeof(struct svalue));
+    tmp = (struct svalue *)tmpalloc(nmax * sizeof(struct svalue));
     for(k = 0; k < nmax; k++)
 	tmp[k] = const0;
     i = 0;
@@ -455,14 +455,14 @@ restore_array(char **str)
 	    }
 	    else
 		break;
-	} 
+	}
 	else
 	{
 	    if (i >= nmax)
 	    {
 		struct svalue *ntmp;
 
-		ntmp = (struct svalue *)alloca(nmax * 2 * sizeof(struct svalue));
+		ntmp = (struct svalue *)tmpalloc(nmax * 2 * sizeof(struct svalue));
 		(void)memcpy((char *)ntmp, (char *)tmp, sizeof(struct svalue) * nmax);
 		tmp = ntmp;
 		nmax *= 2;
@@ -545,7 +545,7 @@ restore_one(struct svalue *v, char **msp)
 		v->u.map = map;
 	    }
 	    break;
-	    
+
 	case '{':
 	    {
 		struct vector *vec;
@@ -559,13 +559,13 @@ restore_one(struct svalue *v, char **msp)
 		v->u.vec = vec;
 	    }
 	    break;
-	    
+
 	default:
 	    return 0;
 	}
 	break;
     case '"':
-	for (p = s + 1, q = s; *p && *p != '"'; p++) 
+	for (p = s + 1, q = s; *p && *p != '"'; p++)
 	{
 	    if (*p == '\\') {
 		switch (*++p) {
@@ -652,7 +652,7 @@ restore_one(struct svalue *v, char **msp)
     return 1;
 }
 
-int 
+int
 restore_object(struct object *ob, char *file)
 {
     char *name, var[100], *buff, *space;
@@ -672,7 +672,7 @@ restore_object(struct object *ob, char *file)
 	error("Illegal use of restore_object()\n");
 
     len = strlen(file);
-    name = alloca(len + 3);
+    name = tmpalloc(len + 3);
     (void)strcpy(name, file);
     if (name[len-2] == '.' && name[len-1] == 'c')
 	name[len-1] = 'o';
@@ -682,7 +682,7 @@ restore_object(struct object *ob, char *file)
     if (s_flag)
 	num_fileread++;
     if (!f || fstat(fileno(f), &st) == -1) {
-	if (f) 
+	if (f)
 	    (void)fclose(f);
 	return 0;
     }
@@ -692,7 +692,7 @@ restore_object(struct object *ob, char *file)
     }
     buff = xalloc((size_t)st.st_size + 1);
     current_object = ob;
-    
+
     for (;;) {
 	struct svalue *v;
 
@@ -725,7 +725,7 @@ restore_object(struct object *ob, char *file)
     (void)fclose(f);
     return 1;
 }
-int 
+int
 m_restore_object(struct object *ob, struct mapping *map)
 {
     int p;
@@ -734,14 +734,14 @@ m_restore_object(struct object *ob, struct mapping *map)
 
     if (ob->flags & O_DESTRUCTED)
 	return 0;
-    
+
     for (i = 0; i < map->size; i++)
     {
 	for (j = map->pairs[i]; j ; j = j->next)
 	{
 	    if (j->arg.type != T_STRING)
 		continue;
-	    
+
 	    if ((p = find_status(ob->prog, j->arg.u.string, TYPE_MOD_STATIC))
 		== -1)
 		continue;
@@ -749,11 +749,11 @@ m_restore_object(struct object *ob, struct mapping *map)
 	    assign_svalue(&ob->variables[p], &j->val);
 	}
     }
-    
+
     return 1;
 }
 
-void 
+void
 restore_map(struct object *ob, struct mapping *map, char *file)
 {
     char *name, *buff, *space;
@@ -772,7 +772,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
 	error("Illegal use of restore_map()\n");
 
     len = strlen(file);
-    name = alloca(len + 2 + 1);
+    name = tmpalloc(len + 2 + 1);
     (void)strcpy(name, file);
     if (name[len-2] == '.' && name[len-1] == 'c')
 	name[len-1] = 'o';
@@ -782,7 +782,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
     if (s_flag)
 	num_fileread++;
     if (!f || fstat(fileno(f), &st) == -1) {
-	if (f) 
+	if (f)
 	    (void)fclose(f);
 	return;
     }
@@ -791,7 +791,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
 	return;
     }
     buff = xalloc((size_t)st.st_size + 1);
-    
+
     for (;;) {
 	struct svalue v;
 
@@ -809,7 +809,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
 	}
 	*space++ = '\0';
 	v.u.string = make_sstring(buff);
-	
+
 	if (!restore_one(get_map_lvalue(map,&v,1), &space)) {
 	    (void)fclose(f);
 	    free(buff);
@@ -823,7 +823,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
     (void)fclose(f);
 }
 
-void 
+void
 free_object(struct object *ob, char *from)
 {
     if (d_flag & DEBUG_OB_REF)
@@ -856,7 +856,7 @@ free_object(struct object *ob, char *from)
     tot_alloc_object_size -= sizeof (struct object);
 }
 
-void 
+void
 add_ref(struct object *ob, char *from)
 {
     INCREF(ob->ref);
@@ -976,7 +976,7 @@ remove_all_objects()
 /*
  * For debugging purposes.
  */
-void 
+void
 check_ob_ref(struct object *ob, char *from)
 {
     struct object *o;
@@ -1069,7 +1069,7 @@ find_living_objects(char *str)
     return ret;
 }
 
-void 
+void
 set_living_name(struct object *ob, char *str)
 {
     struct object **hl;
@@ -1098,7 +1098,7 @@ set_living_name(struct object *ob, char *str)
     return;
 }
 
-void 
+void
 remove_living_name(struct object *ob)
 {
     struct object **hl;
@@ -1131,7 +1131,7 @@ stat_living_objects()
     return tmp;
 }
 
-void 
+void
 reference_prog (struct program *progp, char *from)
 {
     INCREF(progp->ref);
@@ -1164,12 +1164,12 @@ void register_program(struct program *prog)
  * as we want to be able to read the program in again from the swap area.
  * That means that strings are not swapped.
  */
-void 
+void
 free_prog(struct program *progp)
 {
     extern int total_program_size;
     int i;
-    
+
     if (d_flag & DEBUG_PROG_REF)
 	(void)printf("free_prog: %s\n", progp->name);
     if (!progp->ref || --progp->ref > 0)
@@ -1179,17 +1179,17 @@ free_prog(struct program *progp)
 
     if (progp == prog_list)
 	prog_list = progp->next_all;
-    
+
     progp->prev_all->next_all = progp->next_all;
     progp->next_all->prev_all = progp->prev_all;
     if (progp->next_all == progp)
 	prog_list = 0;
-    
+
     total_program_size -= progp->exec_size;
-    
+
     total_prog_block_size -= progp->total_size;
     total_num_prog_blocks--;
-    
+
     /* Free all function names. */
     for (i=0; i < (int)progp->num_functions; i++)
 	if (progp->functions[i].name)
@@ -1213,7 +1213,7 @@ free_prog(struct program *progp)
     free((char *)progp);
 }
 
-void 
+void
 create_object(struct object *ob)
 {
     int i;
@@ -1241,7 +1241,7 @@ create_object(struct object *ob)
 	}
     }
 }
-void 
+void
 recreate_object(struct object *ob, struct object *old_ob)
 {
     int i;

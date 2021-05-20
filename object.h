@@ -9,8 +9,10 @@
  *		for a number of reset periods.
  */
 #include "config.h"
-
 #include "interpret.h"
+
+#ifndef _OBJECT_H
+#define _OBJECT_H
 
 #define O_CREATED		0x02  /* Has 'create()' been called */
 #define O_ENABLE_COMMANDS	0x04  /* Can it execute commands ? */
@@ -86,3 +88,4 @@ int restore_one(struct svalue *, char **);
 void restore_map(struct object *, struct mapping *, char *);
 void create_object(struct object *);
 void recreate_object(struct object *, struct object *);
+#endif
