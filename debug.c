@@ -165,7 +165,7 @@ debug_command(char *debcmd, int argc, struct svalue *argv)
 	return &retval;
     case 1: /* malloc */
 	retval.type = T_STRING;
-	retval.string_type = STRING_MSTRING;
+	retval.string_type = STRING_SSTRING;
         char *data = dump_malloc_data();
 	retval.u.string = make_sstring(data);
         free(data);
