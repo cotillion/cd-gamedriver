@@ -1844,13 +1844,14 @@ handle_define(char *yyt)
 		lexerror("Macro text too long");
 		return;
 	    }
-	    if (!*p && p[-2] == '\\')
+	    if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
 	    {
 		q -= 2;
 		refill();
 		p = yytext;
 	    }
 	}
+
 	*--q = 0;
 	add_define(namebuf, arg, mtext);
     }
@@ -1866,13 +1867,14 @@ handle_define(char *yyt)
 		lexerror("Macro text too long");
 		return;
 	    }
-	    if (!*p && p[-2] == '\\')
+	    if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
 	    {
 		q -= 2;
 		refill();
 		p = yytext;
 	    }
 	}
+
 	*--q = 0;
 	add_define(namebuf, -1, mtext);
     }
