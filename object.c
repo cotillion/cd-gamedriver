@@ -436,7 +436,7 @@ restore_array(char **str)
     int nmax = BIG;
     int i, k;
 
-    tmp = (struct svalue *)tmpalloc(nmax * sizeof(struct svalue));
+    tmp = (struct svalue *)xalloc(nmax * sizeof(struct svalue));
     for(k = 0; k < nmax; k++)
 	tmp[k] = const0;
     i = 0;
@@ -451,6 +451,7 @@ restore_array(char **str)
 		++*str;
 		v = allocate_array(i);
 		(void)memcpy((char *)&v->item[0], (char *)tmp, sizeof(struct svalue) * i);
+		free(tmp);
 		return v;
 	    }
 	    else
@@ -460,10 +461,9 @@ restore_array(char **str)
 	{
 	    if (i >= nmax)
 	    {
-		struct svalue *ntmp;
-
-		ntmp = (struct svalue *)tmpalloc(nmax * 2 * sizeof(struct svalue));
+		struct svalue *ntmp = (struct svalue *)xalloc(nmax * 2 * sizeof(struct svalue));
 		(void)memcpy((char *)ntmp, (char *)tmp, sizeof(struct svalue) * nmax);
+		free(tmp);
 		tmp = ntmp;
 		nmax *= 2;
 		for(k = i; k < nmax; k++)
@@ -474,9 +474,10 @@ restore_array(char **str)
 	    if (*(*str)++ != ',')
 		break;
 	}
-    }
-    for (i--; i >= 0; i--)
-	free_svalue(&(tmp[i]));
+	}
+	for (i--; i >= 0; i--)
+		free_svalue(&(tmp[i]));
+	free(tmp);
     return 0;
 }
 
