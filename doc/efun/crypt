@@ -1,28 +1,31 @@
 NAME
-	crypt - encrypt a string
+	crypt - hash a password string
 
 SYNOPSIS
-	string crypt(string data, string salt|int random)
+	string crypt(string data, string salt, int generate|void)
 
 DESCRIPTION
 	This function encrypts the given `data' using the given encryption
-	`salt'. If the the second argument is given as an integer, the
-	encryption is done with a random salt.
+	`salt'. By default a number of random salt chars will be appended to
+        the provided salt. This behaviour can be configured by providing the
+        optional third argument with the number of chars to append.
 
-        If the the OS supports it other encryption modes than the standard
-        DES are available.
+        Which hash methods are available depends on the underlying OS.
 
-        ID  -  Method        
+        ID  -  Method
         1   | MD5
         2a  | Blowfish (not in mainline glibc; added in some
             | Linux distributions)
 
         5   | SHA-256 (since glibc 2.7)
         6   | SHA-512 (since glibc 2.7)
-
-        To use these methods provide a salt of the format $<id>$<salt>$.
-        For a random salt to be used use the form $<id>$
+NOTE
+        Access to this should be restricted through the valid_crypt callback
+        in the master object as some methods have a very long execute time.
 
 EXAMPLES
-        crypt("foo", "$1$")  - Will return the foo encrypted with a
-                               random salt value using MD5
+        crypt("foo", "$1$")  - Will return the foo hashed with a random salt
+                               value using the MD5 algorithm (not recommended)
+
+        crypt("foo", "$2b$06$", 22) - Will hash foo with bcrypt with 22 chars of
+                                      salt

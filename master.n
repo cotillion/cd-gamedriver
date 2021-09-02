@@ -52,6 +52,7 @@ runtime_error
 #######
 query_allow_shadow
 #valid_compile_path
+valid_crypt
 valid_debug
 valid_set_auth
 valid_write

@@ -4787,7 +4787,7 @@ f_ed(int num_arg)
 }
 
 static char *
-build_salt(int length)
+build_salt(size_t length)
 {
     char *str;
     int i;
@@ -4795,56 +4795,81 @@ build_salt(int length)
 
     str = xalloc(length + 1);
     for (i = 0; i < length; i++)
-        str[i] = choise[random_number((int)strlen(choise))];
+        str[i] = choise[random_number((long long)strlen(choise))];
 
-    if (length > 0)
-        str[length] = '\0';
-
+    str[length] = '\0';
     return str;
 }
 
-#define MAX_SALT_LENGTH 16
+#define MAX_SALT_LENGTH 1024
 
 /* ARGSUSED */
 static void
 f_crypt(int num_arg)
 {
-    char *salt;
-    char *res;
-    int i, count = 0;
+    char *salt = NULL;
+    long long generate_salt = 16;
+    struct svalue *arg = sp - num_arg + 1;
 
-    if (sp->type == T_STRING && strlen(sp->u.string) >= 2)
-    {
-        /* If the string matches. $<id>$ then we add a salt.
-         * If it's $<id>$<salt>$ salt we don't. */
-        for (i = 0; i < strlen(sp->u.string); i++)
-            if (sp->u.string[i] == '$')
-                count++;
+    push_object(current_object);
+    push_svalue(&arg[1]);
 
-        if (count > 1 && count < 3)
-        {
-            salt = xalloc(strlen(sp->u.string) + MAX_SALT_LENGTH + 2);
-            strcpy(salt, sp->u.string);
-            res = build_salt(MAX_SALT_LENGTH);
-            strcat(salt, res);
-            strcat(salt, "$");
-            free(res);
-        } else {
-            salt = xalloc(strlen(sp->u.string) + 1);
-            strcpy(salt, sp->u.string);
-        }
-    } else {
-        salt = build_salt(2);
+	struct svalue *ret = apply_master_ob(M_VALID_CRYPT, 2);
+	if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+	{
+        error("Access to crypt() was denied");
+	    return;
+	}
+
+    if (num_arg > 2 && arg[2].type == T_NUMBER)
+        generate_salt = sp->u.number;
+
+    if (generate_salt < 0 || generate_salt > MAX_SALT_LENGTH) {
+        error("Too much salt requested from crypt.\n");
     }
 
-    char *encrypted = crypt((sp-1)->u.string, salt);
+    if (arg[1].type == T_STRING && strlen(arg[1].u.string) > 0)
+    {
+        salt = xalloc(strlen(arg[1].u.string) + (size_t)generate_salt + 2);
+        strcpy(salt, arg[1].u.string);
+
+        char *generated = build_salt((size_t)generate_salt);
+        strcat(salt, generated);
+        free(generated);
+    } else {
+        salt = build_salt((size_t)generate_salt);
+    }
+
+    errno = 0;
+    char *encrypted = crypt(arg[0].u.string, salt);
+
     free(salt);
     pop_n_elems(2);
 
-    if (NULL != encrypted)
-        push_string(encrypted, STRING_MSTRING);
-    else
-        error("Invalid salt\n");
+    /* Apply some extra eval cost */
+    eval_cost += EXTRA_COST;
+
+    /* Some crypt versions return NULL without setting errno */
+    if (NULL == encrypted && !errno)
+        errno = EINVAL;
+
+    if (errno) {
+        switch (errno) {
+            case EINVAL:
+                error("Salt is invalid, or requests a hash method that is unsupported.");
+            case ERANGE:
+                error("Data to crypt is too long.");
+            case ENOMEM:
+                error("Failed to allocate internal scratch memory for crypt.");
+            case ENOSYS:
+            case ENOTSUP:
+                error("The requested hash method is not supported by crypt.");
+            default:
+                error("An undefined error occured in crypt.");
+        }
+    }
+
+    push_string(encrypted, STRING_MSTRING);
 }
 
 /* ARGSUSED */

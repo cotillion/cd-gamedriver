@@ -36,7 +36,7 @@ int	command(string);
 mixed  *commands(object|int default: F_THIS_OBJECT);
 float	cos(float);
 float	cosh(float);
-string	crypt(string, string|int);
+string	crypt(string, string|int, void|int);
 string	ctime(int default: F_TIME);
 mixed	debug(string, ...);
 object	*deep_inventory(int|object default: F_THIS_OBJECT);
