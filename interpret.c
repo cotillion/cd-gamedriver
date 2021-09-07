@@ -4844,7 +4844,7 @@ f_crypt(int num_arg)
     char *encrypted = crypt(arg[0].u.string, salt);
 
     free(salt);
-    pop_n_elems(2);
+    pop_n_elems(num_arg);
 
     /* Apply some extra eval cost */
     eval_cost += EXTRA_COST;
