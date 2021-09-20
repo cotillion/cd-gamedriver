@@ -39,7 +39,6 @@ int pragma_resident;
 
 extern void smart_log (char *, int, char *);
 struct lpc_predef_s *lpc_predefs=NULL;
-static int number (long long), real (double), ident (char *), string (char *);
 static void handle_define (char *);
 static void free_defines (void), add_define (char *, int, char *);
 static int expand_define (void);
@@ -55,10 +54,18 @@ static void skip_comment (void);
 static void skip_comment2 (void);
 static INLINE int mygetc (void);
 
+static int number (const long long);
+static int real (const double);
+static int ident (const char *);
+static int string (const char *);
+
 static FILE *yyin;
 static int lex_fatal;
 static char **inc_list;
 static int inc_list_size;
+
+
+struct allocation_pool lex_allocations = EMPTY_ALLOCATION_POOL;
 
 
 #define EXPANDMAX 25000
@@ -70,7 +77,7 @@ extern int s_flag;
 extern int tolower (int);
 #endif
 
-void yyerror(char *), error(char *, ...);
+void yyerror(char *);
 int yylex (void);
 
 #define MAXLINE 1024
@@ -1365,7 +1372,7 @@ yylex(void)
 	    /*
 	     * concatenate string constants
 	     */
-	    keep3.lval.string = tmpalloc(strlen(keep4.lval.string) +
+	    keep3.lval.string = pool_alloc(&lex_allocations, strlen(keep4.lval.string) +
 					 strlen(keep2.lval.string) + 1);
 	    (void)strcpy(keep3.lval.string, keep4.lval.string);
 	    (void)strcat(keep3.lval.string, keep2.lval.string);
@@ -1380,23 +1387,24 @@ yylex(void)
 extern YYSTYPE yylval;
 
 static int
-ident(char *str)
+ident(const char *str)
 {
-    yylval.string = tmpstring_copy(str);
+    char *xp = pool_alloc(&lex_allocations, strlen(str) + 1);
+    strcpy(xp, str);
+    yylval.string = xp;
     return F_IDENTIFIER;
 }
 
 static int
-string(char *str)
+string(const char *str)
 {
-    char *p;
-
     if (!*str)
     {
 	str = "\"\"";
     }
-    p = tmpalloc(strlen(str) + 1);
+    char *p = pool_alloc(&lex_allocations, strlen(str) + 1);
     yylval.string = p;
+
     for (str++; str[0] && str[1] ; str++, p++)
     {
 	/* Copy the similar one to here /JH */
@@ -1428,14 +1436,14 @@ string(char *str)
 }
 
 static int
-number(long long i)
+number(const long long i)
 {
     yylval.number = i;
     return F_NUMBER;
 }
 
 static int
-real(double f)
+real(const double f)
 {
     yylval.real = f;
     return F_FLOATC;
@@ -1470,6 +1478,7 @@ end_new_file(void)
 	free((char *)p);
     }
     free_defines();
+    pool_free(&lex_allocations);
 }
 
 /*
