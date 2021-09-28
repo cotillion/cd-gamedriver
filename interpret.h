@@ -1,8 +1,10 @@
 #ifndef INTERPRET_H
 #define INTERPRET_H
 
+#include <stddef.h>
 #include <setjmp.h>
 
+#include "config.h"
 #include "simulate.h"
 
 #define push_svalue(val) \
@@ -64,8 +66,6 @@ struct vector {
 #define ALLOC_VECTOR(nelem) \
     (struct vector *)xalloc(sizeof (struct vector) + \
 			    sizeof(struct svalue) * (nelem - 1))
-
-struct lnode_def;
 
 /*
  * Function stuff.
@@ -161,13 +161,21 @@ extern struct control_stack *csp;	/* Points to last element pushed */
 #define INCREF(x) if (x) x++
 #define DECREF(x) if (x) x--
 
+void bad_arg(int arg, int instr, struct svalue *sv);
+void bad_arg_op(int instr, struct svalue *arg1, struct svalue *arg2);
 void push_pop_error_context(int push);
 void pop_stack(void);
 int search_for_function(char *name, struct program *prog);
 void free_closure(struct closure *f);
 void push_control_stack(struct object*, struct program *, struct function *funp);
 void pop_control_stack(void);
+void push_float (double d);
 void push_vector(struct vector*i, bool_t);
+void push_string (char *, int);
+void push_mstring (char *);
+void push_number (long long);
+void push_object (struct object *);
+
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
 void clear_closure_cache(void);
 #endif

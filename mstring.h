@@ -30,12 +30,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
+#include <stddef.h>
+
 struct mstring_hdr {
 #ifdef DEBUG
 	u_long	magic;
 #endif
-	u_int	length;
-	u_short	count;
+	uint32_t	length;
+	uint16_t	count;
 };
 
 #define	mstring_header \
@@ -65,11 +68,11 @@ struct sstring_hdr {
 #ifdef DEBUG
 	u_long	magic;
 #endif
-	char	*prev;
-	char	*next;
-	u_int	length;
-	u_short	count;
-	unsigned int	hash;
+	char		*prev;
+	char		*next;
+	uint32_t	length;
+	uint16_t	count;
+	uint32_t	hash;
 };
 
 #define	sstring_header \
