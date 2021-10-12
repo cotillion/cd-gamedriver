@@ -46,7 +46,7 @@
 /* %expect 2 */ /* You can uncomment previous statement if you use bison */
 %{
 /* has to be here so that F_EXT is defined */
-static void store_reloc_data (char, unsigned short, char *name, int, char);
+static void store_reloc_data (char, offset_t, char *name, int, char);
 static void ins_f_byte (unsigned int);
 static void start_block(void);
 static void end_block(void);
@@ -208,17 +208,13 @@ def: type optional_star fun_identifier
 
 	    ins_f_byte(F_JUMP);
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
+
 	    {
-	        int i;
-	        unsigned short j;
-		i = pop_address();
+		offset_t i = pop_address();
 		push_address();
 		dump_init_arg_table($5);
-		j = mem_block[A_PROGRAM].current_size;
-		upd_short(i, (short)mem_block[A_PROGRAM].current_size);
-		((char *)mem_block[A_PROGRAM].block)[i] = ((char *)&j)[0];
-		((char *)mem_block[A_PROGRAM].block)[i + 1] = ((char *)&j)[1];
+		upd_address(i, mem_block[A_PROGRAM].current_size);
 		define_new_function($3, (char)$5, 0, 0,
 				    NAME_PROTOTYPE | $1 | $2 | true_varargs,
 				    (char)first_default_arg);
@@ -241,7 +237,7 @@ def: type optional_star fun_identifier
 				    pop_address(), $1 | $2 | true_varargs,
 				    (char)first_default_arg);
 		ins_f_byte(F_CONST0);
-		set_label(return_label, (short)mem_block[A_PROGRAM].current_size);
+		set_label(return_label, mem_block[A_PROGRAM].current_size);
 		ins_f_byte(F_RETURN);
 		(void)pop_address(); /* Not used here */
 	    }
@@ -501,7 +497,7 @@ try: F_TRY
         {
 	    ins_f_byte(F_TRY);
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
 	    ins_byte(0);
 	    try_level++;
 	} statement F_CATCH {start_block();} '(' basic_type new_local_name2 ')'
@@ -511,15 +507,13 @@ try: F_TRY
 	    ins_f_byte(F_END_TRY);
 	    ins_f_byte(F_JUMP);
 	    push_address();
-	    ins_short(0);
-	    upd_short(try_start,
-		      (short)mem_block[A_PROGRAM].current_size);
-	    upd_byte(try_start + 2, $8);
+	    ins_address(0);
+	    upd_address(try_start, mem_block[A_PROGRAM].current_size);
+	    upd_byte(try_start + 4, $8);
 	} statement
 	{
 	    end_block();
-	    upd_short(pop_address(),
-		      (short)mem_block[A_PROGRAM].current_size);
+	    upd_address(pop_address(), mem_block[A_PROGRAM].current_size);
 	};
 
 
@@ -530,7 +524,7 @@ while:  {   push_explicit(current_continue_address);
 	    current_continue_address = make_label();
 	    current_break_address = make_label();
 	    continue_try_level = break_try_level = try_level;
-	    set_label(current_continue_address, (short)mem_block[A_PROGRAM].current_size);
+	    set_label(current_continue_address, mem_block[A_PROGRAM].current_size);
 	} F_WHILE '(' comma_expr ')'
 	{
 	    ins_f_byte(F_JUMP_WHEN_ZERO);
@@ -542,7 +536,7 @@ while:  {   push_explicit(current_continue_address);
 	  ins_f_byte(F_JUMP);
 	  add_jump();
 	  ins_label(current_continue_address);
-	  set_label(current_break_address, (short)mem_block[A_PROGRAM].current_size);
+	  set_label(current_break_address, mem_block[A_PROGRAM].current_size);
 	  break_try_level = pop_address();
 	  current_break_address = pop_address();
 	  continue_try_level = pop_address();
@@ -561,14 +555,14 @@ do: {
     }
     F_DO statement
     {
-	set_label(current_continue_address, (short)mem_block[A_PROGRAM].current_size);
+	set_label(current_continue_address, mem_block[A_PROGRAM].current_size);
     }
     F_WHILE '(' comma_expr ')' ';'
     {
 	ins_f_byte(F_JUMP_WHEN_NON_ZERO);
 	add_jump();
-	ins_short((short)pop_address());
-	set_label(current_break_address, (short)mem_block[A_PROGRAM].current_size);
+	ins_address(pop_address());
+	set_label(current_break_address, mem_block[A_PROGRAM].current_size);
 	break_try_level = pop_address();
 	current_break_address = pop_address();
 	continue_try_level = pop_address();
@@ -661,26 +655,26 @@ for: F_FOR '('	start_block  {
 		  }
      for_guard ';' {
 		    push_address();
-		    ins_short(0);
+		    ins_address(0);
 		    current_continue_address = make_label();
 		    current_break_address = make_label();
 		    ins_f_byte(F_JUMP);
 		    add_jump();
 		    ins_label(current_break_address);
-		    set_label(current_continue_address, (short)mem_block[A_PROGRAM].current_size);
+		    set_label(current_continue_address, mem_block[A_PROGRAM].current_size);
 		  }
      for_expr ')' {
-		    upd_short(pop_address(), (short)(mem_block[A_PROGRAM].current_size + 3));
+		    upd_address(pop_address(), mem_block[A_PROGRAM].current_size + 1 + sizeof(offset_t));
 		    ins_f_byte(F_JUMP);
 		    add_jump();
-		    ins_short((short)pop_address());
+		    ins_address(pop_address());
 		  }
      statement
    {
        ins_f_byte(F_JUMP);
        add_jump();
        ins_label(current_continue_address);
-       set_label(current_break_address, (short)mem_block[A_PROGRAM].current_size);
+       set_label(current_break_address, mem_block[A_PROGRAM].current_size);
        end_block();
        break_try_level = pop_address();
        current_break_address = pop_address();
@@ -720,9 +714,9 @@ switch: F_SWITCH '(' comma_expr ')'
 	  current_case_number_heap = mem_block[A_CASE_NUMBERS].current_size;
 	  current_case_string_heap = mem_block[A_CASE_STRINGS].current_size;
 	  zero_case_label = NO_STRING_CASE_LABELS;
-	  ins_short(0); /* address of table */
-	  ins_short(0); /* break address to push, table is entered before */
-	  ins_short(0); /* default address */
+	  ins_address(0); /* address of table */
+	  ins_address(0); /* break address to push, table is entered before */
+	  ins_address(0); /* default address */
 
 	  current_break_address = make_label();
       }
@@ -730,16 +724,16 @@ switch: F_SWITCH '(' comma_expr ')'
       {
 	  int block_index;
 	  int current_case_heap;
-	  short default_addr;
+	  offset_t default_addr;
 
 	  /* Wrap up switch */
 	  /* It is not unusual that the last case/default has no break
 	   */
 	  /* Default address */
-	  if (!(default_addr = read_short(current_case_address + 5)))
+	  if (!(default_addr = read_address(current_case_address + 1 + (sizeof(offset_t) * 2))))
 	  {
-	      upd_short(current_case_address + 5,   /* no default given ->  */
-			(short)mem_block[A_PROGRAM].current_size);  /* create one   */
+	      upd_address(current_case_address + 1 + (sizeof(offset_t) * 2),   /* no default given ->  */
+			mem_block[A_PROGRAM].current_size);  /* create one   */
 	      default_addr = mem_block[A_PROGRAM].current_size;
 	  }
 
@@ -748,8 +742,7 @@ switch: F_SWITCH '(' comma_expr ')'
 	  ins_label(current_break_address);
 
 	  /* Table address */
-	  upd_short(current_case_address + 1,
-		    (short)mem_block[A_PROGRAM].current_size);
+	  upd_address(current_case_address + 1, mem_block[A_PROGRAM].current_size);
 
 	  /* What type of table? */
 	  if (zero_case_label & (NO_STRING_CASE_LABELS|SOME_NUMERIC_CASE_LABELS))
@@ -766,12 +759,12 @@ switch: F_SWITCH '(' comma_expr ')'
 	      if (zero_case_label & 0xffff)
 	      {
 		  ins_long_long(0); /* not used */
-		  ins_short((short)zero_case_label); /* the address */
+		  ins_address(zero_case_label); /* the address */
 	      }
 	      else
 	      {
 		  ins_long_long(0); /* not used */
-		  ins_short(default_addr); /* the address */
+		  ins_address(default_addr); /* the address */
 	      }
 	  }
 
@@ -787,15 +780,13 @@ switch: F_SWITCH '(' comma_expr ')'
 	      for (; ent < end; ent++)
 	      {
 		  ins_long_long(ent->key);
-		  ins_short(ent->addr);
+		  ins_address(ent->addr);
 	      }
 	  }
 
 	  /* Break address */
-	  upd_short(current_case_address + 3,
-		    (short)mem_block[A_PROGRAM].current_size);
-	  set_label(current_break_address,
-		    (short)mem_block[A_PROGRAM].current_size);
+	  upd_address(current_case_address + 1 + sizeof(offset_t), mem_block[A_PROGRAM].current_size);
+	  set_label(current_break_address, mem_block[A_PROGRAM].current_size);
 
 	  mem_block[A_CASE_NUMBERS].current_size = current_case_number_heap;
 	  mem_block[A_CASE_STRINGS].current_size = current_case_string_heap;
@@ -840,7 +831,7 @@ case: F_CASE case_label ':'
 	else
 	{
 	    temp1.key = $2.key;
-	    temp1.addr = -1;
+	    temp1.addr = OFFSET_MAX;
 	    temp1.line = current_line;
 	    temp2.key = $4.key;
 	    temp2.addr = mem_block[A_PROGRAM].current_size;
@@ -912,15 +903,14 @@ const9: F_NUMBER
 
 default: F_DEFAULT ':'
     {
-	if ( !current_case_address)
+	if (!current_case_address)
         {
 	    yyerror("Default outside switch");
 	    break;
 	}
-	if ( read_short(current_case_address + 5 ) )
+	if (read_address(current_case_address + 1 + sizeof(offset_t) * 2))
 	    yyerror("Duplicate default");
-	upd_short(current_case_address + 5,
-            (short)mem_block[A_PROGRAM].current_size);
+	upd_address(current_case_address + 1 + sizeof(offset_t) * 2, mem_block[A_PROGRAM].current_size);
     } ;
 
 
@@ -959,7 +949,7 @@ expr01: expr1 { $$ = $1; }
 	    ins_f_byte(F_JUMP_WHEN_ZERO);
 	    add_jump();
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
 	}
 	opt_expr01
 	{
@@ -971,21 +961,21 @@ expr01: expr1 { $$ = $1; }
 	      ins_f_byte(F_JUMP);
 	      add_jump();
 	      push_address();
-	      ins_short(0);
-	      upd_short(i, (short)mem_block[A_PROGRAM].current_size);
+	      ins_address(0);
+	      upd_address(i, mem_block[A_PROGRAM].current_size);
 	    }
 	    else
 	    {
 	      mem_block[A_PROGRAM].current_size = pop_address();
 	      ins_f_byte(F_SKIP_NZ);
 	      push_address();
-	      ins_short(0);
+	      ins_address(0);
 	      $4 = $1;
 	    }
 	}
       ':' expr01
 	{
-	    upd_short(pop_address(), (short)mem_block[A_PROGRAM].current_size);
+	    upd_address(pop_address(), mem_block[A_PROGRAM].current_size);
 	    if (exact_types && !compatible_types($4, $7)) {
 		type_error("Different types in ?: expr", $4);
 		type_error("                      and ", $7);
@@ -1053,12 +1043,12 @@ expr1: expr2 { $$ = $1; }
 	    ins_f_byte(F_JUMP_WHEN_NON_ZERO);
 	    add_jump();
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
 	    ins_f_byte(F_POP_VALUE);
 	}
        expr1
 	{
-	    upd_short(pop_address(), (short)mem_block[A_PROGRAM].current_size);
+	    upd_address(pop_address(), mem_block[A_PROGRAM].current_size);
 	    if ($1 == $4)
 		$$ = $1;
 	    else
@@ -1072,12 +1062,12 @@ expr2: expr211 { $$ = $1; }
 	    ins_f_byte(F_JUMP_WHEN_ZERO);
 	    add_jump();
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
 	    ins_f_byte(F_POP_VALUE);
 	}
        expr2
 	{
-	    upd_short(pop_address(), (short)mem_block[A_PROGRAM].current_size);
+	    upd_address(pop_address(), mem_block[A_PROGRAM].current_size);
 	    if ($1 == $4)
 		$$ = $1;
 	    else
@@ -1660,8 +1650,7 @@ expr4:  rvalue
 	  int inherited_override = strchr($1, ':') != NULL;
 	  int efun_override = inherited_override && strncmp($1,"efun::", 6) == 0;
 	  int is_sfun = 0;
-	  int f;
-
+	  int f = -1;
 
           $$ = TYPE_ANY;		/* in case anything goes wrong we need a default type. /LA */
 	  if (inherited_override && !efun_override)
@@ -1741,8 +1730,7 @@ expr4:  rvalue
                if (is_sfun)
 	       {
                    ins_f_byte(F_CALL_SIMUL);
-		   store_reloc_data(R_CALL,
-		  	(unsigned short)mem_block[A_PROGRAM].current_size, $1,0,0);
+		   store_reloc_data(R_CALL, mem_block[A_PROGRAM].current_size, $1,0,0);
 	       }
                else if (function_type_mod_found & (TYPE_MOD_NO_MASK|TYPE_MOD_PRIVATE))
 	       {
@@ -1752,9 +1740,7 @@ expr4:  rvalue
 	       {
 		   ins_f_byte (F_CALL_VIRT);
 		   if (function_prog_found)
-		       store_reloc_data(R_CALL,
-					(unsigned short)mem_block[A_PROGRAM].current_size,
-					$1,0,0);
+		       store_reloc_data(R_CALL, mem_block[A_PROGRAM].current_size, $1,0,0);
 	       }
 	       ins_byte ((char)function_inherit_found);
                ins_short ((short)function_index_found);
@@ -1919,9 +1905,7 @@ expr4:  rvalue
 		   /* Function not found
 		    */
 		   ins_f_byte(F_CALL_VIRT);
-		   store_reloc_data(R_CALL,
-				    (unsigned short)mem_block[A_PROGRAM].current_size,
-				    $1,0,0);
+		   store_reloc_data(R_CALL, mem_block[A_PROGRAM].current_size, $1, 0, 0);
 		   ins_byte((char)0xFF);
 		   ins_short (-1);
 		   ins_byte((char)$3); /* Number of arguments */
@@ -1937,13 +1921,12 @@ call_other_start: expr4 F_ARROW F_IDENTIFIER
 	    ins_f_byte(F_STRING);
 	    ins_short(store_prog_string($3));
 	} ;
-catch: F_CATCH { ins_f_byte(F_CATCH); push_address(); ins_short(0);}
+catch: F_CATCH { ins_f_byte(F_CATCH); push_address(); ins_address(0);}
        '(' comma_expr ')'
 	       {
 		   ins_f_byte(F_POP_VALUE);
 		   ins_f_byte(F_END_CATCH);
-		   upd_short(pop_address(),
-			     (short)mem_block[A_PROGRAM].current_size);
+		   upd_address(pop_address(), mem_block[A_PROGRAM].current_size);
 	       };
 
 sscanf: F_SSCANF '(' expr0 ',' expr0 lvalue_list ')'
@@ -2075,24 +2058,24 @@ cond: condStart
 	    ins_f_byte(F_JUMP);
 	    add_jump();
 	    push_address();
-	    ins_short(0);
-	    upd_short(i, (short)mem_block[A_PROGRAM].current_size);
+	    ins_address(0);
+	    upd_address(i, mem_block[A_PROGRAM].current_size);
 	}
       optional_else_part
-	{ upd_short(pop_address(), (short)mem_block[A_PROGRAM].current_size); } ;
+	{ upd_address(pop_address(), mem_block[A_PROGRAM].current_size); } ;
 
 condStart: F_IF '(' comma_expr ')'
 	{
 	    ins_f_byte(F_JUMP_WHEN_ZERO);
 	    add_jump();
 	    push_address();
-	    ins_short(0);
+	    ins_address(0);
 	} ;
 
 optional_else_part: /* empty */
        | F_ELSE statement ;
 %%
-#line 2115 "postlang.y"
+#line 2084 "postlang.y"
 
 int link_errors;
 
@@ -2537,8 +2520,7 @@ store_line_number_info(int file, int line)
 }
 
 static void
-store_reloc_data(char type, unsigned short address, char *name,
-			     int value, char modifier)
+store_reloc_data(char type, offset_t address, char *name, int value, char modifier)
 {
     struct reloc rel;
     rel.type = type;
@@ -2631,7 +2613,7 @@ compile_file()
     int yyparse (void);
 
     prolog();
-    (void)yyparse();
+    yyparse();
     epilog();
 }
 
@@ -2677,8 +2659,7 @@ int current_id_number = 1;
 static struct section_desc sec_hdr[] =
 {
     {A_HEADER, -1, -1, sizeof(struct program)},
-    {A_INHERITS, H_OFFSET(inherit), H_OFFSET(num_inherited),
-     sizeof(struct inherit)},
+    {A_INHERITS, H_OFFSET(inherit), H_OFFSET(num_inherited), sizeof(struct inherit)},
     {A_FUNC_HASH, H_OFFSET(func_hash), -1, sizeof(struct function_hash)},
     {-1, 0, 0, 0},
 };
@@ -2711,8 +2692,7 @@ struct segment_desc segm_desc[] =
     { H_OFFSET(program), H_OFFSET(swap_num), H_OFFSET(exec_size),sec_exe, },
 
     /* S_DBG */
-    { H_OFFSET(line_numbers), H_OFFSET(swap_lineno_index),
-    H_OFFSET(debug_size),sec_dbg, },
+    { H_OFFSET(line_numbers), H_OFFSET(swap_lineno_index), H_OFFSET(debug_size),sec_dbg, },
     { -1, -1, -1, (struct section_desc *)0 },
 };
 
@@ -2727,16 +2707,14 @@ load_segments(struct segment_desc *seg, struct mem_block *mem_block1)
     for ( ; seg->sections != NULL; seg++)
     {
 	size = 0;
-	for (sect = seg->sections; sect->section != -1; sect++)
+	for (sect = seg->sections; sect->section != -1; sect++) {
 	    size += align(mem_block1[sect->section].current_size);
+	}
 
 	if (size)
 	    block = xalloc((size_t)size);
 	else
 	    block = xalloc(1);
-#ifdef PURIFY
-	(void)memset(block, '\0', size ? size : 1);
-#endif
 
 	if (!hdr)
 	    hdr = block;
@@ -2746,20 +2724,19 @@ load_segments(struct segment_desc *seg, struct mem_block *mem_block1)
 
 	for (sect = seg->sections; sect->section != -1; sect++)
 	{
-	    (void)memcpy(block, mem_block1[sect->section].block,
-			 (size_t)mem_block1[sect->section].current_size);
+	    size_t section_size = mem_block1[sect->section].current_size;
+	    memcpy(block, mem_block1[sect->section].block, section_size);
 
 	    if (sect->ptr_offset != -1)
-		*(char **)(hdr + sect->ptr_offset) = block;
+		    *(char **)(hdr + sect->ptr_offset) = block;
 	    if (sect->num_offset != -1)
-		*(unsigned short *)(hdr + sect->num_offset) =
-		    mem_block1[sect->section].current_size /
-			sect->ent_size;
+ 		    *(offset_t *)(hdr + sect->num_offset) = section_size / sect->ent_size;
 
 	    block += align(mem_block1[sect->section].current_size);
 	}
-	if (seg->size_offset != -1)
-	    *(int *)(hdr + seg->size_offset) = size;
+	if (seg->size_offset != -1) {
+	    *(offset_t *)(hdr + seg->size_offset) = size;
+	}
     }
     return hdr;
 }
@@ -2817,14 +2794,10 @@ process_reloc(struct reloc *reloc, int num_relocs, int num_inherited)
 		call_efun = F_CALL_VIRT;
 
 	    fix = function_index_found;
-	    mem_block[A_PROGRAM].block[reloc->address - 1] =
-		call_efun - EFUN_FIRST;
-	    mem_block[A_PROGRAM].block[reloc->address] =
-		function_inherit_found;
-	    mem_block[A_PROGRAM].block[reloc->address + 1] =
-		((char *)&fix)[0];
-	    mem_block[A_PROGRAM].block[reloc->address + 2] =
-		((char *)&fix)[1];
+	    mem_block[A_PROGRAM].block[reloc->address - 1] = call_efun - EFUN_FIRST;
+	    mem_block[A_PROGRAM].block[reloc->address] = function_inherit_found;
+	    mem_block[A_PROGRAM].block[reloc->address + 1] = ((char *)&fix)[0];
+	    mem_block[A_PROGRAM].block[reloc->address + 2] = ((char *)&fix)[1];
 	    break;
 
 	default:
@@ -2874,17 +2847,18 @@ link_C_functions(char *name)
 static void
 optimize_jumps(void)
 {
-    int jumps, *ip, i, offset1, offset2, opcode;
+    offset_t jumps, *ip, i, offset1, offset2;
+    int opcode;
 
     /*
      * Compute the number of jumps in the jump table.
      */
-    jumps = mem_block_size(A_JUMPS, sizeof (int));
+    jumps = mem_block_size(A_JUMPS, sizeof (offset_t));
 
     /*
      * Get a pointer to the base of the jump table.
      */
-    ip = (int *)mem_block[A_JUMPS].block;
+    ip = (offset_t *)mem_block[A_JUMPS].block;
 
     /*
      * Loop through each jump table entry.
@@ -2894,7 +2868,7 @@ optimize_jumps(void)
 	/*
 	 * Read the target PC from the program section.
 	 */
-	offset2 = (unsigned short)read_short(*ip);
+	offset2 = read_address(*ip);
 
 	/*
 	 * Short-circuit all unconditional jumps.
@@ -2912,7 +2886,7 @@ optimize_jumps(void)
 	    opcode = (unsigned char)read_byte(offset2++);
 	    if (opcode == F_EXT - EFUN_FIRST)
 	    {
-		opcode = (unsigned short)read_short(offset2);
+		opcode = read_short(offset2);
 		offset2 += 2;
 	    }
 
@@ -2926,7 +2900,7 @@ optimize_jumps(void)
 	    /*
 	     * Get the target PC of the unconditional jump.
 	     */
-	    offset2 = (unsigned short)read_short(offset2);
+	    offset2 = read_address(offset2);
 
 	    /*
 	     * If the target PC of the jump is the same as the target PC of
@@ -2939,7 +2913,7 @@ optimize_jumps(void)
 	    /*
 	     * Short-circuit the unconditional jump.
 	     */
-	    upd_short(*ip, (short)offset2);
+	    upd_address(*ip, offset2);
 	}
 
 	ip++;
@@ -2993,9 +2967,8 @@ epilog()
 	{
 	    struct function *funp1;
 
-	    funp1 = &((struct function *)
-		    mem_block[A_FUNCTIONS].block)[has_ctor];
-	    upd_short(last_initializer_end, funp1->offset);
+	    funp1 = &((struct function *)mem_block[A_FUNCTIONS].block)[has_ctor];
+	    upd_address(last_initializer_end, funp1->offset);
 	    funp1->offset = 0;
 	}
 	else
@@ -3008,10 +2981,8 @@ epilog()
 	     * Change the last jump after the last initializer into a
 	     * return(1) statement.
 	     */
-	    mem_block[A_PROGRAM].block[last_initializer_end - 1] =
-		F_CONST1 - EFUN_FIRST;
-	    mem_block[A_PROGRAM].block[last_initializer_end] =
-		F_RETURN - EFUN_FIRST;
+	    mem_block[A_PROGRAM].block[last_initializer_end -1] = F_CONST1 - EFUN_FIRST;
+	    mem_block[A_PROGRAM].block[last_initializer_end] = F_RETURN - EFUN_FIRST;
 	}
     }
 
@@ -3020,8 +2991,7 @@ epilog()
     (struct function *)mem_block[A_FUNCTIONS].block);
 
     /* I don't like doing this, but I see no other way. |D| */
-    mem_block[A_FUNCTIONS].current_size =
-        functions_left * sizeof (struct function);
+    mem_block[A_FUNCTIONS].current_size = functions_left * sizeof (struct function);
 
 
     if (!(num_parse_error || inherit_file))
@@ -3072,7 +3042,6 @@ epilog()
     end_lineno_info();
 
     prog = (struct program *)load_segments(segm_desc, mem_block);
-
     prog->ref = 1;
     prog->swap_num = 0;
     prog->ctor_index = has_ctor;
@@ -3212,7 +3181,7 @@ add_new_init_jump()
      */
     ins_f_byte(F_JUMP);
     last_initializer_end = mem_block[A_PROGRAM].current_size;
-    ins_short(0);
+    ins_address(0);
 }
 
 static int

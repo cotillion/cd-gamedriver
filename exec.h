@@ -28,12 +28,20 @@
  *    F_CALL_DOWN gets an index to this table.
  */
 #include "config.h"
+#include <bits/stdint-uintn.h>
+#include <stdint.h>
 
-struct reloc 
+#ifndef EXEC_H
+#define EXEC_H
+
+typedef uint32_t offset_t;
+#define OFFSET_MAX       (UINT32_MAX)
+
+struct reloc
 {
     char *name;
     int value;
-    unsigned short address;
+    offset_t address;
     char type;
     char modifier;
 };
@@ -52,8 +60,8 @@ struct function {
     unsigned long long num_calls;	/* Number of times this function called */
     double time_spent;	/* cpu spent inside this function */
     double tot_time_spent; /* cpu spent inside this function and those called by it */
-    double avg_time;    
-    double avg_tot_time;    
+    double avg_time;
+    double avg_tot_time;
     double avg_calls;
     double last_call_update;
 #endif
@@ -63,14 +71,13 @@ struct function {
     unsigned short type_flags;	/* Return type of function. See below. */
 				/* NAME_ . See above. */
 
-    unsigned short offset;	/* Address of function,
-				 * or inherit table index when inherited. */
+    offset_t offset;            /* Address of function or inherit table index when inherited. */
     unsigned char num_local;	/* Number of local variables */
-    char num_arg;	        /* Number of arguments needed.
-				   -1 arguments means function not defined
-				   in this object. Probably inherited */
+    char num_arg;	            /* Number of arguments needed.
+                                 *  -1 arguments means function not defined
+				                 * in this object. Probably inherited */
     char first_default;
-};				
+};
 
 struct function_hash {
     char *name;
@@ -93,7 +100,7 @@ struct inherit {
 };
 
 
-struct segment_desc 
+struct segment_desc
 {
     int ptr_offset;
     int swap_idx_offset;
@@ -144,7 +151,7 @@ struct lineno {
   unsigned int lineno;
 };
 
-  
+
 struct program {
     char *program;			/* The binary instructions */
     char *name;				/* Name of file that defined prog */
@@ -176,7 +183,7 @@ struct program {
 
     char *include_files;
     struct object *clones;
-    
+
 #if defined(PROFILE_LPC)
     double cpu;				/* The amount of cpu taken up */
     double cpu_avg;
@@ -186,13 +193,13 @@ struct program {
     int swap_num;
     long num_clones;
     unsigned int time_of_ref;
-    
+
 #ifdef DEBUG
     int extra_ref;			/* Used to verify ref count */
 #endif
-    int total_size;			/* Sum of all data in this struct */
-    int debug_size;
-    int exec_size;
+    offset_t total_size;			/* Sum of all data in this struct */
+    offset_t debug_size;
+    offset_t exec_size;
 
     int load_time;                      /* Time of loding of the program */
     int id_number;			/* used to associate information with
@@ -205,19 +212,28 @@ struct program {
     unsigned short dtor_index;          /* destructor */
     unsigned short ctor_index;          /* constructor */
     unsigned short debug_flags;
-    
+
     /*
      * And now some general size information.
      */
-    unsigned short program_size;	/* size of this instruction code */
-    unsigned short num_functions;
-    unsigned short rodata_size;
-    unsigned short num_variables;
-    unsigned short num_inherited;
 
-    unsigned short sizeof_line_numbers;
-    unsigned short sizeof_include_files;
-    unsigned short sizeof_argument_types;
+     /* SEC_EXE */
+    offset_t program_size;	/* size of this instruction code */
+    offset_t rodata_size;
+    offset_t num_functions;
+    offset_t num_variables;
+
+    /* SEC_HDR */
+    offset_t num_inherited;
+
+    /* SEC_DBG */
+    offset_t sizeof_line_numbers;
+    offset_t sizeof_include_files;
+
+    /* NOT IMPLEMENETED */
+    offset_t sizeof_argument_types;
+
+
     char flags;                         /* some useful flags */
 #define PRAGMA_NO_CLONE		1
 #define PRAGMA_NO_INHERIT	2
@@ -283,3 +299,5 @@ extern int inh_offset;
 #define TYPE_MOD_MASK         (TYPE_MOD_STATIC | TYPE_MOD_NO_MASK |\
                                 TYPE_MOD_PRIVATE | TYPE_MOD_PUBLIC |\
 				TYPE_MOD_VARARGS | TYPE_MOD_TRUE_VARARGS)
+
+#endif

@@ -11,6 +11,7 @@
  * the generated token list and post_lang.y. The reason of this is that there
  * is no #include-statment that yacc recognizes.
  */
+#include <inttypes.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +46,7 @@
 #define BREAK_FROM_CASE		0x80000
 
 /* make shure that this struct has a size that is a power of two */
-struct case_heap_entry { long long key; short addr; short line; };
+struct case_heap_entry { long long key; offset_t addr; short line; };
 #define CASE_HEAP_ENTRY_ALIGN(offset) offset &= -sizeof(struct case_heap_entry)
 
 static struct mem_block mem_block[NUMAREAS];
@@ -90,11 +91,11 @@ extern int total_num_prog_blocks, total_prog_block_size;
 extern int num_parse_error;
 extern int d_flag;
 
-static int current_break_address;
-static int current_continue_address;
-static int current_case_address;
-static int current_case_number_heap;
-static int current_case_string_heap;
+static offset_t current_break_address;
+static offset_t current_continue_address;
+static offset_t current_case_address;
+static offset_t current_case_number_heap;
+static offset_t current_case_string_heap;
 static int try_level, break_try_level, continue_try_level;
 #define SOME_NUMERIC_CASE_LABELS 0x40000
 #define NO_STRING_CASE_LABELS    0x80000
@@ -118,15 +119,15 @@ static char *get_type_name(int);
  * When inheriting from another object, a call will automatically be made
  * to call .CTOR in that code from the current .CTOR.
  */
-static int last_initializer_end;
-static int first_last_initializer_end;
+static offset_t last_initializer_end;
+static offset_t first_last_initializer_end;
 
 void epilog (void);
 static int check_declared (char *str);
 static void prolog (void);
 static void push_address (void);
-static int pop_address (void);
-static int make_label (void);
+static offset_t pop_address (void);
+static offset_t make_label (void);
 static void transfer_init_control (void);
 static char *get_two_types (int, int);
 static int verify_declared (char *);
@@ -139,7 +140,7 @@ static struct program NULL_program; /* marion - clean neat empty struct */
 
 void init_lineno_info(void);
 void end_lineno_info(void);
-static void push_init_arg_address (int);
+static void push_init_arg_address (offset_t);
 static void clear_init_arg_stack (void);
 void free_all_local_names (void);
 int lookup_local_name(char *);
@@ -185,7 +186,7 @@ struct program *prog;	/* Is returned to the caller of yyparse */
 /*
  * Compare two types, and return true if they are compatible.
  */
-static int 
+static int
 compatible_types(int t1, int t2)
 {
     if (t1 == TYPE_UNKNOWN || t2 == TYPE_UNKNOWN)
@@ -211,7 +212,7 @@ compatible_types(int t1, int t2)
  * Add another argument type to the argument type stack
  */
 INLINE
-static void 
+static void
 add_arg_type(unsigned short type)
 {
     struct mem_block *mbp = &type_of_arguments;
@@ -227,7 +228,7 @@ add_arg_type(unsigned short type)
  * Pop the argument type stack 'n' elements.
  */
 INLINE
-static void 
+static void
 pop_arg_stack(int n)
 {
     type_of_arguments.current_size -= sizeof (unsigned short) * n;
@@ -247,49 +248,45 @@ get_argument_ptr(int n)
  * 0 is the first argument.
  */
 INLINE
-int 
+int
 get_argument_type(int arg, int n)
 {
-    return
-	((unsigned short *)
-	 (type_of_arguments.block + type_of_arguments.current_size))[arg - n];
+    return((unsigned short *)(type_of_arguments.block + type_of_arguments.current_size))[arg - n];
 }
 
 INLINE
-static void 
-add_to_mem_block(int n, char *data, int size)
+static void
+add_to_mem_block(int n, void *data, int size)
 {
     struct mem_block *mbp = &mem_block[n];
     while (mbp->current_size + size > mbp->max_size) {
-	mbp->max_size <<= 1;
-	mbp->block = realloc(mbp->block, (size_t)mbp->max_size);
+        mbp->max_size <<= 1;
+        mbp->block = realloc(mbp->block, (size_t)mbp->max_size);
     }
-    (void)memcpy(mbp->block + mbp->current_size, data, (size_t)size);
+    memcpy(mbp->block + mbp->current_size, data, (size_t)size);
     mbp->current_size += size;
 }
 
 INLINE static unsigned
-mem_block_size(n, size)
-    int n;
-    int size;
+mem_block_size(int n, int size)
 {
     return mem_block[n].current_size / size;
 }
 
-INLINE static void 
+INLINE static void
 ins_byte(char b)
 {
     add_to_mem_block(A_PROGRAM, &b, 1);
 }
 
-static INLINE void 
-upd_byte(int offset, char l)
+static INLINE void
+upd_byte(offset_t offset, char l)
 {
     mem_block[A_PROGRAM].block[offset] = l;
 }
 
 static INLINE char
-read_byte(int offset)
+read_byte(offset_t offset)
 {
     return mem_block[A_PROGRAM].block[offset];
 }
@@ -299,29 +296,41 @@ read_byte(int offset)
  * that correct byte order is used, regardless of machine architecture.
  * Also beware that some machines can't write a word to odd addresses.
  */
-static INLINE void 
-ins_short(short l)
+static INLINE void
+ins_short(int32_t t)
 {
-    add_to_mem_block(A_PROGRAM, (char *)&l + 0, 1);
-    add_to_mem_block(A_PROGRAM, (char *)&l + 1, 1);
+    if (t >= UINT16_MAX) {
+        fatal("Attempt to insert a too large short.");
+    }
+
+    int16_t val = t;
+    add_to_mem_block(A_PROGRAM, &val, sizeof(val));
 }
 
-static INLINE void 
-upd_short(int offset, short l)
+static INLINE void
+upd_address(offset_t offset, offset_t val)
 {
-    mem_block[A_PROGRAM].block[offset + 0] = ((char *)&l)[0];
-    mem_block[A_PROGRAM].block[offset + 1] = ((char *)&l)[1];
+    memcpy(&mem_block[A_PROGRAM].block[offset], &val, sizeof(val));
 }
 
-static INLINE short 
-read_short(int offset)
+static INLINE short
+read_short(offset_t offset)
 {
-    short l;
-
-    ((char *)&l)[0] = mem_block[A_PROGRAM].block[offset + 0];
-    ((char *)&l)[1] = mem_block[A_PROGRAM].block[offset + 1];
-    return l;
+    return *(short *)&mem_block[A_PROGRAM].block[offset];
 }
+
+static offset_t
+read_address(offset_t offset)
+{
+    return *(offset_t *)&mem_block[A_PROGRAM].block[offset];
+}
+
+static void
+ins_address(offset_t l)
+{
+    add_to_mem_block(A_PROGRAM, &l, sizeof(l));
+}
+
 
 static INLINE void
 ins_mem(void *data, size_t n)
@@ -333,25 +342,22 @@ ins_mem(void *data, size_t n)
  * Store a 4 byte number. It is stored in such a way as to be sure
  * that correct byte order is used, regardless of machine architecture.
  */
-static INLINE void 
+static INLINE void
 ins_long(int l)
 {
-    add_to_mem_block(A_PROGRAM, (char *)&l+0, 1);
-    add_to_mem_block(A_PROGRAM, (char *)&l+1, 1);
-    add_to_mem_block(A_PROGRAM, (char *)&l+2, 1);
-    add_to_mem_block(A_PROGRAM, (char *)&l+3, 1);
+    add_to_mem_block(A_PROGRAM, &l, sizeof(l));
 }
 
 static INLINE void
 ins_long_long(long long ll)
 {
-    ins_mem(&ll, sizeof(ll));
+    add_to_mem_block(A_PROGRAM, &ll, sizeof(ll));
 }
 
 /*
  * Return 1 on success, 0 on failure.
  */
-static int 
+static int
 defined_function(char *s)
 {
     int offset;
@@ -364,25 +370,23 @@ defined_function(char *s)
 
     real_name = strrchr(s, ':') + 1;
     sub_name = strchr(s, ':') + 2;
-    
+
     real_name = (find_sstring((real_name == (char *)1) ? s : real_name));
     if(!real_name) {
         return 0;
     }
     if (sub_name == (char *)2)
 	for (offset = 0; offset < mem_block[A_FUNCTIONS].current_size;
-	     offset += sizeof (struct function)) 
+	     offset += sizeof (struct function))
 	    {
 		funp = (struct function *)&mem_block[A_FUNCTIONS].block[offset];
 		/* Only index, prog, and type will be defined. */
-		if (real_name == funp->name) 
+		if (real_name == funp->name)
 		    {
 			function_index_found = offset / sizeof (struct function);
 			function_prog_found = 0;
 			function_type_mod_found = funp->type_flags & TYPE_MOD_MASK;
-			function_inherit_found =
-			    mem_block[A_INHERITS].current_size / 
-				sizeof(struct inherit);
+			function_inherit_found = mem_block[A_INHERITS].current_size / sizeof(struct inherit);
 			return 1;
 		    }
 	    }
@@ -397,7 +401,7 @@ defined_function(char *s)
 	}
 	else
 	    s = sub_name;
-    
+
     /* Look for the function in the inherited programs
 	*/
 
@@ -415,7 +419,7 @@ defined_function(char *s)
 	{
 	    /* Adjust for inherit-type */
 	    int type = ((struct inherit *)mem_block[A_INHERITS].block)[inh].type;
-	    
+
 	    if (function_type_mod_found & TYPE_MOD_PRIVATE)
 		type &= ~TYPE_MOD_PUBLIC;
 	    if (function_type_mod_found & TYPE_MOD_PUBLIC)
@@ -425,7 +429,7 @@ defined_function(char *s)
 	    function_inherit_found += inh -
 		(((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog->
 		 num_inherited - 1);
-	    
+
 	    return 1;
 	}
     }
@@ -436,74 +440,72 @@ defined_function(char *s)
  * A mechanism to remember addresses on a stack. The size of the stack is
  * defined in config.h.
  */
-static int comp_stackp;
-static int comp_stack[COMPILER_STACK_SIZE];
+static offset_t comp_stackp;
+static offset_t comp_stack[COMPILER_STACK_SIZE];
 
-static INLINE void 
+static INLINE void
 push_address()
 {
     if (comp_stackp >= COMPILER_STACK_SIZE) {
-	yyerror("Compiler stack overflow");
-	comp_stackp++;
-	return;
+	    yyerror("Compiler stack overflow");
+	    comp_stackp++;
+	    return;
     }
     comp_stack[comp_stackp++] = mem_block[A_PROGRAM].current_size;
 }
 
-static INLINE int
+static INLINE offset_t
 get_address(void)
 {
     return mem_block[A_PROGRAM].current_size;
 }
 
-static INLINE void 
-push_explicit(int address)
+static INLINE void
+push_explicit(offset_t address)
 {
     if (comp_stackp >= COMPILER_STACK_SIZE) {
-	yyerror("Compiler stack overflow");
-	comp_stackp++;
-	return;
+	    yyerror("Compiler stack overflow");
+	    comp_stackp++;
+	    return;
     }
     comp_stack[comp_stackp++] = address;
 }
 
-static INLINE int 
+static INLINE offset_t
 pop_address()
 {
     if (comp_stackp == 0)
 	fatal("Compiler stack underflow.\n");
     if (comp_stackp > COMPILER_STACK_SIZE) {
-	--comp_stackp;
-	return 0;
+	    --comp_stackp;
+	    return 0;
     }
-    return comp_stack[--comp_stackp];
+    offset_t ret = comp_stack[--comp_stackp];
+    return ret;
 }
 
 static INLINE void
 add_jump(void)
 {
-    int offset;
-
-    offset = mem_block[A_PROGRAM].current_size;
+    offset_t offset = mem_block[A_PROGRAM].current_size;
     add_to_mem_block(A_JUMPS, (char *)&offset, sizeof (offset));
 }
 
-static void 
-define_new_function(char *name, char num_arg, unsigned char num_local,
-		    int offset, int type_flags, char first_default)
+static void
+define_new_function(char *name, char num_arg, unsigned char num_local, offset_t offset, int type_flags, char first_default)
 {
     struct function fun;
     struct function *funp;
     unsigned short argument_start_index;
- 
-    if (defined_function (name)) 
+
+    if (defined_function (name))
     {
         /* The function is already defined.
          *   If it was defined by inheritance, make a new definition,
          *   unless nomask applies.
          *   If it was defined in the current program, use that definition.
          */
-         /* Point to the function definition found 
+         /* Point to the function definition found
 	  */
         if (function_prog_found)
 	{
@@ -511,12 +513,12 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 	}
 	else
 	    funp = FUNCTION(function_index_found);
-  
+
 	/* If it was declared in the current program, and not a prototype,
-	 * it is a double definition. 
+	 * it is a double definition.
 	 */
 	if (!(funp->type_flags & NAME_PROTOTYPE) &&
-	    !function_prog_found) 
+	    !function_prog_found)
 	{
 	    char buff[500];
 
@@ -527,7 +529,7 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 
 	/* If neither the new nor the old definition is a prototype,
 	 * it must be a redefinition of an inherited function.
-	 * Check for nomask. 
+	 * Check for nomask.
 	 */
 	if ((funp->type_flags & TYPE_MOD_NO_MASK) &&
 	    !(funp->type_flags & NAME_PROTOTYPE))
@@ -539,13 +541,13 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 	    return;
 	}
 
-	/* Check types 
+	/* Check types
 	 */
-	if (exact_types && 
+	if (exact_types &&
 	    ((funp->type_flags & TYPE_MASK) != TYPE_UNKNOWN))
 	{
-	    if (funp->num_arg != num_arg && 
-		!(funp->type_flags & TYPE_MOD_VARARGS)) 
+	    if (funp->num_arg != num_arg &&
+		!(funp->type_flags & TYPE_MOD_VARARGS))
 	    {
 	        yyerror("Incorrect number of arguments");
 		return;
@@ -553,7 +555,7 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 /*
  * This is just a nuisance! /JnA
 
-	    else if (!(funp->type_flags & NAME_STRICT_TYPES)) 
+	    else if (!(funp->type_flags & NAME_STRICT_TYPES))
 	    {
 	        yyerror("Function called not compiled with type testing");
 		return;
@@ -561,25 +563,25 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 */
 
 #if 0
-            else 
+            else
 	    {
 	        int i;
 		/* Now check argument types
 		 */
-		for (i=0; i < num_arg; i++) 
+		for (i=0; i < num_arg; i++)
 		{
 		}
 	    }
 #endif
 	}
 	/* If it is a prototype for a function that has already been defined,
-	 * we don't need it. 
+	 * we don't need it.
 	 */
 	if ((type_flags & NAME_PROTOTYPE) && !function_prog_found)
 	    return;
 
 	/* If the function was defined in an inherited program, we need to
-	 * make a new definition here. 
+	 * make a new definition here.
 	 */
 	if (function_prog_found) {
 	    funp = &fun;
@@ -607,9 +609,10 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
     if (exact_types)
         funp->type_flags |= NAME_STRICT_TYPES;
 
-    if (!exact_types || num_arg == 0)
-	argument_start_index = INDEX_START_NONE;
-    else 
+    if (!exact_types || num_arg == 0) {
+	    argument_start_index = INDEX_START_NONE;
+    }
+    else
     {
 	int i;
 	/*
@@ -622,7 +625,7 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
 	    add_to_mem_block(A_ARGUMENT_TYPES, (char *)&type_of_locals[i],
 			     sizeof type_of_locals[i]);
     }
-    if (funp == &fun) 
+    if (funp == &fun)
     {
 	funp->name = make_sstring(name);
         add_to_mem_block (A_FUNCTIONS, (char *)&fun, sizeof fun);
@@ -637,8 +640,8 @@ define_new_function(char *name, char num_arg, unsigned char num_local,
     }
     return;
 }
- 
-static INLINE int 
+
+static INLINE int
 is_simul_efun (char *name)
 {
 
@@ -646,9 +649,9 @@ is_simul_efun (char *name)
 	!(function_type_mod_found & (TYPE_MOD_PRIVATE | TYPE_MOD_STATIC)))
         return 1;
     return 0;
-}  
+}
 
-static void 
+static void
 define_variable(char *name, int type)
 {
     struct variable dummy;
@@ -675,8 +678,7 @@ store_prog_string(char *str)
     unsigned short addr;
     int i;
 
-    for (i = mem_block[A_STRTAB].current_size - sizeof(short);
-	 i >= 0; i -= sizeof(short))
+    for (i = mem_block[A_STRTAB].current_size - sizeof(short); i >= 0; i -= sizeof(short))
     {
 	char *str2;
 	unsigned short offset;
@@ -700,15 +702,17 @@ store_prog_string(char *str)
 
 struct label
 {
-    unsigned short address;
-    unsigned short link;
+    offset_t address;
+    offset_t link;
 };
 
-static int
+#define EMPTY_LABEL     (OFFSET_MAX - 1)
+
+static offset_t
 make_label()
 {
-    static struct label lbl = { (unsigned short)-1, (unsigned short)-1};
-    int ret;
+    static struct label lbl = { EMPTY_LABEL, EMPTY_LABEL };
+    offset_t ret;
 
     ret = mem_block[A_LABELS].current_size / sizeof(struct label);
     add_to_mem_block(A_LABELS, (char *)&lbl, sizeof(lbl));
@@ -716,37 +720,37 @@ make_label()
 }
 
 static void
-ins_label(int lbl)
+ins_label(offset_t lbl)
 {
     struct label *l;
-    unsigned short here;
 
-    here = mem_block[A_PROGRAM].current_size;
+    offset_t here = mem_block[A_PROGRAM].current_size;
     l = &((struct label *)mem_block[A_LABELS].block)[lbl];
-    if (l->address != (unsigned short)-1)
-	ins_short(l->address);
+    if (l->address != EMPTY_LABEL)
+	    ins_address(l->address);
     else
     {
-	ins_short(l->link);
-	l->link = here;
+	    ins_address(l->link);
+	    l->link = here;
     }
 }
 
 static void
-set_label(int lbl, unsigned short addr)
+set_label(offset_t lbl, offset_t addr)
 {
     struct label *l;
-    unsigned short link1, next;
-    /*char *pgm = mem_block[A_PROGRAM].block;*/
+    offset_t link1, next;
 
     l = ((struct label *)mem_block[A_LABELS].block) + lbl;
     l->address = addr;
-    for (link1 = l->link; link1 != (unsigned short)-1; link1 = next)
+
+    for (link1 = l->link; link1 != EMPTY_LABEL; link1 = next)
     {
-	next = read_short(link1);
-	upd_short(link1, addr);
+	    next = read_address(link1);
+	    upd_address(link1, addr);
     }
-    l->link = (unsigned short)-1;
+
+    l->link = EMPTY_LABEL;
 }
 
 
@@ -760,44 +764,39 @@ static INLINE long long cmp_case_keys(struct case_heap_entry *entry1,
 	return entry1->key - entry2->key;
 }
 
-void 
-add_to_case_heap(int block_index, struct case_heap_entry *entry,
-		 struct case_heap_entry *entry2)
+void
+add_to_case_heap(int block_index, struct case_heap_entry *entry, struct case_heap_entry *entry2)
 {
     int current_heap;
     struct case_heap_entry *heap_top, *heap_entry;
     int is_str;
     int from, to, size;
 
-
     if (block_index == A_CASE_NUMBERS )
     {
         current_heap = current_case_number_heap;
-	is_str = 0;
+        is_str = 0;
     }
     else
     {
-	current_heap = current_case_string_heap;
-	is_str = 1;
+	    current_heap = current_case_string_heap;
+        is_str = 1;
     }
 
     if (entry2 && cmp_case_keys(entry, entry2, is_str) > 0)
 	return;
 
-    heap_top = (struct case_heap_entry *)
-	(mem_block[block_index].block +
-	 mem_block[block_index].current_size);
+    heap_top = (struct case_heap_entry *)(mem_block[block_index].block + mem_block[block_index].current_size);
+    heap_entry = (struct case_heap_entry *)(mem_block[block_index].block + current_heap);
 
-    heap_entry = (struct case_heap_entry *)
-	(mem_block[block_index].block +
-	 current_heap);
-    
     for (; heap_entry < heap_top; heap_entry++)
     {
 	if (cmp_case_keys(heap_entry, entry, is_str) > 0)
 	    break;
-	if (heap_entry->addr == -1)
+
+	if (heap_entry->addr == OFFSET_MAX)
 	{
+        /* Range entry, compare next also */
 	    if (cmp_case_keys(++heap_entry, entry, is_str) >= 0)
 	    {
 		/* Duplicate case label! */
@@ -810,7 +809,7 @@ add_to_case_heap(int block_index, struct case_heap_entry *entry,
 	    }
 	}
     }
-    
+
     if (heap_entry < heap_top &&
 	(!cmp_case_keys(heap_entry, entry, is_str) ||
 	 (entry2 && (cmp_case_keys(entry2, heap_entry, is_str) >= 0))))
@@ -822,8 +821,8 @@ add_to_case_heap(int block_index, struct case_heap_entry *entry,
 		heap_entry->line);
 	yyerror(buff);
     }
-    
-	
+
+
     to = ((char *)(heap_entry + 1 + (entry2 != NULL))) -
 	mem_block[block_index].block;
     from = ((char *)heap_entry) - mem_block[block_index].block;
@@ -832,7 +831,7 @@ add_to_case_heap(int block_index, struct case_heap_entry *entry,
     add_to_mem_block(block_index, (char *)entry, sizeof(*entry));
     if (entry2)
 	add_to_mem_block(block_index, (char *)entry2, sizeof(*entry2));
-    
+
     if (heap_entry != heap_top)
     {
 	(void)memmove(mem_block[block_index].block + to,
@@ -849,18 +848,18 @@ add_to_case_heap(int block_index, struct case_heap_entry *entry,
  * to continue.
  */
 static void
-transfer_init_control() 
+transfer_init_control()
 {
-    if (mem_block[A_PROGRAM].current_size - 2 == last_initializer_end)
-	mem_block[A_PROGRAM].current_size -= 3;
-    else 
+    if (mem_block[A_PROGRAM].current_size - 2 == last_initializer_end) {
+	    mem_block[A_PROGRAM].current_size -= 3;
+    }
+    else
     {
-	/*
-	 * Change the address of the last jump after the last
-	 * initializer to this point.
-	 */
-	upd_short(last_initializer_end,
-		  (short)mem_block[A_PROGRAM].current_size);
+        /*
+         * Change the address of the last jump after the last
+         * initializer to this point.
+         */
+	    upd_address(last_initializer_end, mem_block[A_PROGRAM].current_size);
     }
 }
 
@@ -869,7 +868,7 @@ static int deref_stack[DEREFSIZE];
 static int deref_index;
 
 void add_new_init_jump(void);
-static int init_arg_stack[256];
+static offset_t init_arg_stack[256];
 static int init_arg_stack_index;
 
 static void INLINE
@@ -879,7 +878,7 @@ clear_init_arg_stack()
 }
 
 static void INLINE
-push_init_arg_address(int address)
+push_init_arg_address(offset_t address)
 {
     init_arg_stack[init_arg_stack_index++] = address;
 }
@@ -893,10 +892,10 @@ dump_init_arg_table(int arg)
     int i;
 #if defined(DEBUG)
     if (num_parse_error == 0 && init_arg_stack_index != arg)
-	fatal("Not correct number of init addresses!\n");
+        fatal("Not correct number of init addresses!\n");
 #endif
     for (i = 0; i < init_arg_stack_index; i++)
-	ins_short((short)init_arg_stack[i]);
+        ins_address(init_arg_stack[i]);
 }
 
 %}

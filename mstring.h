@@ -35,7 +35,7 @@
 
 struct mstring_hdr {
 #ifdef DEBUG
-	u_long	magic;
+	uint64_t	magic;
 #endif
 	uint32_t	length;
 	uint16_t	count;
@@ -66,7 +66,7 @@ void free_mstring(char *);
 
 struct sstring_hdr {
 #ifdef DEBUG
-	u_long	magic;
+	uint64_t	magic;
 #endif
 	char		*prev;
 	char		*next;

@@ -1192,16 +1192,16 @@ free_prog(struct program *progp)
     total_num_prog_blocks--;
 
     /* Free all function names. */
-    for (i=0; i < (int)progp->num_functions; i++)
+    for (i=0; i < progp->num_functions; i++)
 	if (progp->functions[i].name)
 	    free_sstring(progp->functions[i].name);
 
     /* Free all variable names */
-    for (i=0; i < (int)progp->num_variables; i++)
+    for (i=0; i < progp->num_variables; i++)
 	free_sstring(progp->variable_names[i].name);
 
     /* Free all inherited objects */
-    for (i=0; i < (int)progp->num_inherited - 1; i++)
+    for (i=0; i < progp->num_inherited - 1; i++)
     {
 	free_prog(progp->inherit[i].prog);
 	free_sstring(progp->inherit[i].name);

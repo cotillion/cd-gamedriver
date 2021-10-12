@@ -388,6 +388,11 @@ equal_svalue(const struct svalue *sval1, const struct svalue *sval2)
 }
 #endif /* !PROFILE */
 
+static offset_t read_address(char *addr)
+{
+    return *(offset_t *)addr;
+}
+
 /*
  * Prepend a slash in front of a string.
  */
@@ -681,8 +686,9 @@ void
 save_control_context(struct control_stack *csp1)
 {
 #ifdef DEBUG
-    if (current_prog && pc - current_prog->program >= current_prog->program_size)
-	fatal("Invalid offset during context save\n");
+    if (current_prog && pc - current_prog->program >= current_prog->program_size) {
+	    fatal("Invalid offset during context save\n");
+    }
 #endif
     csp1->ob = current_object;
     csp1->prev_ob = previous_ob;
@@ -853,51 +859,51 @@ char *
 setup_new_frame(struct function *funp)
 {
     int called_args;
-    unsigned short int npc;
+    offset_t npc;
     char *off;
     /* Remove excessive arguments, or put them in argv if applicable */
-
     previous_ob_access_time = current_object->time_of_ref;
 
     if (funp->type_flags & TYPE_MOD_TRUE_VARARGS)
     {
-	if (csp->num_local_variables >= funp->num_arg)
-	{
-	    struct vector *v;
-	    int i, narg;
-	    v = allocate_array(narg = csp->num_local_variables -
-			       (funp->num_arg - 1));
-	    for (i = narg - 1; i >= 0; i--)
-		assign_svalue_no_free(&v->item[narg - 1 - i], &sp[-i]);
-	    pop_n_elems(narg);
-	    push_vector(v, FALSE);
-	    csp->num_local_variables -= narg - 1;
-	}
+        if (csp->num_local_variables >= funp->num_arg)
+        {
+            struct vector *v;
+            int i, narg;
+            v = allocate_array(narg = csp->num_local_variables - (funp->num_arg - 1));
+            for (i = narg - 1; i >= 0; i--)
+                assign_svalue_no_free(&v->item[narg - 1 - i], &sp[-i]);
+            pop_n_elems(narg);
+            push_vector(v, FALSE);
+            csp->num_local_variables -= narg - 1;
+        }
     }
     else
-	while(csp->num_local_variables > funp->num_arg)
-	{
-	    pop_stack();
-	    csp->num_local_variables--;
-	}
+    {
+    	while(csp->num_local_variables > funp->num_arg)
+    	{
+    	    pop_stack();
+    	    csp->num_local_variables--;
+    	}
+    }
     /* Correct number of arguments and local variables */
     called_args = csp->num_local_variables;
     while(csp->num_local_variables < funp->num_arg + (int)funp->num_local)
     {
-	push_number(0);
-	csp->num_local_variables++;
+        push_number(0);
+        csp->num_local_variables++;
     }
 #ifdef DEBUG
     if (called_args > funp->num_arg)
-	fatal("Error in seting up call frame!\n");
+	    fatal("Error in seting up call frame!\n");
 #endif
-    if (called_args == funp->num_arg)
-	npc = funp->offset + funp->num_arg * 2;
+    if (called_args == funp->num_arg) {
+	    npc = funp->offset + funp->num_arg * sizeof(offset_t);
+    }
     else
     {
-	off = current_prog->program + funp->offset + called_args * 2;
-	((char *)&npc)[0] = off[0];
-	((char *)&npc)[1] = off[1];
+        off = current_prog->program + funp->offset + called_args * sizeof(offset_t);
+        npc = read_address(off);
     }
     tracedepth++;
     fp = sp - csp->num_local_variables + 1;
@@ -1180,15 +1186,6 @@ extern struct vector *make_unique (struct vector *arr, struct closure *fun, stru
 static void eval_instruction(char *);
 
 
-static unsigned short read_short(char *addr)
-{
-    unsigned short ret;
-
-    ((char *)&ret)[0] = ((char *)addr)[0];
-    ((char *)&ret)[1] = ((char *)addr)[1];
-
-    return ret;
-}
 /* ARGSUSED */
 static void
 f_last_reference_time(int xxx)
@@ -1809,17 +1806,14 @@ f_dup(int num_arg)
 static void
 f_jump_when_zero(int num_arg)
 {
-    unsigned short offset;
-
-    ((char *)&offset)[0] = pc[0];
-    ((char *)&offset)[1] = pc[1];
+    offset_t offset = read_address(pc);
 
     if (sp->u.number == 0)
     {
-	pc = current_prog->program + offset;
+	    pc = current_prog->program + offset;
     }
     else
-	pc += 2;
+    	pc += sizeof(offset_t);
     pop_stack();
 }
 
@@ -1827,25 +1821,20 @@ f_jump_when_zero(int num_arg)
 static void
 f_skip_nz(int num_arg)
 {
-    unsigned short offset;
+    offset_t offset = read_address(pc);
+    pc += sizeof(offset_t);
 
-    ((char *)&offset)[0] = pc[0];
-    ((char *)&offset)[1] = pc[1];
-    pc += 2;
     if (sp->type == T_NUMBER && sp->u.number == 0)
-	pop_stack();
+	    pop_stack();
     else
-	pc = current_prog->program + offset;
+	    pc = current_prog->program + offset;
 }
 
 /* ARGSUSED */
 static void
 f_jump(int num_arg)
 {
-    unsigned short offset;
-
-    ((char *)&offset)[0] = pc[0];
-    ((char *)&offset)[1] = pc[1];
+    offset_t offset = read_address(pc);
     pc = current_prog->program + offset;
 }
 
@@ -1853,14 +1842,12 @@ f_jump(int num_arg)
 static void
 f_jump_when_non_zero(int num_arg)
 {
-    unsigned short offset;
+    offset_t offset = read_address(pc);
 
-    ((char *)&offset)[0] = pc[0];
-    ((char *)&offset)[1] = pc[1];
     if (sp->u.number == 0)
-	pc += 2;
+	    pc += sizeof(offset_t);
     else
-	pc = current_prog->program + offset;
+    	pc = current_prog->program + offset;
     pop_stack();
 }
 
@@ -4662,16 +4649,16 @@ f_foreach_m(int num_arg)
     struct svalue *map = sp - 2, *array = sp - 1, *ix = sp;
 
     if (map->type == T_NUMBER) {
-        pc = current_prog->program + read_short(pc);
+        pc = current_prog->program + read_address(pc);
         return;
     }
     if (map->type != T_MAPPING)
         bad_arg(3, F_FOREACH_M, map);
     if (ix->u.number >= array->u.vec->size) {
-        pc = current_prog->program + read_short(pc);
+        pc = current_prog->program + read_address(pc);
         return;
     }
-    pc += 2;
+    pc += sizeof(offset_t);
     assign_svalue(key_var->u.lvalue, array->u.vec->item + ix->u.number);
     assign_svalue(val_var->u.lvalue, get_map_lvalue(map->u.map, key_var->u.lvalue, 0));
     ix->u.number++;
@@ -4684,19 +4671,19 @@ f_foreach(int num_arg)
     struct svalue *loopvar = sp - 2, *array = sp - 1, *ix = sp;
 
     if (array->type == T_NUMBER) {
-        pc = current_prog->program + read_short(pc);
+        pc = current_prog->program + read_address(pc);
         return;
     }
     if (array->type != T_POINTER)
         bad_arg(2, F_FOREACH, array);
     if (ix->u.number >= array->u.vec->size) {
-        pc = current_prog->program + read_short(pc);
+        pc = current_prog->program + read_address(pc);
         return;
     }
-    pc += 2;
+
+    pc += sizeof(offset_t);
     assign_svalue(loopvar->u.lvalue, array->u.vec->item + ix->u.number);
     ix->u.number++;
-
 }
 
 /******** function stuff *********/
@@ -5368,27 +5355,22 @@ cmp_values(searchval_t val, long long cmp, int as_str)
 	return (long long)(val.i - cmp);
 }
 
-struct case_entry
-{
-    int value;
-    unsigned short offset;
-};
-
 /* ARGSUSED */
 static void
 f_switch(int num_arg)
 {
 #define TABLE_OFF       1
-#define TABLE_END_OFF   3
-#define DEFAULT_OFF     5
+#define TABLE_END_OFF   5
+#define DEFAULT_OFF     9
 
 #define STR_TABLE 1
 
 #define E_VALUE  0
 #define E_OFFSET 8
-#define ENTRY_SIZE 10
+#define ENTRY_SIZE 12
 
-#define RANGE_OFFSET ((unsigned short)-1)
+#define RANGE_OFFSET (UINT32_MAX)
+
 
     int tab_head, tab_tail, tab_mid;
     unsigned int tab_start, tab_end;
@@ -5398,8 +5380,8 @@ f_switch(int num_arg)
     tab_type = (*pc) & 0xff;
     is_str = tab_type & STR_TABLE;
 
-    tab_start = read_short(pc + TABLE_OFF);
-    tab_end = read_short(pc + TABLE_END_OFF);
+    tab_start = read_address(pc + TABLE_OFF);
+    tab_end = read_address(pc + TABLE_END_OFF);
 
     tab_head = 0;
     tab_tail = (tab_end - tab_start) / ENTRY_SIZE - 1;
@@ -5410,7 +5392,7 @@ f_switch(int num_arg)
 
 	if (sp->type == T_NUMBER && !sp->u.number)
 	{
-	    pc = current_prog->program + read_short(current_prog->program + tab_start + E_OFFSET);
+	    pc = current_prog->program + read_address(current_prog->program + tab_start + E_OFFSET);
 	    pop_stack();
 	    return;
 	}
@@ -5420,38 +5402,33 @@ f_switch(int num_arg)
 	tab_head++;
     }
     else if (sp->type == T_NUMBER)
-	search_val.i = sp->u.number;
+	    search_val.i = sp->u.number;
     else
 	bad_arg(1, F_SWITCH, sp);
 
     while (tab_head <= tab_tail)
     {
-	tab_mid = (tab_head + tab_tail) / 2;
+	    tab_mid = (tab_head + tab_tail) / 2;
 
-	if (read_short(current_prog->program + tab_start +
-		       tab_mid * ENTRY_SIZE + E_OFFSET) == RANGE_OFFSET ||
+	if (read_address(current_prog->program + tab_start + tab_mid * ENTRY_SIZE + E_OFFSET) == RANGE_OFFSET ||
 	    (tab_mid != tab_head &&
-	     read_short(current_prog->program + tab_start +
-			tab_mid * ENTRY_SIZE + E_OFFSET - ENTRY_SIZE) == RANGE_OFFSET &&
+	     read_address(current_prog->program + tab_start + tab_mid * ENTRY_SIZE + E_OFFSET - ENTRY_SIZE) == RANGE_OFFSET &&
 	     (tab_mid--, 1)))
 	{
 	    /* It is a range entry */
 	    long long lo_value, hi_value;
 
-	    lo_value = read_long_long(current_prog->program + tab_start +
-				tab_mid * ENTRY_SIZE + E_VALUE);
-	    hi_value = read_long_long(current_prog->program + tab_start +
-				tab_mid * ENTRY_SIZE + E_VALUE + ENTRY_SIZE);
-	    if (cmp_values(search_val, lo_value, is_str) < 0)
-		tab_tail = tab_mid - 1;
-	    else if (cmp_values(search_val, hi_value, is_str) > 0)
-		tab_head = tab_mid + 2;
-	    else
+	    lo_value = read_long_long(current_prog->program + tab_start + tab_mid * ENTRY_SIZE + E_VALUE);
+	    hi_value = read_long_long(current_prog->program + tab_start + tab_mid * ENTRY_SIZE + E_VALUE + ENTRY_SIZE);
+
+        if (cmp_values(search_val, lo_value, is_str) < 0)
+            tab_tail = tab_mid - 1;
+        else if (cmp_values(search_val, hi_value, is_str) > 0)
+            tab_head = tab_mid + 2;
+        else
 	    {
-		pc = current_prog->program +
-		    read_short(current_prog->program + tab_start +
-			       tab_mid * ENTRY_SIZE + E_OFFSET + ENTRY_SIZE);
-		pop_stack();
+		    pc = current_prog->program + read_address(current_prog->program + tab_start + tab_mid * ENTRY_SIZE + E_OFFSET + ENTRY_SIZE);
+    		pop_stack();
 		return;
 	    }
 	}
@@ -5465,20 +5442,18 @@ f_switch(int num_arg)
 			     tab_mid * ENTRY_SIZE + E_VALUE);
 	    if ((cmp = cmp_values(search_val, value, is_str)) == 0)
 	    {
-		pc = current_prog->program +
-		    read_short(current_prog->program + tab_start +
-			       tab_mid * ENTRY_SIZE + E_OFFSET);
-		pop_stack();
-		return;
+		    pc = current_prog->program + read_address(current_prog->program + tab_start +  tab_mid * ENTRY_SIZE + E_OFFSET);
+		    pop_stack();
+		    return;
 	    }
 	    else if (cmp < 0)
-		tab_tail = tab_mid - 1;
+		    tab_tail = tab_mid - 1;
 	    else
-		tab_head = tab_mid + 1;
+		    tab_head = tab_mid + 1;
 	}
     }
     /* No match, use default */
-    pc = current_prog->program + read_short(pc + DEFAULT_OFF);
+    pc = current_prog->program + read_address(pc + DEFAULT_OFF);
     pop_stack();
     return;
 }
@@ -6776,7 +6751,7 @@ eval_instruction(char *p)
 	    push_pop_error_context (1);
 	    catch_level++;
 
-	    pc += 3;
+	    pc += 1 + sizeof(offset_t);
 
 #ifdef DEBUG
 	    stack = expected_stack;
@@ -6800,8 +6775,8 @@ eval_instruction(char *p)
 #endif
 		push_pop_error_context (-1);
 		catch_level--;
-		new_pc = current_prog->program + read_short(pc);
-		pc += 2;
+		new_pc = current_prog->program + read_address(pc);
+		pc += sizeof(offset_t);
 		varnum = EXTRACT_UCHAR(pc);
 		assign_svalue(fp + varnum, &catch_value);
 		pc = new_pc;
@@ -6840,7 +6815,6 @@ eval_instruction(char *p)
 	 */
 	{
 	    struct gdexception exception_frame;
-	    unsigned short new_pc_offset;
 #ifdef DEBUG
 	    struct svalue *stack;
 	    int args, ins;
@@ -6850,9 +6824,8 @@ eval_instruction(char *p)
 	    /*
 	     * Compute address of next instruction after the CATCH statement.
 	     */
-	    ((char *)&new_pc_offset)[0] = pc[0];
-	    ((char *)&new_pc_offset)[1] = pc[1];
-	    pc += 2;
+        offset_t new_pc_offset = read_address(pc);
+	    pc += sizeof(offset_t);
 	    /*
 	     * Save some global variables that must be restored separately
 	     * after a longjmp. The stack will have to be manually popped all
@@ -6921,10 +6894,9 @@ eval_instruction(char *p)
 	}
     }
 #ifdef DEBUG
-    if ((expected_stack && expected_stack != sp) ||
-	sp < fp + csp->num_local_variables - 1)
+    if ((expected_stack && expected_stack != sp) ||	sp < fp + csp->num_local_variables - 1)
     {
-	fatal("Bad stack after evaluation. Was %d, expected %d, frame ends at %d. Instruction %d, num arg %d\n",
+        fatal("Bad stack after evaluation. Was %ld, expected %ld, frame ends at %ld. Instruction %d, num arg %d\n",
 	      sp - start_of_stack,
 	      expected_stack - start_of_stack,
 	      (fp - start_of_stack) + csp->num_local_variables - 1,
@@ -7757,7 +7729,7 @@ last_instructions()
     do
     {
 	if (previous_prog[i])
-	    (void)printf("%5lx: %3d%*s %8s %-25s (%d) %s\n",
+	    (void)printf("%6d: %3d%*s %8s %-25s (%d) %s\n",
 			 (unsigned long)previous_pc[i],
 		   previous_instruction[i],
 		   curtracedepth[i],"",

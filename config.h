@@ -95,7 +95,6 @@
  * If your compiler has the type 'unsigned char', then the cast-version
  * is best. If you do not know, use the simple version, and the game will
  * immediately terminate with a message if bad.
-#define EXTRACT_UCHAR(p) (*p < 0 ? *p + 0x100 : *p)
  */
 #define EXTRACT_UCHAR(p) (*(unsigned char *)(p))
 
