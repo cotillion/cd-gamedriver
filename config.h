@@ -22,12 +22,6 @@
 #define GAME_VERSION "CD.06."
 
 /*
- * Maximum number of objects to swap out during one round through
- * the swap algorithm
- */
-#define MAX_CONSECUTIVE_SWAPS	100
-
-/*
  * If you define this explode() will strip any leading delimiters.
  */
 #undef OLD_EXPLODE
@@ -59,11 +53,6 @@
  * What file, if any, to automatically include.
  */
 #define AUTO_INCLUDE "</secure/auto.h>"
-
-/* If you define this add_actions to static functions can be called
- * with the efun command().
- */
-#define STATIC_ADD_ACTIONS
 
 /* If you define this add_action(,,1) will not require whitespace
  * between the verb and the arguments
