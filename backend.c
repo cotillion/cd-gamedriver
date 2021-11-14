@@ -56,8 +56,8 @@ extern int t_flag;
  * This routine must only be called from top level, not from inside
  * stack machine execution (as stack will be cleared).
  */
-void 
-clear_state(void) 
+void
+clear_state(void)
 {
     extern struct object *previous_ob;
 
@@ -69,7 +69,7 @@ clear_state(void)
     reset_machine();	/* Pop down the stack. */
 }
 
-void 
+void
 logon(struct object *ob)
 {
     struct svalue *ret;
@@ -93,7 +93,7 @@ logon(struct object *ob)
  * The command can also come from a NPC.
  * Beware that 'str' can be modified and extended !
  */
-int 
+int
 parse_command(char *str, struct object *ob)
 {
     struct object *save = command_giver;
@@ -117,7 +117,7 @@ parse_command(char *str, struct object *ob)
  */
 struct allocation_pool tmp_pool = EMPTY_ALLOCATION_POOL;
 
-void 
+void
 tmpclean(void)
 {
     pool_free(&tmp_pool);
@@ -159,7 +159,7 @@ init_tasks(void) {
     task_head.prev = task_head.next = &task_head;
 }
 
-static void 
+static void
 append_task(struct task *task) {
     if (!task)
 	return;
@@ -184,7 +184,7 @@ struct task *
 create_task(void (*f)(void *), void *arg)
 {
     struct task *new_task;
-    
+
     new_task = xalloc(sizeof(struct task));
     new_task->fkn = f;
     new_task->arg = arg;
@@ -196,7 +196,7 @@ struct task *
 create_hiprio_task(void (*f)(void *), void *arg)
 {
     struct task *new_task;
-    
+
     new_task = xalloc(sizeof(struct task));
     new_task->fkn = f;
     new_task->arg = arg;
@@ -204,7 +204,7 @@ create_hiprio_task(void (*f)(void *), void *arg)
     return new_task;
 }
 
-    
+
 void
 remove_task(struct task*t)
 {
@@ -225,7 +225,7 @@ reschedule_task(struct task *t)
 {
     if (!t)
 	return;
-    
+
     if (t->next == t)
 	return; /* It's the currently running task, it will be rescheduled
 		   when it is finnished */
@@ -243,7 +243,7 @@ static void
 runtask(struct task *t)
 {
     struct gdexception exception_frame;
-    
+
     exception_frame.e_exception = NULL;
     exception_frame.e_catch = 0;
     exception = &exception_frame;
@@ -269,7 +269,7 @@ runtask(struct task *t)
 
 static struct task *shutdown_task;
 
-static void 
+static void
 slow_shut_down(void *v)
 {
     shutdown_task = 0;
@@ -281,7 +281,7 @@ slow_shut_down(void *v)
 static void
 check_for_slow_shut_down(void)
 {
-    if (!slow_shut_down_to_do || shutdown_task) 
+    if (!slow_shut_down_to_do || shutdown_task)
 	return;
     shutdown_task = create_hiprio_task(slow_shut_down, 0);
 }
@@ -306,7 +306,7 @@ mainloop(void)
 	while (task_head.next == &task_head) {
 	    set_current_time();
 	    deliver_signals();
-	    call_out(&tv);	    
+	    call_out(&tv);
 	    if (task_head.next != &task_head)
 		tv.tv_sec = tv.tv_usec = 0;
 	    nd_select(&tv);
@@ -326,14 +326,14 @@ mainloop(void)
 	    current_task->next == current_task) {
 	    tv.tv_sec = tv.tv_usec = 0;
 	    call_out(NULL);
-        } else 
+        } else
 	    call_out(&tv);
 	if (task_head.next != &task_head ||
 	    current_task->next == current_task)
 	    tv.tv_sec = tv.tv_usec = 0;
 	nd_select(&tv);
 	check_for_slow_shut_down();
-	
+
 	if (current_task->next == current_task)
 	    append_task(current_task); /* reschedule the task */
 	else
@@ -350,7 +350,7 @@ mainloop(void)
  *
  * The master object is asked to do the actual loading.
  */
-void 
+void
 preload_objects(int eflag)
 {
     struct gdexception exception_frame;
@@ -361,7 +361,7 @@ preload_objects(int eflag)
     set_current_time();
 
 
-    if (setjmp(exception_frame.e_context)) 
+    if (setjmp(exception_frame.e_context))
     {
 	clear_state();
 	(void)add_message("Error in start_boot() in master_ob.\n");
@@ -388,13 +388,13 @@ preload_objects(int eflag)
     INCREF(prefiles->ref); /* Otherwise it will be freed next sapply */
 
     ix = -1;
-    if (setjmp(exception_frame.e_context)) 
+    if (setjmp(exception_frame.e_context))
     {
 	clear_state();
 	(void)add_message("Anomaly in the fabric of world space.\n");
     }
 
-    while (++ix < prefiles->size) 
+    while (++ix < prefiles->size)
     {
         set_current_time();
 	if (s_flag)
@@ -416,7 +416,7 @@ preload_objects(int eflag)
  * All destructed objects are moved int a sperate linked list,
  * and deallocated after program execution.
  */
-void 
+void
 remove_destructed_objects(void)
 {
     struct object *ob, *next;
@@ -431,7 +431,7 @@ remove_destructed_objects(void)
 /*
  * Append string to file. Return 0 for failure, otherwise 1.
  */
-int 
+int
 write_file(char *file, char *str)
 {
     FILE *f;
@@ -455,7 +455,7 @@ write_file(char *file, char *str)
 }
 
 int read_file_len; /* Side effect from read_file, so we know how many lines
-		      we managed to read */
+                      we managed to read */
 char *
 read_file(char *file, int start, int len)
 {
@@ -465,96 +465,92 @@ read_file(char *file, int start, int len)
     size_t size;
 
     read_file_len = len;
-    if (len < 0) return 0;
+    if (len < 0)
+        return 0;
 
     file = check_valid_path(file, current_object, "read_file", 0);
 
     if (!file)
-	return 0;
+        return 0;
     f = fopen(file, "r");
     if (f == 0)
-	return 0;
+        return 0;
 
 #ifdef PURIFY
     (void)memset(&st, '\0', sizeof(st));
 #endif
 
     if (fstat(fileno(f), &st) == -1)
-	fatal("Could not stat an open file.\n");
+        fatal("Could not stat an open file.\n");
     size = (int)st.st_size;
     if (s_flag)
-	num_fileread++;
-    if (size > READ_FILE_MAX_SIZE)
-    {
-	if ( start || len )
-	    size = READ_FILE_MAX_SIZE;
-	else
-	{
-	    (void)fclose(f);
-	    return 0;
-	}
+        num_fileread++;
+    if (size > READ_FILE_MAX_SIZE) {
+        if (start || len)
+            size = READ_FILE_MAX_SIZE;
+        else {
+            (void)fclose(f);
+            return 0;
+        }
     }
     if (!start)
-	start = 1;
+        start = 1;
     if (!len)
-	read_file_len = len = READ_FILE_MAX_SIZE;
+        read_file_len = len = READ_FILE_MAX_SIZE;
+
     str = allocate_mstring(size);
     str[size] = '\0';
-    do
-    {
-	if (size > (int)st.st_size)
-	    size = (int)st.st_size;
-        if (fread(str, size, 1, f) != 1)
-	{
-    	    (void)fclose(f);
-	    free_mstring(str);
-    	    return 0;
+    do {
+        if (size > (int)st.st_size)
+            size = (int)st.st_size;
+        if (fread(str, size, 1, f) != 1) {
+            (void)fclose(f);
+            free_mstring(str);
+            return 0;
         }
-	st.st_size -= size;
-	end = str + size;
-        for (p = str; ( p2 = memchr(p, '\n', (size_t)(end - p)) ) && --start; )
-	    p = p2 + 1;
-    } while ( start > 1 );
-    
-    for (p2 = str; p != end; )
-    {
+        st.st_size -= size;
+        end = str + size;
+        for (p = str; (p2 = memchr(p, '\n', (size_t)(end - p))) && --start;)
+            p = p2 + 1;
+    } while (start > 1);
+
+    for (p2 = str; p != end;) {
         c = *p++;
-	if (!isprint(c) && !isspace(c))
-	    c = ' ';
-	*p2++ = c;
-	if ( c == '\n' )
-	    if (!--len)
-		break;
-    }
-    if (len && st.st_size)
-    {
-	size -= (p2 - str) ; 
-	if (size > (int)st.st_size)
-	    size = (int)st.st_size;
-        if (fread(p2, size, 1, f) != 1)
-	{
-    	    (void)fclose(f);
-	    free_mstring(str);
-    	    return 0;
+        if (!isprint((unsigned char)c) && !isspace((unsigned char)c)) {
+            c = ' ';
         }
-	st.st_size -= size;
-	end = p2 + size;
-        for (; p2 != end; )
-	{
-	    c = *p2;
-	    if (!isprint(c) && !isspace(c))
-		*p2 = ' ';
-	    p2++;
-	    if (c == '\n')
-	        if (!--len) break;
-	}
-	if ( st.st_size && len )
-	{
-	    /* tried to read more than READ_MAX_FILE_SIZE */
-	    (void)fclose(f);
-	    free_mstring(str);
-	    return 0;
-	}
+        *p2++ = c;
+        if (c == '\n')
+            if (!--len)
+                break;
+    }
+    if (len && st.st_size) {
+        size -= (p2 - str);
+        if (size > (int)st.st_size)
+            size = (int)st.st_size;
+        if (fread(p2, size, 1, f) != 1) {
+            (void)fclose(f);
+            free_mstring(str);
+            return 0;
+        }
+        st.st_size -= size;
+        end = p2 + size;
+        for (; p2 != end;) {
+            c = *p2;
+            if (!isprint((unsigned char)c) && !isspace((unsigned char)c)) {
+                *p2 = ' ';
+            }
+            p2++;
+            if (c == '\n')
+                if (!--len)
+                    break;
+        }
+        if (st.st_size && len) {
+            /* tried to read more than READ_MAX_FILE_SIZE */
+            (void)fclose(f);
+            free_mstring(str);
+            return 0;
+        }
     }
     read_file_len -= len;
     *p2 = '\0';
@@ -589,7 +585,7 @@ read_bytes(char *file, int start, size_t len)
     if (fstat(f, &st) == -1)
 	fatal("Could not stat an open file.\n");
     size = (int)st.st_size;
-    if(start < 0) 
+    if(start < 0)
 	start = size + start;
 
     if (start >= size)
@@ -597,7 +593,7 @@ read_bytes(char *file, int start, size_t len)
 	(void)close(f);
 	return 0;
     }
-    if ((start+len) > size) 
+    if ((start+len) > size)
 	len = (size - start);
 
     if ((size = (int)lseek(f, (off_t)start, 0)) < 0)
@@ -619,7 +615,7 @@ read_bytes(char *file, int start, size_t len)
     }
 
     /* We want to allow all characters to pass untouched!
-    for (il = 0; il < size; il++) 
+    for (il = 0; il < size; il++)
 	if (!isprint(str[il]) && !isspace(str[il]))
 	    str[il] = ' ';
 
@@ -657,7 +653,7 @@ write_bytes(char *file, int start, char *str)
     if (fstat(f, &st) == -1)
 	fatal("Could not stat an open file.\n");
     size = (int)st.st_size;
-    if(start < 0) 
+    if(start < 0)
 	start = size + start;
 
     if (start >= size)
@@ -715,7 +711,7 @@ file_size(char *file)
     return (int)st.st_size;
 }
 
-int 
+int
 file_time(char *file)
 {
     struct stat st;
@@ -746,8 +742,8 @@ update_av(av_t *av, double amount)
 {
     long double delta = current_time - av->last_time;
     av->last_time = current_time;
-    
-                                
+
+
     av->avg1 = expl(-delta / 60.0l) * av->avg1 +
 	(1.0l - expl(-1.0l/60.0l)) * amount;
 
@@ -760,39 +756,39 @@ update_av(av_t *av, double amount)
 
 static av_t tcp_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
-update_tcp_av(void) 
+void
+update_tcp_av(void)
 {
     update_av(&tcp_av, 1);
 }
 
 static av_t udp_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
-update_udp_av(void) 
+void
+update_udp_av(void)
 {
     update_av(&udp_av, 1);
 }
 
 static av_t alarm_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
-update_alarm_av(void) 
+void
+update_alarm_av(void)
 {
     update_av(&alarm_av, 1);
 }
 
 static av_t load_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
-update_load_av(void) 
+void
+update_load_av(void)
 {
     update_av(&load_av, 1);
 }
 
 static av_t runq_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
+void
 update_runq_av(double l)
 {
     update_av(&runq_av, l);
@@ -800,7 +796,7 @@ update_runq_av(double l)
 
 static av_t compile_av = {0.0, 0.0, 0.0, 0.0};
 
-void 
+void
 update_compile_av(int lines)
 {
     update_av(&compile_av, lines);

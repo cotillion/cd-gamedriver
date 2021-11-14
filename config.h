@@ -217,15 +217,6 @@
 #define MAX_PLAYERS	4000
 
 /*
- * When uploading files, we want fast response; however, normal players
- * shouldn't be able to hog the system in this way.  Define ALLOWED_ED_CMDS
- * to be the ratio of the no of ed cmds executed per player cmd, and
- * MAX_CMDS_PER_BEAT to be the bax no of buffered player commands the
- * system will accept in each heartbeat interval.
- */
-#define	ALLOWED_ED_CMDS		20
-
-/*
  * Reserve an extra memory area from malloc(), to free when we run out
  * of memory to get some warning and tell master about our memory troubles.
  * If this value is 0, no area will be reserved.
@@ -348,6 +339,28 @@
  * CHARSET telnet option.
  */
  #define DEFAULT_CHARSET  "ISO-8859-1"
+
+ /*
+  * DEFAULT_LC_CTYPE
+  *
+  * The GD is using isprint() and friends to filter chars when reading
+  * files and other data, this means that the CTYPE locale must be set
+  * to something reasonable.
+  *
+  * In most cases you will want to set this to a locale which works with
+  * DEFAULT_CHARSET.
+  *
+  * When set to "" locale will be set from the environment variables.
+  */
+#define DEFAULT_LC_CTYPE   "en_US.ISO-8859-1"
+
+/*
+ * DEFAULT_LC_ALL
+ *
+ * The default locale to set upon GD startup.
+ * When set to "" locale will be set from the environment variables.
+ */
+#define DEFAULT_LC_ALL    "C"
 
 #endif
 

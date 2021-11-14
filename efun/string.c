@@ -34,22 +34,19 @@ f_lower_case(int num_arg)
     push_mstring(str);
 }
 
-#define ISPRINT(c) (isprint(c) || (c) >= 0xa0)
-
 void
 f_readable_string(int num_arg)
 {
-    char *str;
-    int  i, c;
-
     if (sp->type == T_NUMBER)
-	return;
-    str = make_mstring(sp->u.string);
-    for (i = strlen(str)-1; i>=0; i--) {
-	c = str[i] & 0xff;
-	if (c < ' ' || !ISPRINT(c) ) /* A quick hack for 8859 -- LA */
-	    str[i] = '.';
+        return;
+
+    char *str = make_mstring(sp->u.string);
+    for (int i = strlen(str) - 1; i >= 0; i--) {
+        unsigned char c = str[i];
+        if (!isprint(c))
+            str[i] = '.';
     }
+
     pop_stack();
     push_mstring(str);
 }
