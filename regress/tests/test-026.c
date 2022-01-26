@@ -10,4 +10,9 @@ create()
 
     if (crypt("foo", "$1$BxY4Q1.U$") != "$1$BxY4Q1.U$CuizrialdJ9aeX30y/xJt/")
         throw("MD5 crypt is broken");
+
+    string pass = "foofoo!";
+    string c = crypt(pass, "$1$");
+    if (crypt(pass, c) != c)
+        throw("MD5 crypt is broken");
 }
