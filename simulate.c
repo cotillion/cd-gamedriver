@@ -41,7 +41,9 @@ extern int comp_flag;
 
 char *inherit_file;
 
-char *last_verb, *trig_verb;
+char *last_verb = NULL;
+char *trig_verb = NULL;
+
 extern int tot_alloc_dest_object, tot_removed_object;
 
 extern int set_call (struct object *, struct sentence *, int),
@@ -1705,25 +1707,25 @@ player_parser(char *buff)
 
 #ifdef DEBUG
     if (d_flag & DEBUG_COMMAND)
-	debug_message("cmd [%s]: %s\n", cmd_giver->name, buff);
+        debug_message("cmd [%s]: %s\n", cmd_giver->name, buff);
 #endif
     /*
      * Strip trailing spaces.
      */
     for (p = buff + strlen(buff) - 1; p >= buff; p--)
     {
-	if (*p != ' ')
-	    break;
-	*p = '\0';
+        if (*p != ' ')
+            break;
+        *p = '\0';
     }
     /*
      * Strip leading spaces.
      */
     while(*buff == ' ')
-	buff++;
+        buff++;
 
     if (buff[0] == '\0')
-	return 0;
+        return 0;
 
     /*
      * Quicktyper hook.
@@ -1733,135 +1735,141 @@ player_parser(char *buff)
     ret = apply_master_ob(M_MODIFY_COMMAND, 2);
 
     if (ret && ret->type == T_STRING)
-	subst_buff = string_copy(ret->u.string);
+        subst_buff = string_copy(ret->u.string);
     else if (ret == NULL)
-	subst_buff = string_copy(buff);
+        subst_buff = string_copy(buff);
 
     if (subst_buff == NULL)
-	return 1;
+        return 1;
 
     p = strpbrk(subst_buff, " \t\v\f\r\n");
     if (p == 0)
-	length = strlen(subst_buff);
+        length = strlen(subst_buff);
     else
-	length = p - subst_buff;
-    if (!*subst_buff ||
-	!cmd_giver || (cmd_giver->flags & O_DESTRUCTED))
-	return 1;
+        length = p - subst_buff;
+    if (!*subst_buff || !cmd_giver || (cmd_giver->flags & O_DESTRUCTED))
+        return 1;
 
     clear_notify();
     for (s = cmd_giver->sent; s; s = s->next)
     {
-	size_t len, copy_len;
+        size_t len, copy_len;
 
-	if (s->verb == 0) {
-	    error("An 'action' did something, but returned 0 or had an undefined verb.\n");
-	    /* NOTREACHED */
-	}
-	len = strlen(s->verb);
-	if (s->short_verb)
-	{
-	    if (len && strncmp(s->verb, subst_buff, len) != 0)
-		continue;
-	    if (s->short_verb == V_NO_SPACE)
-		length = len;
-	    else {
-#ifndef COMPAT_ADD_ACTIONS	/* Backwards compatibility */
-	    	if (len && length > len)
-		    continue;
+        if (s->verb == 0) {
+            error("An 'action' did something, but returned 0 or had an undefined verb.\n");
+            /* NOTREACHED */
+        }
+
+        len = strlen(s->verb);
+        if (s->short_verb)
+        {
+            if (len && strncmp(s->verb, subst_buff, len) != 0)
+                continue;
+            if (s->short_verb == V_NO_SPACE)
+                length = len;
+            else {
+#ifndef COMPAT_ADD_ACTIONS      /* Backwards compatibility */
+                if (len && length > len)
+                    continue;
 #endif
-		len = length;
-	    }
-	}
-	else
-	{
-	    if (len != length)
-		continue;
-	    if (strncmp(subst_buff, s->verb, length))
-		continue;
-	}
-	/*
-	 * Now we have found a special sentence !
-	 */
+                len = length;
+            }
+        }
+        else
+        {
+            if (len != length)
+                continue;
+            if (strncmp(subst_buff, s->verb, length))
+                continue;
+        }
+        /*
+         * Now we have found a special sentence !
+         */
 #ifdef DEBUG
-	if (d_flag & DEBUG_COMMAND)
-	    debug_message("Local command %s\n", getclosurename(s->funct));
+        if (d_flag & DEBUG_COMMAND)
+            debug_message("Local command %s\n", getclosurename(s->funct));
 #endif
-	if (length >= sizeof verb_copy)
-	    copy_len = sizeof verb_copy - 1;
-	else
-	    copy_len = length;
-	(void)strncpy(verb_copy, subst_buff, copy_len);
-	verb_copy[copy_len] = '\0';
-	last_verb = verb_copy;
-	trig_verb = s->verb;
+        if (length >= sizeof verb_copy)
+            copy_len = sizeof verb_copy - 1;
+        else
+            copy_len = length;
+        (void)strncpy(verb_copy, subst_buff, copy_len);
+        verb_copy[copy_len] = '\0';
 
-	theobj = s->funct->funobj;
+        /* Store the last verb */
+        if (NULL != last_verb)
+            free(last_verb);
+        last_verb = string_copy(verb_copy);
 
-	/*
-	 * If the function is static and not defined by current object,
-	 * then it will fail. If this is called directly from player input,
-	 * then we set current_object so that static functions are allowed.
-	 * current_object is reset just after the call to apply().
-	 */
-	if (current_object == 0)
-	    current_object = theobj;
-	/*
-	 * Remember the object, to update score.
-	 */
-	command_giver = cmd_giver;
+        /* Store the last trigger verb */
+        if (NULL != trig_verb)
+            free(trig_verb);
+        trig_verb = string_copy(s->verb);
 
-	p = subst_buff + (s->short_verb == V_NO_SPACE ? len : length);
-	while (*p != '\0' && isspace(*p))
-	    p++;
+        theobj = s->funct->funobj;
+        /*
+         * If the function is static and not defined by current object,
+         * then it will fail. If this is called directly from player input,
+         * then we set current_object so that static functions are allowed.
+         * current_object is reset just after the call to apply().
+         */
+        if (current_object == 0)
+            current_object = theobj;
+        /*
+         * Remember the object, to update score.
+         */
+        command_giver = cmd_giver;
+
+        p = subst_buff + (s->short_verb == V_NO_SPACE ? len : length);
+        while (*p != '\0' && isspace(*p))
+            p++;
 #ifdef DEBUG
-	if (d_flag & DEBUG_COMMAND)
-	    debug_message("Verb is %s [%s], args \"%s\"\n", last_verb, trig_verb, p ? p : "[none]");
+        if (d_flag & DEBUG_COMMAND)
+            debug_message("Verb is %s [%s], args \"%s\"\n", last_verb, trig_verb, p ? p : "[none]");
 #endif
-	if (*p != '\0') {
-	    push_string(p, STRING_MSTRING);
-	    (void)call_var(1, s->funct);
-	}
-	else
-	{
-	    (void)call_var(0, s->funct);
-	}
-	if (cmd_giver == 0) {
-	    pop_stack();
-	    if (subst_buff)
-		free(subst_buff);
-	    return 1;
-	}
+        if (*p != '\0') {
+            push_string(p, STRING_MSTRING);
+            (void)call_var(1, s->funct);
+        }
+        else
+        {
+            (void)call_var(0, s->funct);
+        }
+        if (cmd_giver == 0) {
+            pop_stack();
+            if (subst_buff)
+                free(subst_buff);
+            return 1;
+        }
 
-	current_object = save_current_object;
-	last_verb = 0;
-	trig_verb = 0;
-	/* If we get fail from the call, it was wrong second argument. */
-	if (sp->type == T_NUMBER && sp->u.number == 0) {
-	    /* Has the sentences been lost? */
-	    /* Does anyone know a better way of doing this? */
-	    struct sentence *s0;
+        current_object = save_current_object;
 
-	    pop_stack();
+        /* If we get fail from the call, it was wrong second argument. */
+        if (sp->type == T_NUMBER && sp->u.number == 0) {
+            /* Has the sentences been lost? */
+            /* Does anyone know a better way of doing this? */
+            struct sentence *s0;
 
-	    for (s0 = cmd_giver->sent; s0 && s0 != s; s0 = s0->next)
-		;
+            pop_stack();
 
-	    if (!s0) {
-		s = 0;
-		break;
-	    }
-	    continue;
-	} else
-	    pop_stack();
-	break;
+            for (s0 = cmd_giver->sent; s0 && s0 != s; s0 = s0->next)
+                ;
+
+            if (!s0) {
+                s = 0;
+                break;
+            }
+            continue;
+        } else
+            pop_stack();
+        break;
     }
     if (subst_buff)
         free(subst_buff);
     if (s == 0)
     {
-	notify_no_command();
-	return 0;
+        notify_no_command();
+        return 0;
     }
     return 1;
 }

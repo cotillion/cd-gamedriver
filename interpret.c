@@ -73,9 +73,11 @@ int s_f_f(char *name, struct program *prog);
 
 extern struct object *previous_ob;
 extern char *last_verb, *trig_verb;
-struct program *current_prog;
 extern int  s_flag, unlimited;
 extern struct object *current_interactive;
+
+
+struct program *current_prog;
 int variable_index_found;
 int variable_inherit_found;
 int variable_type_mod_found;
@@ -4050,8 +4052,8 @@ static void
 f_query_verb(int num_arg)
 {
     if (last_verb == 0) {
-	push_number(0);
-	return;
+        push_number(0);
+        return;
     }
     push_string(last_verb, STRING_MSTRING);
 }
@@ -4061,7 +4063,7 @@ static void
 f_query_trigverb(int num_arg)
 {
     if (trig_verb == 0) {
-	push_number(0);
+    	push_number(0);
 	return;
     }
     push_string(trig_verb, STRING_MSTRING);
