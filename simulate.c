@@ -45,6 +45,7 @@ char *last_verb = NULL;
 char *trig_verb = NULL;
 
 extern int tot_alloc_dest_object, tot_removed_object;
+extern struct allocation_pool tmp_pool;
 
 extern int set_call (struct object *, struct sentence *, int),
     legal_path (char *);
@@ -74,7 +75,7 @@ struct object *current_object;      /* The object interpreting a function. */
 struct object *command_giver;       /* Where the current command came from. */
 struct object *current_interactive; /* The user who caused this execution */
 
-int num_parse_error;		/* Number of errors in the parser. */
+int num_parse_error;            /* Number of errors in the parser. */
 
 int total_num_prog_blocks = 0;
 int total_prog_block_size = 0;
@@ -1672,22 +1673,39 @@ free_sentence(struct sentence *p)
 {
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
     if (p->prev_all)
-	p->prev_all->next_all = p->next_all;
+        p->prev_all->next_all = p->next_all;
     if (p->next_all)
-	p->next_all->prev_all = p->prev_all;
+        p->next_all->prev_all = p->prev_all;
     if (p == sent_free)
-	sent_free = p->next_all;
+        sent_free = p->next_all;
 #endif
     if (p->funct)
-	free_closure(p->funct);
+        free_closure(p->funct);
     p->funct = NULL;
     if (p->verb)
-	free_sstring(p->verb);
+        free_sstring(p->verb);
     p->verb = NULL;
     free((char *)p);
     tot_current_alloc_sentence--;
     tot_alloc_sentence--;
 }
+
+/*
+ * Resets state variables used in player_plyaers
+ */
+ void
+ reset_player_parser()
+ {
+    if (NULL != last_verb) {
+        free(last_verb);
+        last_verb = NULL;
+    }
+
+    if (NULL != trig_verb) {
+        free(trig_verb);
+        trig_verb = NULL;
+    }
+ }
 
 /*
  * Find the sentence for a command from the player.
@@ -1700,7 +1718,7 @@ player_parser(char *buff)
     size_t length;
     char *p;
     struct object *save_current_object = current_object;
-    char verb_copy[100], *subst_buff = NULL;
+
     struct svalue *ret;
     struct object *cmd_giver = command_giver;
     struct object *theobj;
@@ -1721,12 +1739,11 @@ player_parser(char *buff)
     /*
      * Strip leading spaces.
      */
-    while(*buff == ' ')
+    while (*buff == ' ')
         buff++;
 
     if (buff[0] == '\0')
         return 0;
-
     /*
      * Quicktyper hook.
      */
@@ -1734,26 +1751,36 @@ player_parser(char *buff)
     push_object(cmd_giver);
     ret = apply_master_ob(M_MODIFY_COMMAND, 2);
 
-    if (ret && ret->type == T_STRING)
-        subst_buff = string_copy(ret->u.string);
-    else if (ret == NULL)
-        subst_buff = string_copy(buff);
+    reset_player_parser();
 
-    if (subst_buff == NULL)
+    char *cmd = NULL;
+    if (ret && ret->type == T_STRING)
+        cmd = string_copy(ret->u.string);
+    else if (ret == NULL)
+        cmd = string_copy(buff);
+
+    if (cmd == NULL)
         return 1;
 
-    p = strpbrk(subst_buff, " \t\v\f\r\n");
+    /* The memory allocated above needs to be freed even if an action throws an exception.
+     * The command needs to be copied since the svalue return from apply_master_ob is reused
+     * on each call and could be called from one of the actions. */
+    pool_track(&tmp_pool, cmd);
+
+    p = strpbrk(cmd, " \t\v\f\r\n");
     if (p == 0)
-        length = strlen(subst_buff);
+        length = strlen(cmd);
     else
-        length = p - subst_buff;
-    if (!*subst_buff || !cmd_giver || (cmd_giver->flags & O_DESTRUCTED))
+        length = p - cmd;
+
+    if (!*cmd || !cmd_giver || (cmd_giver->flags & O_DESTRUCTED))
         return 1;
 
     clear_notify();
+
     for (s = cmd_giver->sent; s; s = s->next)
     {
-        size_t len, copy_len;
+        size_t len;
 
         if (s->verb == 0) {
             error("An 'action' did something, but returned 0 or had an undefined verb.\n");
@@ -1763,7 +1790,7 @@ player_parser(char *buff)
         len = strlen(s->verb);
         if (s->short_verb)
         {
-            if (len && strncmp(s->verb, subst_buff, len) != 0)
+            if (len && strncmp(s->verb, cmd, len) != 0)
                 continue;
             if (s->short_verb == V_NO_SPACE)
                 length = len;
@@ -1779,7 +1806,7 @@ player_parser(char *buff)
         {
             if (len != length)
                 continue;
-            if (strncmp(subst_buff, s->verb, length))
+            if (strncmp(cmd, s->verb, length))
                 continue;
         }
         /*
@@ -1789,17 +1816,14 @@ player_parser(char *buff)
         if (d_flag & DEBUG_COMMAND)
             debug_message("Local command %s\n", getclosurename(s->funct));
 #endif
-        if (length >= sizeof verb_copy)
-            copy_len = sizeof verb_copy - 1;
-        else
-            copy_len = length;
-        (void)strncpy(verb_copy, subst_buff, copy_len);
-        verb_copy[copy_len] = '\0';
 
         /* Store the last verb */
         if (NULL != last_verb)
             free(last_verb);
-        last_verb = string_copy(verb_copy);
+
+        last_verb = xalloc(length + 1);
+        strncpy(last_verb, cmd, length);
+        last_verb[length] = '\0';
 
         /* Store the last trigger verb */
         if (NULL != trig_verb)
@@ -1820,7 +1844,7 @@ player_parser(char *buff)
          */
         command_giver = cmd_giver;
 
-        p = subst_buff + (s->short_verb == V_NO_SPACE ? len : length);
+        p = cmd + (s->short_verb == V_NO_SPACE ? len : length);
         while (*p != '\0' && isspace(*p))
             p++;
 #ifdef DEBUG
@@ -1835,10 +1859,9 @@ player_parser(char *buff)
         {
             (void)call_var(0, s->funct);
         }
+
         if (cmd_giver == 0) {
             pop_stack();
-            if (subst_buff)
-                free(subst_buff);
             return 1;
         }
 
@@ -1864,8 +1887,7 @@ player_parser(char *buff)
             pop_stack();
         break;
     }
-    if (subst_buff)
-        free(subst_buff);
+
     if (s == 0)
     {
         notify_no_command();
