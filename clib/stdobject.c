@@ -23,6 +23,10 @@ static var obj_prev = { "obj_previous", 0 };
 static var obj_props = { "obj_props", 0 };
 static var obj_no_change = { "obj_no_change", 0 };
 
+static var obj_names = { "obj_names", 0 };
+static var obj_pnames = { "obj_pnames", 0 };
+static var obj_rodzaje = { "obj_rodzaje", 0 };
+static var obj_prodzaje = { "obj_prodzaje", 0 };
 /*
 fp[0]: string to be expanded
 fp[1]: target object
