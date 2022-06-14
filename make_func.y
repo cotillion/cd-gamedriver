@@ -24,7 +24,7 @@ int min_arg = -1, limit_max = 0;
  * arg_types is the types of all arguments. A 0 is used as a delimiter,
  * marking next argument. An argument can have several types.
  */
-int arg_types[200], last_current_type;
+int arg_types[300], last_current_type;
 /*
  * Store the types of the current efun. They will be copied into the
  * arg_types list if they were not already there (to save memory).

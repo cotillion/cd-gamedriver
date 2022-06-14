@@ -6559,7 +6559,244 @@ f_match_path(int num_arg)
 
     assign_svalue(sp, svp1);
 }
+/* Przypadki */
+#define MIA  0
+#define DOP  1
+#define CEL  2
+#define BIE  3
+#define NAR  4
+#define MIE  5
 
+/* Rodzaje gramatyczne */
+
+#define R_M_OS             0
+#define R_M_NOS_ZYW        1
+#define R_M_NOS_NZYW       2
+#define R_M_NZYW           2
+
+#define R_Z               3
+
+#define R_N_OS            4
+#define R_N_NOS           5
+
+char *
+oblicz_przym(char *adj1, char *adj2, int przyp, int rodzaj, int liczba)
+{
+    int temat_l;
+    char konc[5], *ret;
+    
+    temat_l = strlen(adj1) - 1;
+    if (temat_l > 25)
+    {
+        adj1[25] = '\0';
+        temat_l = 25;
+    }
+    
+    ret = (char *)xalloc(30);
+    
+    if (temat_l <= 0)
+        return 0;
+    
+    *ret = '\0';
+    *konc = '\0';
+    
+    if (adj1[temat_l] == 'y')
+    {
+        if (!liczba)
+        {
+            switch(rodzaj)
+            {
+                case R_M_OS:
+                case R_M_NOS_ZYW:
+                    if (przyp == BIE)
+                    {
+                        strcpy(konc, "ego");
+                        break;
+                    }
+                case R_M_NOS_NZYW:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE: strcpy(konc, "y"); break;
+                        case DOP: strcpy(konc, "ego"); break;
+                        case CEL: strcpy(konc, "emu"); break;
+                        case NAR:
+                        case MIE: strcpy(konc, "ym"); break;
+                    }
+                    break;
+                case R_Z:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE:
+                        case NAR: strcpy(konc, "a"); break;
+                        default: strcpy(konc, "ej"); break;
+                    }
+                    break;
+                
+                case R_N_OS:
+                case R_N_NOS:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE: strcpy(konc, "e"); break;
+                        case DOP: strcpy(konc, "ego"); break;
+                        case CEL: strcpy(konc, "emu"); break;
+                        default: strcpy(konc, "ym"); break;
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            switch(rodzaj)
+            {
+                case R_M_OS:
+                    switch(przyp)
+                    {
+                        case MIA: strcpy(ret, adj2);
+                                  return ret;
+                        case DOP:
+                        case BIE:
+                        case MIE: strcpy(konc, "ych"); break;
+                        case CEL: strcpy(konc, "ym"); break;
+                        case NAR: strcpy(konc, "ymi"); break;
+                    }
+                    break;
+
+                default:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE: strcpy(konc, "e"); break;
+                        case DOP:
+                        case MIE: strcpy(konc, "ych"); break;
+                        case CEL: strcpy(konc, "ym"); break;
+                        case NAR: strcpy(konc, "ymi"); break;
+                    }
+            }
+        }
+    }
+    else /* Koncowka 'i' */
+    {
+        if (!liczba)
+        {
+            switch(rodzaj)
+            {
+		case R_M_OS:
+		case R_M_NOS_ZYW:
+		case R_M_NOS_NZYW:
+                    switch(przyp)
+                    {
+                        case MIA: strcpy(konc, "i"); break;
+                        case DOP: strcpy(konc, "iego"); break;
+                        case CEL: strcpy(konc, "iemu"); break;
+                        case BIE: strcpy(konc, 
+                            (rodzaj == R_M_NOS_NZYW ? "i" : "iego")); 
+                            break;
+                        case NAR:
+                        case MIE: strcpy(konc, "im"); break;
+                    }
+                    break;
+                    
+                case R_Z:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE:
+                        case NAR: switch(adj1[temat_l - 1])
+                        	  {
+                        	      case 's':
+                        	      case 'z':
+                        	      case 'n':
+                        	      case 'p': strcpy(konc, "ia"); break;
+                        	      default: strcpy(konc, "a");
+                        	  }
+                        	  break;
+                        default: strcpy(konc, "iej");
+                    }
+                    break;
+                    
+                case R_N_OS:
+                case R_N_NOS:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE: strcpy(konc, "ie"); break;
+                        case DOP: strcpy(konc, "iego"); break;
+                        case CEL: strcpy(konc, "iemu"); break;
+                        case NAR:
+                        case MIE: strcpy(konc, "im"); break;
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            switch(rodzaj)
+            {
+                case R_M_OS:
+                    switch(przyp)
+                    {
+                        case MIA: strcpy(ret, adj2);
+                                  return ret;
+                        case DOP:
+                        case BIE:
+                        case MIE: strcpy(konc, "ich"); break;
+                        case CEL: strcpy(konc, "im"); break;
+                        case NAR: strcpy(konc, "imi"); break;
+                    }
+                    break;
+
+                default:
+                    switch(przyp)
+                    {
+                        case MIA:
+                        case BIE: strcpy(konc, "ie"); break;
+                        case DOP:
+                        case MIE: strcpy(konc, "ich"); break;
+                        case CEL: strcpy(konc, "im"); break;
+                        case NAR: strcpy(konc, "imi"); break;
+                    }
+                    break;
+            }
+        }
+    }
+    strncpy(ret, adj1, temat_l); ret[temat_l] = '\0';
+    strcat(ret, konc);
+    
+    return ret;
+}
+
+static void
+f_oblicz_przym(int num_arg)
+{
+    struct svalue *arg;
+    char *ret;
+    
+    arg = sp - num_arg + 1;
+
+    if (arg[0].type != T_STRING)
+	bad_arg(1, F_PARSE_COMMAND, &arg[0]);
+    if (arg[1].type != T_STRING)
+	bad_arg(2, F_PARSE_COMMAND, &arg[1]);
+    if (arg[2].type != T_NUMBER)
+	bad_arg(3, F_PARSE_COMMAND, &arg[2]);
+    if (arg[3].type != T_NUMBER)
+	bad_arg(4, F_PARSE_COMMAND, &arg[3]);
+    if (arg[4].type != T_NUMBER)
+	bad_arg(5, F_PARSE_COMMAND, &arg[4]);
+    
+    ret = oblicz_przym(arg[0].u.string, arg[1].u.string, arg[2].u.number, 
+        arg[3].u.number, arg[4].u.number);
+
+    pop_n_elems(num_arg);
+    
+    if (!ret)
+        push_number(0);
+    else
+        push_string(ret, STRING_MSTRING);
+}
 
 #define EFUN_TABLE
 #include "efun_table.h"
@@ -8048,243 +8285,4 @@ call_efun(int instruction, int numa)
 	}
     }
     efun_table[instruction](numa);
-}
-
-/* Przypadki */
-#define MIA  0
-#define DOP  1
-#define CEL  2
-#define BIE  3
-#define NAR  4
-#define MIE  5
-
-/* Rodzaje gramatyczne */
-
-#define R_M_OS             0
-#define R_M_NOS_ZYW        1
-#define R_M_NOS_NZYW       2
-#define R_M_NZYW           2
-
-#define R_Z               3
-
-#define R_N_OS            4
-#define R_N_NOS           5
-
-char *
-oblicz_przym(char *adj1, char *adj2, int przyp, int rodzaj, int liczba)
-{
-    int temat_l;
-    char konc[5], *ret;
-    
-    temat_l = strlen(adj1) - 1;
-    if (temat_l > 25)
-    {
-        adj1[25] = '\0';
-        temat_l = 25;
-    }
-    
-    ret = (char *)xalloc(30);
-    
-    if (temat_l <= 0)
-        return 0;
-    
-    *ret = '\0';
-    *konc = '\0';
-    
-    if (adj1[temat_l] == 'y')
-    {
-        if (!liczba)
-        {
-            switch(rodzaj)
-            {
-                case R_M_OS:
-                case R_M_NOS_ZYW:
-                    if (przyp == BIE)
-                    {
-                        strcpy(konc, "ego");
-                        break;
-                    }
-                case R_M_NOS_NZYW:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE: strcpy(konc, "y"); break;
-                        case DOP: strcpy(konc, "ego"); break;
-                        case CEL: strcpy(konc, "emu"); break;
-                        case NAR:
-                        case MIE: strcpy(konc, "ym"); break;
-                    }
-                    break;
-                case R_Z:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE:
-                        case NAR: strcpy(konc, "a"); break;
-                        default: strcpy(konc, "ej"); break;
-                    }
-                    break;
-                
-                case R_N_OS:
-                case R_N_NOS:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE: strcpy(konc, "e"); break;
-                        case DOP: strcpy(konc, "ego"); break;
-                        case CEL: strcpy(konc, "emu"); break;
-                        default: strcpy(konc, "ym"); break;
-                    }
-                    break;
-            }
-        }
-        else
-        {
-            switch(rodzaj)
-            {
-                case R_M_OS:
-                    switch(przyp)
-                    {
-                        case MIA: strcpy(ret, adj2);
-                                  return ret;
-                        case DOP:
-                        case BIE:
-                        case MIE: strcpy(konc, "ych"); break;
-                        case CEL: strcpy(konc, "ym"); break;
-                        case NAR: strcpy(konc, "ymi"); break;
-                    }
-                    break;
-
-                default:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE: strcpy(konc, "e"); break;
-                        case DOP:
-                        case MIE: strcpy(konc, "ych"); break;
-                        case CEL: strcpy(konc, "ym"); break;
-                        case NAR: strcpy(konc, "ymi"); break;
-                    }
-            }
-        }
-    }
-    else /* Koncowka 'i' */
-    {
-        if (!liczba)
-        {
-            switch(rodzaj)
-            {
-		case R_M_OS:
-		case R_M_NOS_ZYW:
-		case R_M_NOS_NZYW:
-                    switch(przyp)
-                    {
-                        case MIA: strcpy(konc, "i"); break;
-                        case DOP: strcpy(konc, "iego"); break;
-                        case CEL: strcpy(konc, "iemu"); break;
-                        case BIE: strcpy(konc, 
-                            (rodzaj == R_M_NOS_NZYW ? "i" : "iego")); 
-                            break;
-                        case NAR:
-                        case MIE: strcpy(konc, "im"); break;
-                    }
-                    break;
-                    
-                case R_Z:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE:
-                        case NAR: switch(adj1[temat_l - 1])
-                        	  {
-                        	      case 's':
-                        	      case 'z':
-                        	      case 'n':
-                        	      case 'p': strcpy(konc, "ia"); break;
-                        	      default: strcpy(konc, "a");
-                        	  }
-                        	  break;
-                        default: strcpy(konc, "iej");
-                    }
-                    break;
-                    
-                case R_N_OS:
-                case R_N_NOS:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE: strcpy(konc, "ie"); break;
-                        case DOP: strcpy(konc, "iego"); break;
-                        case CEL: strcpy(konc, "iemu"); break;
-                        case NAR:
-                        case MIE: strcpy(konc, "im"); break;
-                    }
-                    break;
-            }
-        }
-        else
-        {
-            switch(rodzaj)
-            {
-                case R_M_OS:
-                    switch(przyp)
-                    {
-                        case MIA: strcpy(ret, adj2);
-                                  return ret;
-                        case DOP:
-                        case BIE:
-                        case MIE: strcpy(konc, "ich"); break;
-                        case CEL: strcpy(konc, "im"); break;
-                        case NAR: strcpy(konc, "imi"); break;
-                    }
-                    break;
-
-                default:
-                    switch(przyp)
-                    {
-                        case MIA:
-                        case BIE: strcpy(konc, "ie"); break;
-                        case DOP:
-                        case MIE: strcpy(konc, "ich"); break;
-                        case CEL: strcpy(konc, "im"); break;
-                        case NAR: strcpy(konc, "imi"); break;
-                    }
-                    break;
-            }
-        }
-    }
-    strncpy(ret, adj1, temat_l); ret[temat_l] = '\0';
-    strcat(ret, konc);
-    
-    return ret;
-}
-
-static void
-f_oblicz_przym(int num_arg)
-{
-    struct svalue *arg;
-    char *ret;
-    
-    arg = sp - num_arg + 1;
-
-    if (arg[0].type != T_STRING)
-	bad_arg(1, F_PARSE_COMMAND, &arg[0]);
-    if (arg[1].type != T_STRING)
-	bad_arg(2, F_PARSE_COMMAND, &arg[1]);
-    if (arg[2].type != T_NUMBER)
-	bad_arg(3, F_PARSE_COMMAND, &arg[2]);
-    if (arg[3].type != T_NUMBER)
-	bad_arg(4, F_PARSE_COMMAND, &arg[3]);
-    if (arg[4].type != T_NUMBER)
-	bad_arg(5, F_PARSE_COMMAND, &arg[4]);
-    
-    ret = oblicz_przym(arg[0].u.string, arg[1].u.string, arg[2].u.number, 
-        arg[3].u.number, arg[4].u.number);
-
-    pop_n_elems(num_arg);
-    
-    if (!ret)
-        push_number(0);
-    else
-        push_string(ret, STRING_MSTRING);
 }
