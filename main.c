@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <locale.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -180,9 +181,22 @@ main(int argc, char **argv)
     *p = -10;
     if (EXTRACT_UCHAR(p) != 0x100 - 10)
     {
-	(void)fprintf(stderr, "Bad definition of EXTRACT_UCHAR() in config.h.\n");
-	exit(1);
+        (void)fprintf(stderr, "Bad definition of EXTRACT_UCHAR() in config.h.\n");
+        exit(1);
     }
+
+#ifdef DEFAULT_LC_ALL
+    if (NULL == setlocale(LC_ALL, DEFAULT_LC_ALL)) {
+        fprintf(stderr, "Unable to set LC_ALL to: %s.\n", DEFAULT_LC_ALL);
+    }
+#endif
+
+#ifdef DEFAULT_LC_CTYPE
+    if (NULL == setlocale(LC_CTYPE, DEFAULT_LC_CTYPE)) {
+        fprintf(stderr, "Unable to set LC_CTYPE to: %s.\n", DEFAULT_LC_CTYPE);
+    }
+#endif
+
     set_current_time();
 
 #ifdef PROFILE_LPC
@@ -208,13 +222,13 @@ main(int argc, char **argv)
 
     if (chdir(mudlib_path) == -1) {
         (void)fprintf(stderr, "Bad mudlib directory: %s\n", MUD_LIB);
-	exit(1);
+        exit(1);
     }
 
     if (setjmp(exception_frame.e_context))
     {
-	clear_state();
-	add_message("Anomaly in the fabric of world space.\n");
+        clear_state();
+        add_message("Anomaly in the fabric of world space.\n");
     }
     else
     {
