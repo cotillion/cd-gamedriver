@@ -170,6 +170,7 @@ void    write_socket(string|int);
 void    write_socket_gmcp(string, mixed);
 string  val2json(mixed);
 void    set_ip_number(object, string);
+string	oblicz_przym(string, string, int, int, int);
 
 #ifdef WORD_WRAP
 /*
