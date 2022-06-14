@@ -101,6 +101,140 @@ static func func_check_call =
     "check_call",
     object_check_call,
 };
+static void
+object_usun_stare_nazwy(struct svalue *fp)
+{
+    struct vector *arr, *workarr, *argarr, *ret_nazwy, *ret_rodzaje;
+    struct svalue el, *workitem, *rodzajitem;
+    int size_arg, size_work, ix, cx, dx, arr_ix;
+
+    if (fp[0].type != T_POINTER)
+    {
+        if (fp[0].type != T_STRING)
+        {
+            push_number(1);
+            return;
+        }
+        
+        arr = allocate_array(1);
+        assign_svalue_no_free(&arr->item[0], fp);
+        el.type = T_POINTER;
+        el.u.vec = arr;
+        assign_svalue(fp, &el);
+    }
+    else if (!fp[0].u.vec->size)
+    {
+        push_number(1);
+        return;
+    }
+    
+    argarr = fp[0].u.vec;
+    
+    if (!fp[2].u.number) // Liczba pojedyncza.
+    {
+        workitem = &(VAR(obj_names).u.vec->item[fp[1].u.number]);
+        rodzajitem = &(VAR(obj_rodzaje).u.vec->item[fp[1].u.number]);
+    }
+    else
+    {
+        workitem = &(VAR(obj_pnames).u.vec->item[fp[1].u.number]);
+        rodzajitem = &(VAR(obj_prodzaje).u.vec->item[fp[1].u.number]);
+    }
+
+    if (workitem->type != T_POINTER)
+    {
+	push_number(1);
+	return;
+    }
+    
+    workarr = workitem->u.vec;
+    size_work = workarr->size;
+    size_arg = argarr->size;
+	
+    if (!size_work)
+    {
+	push_number(1);
+	return;
+    }
+
+#if 0    
+    if (argarr->size == 1)
+    {
+	if ((argarr->item[0].type != T_STRING) ||
+	    (workarr->item[0].type != T_STRING))
+	   fprintf(stderr, "ROZNI SIE\n");
+	if (!strcmp(argarr->item[0].u.string, workarr->item[0].u.string))
+	{
+	    push_number(0);
+	    return;
+	}
+    }
+#endif
+    
+    size_work--;
+    
+    ix = size_arg;
+    while(--ix >= 0)
+    {
+        cx = size_work;
+        while (cx >= 0)
+        {
+            if ((argarr->item[ix].type != T_STRING) ||
+ 		(workarr->item[cx].type != T_STRING))
+ 	    {
+ 		cx--;
+ 		continue;
+ 	    }
+	    if (strcmp(argarr->item[ix].u.string, workarr->item[cx].u.string))
+	    {
+		cx--;
+		continue;
+	    }
+
+	    ret_nazwy = allocate_array(size_work);
+	    ret_rodzaje = allocate_array(size_work);
+#if 0	    
+            fprintf(stderr, "CKK 3, nazwa = '%s', '%s'\n", 
+                argarr->item[ix].u.string, current_object->name);
+#endif	    
+	    arr_ix = 0;
+	    for (dx = 0; dx < cx; dx++)
+	    {
+		assign_svalue_no_free(&ret_nazwy->item[arr_ix],
+				      &workarr->item[dx]);
+		assign_svalue_no_free(&ret_rodzaje->item[arr_ix++],
+				      &(rodzajitem->u.vec->item[dx]));
+	    }
+	    for (dx = cx + 1; dx <= size_work; dx++)
+	    {
+		assign_svalue_no_free(&ret_nazwy->item[arr_ix],
+				      &workarr->item[dx]);
+		assign_svalue_no_free(&ret_rodzaje->item[arr_ix++],
+				      &(rodzajitem->u.vec->item[dx]));
+	    }
+
+	    free_vector(workitem->u.vec);
+	    free_vector(rodzajitem->u.vec);
+	    
+	    workitem->u.vec/* = workarr*/ = ret_nazwy;
+	    rodzajitem->u.vec = ret_rodzaje;
+	    break; // Zakladamy, ze nigdy nie bedzie dwoch takich samych nazw.
+/*
+	    size_work--;
+	    cx--;
+ */
+        }
+    }
+    
+    push_number(1);
+    return;
+}
+
+static func func_usun_stare_nazwy =
+{
+    "usun_stare_nazwy",
+    object_usun_stare_nazwy,
+};
 
 static void
 object_query_prop(struct svalue *fp)
@@ -260,6 +394,7 @@ static func *(funcs[]) =
     &func_query_prop,
     &func_add_prop,
     &func_change_prop,
+    &func_usun_stare_nazwy,
     0,
 };
 
