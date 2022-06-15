@@ -1,4 +1,4 @@
-/*
+gProdz_list_d/*
 
   Pattern Parser package for LPmud
 
@@ -310,9 +310,10 @@ static struct vector    *gAdj1id_list        = 0;
 static struct vector    *gAdj2id_list        = 0;
 
 static struct vector	*gId_list_d	= 0;  /* From master */
-static struct vector    *gRodz_list_d        = 0;  /* From master */
-static struct vector	*gPluid_list_d	= 0;  /* From master */
-static struct vector	*gAdjid_list_d	= 0;  /* From master */
+static struct vector        *gRodz_list_d        = 0;  /* From master */
+static struct vector        *gPluid_list_d        = 0;  /* From master */
+static struct vector        *gProdz_list_d        = 0;  /* From master */
+
 static struct vector	*gPrepos_list	= 0;  /* From master */
 static char 		*gAllword       = 0;  /* From master */
 
