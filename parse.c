@@ -7,10 +7,14 @@
   If you have questions or complaints about this code please refer them
   to jna@cd.chalmers.se
 
+
+  Implementacja polskiej gramatyki (przypadki, liczebniki, zaimki):
+  Copyright (C) 1998 Jakub Szewczyk <alvin@rpg.pl>
+
+  Poprawki by Delvert.
 */
 
 #include <alloca.h>
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,11 +35,12 @@
 extern int d_flag; /* for debugging purposes */
 extern struct object *previous_ob;
 struct object *vbfc_object;
-
 static int przyp;
+
 static int match_all_flag;
 static int last_word_flag;
-#ifndef tolower			/* On some systems this is a function */
+
+#ifndef tolower                        /* On some systems this is a function */
 extern int tolower (int);
 #endif
 
@@ -64,8 +69,8 @@ extern int tolower (int);
   In earlier versions it used the normal id() lfun in the LPC objects to
   find out if a given object was identified by a certain string. This was
   highly inefficient as it could result in hundreds or maybe thousands of
-  calls when very long commands were parsed.
-
+  calls when very long commands were parsed. 
+  
   The new version relies on the LPC objects to give it three lists of 'names'.
 
        1 - The normal singular names.
@@ -79,7 +84,7 @@ extern int tolower (int);
        3 - string *parse_command_adjectiv_id_list();
 
   The only really needed list is the first. If the second does not exist
-  than the efun will try to create one from the singular list. For
+  than the efun will try to create one from the singular list. For 
   grammatical reasons it does not always succeed in a perfect way. This is
   especially true when the 'names' are not single words but phrases.
 
@@ -107,7 +112,7 @@ extern int tolower (int);
                 - Would normally return ({ "iffish" })
 
   The last two are the default list of the prepositions and a single so called
-  'all' word.
+  'all' word. 
 
        string *parse_command_prepos_list()
                  - Would normally return: ({ "in", "on", "under" })
@@ -123,13 +128,13 @@ extern int tolower (int);
     * Language configured parse.c
     *
     #define PARSE_FOREIGN
-
+   
     char *parse_to_plural(str)
         char *str;
     {
 
         * Your own plural converter for your language *
-
+     
     }
 
       * The numberwords below should be replaced for the new language *
@@ -137,12 +142,12 @@ extern int tolower (int);
     static char *ord1[] = {"", "first", "second", "third", "fourth", "fifth",
 			   "sixth", "seventh", "eighth", "ninth", "tenth",
 			   "eleventh", "twelfth", "thirteenth", "fourteenth",
-			   "fifteenth", "sixteenth", "seventeenth",
+			   "fifteenth", "sixteenth", "seventeenth", 
 			   "eighteenth","nineteenth"};
 
     static char *ord10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
 			    "seventy", "eighty","ninety"};
-
+    
     static char *sord10[] = {"", "", "twentieth", "thirtieth", "fortieth",
 			     "fiftieth", "sixtieth","seventieth", "eightieth",
 			     "ninetieth"};
@@ -158,7 +163,7 @@ extern int tolower (int);
     #include "parse_english.c"      * This parse.c file *
 
 #endif
-
+  
   When all these things are defined parse_command() works best and most
   efficient. What follows is the docs for how to use it from LPC:
 
@@ -171,7 +176,7 @@ int parse_command(string, object/object*, string, destargs...)
 
 	string		Given command
 
-	object*		if arr
+	object*		if arr 
 	object			array holding the accessible objects
 			if ob
 				object from which to recurse and create
@@ -204,7 +209,7 @@ int parse_command(string, object/object*, string, destargs...)
 				   if array: array[0]=matched word
 			%i	Returns a special array on the form:
 				[0] = (int) +(wanted) -(order) 0(all)
-				[1..n] (object) Objectpointers
+				[1..n] (object) Objectpointers	
 			%l	Returns a special array on the form:
 				[0] = (int) +(wanted) -(order) 0(all)
 				[1..n] (object) Objectpointers
@@ -218,7 +223,7 @@ int parse_command(string, object/object*, string, destargs...)
   The return values of %i and %l is also the most complex. They return an
   array consisting of first a number and then all possible objects matching.
   As the typical string matched by %i/%l looks like: 'three red roses',
-  'all nasty bugs' or 'second blue sword' the number indicates which
+  'all nasty bugs' or 'second blue sword' the number indicates which 
   of these numerical constructs was matched:
 
          if numeral >0 then three, four, five etc were matched
@@ -237,15 +242,15 @@ int parse_command(string, object/object*, string, destargs...)
        to the caller to decide which of the objects are actually visible
        meaning that 'second' might not at all mean the second object in
        the returned array of objects.
-
+			
 Example:
 
  if (parse_command("spray car",environment(this_player()),
-                      " 'spray' / 'paint' [paint] %i ",items))
+                      " 'spray' / 'paint' [paint] %i ",items))  
  {
       If the pattern matched then items holds a return array as described
         under 'destargs' %i above.
-
+     
  }
 
  BUGS / Features
@@ -262,60 +267,50 @@ Example:
             This will be fixed in the future
 
 
-*/
-
+*/ 
 /* Some useful string macros
 */
 #define EQ(x,y) (strcmp(x,y)==0)
 
-/* Function in LPC which returns a list of ids
+/* Function in LPC which returns a list of ids 
 */
-#define QGET_ID "parse_command_id_list"
+#define QGET_ID "parse_command_id_list"                
 #define QGET_RODZAJ "parse_command_rodzaj_id_list"
 #define M_QGET_ID M_PARSE_COMMAND_ID_LIST
 #define M_QGET_RODZ M_PARSE_COMMAND_RODZ_LIST
-/* Function in LPC which returns a list of plural ids
+/* Function in LPC which returns a list of plural ids 
 */
-#define QGET_PLURID "parse_command_plural_id_list"
+#define QGET_PLURID "parse_command_plural_id_list"   
 #define QGET_PRODZAJ "parse_command_plural_rodzaj_id_list"
 #define M_QGET_PLURID M_PARSE_COMMAND_PLURAL_ID_LIST
 #define M_QGET_PRODZ M_PARSE_COMMAND_PRODZ_LIST
-/* Function in LPC which returns a list of adjectiv ids
+/* Function in LPC which returns a list of adjectiv ids 
 */
 #define QGET_ADJID1 "parse_command_adjectiv1_id_list" 
 #define QGET_ADJID2 "parse_command_adjectiv2_id_list"
-/* Function in LPC which returns a list of prepositions
-*/
-#define QGET_PREPOS "parse_command_prepos_list"
-#define M_QGET_PREPOS M_PARSE_COMMAND_PREPOS_LIST
-/* Function in LPC which returns the 'all' word
-*/
-#define QGET_ALLWORD "parse_command_all_word"
-#define M_QGET_ALLWORD M_PARSE_COMMAND_ALL_WORD
 
 #define QGET_ZAIMKA                "parse_command_obiekty_zaimka"
 #define QGET_RODZAJ_NAZWY        "query_rodzaj_nazwy"
 #define QSET_RODZAJ                "parse_command_set_rodzaj"
 #define QGET_BIT_ZAIMKOW        "parse_command_bit_zaimkow"
+
+
 /* Global vectors for 'caching' of ids
 
    The main 'parse' routine stores these on call, making the entire
    parse_command() reentrant.
 */
-static struct vector	*gId_list	= 0;
-static struct vector	*gPluid_list	= 0;
-static struct vector    *gRodz_list        = 0;
-static struct vector    *gProdz_list        = 0;
-static struct vector    *gAdj1id_list        = 0;
-static struct vector    *gAdj2id_list        = 0;
+static struct vector        *gId_list        = 0;
+static struct vector        *gPluid_list        = 0;
+static struct vector        *gRodz_list        = 0;
+static struct vector        *gProdz_list        = 0;
+static struct vector        *gAdj1id_list        = 0;
+static struct vector        *gAdj2id_list        = 0;
 
-static struct vector	*gId_list_d	= 0;  /* From master */
+static struct vector        *gId_list_d        = 0;  /* From master */
 static struct vector        *gRodz_list_d        = 0;  /* From master */
 static struct vector        *gPluid_list_d        = 0;  /* From master */
 static struct vector        *gProdz_list_d        = 0;  /* From master */
-
-static struct vector	*gPrepos_list	= 0;  /* From master */
-static char 		*gAllword       = 0;  /* From master */
 
 /*
  * Master has been (re)loaded; fetch params needed for parsing
@@ -332,11 +327,11 @@ load_parse_information()
     pval = apply_master_ob(M_QGET_ID, 0);
     if (pval && pval->type == T_POINTER)
     {
-	gId_list_d = pval->u.vec;
-	INCREF(pval->u.vec->ref);	    /* Otherwise next sapply will free it */
+        gId_list_d = pval->u.vec;
+        INCREF(pval->u.vec->ref);            /* Otherwise next sapply will free it */
     }
     else
-	gId_list_d = 0;
+        gId_list_d = 0;
 
     pval = apply_master_ob(M_QGET_RODZ, 0);
     if (pval && pval->type == T_POINTER)
@@ -347,16 +342,14 @@ load_parse_information()
     else
         gRodz_list_d = 0;
 
-
-
     pval = apply_master_ob(M_QGET_PLURID,0);
-    if (pval && pval->type == T_POINTER)
+    if (pval && pval->type == T_POINTER)        
     {
-	gPluid_list_d = pval->u.vec;
-	INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
+        gPluid_list_d = pval->u.vec;
+        INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
     }
     else
-	gPluid_list_d = 0;
+        gPluid_list_d = 0;
 
     pval = apply_master_ob(M_QGET_PRODZ,0);
     if (pval && pval->type == T_POINTER)        
@@ -366,99 +359,64 @@ load_parse_information()
     }
     else
         gProdz_list_d = 0;
-
-
-    pval = apply_master_ob(M_QGET_PREPOS,0);
-    if (pval && pval->type == T_POINTER)
-    {
-	gPrepos_list = pval->u.vec;
-	INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
-    }
-    else
-	gPrepos_list = 0;
-
-    pval = apply_master_ob(M_QGET_ALLWORD,0);
-    if (pval && pval->type == T_STRING)
-	gAllword = string_copy(pval->u.string);
-    else
-	gAllword = 0;
 }
 
 /*
- * Function name: 	load_lpc_info
- * Description:		Loads relevant information from a given object.
- *			This is the ids, plural ids and adjectiv ids. This
- *			is the only calls to LPC objects other than the
+ * Function name:         load_lpc_info
+ * Description:                Loads relevant information from a given object.
+ *                        This is the ids, plural ids and adjectiv ids. This
+ *                        is the only calls to LPC objects other than the
  *                      master object that occur within the efun
  *                      parse_command().
- * Arguments:		ix: Index in the array
- *			ob: The object to call for information.
+ * Arguments:                ix: Index in the array
+ *                        ob: The object to call for information.
  */
 void
 load_lpc_info(int ix, struct object *ob)
 {
-    struct vector *tmp, *sing;
-    struct svalue sval, *ret;
-    int il, make_plural = 0;
-    char *str;
-    char *parse_to_plural(char *);
-
+    struct svalue *ret;
+    
     if (!ob)
-	return;
+        return;
 
-    if (gPluid_list &&
-	gPluid_list->size > ix &&
-	gPluid_list->item[ix].type == T_NUMBER ||
-	gPluid_list->item[ix].u.number == 0)
+/* Zmieniony warunek pobierania danych z LPC. Od teraz sa one pobierane za
+ * kazdym razem, bowiem nie ma raczej sytuacji, w ktorych powtarza sie ten
+ * sam przypadek gramatyczny w tym samym wywolaniu parse_command() - nie
+ * oszczedzilibysmy zatem cennego CPU.
+ */
+    if (gPluid_list && 
+        gPluid_list->size > ix && 
+        (gPluid_list->item[ix].type != T_NUMBER ||
+          gPluid_list->item[ix].u.number == 0)
+       )
     {
-		ret = apply(QGET_PLURID, ob, 0, 1);
-		if (ret && ret->type == T_POINTER)
-			assign_svalue_no_free(&gPluid_list->item[ix], ret);
-		else
-		{
-			make_plural = 1;
-			gPluid_list->item[ix].u.number = 1;
-		}
+        push_number(przyp);
+        ret = apply(QGET_PLURID, ob, 1, 1);
+        if (ret && ret->type == T_POINTER) 
+            assign_svalue_no_free(&gPluid_list->item[ix], ret);
+        else 
+        {
+            gPluid_list->item[ix].u.number = 1;
+        }
     }
-
-    if (gId_list &&
-	gId_list->size > ix &&
-	gId_list->item[ix].type == T_NUMBER ||
-	gId_list->item[ix].u.number == 0)
+    
+    if (gId_list && 
+        gId_list->size > ix && 
+        (gId_list->item[ix].type != T_NUMBER ||
+        gId_list->item[ix].u.number == 0))
     {
-		ret = apply(QGET_ID, ob, 0, 1);
-		if (ret && ret->type == T_POINTER)
-		{
-			assign_svalue_no_free(&gId_list->item[ix], ret);
-			if (make_plural)
-			{
-			tmp = allocate_array(ret->u.vec->size);
-			sing = ret->u.vec;
-
-			sval.type = T_STRING;
-			sval.string_type = STRING_MSTRING;
-			for (il = 0; il < tmp->size; il++)
-			{
-				if (sing->item[il].type == T_STRING)
-				{
-				str = parse_to_plural(sing->item[il].u.string);
-				sval.u.string = str;
-				assign_svalue_no_free(&tmp->item[il],&sval);
-				free_mstring(sval.u.string);
-				}
-			}
-			sval.type = T_POINTER;
-			sval.u.vec = tmp;
-			assign_svalue_no_free(&gPluid_list->item[ix], &sval);
-			free_svalue(&sval);
-			}
-		}
-		else
-		{
-			gId_list->item[ix].u.number = 1;
-		}
+        push_number(przyp);
+        ret = apply(QGET_ID, ob, 1, 1);
+        if (ret && ret->type == T_POINTER)
+        {
+            assign_svalue_no_free(&gId_list->item[ix], ret);
+        }
+        else
+        {
+            gId_list->item[ix].u.number = 1;
+        }
     }
-
+    
     if (gRodz_list && 
         gRodz_list->size > ix &&         
         (gRodz_list->item[ix].type != T_NUMBER ||
@@ -484,7 +442,8 @@ load_lpc_info(int ix, struct object *ob)
         else
             gProdz_list->item[ix].u.number = 1;
     }
-	if (gAdj1id_list && 
+    
+    if (gAdj1id_list && 
         gAdj1id_list->size > ix &&         
         (gAdj1id_list->item[ix].type != T_NUMBER ||
         gAdj1id_list->item[ix].u.number == 0))
@@ -512,96 +471,85 @@ load_lpc_info(int ix, struct object *ob)
 void
 free_parse_information()
 {
-    if (gId_list_d)
-	free_vector(gId_list_d);
-    gId_list_d = 0;
-    if (gPluid_list_d)
-	free_vector(gPluid_list_d);
-    gPluid_list_d = 0;
-
+    if (gId_list_d) 
+        free_vector(gId_list_d); 
+    if (gPluid_list_d) 
+        free_vector(gPluid_list_d);
     if (gRodz_list_d)
         free_vector(gRodz_list_d);
     if (gProdz_list_d)
         free_vector(gProdz_list_d);
-
-    if (gPrepos_list)
-	free_vector(gPrepos_list);
-    gPrepos_list = 0;
-    if (gAllword)
-	free(gAllword);
-    gAllword = 0;
 }
 
 /* Main function, called from interpret.c
 */
 
 /*
- * Function name: 	parse
- * Description:		The main function for the efun: parse_command()
- *			It parses a given command using a given pattern and
- *			a set of objects (see args below). For details
- *			see LPC documentation of the efun.
- * Arguments:		cmd: The command to parse
- *			ob_or_array: A list of objects or one object from
- *			             which to make a list of objects by
- *				     using the objects deep_inventory
- *			pattern: The given parse pattern somewhat like sscanf
- *			         but with different %-codes, see efun docs.
- *			stack_args: Pointer to destination arguments.
- *			num_arg: Number of destination arguments.
- * Returns:		True if command matched pattern.
+ * Function name:         parse
+ * Description:                The main function for the efun: parse_command()
+ *                        It parses a given command using a given pattern and
+ *                        a set of objects (see args below). For details
+ *                        see LPC documentation of the efun.
+ * Arguments:                cmd: The command to parse
+ *                        ob_or_array: A list of objects or one object from 
+ *                                     which to make a list of objects by
+ *                                     using the objects deep_inventory
+ *                        pattern: The given parse pattern somewhat like sscanf
+ *                                 but with different %-codes, see efun docs.
+ *                        stack_args: Pointer to destination arguments.
+ *                        num_arg: Number of destination arguments.
+ * Returns:                True if command matched pattern.
  */
 int
 parse (char *cmd, struct svalue *ob_or_array, char *pattern,
        struct svalue *stack_args, int num_arg)
 /*
-    char 		*cmd;          	Command to parse
-    struct svalue 	*ob_or_array;  	Object or array of objects
-    char		*pattern;	Special parsing pattern
-    struct svalue 	*stack_args;	Pointer to lvalue args on stack
-    int 		num_arg;	Number of args on stack
+    char                 *cmd;                  Command to parse
+    struct svalue         *ob_or_array;          Object or array of objects
+    char                *pattern;        Special parsing pattern
+    struct svalue         *stack_args;        Pointer to lvalue args on stack
+    int                 num_arg;        Number of args on stack
 */
 {
-    struct vector	*obvec, *patvec, *wvec;
-    struct vector	*old_id, *old_plid, *old_adj1id, *old_adj2id,
+    struct vector        *obvec, *patvec, *wvec;
+    struct vector        *old_id, *old_plid, *old_adj1id, *old_adj2id,
                             *old_rodz, *old_prodz;
-
-    int			pix, cix, six, fail, fword, ocix, fpix;
-    struct svalue	*pval;
-    void		check_for_destr(struct svalue *);    /* In interpret.c */
-    struct svalue	*sub_parse(struct vector *, struct vector *, int *, struct vector *, int *, int *, struct svalue *);
-    struct svalue	*slice_words(struct vector *, int, int), tmp;
-    void		stack_put(struct svalue *, struct svalue *, int, int);
-    struct vector	*deep_inventory(struct object *, int);
+    int                        pix, cix, six, fail, fword, ocix, fpix;
+    struct svalue        *pval;
+    void                check_for_destr(struct svalue *);    /* In interpret.c */
+    struct svalue	*sub_parse(struct vector *, struct vector *, int *, struct vector *, int *, int *);
+    struct svalue        *slice_words(struct vector *, int, int), tmp;
+    void                stack_put(struct svalue *, struct svalue *, int, int);
+    struct vector        *deep_inventory(struct object *, int);
 
     /*
      * Pattern and commands can not be empty
      */
     if (*cmd == '\0' || *pattern == '\0')
-	return 0;
+        return 0;
 
     wvec = explode_string(cmd," ");        /* Array of words in command */
     patvec = explode_string(pattern," ");  /* Array of pattern elements */
 
     /*
-     * Explode can return '0'.
+     * Explode can return '0'. 
      */
     if (!wvec)
-	wvec = allocate_array(0);
+        wvec = allocate_array(0);
     if (!patvec)
-	patvec = allocate_array(0);
+        patvec = allocate_array(0);
 
-    INCREF(wvec->ref); 		/* Do not lose these arrays */
+    INCREF(wvec->ref);                 /* Do not lose these arrays */
     INCREF(patvec->ref);
 
     if (ob_or_array->type == T_POINTER)
-	obvec = ob_or_array->u.vec;
+        obvec = ob_or_array->u.vec;
     else if (ob_or_array->type == T_OBJECT)
-	obvec = deep_inventory(ob_or_array->u.ob, 1); /* 1 == ob + deepinv */
+        obvec = deep_inventory(ob_or_array->u.ob, 1); /* 1 == ob + deepinv */
     else
     {
-	obvec = 0;
-	error("Bad second argument to parse_command()\n");
+        obvec = 0;
+        error("Bad second argument to parse_command()\n");
     }
 
     tmp.type = T_POINTER;
@@ -612,27 +560,26 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 
     /* Copy and  make space for id arrays
     */
-    old_id      = gId_list;
-    old_plid    = gPluid_list;
+    old_id      = gId_list; 
+    old_plid    = gPluid_list; 
     old_rodz        = gRodz_list;
     old_prodz        = gProdz_list;
     old_adj1id  = gAdj1id_list;
     old_adj2id        = gAdj2id_list;
 
-
     gId_list    = allocate_array(obvec->size);
     gPluid_list  = allocate_array(obvec->size);
- 	gRodz_list   = allocate_array(obvec->size);
-    gProdz_list  = allocate_array(obvec->size);
+    gRodz_list        = allocate_array(obvec->size);
+    gProdz_list        = allocate_array(obvec->size);
     gAdj1id_list = allocate_array(obvec->size);
     gAdj2id_list = allocate_array(obvec->size);
-
+    
     /* Loop through the pattern. Handle %s but not '/'
     */
     pix = 0;
 #ifndef OLD_EXPLODE
     while (pix < patvec->size && !*(patvec->item[pix].u.string))
-	pix++;
+        pix++;
 #endif
 
     six = 0;
@@ -640,111 +587,107 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
     fail = 0;
     for (; pix < patvec->size; pix++)
     {
-	pval = 0; 		/* The 'fill-in' value */
-	fail = 0; 		/* 1 if match failed */
+        pval = 0;                 /* The 'fill-in' value */
+        fail = 0;                 /* 1 if match failed */
 
-	if (EQ(patvec->item[pix].u.string, "%s"))
-	{
-	    /* We are at end of pattern, scrap up the remaining
-	       words and put them in the fill-in value.
+        if (EQ(patvec->item[pix].u.string, "%s"))
+        {
+            /* We are at end of pattern, scrap up the remaining
+               words and put them in the fill-in value.
             */
-	    if (pix == (patvec->size-1))
-	    {
-		pval = slice_words(wvec, cix, wvec->size - 1);
-		cix = wvec->size;
-		stack_put(pval, stack_args, six++, num_arg);
-	    }
-	    else
-	    /*
-	       There is something after %s, try to parse with the
+            if (pix == (patvec->size-1))
+            {
+                pval = slice_words(wvec, cix, wvec->size - 1);
+                cix = wvec->size;
+                stack_put(pval, stack_args, six++, num_arg);
+            }
+            else 
+            /* 
+               There is something after %s, try to parse with the
                next pattern. Begin with the current word and step
-	       one word for each fail, until match or end of words.
+               one word for each fail, until match or end of words.
             */
-	    {
-		ocix = fword = cix; 	/* Current word */
-		fpix = ++pix;		/* pix == next pattern */
-		do
-		{
-		    fail = 0;
-		    /*
-			Parse the following pattern, fill-in values:
-		        stack_args[six] = result of %s
-		        stack_args[six + 1] = result of following pattern,
-		    			      if it is a fill-in pattern
-		     */
-		    pval = sub_parse(obvec, patvec, &pix, wvec, &cix, &fail,
-				     ((six + 1) < num_arg) ?
-				     stack_args[six + 1].u.lvalue
-				     : 0);
-		    if (fail)
-		    {
-			cix = ++ocix;
-			pix = fpix;
-		    }
-		} while ((fail) && (cix < wvec->size));
+            {
+                ocix = fword = cix;         /* Current word */
+                fpix = ++pix;                /* pix == next pattern */
+                do
+                {
+                    fail = 0;
+                    /*
+                        Parse the following pattern, fill-in values:
+                        stack_args[six] = result of %s
+                        stack_args[six + 1] = result of following pattern,
+                                                  if it is a fill-in pattern
+                     */
+                    pval = sub_parse(obvec, patvec, &pix, wvec, &cix, &fail);
+                    if (fail)
+                    {
+                        cix = ++ocix;
+                        pix = fpix;
+                    }
+                } while ((fail) && (cix < wvec->size));
 
-		/*
-		    We found something matching the pattern after %s.
-		    First
-		        stack_args[six + 1] = result of match
-		    Then
-		        stack_args[six] = the skipped words before match
-		*/
-		if (!fail)
-		{
-		    /* A match with a value fill in param */
-		    if (pval)
-		    {
-			stack_put(pval, stack_args, six + 1, num_arg);
-			pval = slice_words(wvec, fword, ocix - 1);
-			stack_put(pval, stack_args, six, num_arg);
-			six += 2;
-		    }
-		    else
-		    {
-			/* A match with a non value ie 'word' */
-			pval = slice_words(wvec, fword, ocix - 1);
-			stack_put(pval, stack_args, six++, num_arg);
-		    }
-		    pval = 0;
-		}
-	    }
-	}
+                /* 
+                    We found something matching the pattern after %s.
+                    First
+                        stack_args[six + 1] = result of match
+                    Then
+                        stack_args[six] = the skipped words before match
+                */
+                if (!fail)
+                {
+                    /* A match with a value fill in param */
+                    if (pval)
+                    {
+                        stack_put(pval, stack_args, six + 1, num_arg);
+                        pval = slice_words(wvec, fword, ocix - 1);
+                        stack_put(pval, stack_args, six, num_arg);
+                        six += 2;
+                    }
+                    else
+                    {
+                        /* A match with a non value ie 'word' */
+                        pval = slice_words(wvec, fword, ocix - 1);
+                        stack_put(pval, stack_args, six++, num_arg);
+                    }
+                    pval = 0; 
+                }
+            }
+        }
 
-	else if (!EQ(patvec->item[pix].u.string,"/"))
-	{
-	    /* The pattern was not %s, parse the pattern if
-	     * it is not '/', a '/' here is skipped.
-	     * If match, put in fill-in value.
+        else if (!EQ(patvec->item[pix].u.string,"/"))
+        {
+            /* The pattern was not %s, parse the pattern if
+             * it is not '/', a '/' here is skipped.
+             * If match, put in fill-in value.
              */
-	    pval = sub_parse(obvec, patvec, &pix, wvec, &cix, &fail,
-			     (six < num_arg) ? stack_args[six].u.lvalue : 0);
-	    if (!fail && pval)
-		stack_put(pval, stack_args, six++, num_arg);
-	}
+            pval = sub_parse(obvec, patvec, &pix, wvec, &cix, &fail);
+            if (!fail && pval)
+                stack_put(pval, stack_args, six++, num_arg);
+        }
 
-	/* Terminate parsing if no match
+        /* Terminate parsing if no match
         */
-	if (fail)
-	    break;
+        if (fail)
+            break;
     }
-
+  
     /* Also fail when there are words left to parse and pattern exhausted
     */
     if (cix < wvec->size)
-	fail = 1;
+        fail = 1;
 
     /* Delete and free the id arrays
     */
-    if (gId_list)
+    if (gId_list) 
     {
-	free_vector(gId_list);
+        free_vector(gId_list);
     }
-    if (gPluid_list)
+    if (gPluid_list) 
     {
-	free_vector(gPluid_list);
+        free_vector(gPluid_list);
     }
-  	if (gRodz_list)
+    if (gRodz_list)
     {
         free_vector(gRodz_list);
     }
@@ -768,7 +711,7 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
     gAdj1id_list = old_adj1id;
     gAdj2id_list = old_adj2id;
 
-    DECREF(wvec->ref);
+    DECREF(wvec->ref); 
     DECREF(patvec->ref);
     DECREF(obvec->ref);
     free_vector(wvec);
@@ -779,136 +722,136 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
      */
     if (ob_or_array->type == T_OBJECT)
     {
-	free_vector(obvec);
+        free_vector(obvec); 
     }
 
     return !fail;
 }
 
 /*
- * Function name: 	stack_put
- * Description:		Puts an svalue on the stack.
- * Arguments:		pval: Value to put
- *			sp: Stackpointer
- *			pos: Position on stack to put value
- *			max: The number of args on the stack
+ * Function name:         stack_put
+ * Description:                Puts an svalue on the stack.
+ * Arguments:                pval: Value to put
+ *                        sp: Stackpointer
+ *                        pos: Position on stack to put value
+ *                        max: The number of args on the stack
  */
-void
-stack_put(struct svalue	*pval, struct svalue *msp, int pos, int max)
+void 
+stack_put(struct svalue        *pval, struct svalue *msp, int pos, int max)
 {
     if (pos >= max)
-	return;
+        return;
 
     if ((pval) && (msp[pos].type == T_LVALUE))
-	assign_svalue(msp[pos].u.lvalue, pval);
+        assign_svalue(msp[pos].u.lvalue, pval);
 }
 
 /*
- * Function name: 	slice_words
- * Description:		Gives an imploded string of words from an array
- * Arguments:		wvec: array of words
- *			from: First word to use
- *			to:   Last word to use
- * Returns:		A pointer to a static svalue now containing string.
+ * Function name:         slice_words
+ * Description:                Gives an imploded string of words from an array
+ * Arguments:                wvec: array of words
+ *                        from: First word to use
+ *                        to:   Last word to use
+ * Returns:                A pointer to a static svalue now containing string.
  */
 struct svalue *
 slice_words(struct vector *wvec, int from, int to)
 {
-    struct vector	*slice;
-    char		*tx;
+    struct vector        *slice;
+    char                *tx;
     static struct svalue stmp = { T_NUMBER };
 
     tx = 0;
 
     if (from <= to)
     {
-	slice = slice_array(wvec, from, to);
+        slice = slice_array(wvec, from, to);
 
-	if (slice->size)
-	    tx = implode_string(slice, " ");
-	free_vector(slice);
+        if (slice->size)
+            tx = implode_string(slice, " ");
+        free_vector(slice);
     }
 
     free_svalue(&stmp); /* May be allocated! */
 
     if (tx)
     {
-	stmp.type = T_STRING;
-	stmp.string_type = STRING_MSTRING;
-	stmp.u.string = tx;
+        stmp.type = T_STRING;
+	    stmp.string_type = STRING_MSTRING;
+	    stmp.u.string = tx;
     }
     else
     {
-	stmp.type = T_STRING;
-	stmp.string_type = STRING_CSTRING;
-	stmp.u.string = "";
+        stmp.type = T_STRING;
+        stmp.string_type = STRING_CSTRING;
+        stmp.u.string = "";
     }
     return &stmp;
 }
 
 /*
- * Function name: 	sub_parse
- * Description:		Parses a vector of words against a pattern. Gives
- *			result as an svalue. Sets fail if parsing fails and
- *			updates pointers in pattern and word vectors. It
- *			handles alternate patterns but not "%s"
+ * Function name:         sub_parse
+ * Description:                Parses a vector of words against a pattern. Gives
+ *                        result as an svalue. Sets fail if parsing fails and
+ *                        updates pointers in pattern and word vectors. It
+ *                        handles alternate patterns but not "%s"
  */
 struct svalue *
 sub_parse(struct vector *obvec, struct vector *patvec, int *pix_in,
-	  struct vector *wvec, int *cix_in, int *fail, struct svalue *msp)
+          struct vector *wvec, int *cix_in, int *fail)
 {
-    int			cix, pix, subfail;
-    struct svalue	*pval;
-    struct svalue	*one_parse(struct vector *, char *, struct vector *,
-				   int *, int *, struct svalue *);
+    int                        cix, pix, subfail;
+    struct svalue        *pval;
+    struct svalue        *one_parse(struct vector *, char *, struct vector *,
+                                   int *, int *);
 
     cix = *cix_in; pix = *pix_in; subfail = 0;
 
     pval = one_parse(obvec, patvec->item[pix].u.string,
-		     wvec, &cix, &subfail, msp);
+                     wvec, &cix, &subfail);
 
     while (subfail)
     {
-	pix++;
-	cix = *cix_in;
+        pix++;
+        cix = *cix_in;
 
-	/*
-	    Find the next alternative pattern, consecutive '/' are skipped
-	 */
-	while ((pix < patvec->size) && (EQ(patvec->item[pix].u.string, "/")))
-	{
-	    subfail = 0;
-	    pix++;
-	}
+        /*
+            Find the next alternative pattern, consecutive '/' are skipped
+         */
+        while ((pix < patvec->size) && (EQ(patvec->item[pix].u.string, "/")))
+        {
+            subfail = 0;
+            pix++;
+        }
 
-	if (!subfail && (pix < patvec->size))
-	{
-	    pval = one_parse(obvec, patvec->item[pix].u.string, wvec, &cix,
-			     &subfail, msp);
-	}
-	else if (subfail == 2) /* failed optional */
-	{
-	    subfail = 0;
-	    pix = pix-1;
-	}
-	else
-	{
-	    *fail = 1; *pix_in = pix-1;
-	    return 0;
-	}
+        if (!subfail && (pix < patvec->size))
+        {
+            pval = one_parse(obvec, patvec->item[pix].u.string, wvec, &cix, 
+                             &subfail);
+        }
+        else if (subfail == 2) /* failed optional */
+        {
+            subfail = 0;
+            pix = pix - 1;
+        }
+        else
+        {
+            *fail = 1; *pix_in = pix - 1;
+            return 0;
+        }
     }
 
     /* If there are alternatives left after the matching pattern, skip them
     */
     if ((pix + 1 < patvec->size) && (EQ(patvec->item[pix + 1].u.string, "/")))
     {
-	while ((pix + 1 <patvec->size) &&
-	       (EQ(patvec->item[pix + 1].u.string, "/")))
-	{
-	       pix += 2;
-	}
-	if (pix>=patvec->size)
-	    pix = patvec->size-1;
+        while ((pix + 1 <patvec->size) &&
+               (EQ(patvec->item[pix + 1].u.string, "/")))
+        {
+               pix += 2;
+        }
+        if (pix>=patvec->size)
+            pix = patvec->size-1;
     }
 
     *cix_in = cix;
@@ -916,49 +859,49 @@ sub_parse(struct vector *obvec, struct vector *patvec, int *pix_in,
     *fail = 0;
     return pval;
 }
-
+    
 
 /*
- * Function name: 	one_parse
- * Description:		Checks one parse pattern to see if match. Consumes
- *			needed number of words from wvec.
- * Arguments:		obvec: Vector of objects relevant to parse
- *			pat: The pattern to match against.
- *			wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- *			prep_param: Only used on %p (see prepos_parse)
- * Returns:		svalue holding result of parse.
+ * Function name:         one_parse
+ * Description:                Checks one parse pattern to see if match. Consumes
+ *                        needed number of words from wvec.
+ * Arguments:                obvec: Vector of objects relevant to parse
+ *                        pat: The pattern to match against.
+ *                        wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        fail: Fail flag if parse did not match
+ * Returns:                svalue holding result of parse.
  */
 struct svalue *
 one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
-	  int *fail, struct svalue *prep_param)
+          int *fail)
 {
-    struct svalue	*pval;
+    char ch;
+    struct svalue        *pval;
     static struct svalue stmp = { T_NUMBER };
-    char		*str1, *str2;
-    struct svalue	*item_parse(struct vector *, struct vector *, int *, int *);
-    struct svalue	*living_parse(struct vector *, struct vector *, int *, int *);
-    struct svalue	*single_parse(struct vector *, struct vector *, int *, int *);
-    struct svalue	*prepos_parse(struct vector *, int *, int *, struct svalue *);
-    struct svalue	*number_parse(struct vector *, int *, int *);
+    char                *str1, *str2;
+    struct svalue        *item_parse(struct vector *, struct vector *, int *, int *);
+    struct svalue        *living_parse(struct vector *, struct vector *, int *, int *);
+    struct svalue        *single_parse(struct vector *, struct vector *, int *, int *);
+    struct svalue        *number_parse(struct vector *, int *, int *);
 
     /*
-	Fail if we have a pattern left but no words to parse
+        Fail if we have a pattern left but no words to parse
      */
-    if (*cix_in >= wvec->size)
+    if (*cix_in >= wvec->size) 
     {
-	if (pat[0] == '[')
-	    *fail = 0;
-	else
-	    *fail = 1;
-	return 0;
+        if (pat[0] == '[')
+            *fail = 0;
+        else
+            *fail = 1;
+        return 0;
     }
 
     pval = 0;
 
     if (pat[0] == '%')
-    {        
+    {
+        ch = pat[1];
         if ((strlen(pat) > 2) && (pat[2] == ':'))
         {
             sscanf(pat, "%%%*c:%i%*s", &przyp);
@@ -967,7 +910,8 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
             przyp = 0;
     }
     else
-    {        
+    {
+        ch = pat[0];
         if ((strlen(pat) > 1) && (pat[1] == ':'))
         {
             sscanf(pat, "%*c:%i%*s", &przyp);
@@ -975,83 +919,75 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
         else
             przyp = 0;
     }
+    /*ch = (pat[0] == '%' ? pat[1] : pat[0]); */
 
-    switch (pat[0]) {
-	case '%':
+    switch (ch)
+    {
+    case 'i':
+        pval = item_parse(obvec, wvec, cix_in, fail);
+        break;
 
+    case 'l':
+        pval = living_parse(obvec, wvec, cix_in, fail);
+        break;
 
-	    switch (pat[1]) {
-		case 'i':
-		    pval = item_parse(obvec, wvec, cix_in, fail);
-		    break;
+    case 's':
+        *fail = 0; /* This is double %s in pattern, skip it */
+        break;
 
-		case 'l':
-		    pval = living_parse(obvec, wvec, cix_in, fail);
-		    break;
+    case 'w':
+        free_svalue(&stmp);
+        stmp.type = T_STRING;
+        stmp.string_type = STRING_SSTRING;
+        stmp.u.string = make_sstring(wvec->item[*cix_in].u.string);
+        pval = &stmp;
+        (*cix_in)++;
+        *fail = 0;
+        break;
 
-		case 's':
-		    *fail = 0; /* This is double %s in pattern, skip it */
-		    break;
+    case 'o':
+        pval = single_parse(obvec, wvec, cix_in, fail);
+        break;
 
-		case 'w':
-		    free_svalue(&stmp);
-		    stmp.type = T_STRING;
-		    stmp.string_type = STRING_SSTRING;
-		    stmp.u.string = make_sstring(wvec->item[*cix_in].u.string);
-		    pval = &stmp;
-		    (*cix_in)++;
-		    *fail = 0;
-		    break;
+    case 'd':
+        pval = number_parse(wvec, cix_in, fail);
+        break;
 
-		case 'o':
-		    pval = single_parse(obvec, wvec, cix_in, fail);
-		    break;
+    case '\'':
+        str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
+        if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
+            (strlen(str1) == strlen(str2) + 1))
+        {
+            *fail = 0;
+            (*cix_in)++;
+        }
+        else
+            *fail = 1;
+        break;
 
-		case 'p':
-		    pval = prepos_parse(wvec, cix_in, fail, prep_param);
-		    break;
+    case '[':
+        str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
+        if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
+            (strlen(str1) == strlen(str2) + 1))
+        {
+            (*cix_in)++;
+            *fail = 0;
+        }
+        else
+        {
+            *fail = 2;
+        }
+        break;
 
-		case 'd':
-		    pval = number_parse(wvec, cix_in, fail);
-		    break;
-		default:
-		     warning("Invalid pattern in parse_command: %s\n", pat);
-		     break;
-	    }
-	    break;
-
-	case '\'':
-	    str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
-	    if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
-		(strlen(str1) == strlen(str2) + 1))
-	    {
-		*fail = 0;
-		(*cix_in)++;
-	    }
-	    else
-		*fail = 1;
-	    break;
-
-	case '[':
-	    str1 = &pat[1]; str2 = wvec->item[*cix_in].u.string;
-	    if ((strncmp(str1, str2, strlen(str1) - 1) == 0) &&
-		(strlen(str1) == strlen(str2) + 1))
-	    {
-		(*cix_in)++;
-		*fail = 0;
-	    }
-	    else
-	    {
-		*fail = 2;
-	    }
-	    break;
-
-	default:
-	    warning("%s: Invalid pattern in parse_command: %s\n", current_object->name, pat);
-	    *fail = 0; /* Skip invalid patterns */
+    default:
+        *fail = 0; /* Skip invalid patterns */
     }
     return pval;
 }
+
+/*
+   We normally define these, see initial documentation (top of file)
+*/
 
     static char *je[] = { "den", "dnego", "dnemu", "dnym", "dna", "dnej",
             "dno", "denascie", "denastu", "denastoma", "" };
@@ -1090,8 +1026,19 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
             "piecdziesiat", "szescdziesiat", "siedemdziesiat", 
             "osiemdziesiat", "dziewiecdziesiat", "" };
 
+
 /*
- * Parse a number %d style, restricted to range 0-<x>
+ * Function name:         number_parse
+ * Description:                Tries to interpret the word in wvec as a numeral
+ *                        descriptor and returns the result on the form:
+ *                        ret.type == T_NUMBER
+ *                            num == 0, 'zero', '0', gAllword
+ *                            num > 0, one, two, three etc or numbers given
+ *                            num < 0, first, second,third etc given
+ * Arguments:                wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        fail: Fail flag if parse did not match
+ * Returns:                svalue holding result of parse.
  */
 struct svalue *
 number_parse(struct vector *wvec, int *cix_in, int *fail)
@@ -1551,7 +1498,6 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 #endif /* 0 */
 }
 
-
 void
 zamien_przypadek(int num)
 {
@@ -1572,6 +1518,31 @@ zamien_przypadek(int num)
        powinny zwracac dopelniacz w czlonie jednosci. Ale jako ze
        parser nie dostaje informacji o rodzaju... przemilczamy to. */
 }
+
+/*
+   DOP: niego/go, niej/jej                nich/ich
+   CEL: mu, jej                                im
+   BIE: niego/go, nia/ja, nie/je        nich/ich, nie/je
+   NAR: nim, nia                        nimi
+   MIE: nim, niej                        nich
+
+   Niejednoznacznosci: m - n (DCNM), mos - nmos (DCNM), n - nos (B).
+
+
+    case PL_DOP:
+        case "niego":
+        case "go":
+            rodzaj = niejednoznacznosc(M_N);
+
+        { "jego", "go" },
+        { "ja" },
+        { "jego", "go" },
+        
+        
+                            };
+                            
+                            */
+
 #define R_MESKI         0
 #define R_ZENSKI         1
 #define R_NIJAKI        2
@@ -1678,161 +1649,51 @@ zaimek_parse(struct vector *wvec, int *cix_in, int *fail)
     return NULL;
 }
 
-/*
- * Function name: 	number_parse
- * Description:		Tries to interpret the word in wvec as a numeral
- *			descriptor and returns the result on the form:
- *			ret.type == T_NUMBER
- *			    num == 0, 'zero', '0', gAllword
- *			    num > 0, one, two, three etc or numbers given
- *			    num < 0, first, second,third etc given
- * Arguments:		wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- * Returns:		svalue holding result of parse.
- */
-/*struct svalue *
-item_number_parse(struct vector *wvec, int *cix_in, int *fail)
-{
-    int cix, ten, ones;
-    long long num;
-    char buf[100];
-    static struct svalue stmp;	/* No need to free, only numbers */
-
-   /* cix = *cix_in; *fail = 0;
-
-    char *suffix;
-    int matches = sscanf(wvec->item[cix].u.string, "%lld%ms", &num, &suffix);
-
-    if (matches == 1)
-    {
-	if (num > 0)
-	{
-	    (*cix_in)++;
-	    stmp.type = T_NUMBER;
-	    stmp.u.number = num;
-	    return &stmp;
-	}
-	*fail = 1;
-	return 0; /* Only positive numbers */
-    /*}
-
-    if (matches == 2)
-    {
-        const int ten = num % 100 / 10;
-        const int last = num % 10;
-        char *expected_suffix = "th";
-
-        if (ten != 1) {
-            if (last == 1) {
-                expected_suffix = "st";
-            } else if (last == 2) {
-                expected_suffix = "nd";
-            } else if (last == 3) {
-                expected_suffix = "rd";
-            }
-        }
-
-        if (EQ(suffix, expected_suffix)) {
-            (*cix_in)++;
-            stmp.type = T_NUMBER;
-            stmp.u.number = -num;
-            free(suffix);
-            return &stmp;
-        }
-        free(suffix);
-    }
-
-    if (gAllword && (strcmp(wvec->item[cix].u.string, gAllword) == 0))
-    {
-	(*cix_in)++;
-	stmp.type = T_NUMBER;
-	stmp.u.number = 0;
-	return &stmp;
-    }
-
-    for (ten = 0; ten < 10; ten++)
-	for(ones = 0; ones < 10; ones++)
-	{
-	    (void)sprintf(buf,"%s%s", num10[ten],
-		    (ten > 1) ? num1[ones] : num1[ten * 10 + ones]);
-	    if (EQ(buf, wvec->item[cix].u.string))
-	    {
-		(*cix_in)++;
-		stmp.type = T_NUMBER;
-		stmp.u.number = ten * 10 + ones;
-		return &stmp;
-	    }
-	}
-
-    for (ten = 0; ten < 10; ten++)
-	for(ones = 0; ones < 10; ones++)
-	{
-	    (void)sprintf(buf,"%s%s", (ones) ? ord10[ten] : sord10[ten],
-		    (ten > 1) ? ord1[ones] : ord1[ten * 10 + ones]);
-	    if (EQ(buf, wvec->item[cix].u.string))
-	    {
-		(*cix_in)++;
-		stmp.type = T_NUMBER;
-		stmp.u.number = -(ten * 10 + ones);
-		return &stmp;
-	    }
-	}
-
-    *fail = 1;
-    return 0;
-}
-*/
 
 /*
- * Function name: 	item_parse
- * Description:		Tries to match as many objects in obvec as possible
- *			onto the description given in commandvector wvec.
- *			Also finds numeral description if one exist and returns
- *			that as first element in array:
- *			ret[0].type == T_NUMBER
- *			    num == 0, 'all' or 'general plural given'
- *			    num > 0, one, two, three etc given
- *			    num < 0, first, second,third etc given
- *			ret[1-n] == Selected objectpointers from obvec
- * Arguments:		obvec: Vector of objects relevant to parse
- *			wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- * Returns:		svalue holding result of parse.
+ * Function name:         item_parse
+ * Description:                Tries to match as many objects in obvec as possible
+ *                        onto the description given in commandvector wvec.
+ *                        Also finds numeral description if one exist and returns
+ *                        that as first element in array:
+ *                        ret[0].type == T_NUMBER
+ *                            num == 0, 'all' or 'general plural given'
+ *                            num > 0, one, two, three etc given
+ *                            num < 0, first, second,third etc given
+ *                        ret[1-n] == Selected objectpointers from obvec
+ * Arguments:                obvec: Vector of objects relevant to parse
+ *                        wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        fail: Fail flag if parse did not match
+ * Returns:                svalue holding result of parse.
  */
 struct svalue *
 item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 {
-    struct vector	*tmp, *ret;
-    struct svalue	*pval;
+    struct vector        *tmp, *ret;
+    struct svalue        *pval;
     static struct svalue stmp = { T_NUMBER };
-    int			cix, tix, obix, plur_flag, max_cix, match_all, rodzaj;
-	int                        all, len, max_len, *tmp_int;
+    int                        cix, tix, obix, plur_flag, max_cix, match_all, rodzaj;
+    int                        all, len, max_len, *tmp_int;
     int                        match_object(int, struct vector *, int *, int *, 
                                 int *, int);
 
-    tmp = allocate_array(obvec->size + 1);
-
-    
     if ( (pval = number_parse(wvec, cix_in, fail)) != NULL )
     {
         zamien_przypadek(pval->u.number);
     }
 
-	assign_svalue_no_free(&tmp->item[0],pval);
-
-    if ((pval) && (pval->u.number>1))
+    if ((pval) && (pval->u.number > 1))
     {
-	plur_flag = 1;
-	match_all = 0;
+        plur_flag = 1;
+        match_all = 0;
     }
     else if ((pval) && (pval->u.number == 0))
     {
-	plur_flag = 1;
-	match_all = 1;
+        plur_flag = 1;
+        match_all = 1;
     }
-    else
+    else 
     {
         plur_flag = 0;
         match_all = 0;
@@ -1889,9 +1750,14 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
         }
     }
 
+    tmp = allocate_array(obvec->size + 1);
+    if (pval)
+        assign_svalue_no_free(&tmp->item[0], pval);
     max_cix = *cix_in;
+    max_len = 0;
     tix = 1;
-	    // delvert
+
+    // delvert
     if (*cix_in >= wvec->size && last_word_flag == 2)
     {
         *fail = 1;
@@ -1978,7 +1844,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     else
         all = 0;
 
-	if (tix < 2)
+    if (tix < 2)
     {
         *fail = 1;
         free_vector(tmp);
@@ -1998,9 +1864,11 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
             ret->item[0].u.number = plur_flag ? 0 : 1;
         }
         free_vector(tmp);
-    }	
+    }
 
-	if (!match_all)
+    /* Przekazanie mudlibowi rodzaju nazwy i liczby, dla obslugi zaimkow.
+     */
+    if (!match_all)
     {
         push_number(rodzaj);
         push_number(plur_flag);
@@ -2013,7 +1881,7 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
         apply(QSET_RODZAJ, command_giver, 2, 1);
     }
 
-    /* stmp is static, and may contain old info that must be freed
+    /* stmp is static, and may contain old info that must be freed 
     */
     free_svalue(&stmp);
     stmp.type = T_POINTER;
@@ -2022,268 +1890,178 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 }
 
 /*
- * Function name: 	living_parse
- * Description:		Tries to match as many living objects in obvec as
- *			possible onto the description given in the command-
- *			vector wvec.
- *			Also finds numeral description if one exist and returns
- *			that as first element in array:
- *			ret[0].type == T_NUMBER
- *			    num == 0, 'all' or 'general plural given'
- *			    num > 0, one, two, three etc given
- *			    num < 0, first, second,third etc given
- *			ret[1-n] == Selected objectpointers from obvec
- *			If not found in obvec a find_player and
- *			lastly a find_living is done. These will return an
- *			objecttype svalue.
- * Arguments:		obvec: Vector of objects relevant to parse
- *			wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- * Returns:		svalue holding result of parse.
+ * Function name:         living_parse
+ * Description:                Tries to match as many living objects in obvec as
+ *                        possible onto the description given in the command-
+ *                        vector wvec.
+ *                        Also finds numeral description if one exist and returns
+ *                        that as first element in array:
+ *                        ret[0].type == T_NUMBER
+ *                            num == 0, 'all' or 'general plural given'
+ *                            num > 0, one, two, three etc given
+ *                            num < 0, first, second,third etc given
+ *                        ret[1-n] == Selected objectpointers from obvec
+ *                        If not found in obvec a find_player and
+ *                        lastly a find_living is done. These will return an
+ *                        objecttype svalue.
+ * Arguments:                obvec: Vector of objects relevant to parse
+ *                        wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        fail: Fail flag if parse did not match
+ * Returns:                svalue holding result of parse.
  */
 struct svalue *
 living_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 {
-    struct vector	*live;
-    struct svalue	*pval;
-    static struct svalue stmp = { T_NUMBER };
-    struct object	*ob;
-    int			obix, tix;
+    struct vector        *live;
+    struct svalue        *pval;
+    int                        obix, tix;
 
     live = allocate_array(obvec->size);
-    tix = 0;
+    tix = 0; 
     *fail = 0;
 
-    for (obix = 0; obix < obvec->size; obix++)
-	if (obvec->item[obix].type == T_OBJECT &&
-	    obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS)
-	    assign_svalue_no_free(&live->item[tix++], &obvec->item[obix]);
+    for (obix = 0; obix < obvec->size; obix++) 
+        if (obvec->item[obix].type == T_OBJECT &&
+            obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS)
+            assign_svalue_no_free(&live->item[tix++], &obvec->item[obix]);
 
     if (tix)
     {
-	pval = item_parse(live, wvec, cix_in, fail);
-	if (pval)
-	{
-	    free_vector(live);
-	    return pval;
-	}
+        pval = item_parse(live, wvec, cix_in, fail);
+        if (pval)
+        {
+            free_vector(live);
+            return pval;
+        }
     }
-
     free_vector(live);
 
+#if 0
     /* find_living */
     ob = find_living_object(wvec->item[*cix_in].u.string);
     if (ob)
     {
-	free_svalue(&stmp); 		/* Might be allocated */
-	stmp.type = T_OBJECT;
-	stmp.u.ob = ob;
-	add_ref(ob, "living_parse");
-	(*cix_in)++;
-	return &stmp;
+        free_svalue(&stmp);                 /* Might be allocated */
+        stmp.type = T_OBJECT;
+        stmp.u.ob = ob;
+        add_ref(ob, "living_parse");
+        (*cix_in)++;
+        return &stmp;
     }
+#endif
     *fail = 1;
     return 0;
 }
 
 /*
- * Function name: 	single_parse
- * Description:		Finds the first object in obvec fitting the description
- *			in commandvector wvec. Gives this as an objectpointer.
- * Arguments:		obvec: Vector of objects relevant to parse
- *			wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- * Returns:		svalue holding result of parse.
+ * Function name:         single_parse
+ * Description:                Finds the first object in obvec fitting the description
+ *                        in commandvector wvec. Gives this as an objectpointer.
+ * Arguments:                obvec: Vector of objects relevant to parse
+ *                        wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        fail: Fail flag if parse did not match
+ * Returns:                svalue holding result of parse.
  */
 struct svalue *
 single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 {
-    int			cix, obix, plur_flag, rodzaj;
+    int                        cix, obix, plur_flag, rodzaj;
     int                        match_object(int, struct vector *, int *, int *,
                                 int *, int);
 
     for (obix = 0; obix < obvec->size; obix++)
     {
-	if (obvec->item[obix].type != T_OBJECT)
-	    continue;
-	*fail = 0;
-	cix = *cix_in;
-	load_lpc_info(obix, obvec->item[obix].u.ob);
-	plur_flag = 0;
-	if (match_object(obix, wvec, &cix, &plur_flag, &rodzaj,0))
-	{
-	    *cix_in = cix + 1;
-	    return &obvec->item[obix];
-	}
+        if (obvec->item[obix].type != T_OBJECT)
+            continue;
+        *fail = 0; 
+        cix = *cix_in;
+        load_lpc_info(obix, obvec->item[obix].u.ob);
+        plur_flag = 0;
+        if (match_object(obix, wvec, &cix, &plur_flag, &rodzaj, 0))
+        {
+            *cix_in = cix + 1;
+            return &obvec->item[obix];
+        }
     }
     *fail = 1;
     return 0;
 }
 
-
 /*
- * Function name: 	prepos_parse
- * Description:		This is a general sentencelist matcher with some hard-
- *			coded prepositions as the default list. The list is
- *			sent as a parameter which will be replaced in the
- *			destination values. If no list is given the return
- *			value on match with the hardcoded prepositions will be
- *			string. If a list is given, the list will be returned
- *			with the matched sentence swapped to the first element.
- * Arguments:		wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			fail: Fail flag if parse did not match
- *			prepos: Pointer to svalue holding prepos parameter.
- * Returns:		svalue holding result of parse.
+ * Function name:         match_object
+ * Description:                Tests if a given object matches the description as
+ *                        given in the commandvector wvec.
+ * Arguments:                obix: Index in id arrays for this object.
+ *                        wvec: Vector of words in the command to parse
+ *                        cix_in: Current word in commandword vector
+ *                        plur: This arg gets set if the noun was on pluralform
+ *                        rodzaj: Rodzaj gramatyczny danej nazwy
+ *                        max_len: ???
+ * Returns:                True if object matches.
  */
-struct svalue *
-prepos_parse(struct vector *wvec, int *cix_in, int *fail,
-	     struct svalue *prepos)
+int 
+match_object(int obix, struct vector *wvec, int *cix_in, int *plur,
+             int *rodzaj, int max_len)
 {
-    struct vector	*pvec, *tvec;
-    static struct svalue stmp = { T_NUMBER };
-    char *tmp;
-    int pix, tix;
-
-    if ((!prepos) || (prepos->type != T_POINTER))
-    {
-	pvec = gPrepos_list;
-    }
-    else
-    {
-	pvec = prepos->u.vec;
-    }
-
-    for (pix = 0; pix < pvec->size; pix++)
-    {
-	if (pvec->item[pix].type != T_STRING)
-	    continue;
-
-	tmp = pvec->item[pix].u.string;
-	if (strchr(tmp,' ') == NULL)
-	{
-	    if (EQ(tmp, wvec->item[*cix_in].u.string))
-	    {
-		(*cix_in)++;
-		break;
-	    }
-	}
-	else
-	{
-	    tvec = explode_string(tmp, " ");
-	    for (tix = 0; tix < tvec->size; tix++)
-	    {
-		if ((*cix_in+tix >= wvec->size) ||
-		    (!EQ(wvec->item[*cix_in+tix].u.string, tvec->item[tix].u.string)))
-		    break;
-	    }
-	    if ( (tix = (tix == tvec->size) ? 1 : 0) != 0 )
-		(*cix_in) += tvec->size;
-	    free_vector(tvec);
-	    if (tix)
-		break;
-	}
-    }
-
-    free_svalue(&stmp);
-
-    if (pix == pvec->size)
-    {
-	stmp.type = T_NUMBER;
-	stmp.u.number = 0;
-	*fail = 1;
-    }
-    else if (pvec != gPrepos_list)
-    {
-	stmp = pvec->item[0];
-	pvec->item[0] = pvec->item[pix];
-	pvec->item[pix] = stmp;
-	*fail = 0;
-	assign_svalue_no_free(&stmp, prepos);
-    }
-    else
-    {
-	stmp.type = T_STRING;
-	stmp.string_type = STRING_MSTRING;
-	stmp.u.string = make_mstring(pvec->item[pix].u.string);
-	*fail = 0;
-    }
-
-    return &stmp;
-
-}
-
-/*
- * Function name: 	match_object
- * Description:		Tests if a given object matches the description as
- *			given in the commandvector wvec.
- * Arguments:		obix: Index in id arrays for this object.
- *			wvec: Vector of words in the command to parse
- *			cix_in: Current word in commandword vector
- *			plur: This arg gets set if the noun was on pluralform
- * Returns:		True if object matches.
- */
-int
-match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj, int max_len)
-{
-    struct vector	*ids, *rodz, *adj1, *adj2;;
-    int 		il, pos, cplur, old_cix, len;
-	int         max_len_cix, max_len_plur, max_len_rodzaj;
-    char		*str;
-    int			find_string(char *, struct vector *, int *);
+    struct vector        *ids, *rodz, *adj1, *adj2;
+    int                 il, pos, cplur, old_cix, len;
+    int                        max_len_cix, max_len_plur, max_len_rodzaj;
+    char                *str;
+    int                        find_string(char *, struct vector *, int *);
     int                        check_adjectiv(struct vector *, struct vector *, int,
                                     struct vector *, int, int, int *, int);
  
- 
     max_len_plur = max_len_rodzaj = max_len_cix = -1;
-
+                                    
     for (cplur = (*plur * 2); cplur < 4; cplur++)
     {
-	switch (cplur)
-	{
-	case 0:
-	    if (!gId_list_d)
-		continue;
-	    ids = gId_list_d;
-		rodz = gRodz_list_d;
-	    break;
+        switch (cplur) 
+        {
+        case 0:
+            if (!gId_list_d)
+                continue;
+            ids = gId_list_d;
+            rodz = gRodz_list_d;
+            break;
 
-	case 1:
-	    if (!gId_list ||
-		gId_list->size <= obix ||
-		gId_list->item[obix].type != T_POINTER)
-		continue;
-	    ids = gId_list->item[obix].u.vec;
-		rodz = gRodz_list->item[obix].u.vec;
-	    break;
+        case 1:
+            if (!gId_list || 
+                gId_list->size <= obix || 
+                gId_list->item[obix].type != T_POINTER)
+                continue;
+            ids = gId_list->item[obix].u.vec;
+            rodz = gRodz_list->item[obix].u.vec;
+            break;
 
-	case 2:
-	    if (!gPluid_list_d)
-		continue;
-	    ids = gPluid_list_d;
-	    break;
+        case 2:
+            if (!gPluid_list_d)
+                continue;
+            ids = gPluid_list_d;
+            rodz = gProdz_list_d;
+            break;
 
-	case 3:
-	    if (!gPluid_list ||
-		gPluid_list->size <= obix ||
-		gPluid_list->item[obix].type != T_POINTER)
-		continue;
-	    ids = gPluid_list->item[obix].u.vec;
-		rodz = gProdz_list->item[obix].u.vec;
-	    break;
+        case 3:
+            if (!gPluid_list || 
+                gPluid_list->size <= obix || 
+                gPluid_list->item[obix].type != T_POINTER)
+                continue;
+            ids = gPluid_list->item[obix].u.vec;
+            rodz = gProdz_list->item[obix].u.vec;
+            break;
 
-	default:
+        default:
             return 0;
-	}
-	adj1 = gAdj1id_list->item[obix].u.vec;
-	adj2 = gAdj2id_list->item[obix].u.vec;
+        }
         
-	if (rodz->size != ids->size)
+        adj1 = gAdj1id_list->item[obix].u.vec;
+        adj2 = gAdj2id_list->item[obix].u.vec;
+        
+        if (rodz->size != ids->size)
             continue;
-
-	old_cix = *cix_in;
+            
+        old_cix = *cix_in;
 
         for (il = 0; il < ids->size; il++)
         {
@@ -2322,7 +2100,8 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj,
             }
             *cix_in = old_cix;
         }
-		if (max_len_cix >= 0)
+        
+        if (max_len_cix >= 0)
         {
             *cix_in = max_len_cix;
             *plur = max_len_plur;
@@ -2331,20 +2110,21 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj,
             return max_len;
         }
     }
+
     return 0;
 }
-
-
+                        
+                
 /*
- * Function name: 	find_string
- * Description:		Finds out if a given string exist within an
- *			array of words.
- * Arguments:		str: String of some words
- *			wvec: Array of words
- *			cix_in: Startpos in word array
- * Returns:		Pos in array if string found or -1
+ * Function name:         find_string
+ * Description:                Finds out if a given string exist within an
+ *                        array of words.
+ * Arguments:                str: String of some words 
+ *                        wvec: Array of words
+ *                        cix_in: Startpos in word array
+ * Returns:                Pos in array if string found or -1
  */
-int
+int 
 find_string(char *str, struct vector *wvec, int *cix_in)
 {
     int fpos;
@@ -2353,57 +2133,59 @@ find_string(char *str, struct vector *wvec, int *cix_in)
 
 #ifndef OLD_EXPLODE
     while (*cix_in < wvec->size && !*(wvec->item[*cix_in].u.string))
-	(*cix_in)++;
+        (*cix_in)++;
 #endif
 
     for (; *cix_in < wvec->size; (*cix_in)++)
     {
-	p1 = wvec->item[*cix_in].u.string;
-	if (p1[0] != str[0])
-	    continue;
+        p1 = wvec->item[*cix_in].u.string;
+        if (p1[0] != str[0])
+            continue;
 
-	if (strcmp(p1, str) == 0) /* str was one word and we found it */
-	    return *cix_in;
+        if (strcmp(p1, str) == 0) /* str was one word and we found it */
+            return *cix_in;
 
-	if (strchr(str,' ') == NULL)
-	    continue;
+        if (strchr(str,' ') == NULL)
+            continue;
 
-	/* If str was multi word we need to make som special checks
+        /* If str was multi word we need to make som special checks
         */
-	if (*cix_in == (wvec->size -1))
-	    continue;
+        if (*cix_in == (wvec->size -1))
+            continue;
 
-	split = explode_string(str," ");
+        split = explode_string(str," ");
 
-	/*
-	    wvec->size - *cix_in ==	2: One extra word
-				3: Two extra words
+        /*
+            wvec->size - *cix_in ==        2: One extra word
+                                3: Two extra words
         */
-	if (!split || (split->size > (wvec->size - *cix_in)))
-	{
-	    if (split)
-		free_vector(split);
-	    continue;
-	}
+        if (!split || (split->size > (wvec->size - *cix_in))) 
+        {
+            if (split)
+                free_vector(split);
+            continue;
+        }
+        
+        fpos = *cix_in;
+        for (; (*cix_in-fpos) < split->size; (*cix_in)++)
+        {
+            if (strcmp(split->item[*cix_in-fpos].u.string, 
+                       wvec->item[*cix_in].u.string))
+                break;
+        }
+        if ((*cix_in - fpos) == split->size) {
+            free_vector(split);
+            (*cix_in)--;
+            return fpos;
+        }
+        free_vector(split);
 
-	fpos = *cix_in;
-	for (; (*cix_in-fpos) < split->size; (*cix_in)++)
-	{
-	    if (strcmp(split->item[*cix_in-fpos].u.string,
-		       wvec->item[*cix_in].u.string))
-		break;
-	}
-	if ((*cix_in - fpos) == split->size) {
-	    free_vector(split);
-	    return fpos;
-	}
-	free_vector(split);
-
-	*cix_in = fpos;
+        *cix_in = fpos;
 
     }
     return -1;
 }
+
 struct vector *
 make_adjectiv_list(struct vector *adj1, struct vector *adj2, int *rodzaj, 
     int plur)
@@ -2440,15 +2222,16 @@ make_adjectiv_list(struct vector *adj1, struct vector *adj2, int *rodzaj,
     
     return rtrn;
 }
+
 /*
- * Function name: 	check_adjectiv
- * Description:		Checks a word to see if it fits as adjectiv of an
- *			object.
- * Arguments:		obix: The index in the global id arrays
- *			wvec: The command words
- *			from: #1 cmdword to test
- *			to:   last cmdword to test
- * Returns:		True if a match is made.
+ * Function name:         check_adjectiv
+ * Description:                Checks a word to see if it fits as adjectiv of an
+ *                        object.
+ * Arguments:                obix: The index in the global id arrays
+ *                        wvec: The command words
+ *                        from: #1 cmdword to test
+ *                        to:   last cmdword to test
+ * Returns:                True if a match is made.
  */
 int 
 check_adjectiv(struct vector *adj1, struct vector *adj2, int obix, 
@@ -2547,32 +2330,32 @@ check_adjectiv(struct vector *adj1, struct vector *adj2, int obix,
 }
 
 
-
 /*
- * Function name: 	member_string
- * Description:		Checks if a string is a member of an array.
- * Arguments:		str: The string to search for
- *			svec: vector of strings
- * Returns:		Pos if found else -1.
+ * Function name:         member_string
+ * Description:                Checks if a string is a member of an array.
+ * Arguments:                str: The string to search for
+ *                        svec: vector of strings
+ * Returns:                Pos if found else -1.
  */
-int
+int 
 member_string(char *str, struct vector *svec)
 {
     int il;
 
     if (!svec)
-	return -1;
+        return -1;
 
     for (il = 0; il < svec->size; il++)
     {
-	if (svec->item[il].type != T_STRING)
-	    continue;
+        if (svec->item[il].type != T_STRING)
+            continue;
 
-	if (strcmp(svec->item[il].u.string, str) == 0)
-	    return il;
+        if (strcmp(svec->item[il].u.string, str) == 0)
+            return il;
     }
     return -1;
 }
+
 int
 member_array(char *str, char *arr[])
 {
@@ -2584,131 +2367,7 @@ member_array(char *str, char *arr[])
             return x;
     return (-1);
 }
-#ifndef PARSE_FOREIGN
-/*
- * Function name: 	parse_to_plural
- * Description:		Change a sentence in singular form to a sentence
- *			in pluralform.
- * Arguments:		str: The sentence to change
- * Returns:		Sentence in plural form.
- */
-char *
-parse_to_plural(char *str)
-{
-    struct vector	*words;
-    struct svalue	stmp;
-    char *spl;
-    int il, changed;
-    char		*parse_one_plural(char *);
 
-    if (!(strchr(str,' ')))
-	return make_mstring(parse_one_plural(str));
-
-    words = explode_string(str, " ");
-#ifdef OLD_EXPLODE
-    il = 1;
-#else
-    for (il = 0 ; il < words->size ; il++)
-	if (*(words->item[il].u.string))
-	    break;
-    il++;
-#endif
-
-    for (changed = 0; il < words->size; il++)
-    {
-	if ((EQ(words->item[il].u.string, "of")) ||
-	    (il + 1 == words->size))
-	{
-	    spl = parse_one_plural(words->item[il - 1].u.string);
-	    if (spl != words->item[il - 1].u.string)
-	    {
-		stmp.type = T_STRING;
-		stmp.string_type = STRING_MSTRING;
-		stmp.u.string = make_mstring(spl);
-		assign_svalue(&words->item[il - 1], &stmp);
-		changed = 1;
-		free_svalue(&stmp);
-	    }
-	}
-    }
-    if (!changed)
-    {
-	free_vector(words);
-	return make_mstring(str);
-    }
-    str = implode_string(words, " ");
-    free_vector(words);
-    return str;
-}
-
-
-/*
- * Function name: 	parse_one_plural
- * Description:		Change a noun in singularform to a noun
- *			in pluralform.
- * Arguments:		str: The sentence to change
- * Returns:		Word in plural form.
- */
-char *
-parse_one_plural(char *str)
-{
-    char 	ch, ch2, ch3;
-    int 	sl;
-    static char	pbuf[100];   /* Words > 100 letters? In Wales maybe... */
-
-    sl = strlen(str) - 1;
-    if ((sl < 2) || (sl > 90))
-	return str;
-
-    ch = str[sl];
-    ch2 = str[sl - 1];
-    ch3 = str[sl - 2];
-    (void)strcpy(pbuf, str); pbuf[sl] = 0;
-
-    switch (ch)
-    {
-    case 'h':
-	if (ch2 == 's' || ch2 == 'c')
-	    return strcat(pbuf, "hes");
-	/* FALLTHROUGH */
-    case 'f':
-	return strcat(pbuf, "ves");
-    case 's':
-	return strcat(pbuf, "ses");
-    case 'x':
-	if (EQ(str,"ox"))
-	    return "oxen";
-	else
-	    return strcat(pbuf, "xes");
-    case 'y':
-	if ((ch2 != 'a' && ch2 != 'e' && ch2 != 'i' && ch2 != 'o' &&
-	     ch2 != 'u') || (ch2 == 'u' && ch3 == 'q'))
-	    return strcat(pbuf, "ies");
-	/* FALLTHROUGH */
-    case 'e':
-	if (ch2 == 'f')
-	{
-	    pbuf[sl - 1] = 0;
-	    return strcat(pbuf, "ves");
-	}
-    }
-
-    if (EQ(str,"corpse")) return "corpses";
-    if (EQ(str,"tooth")) return "teeth";
-    if (EQ(str,"foot")) return "feet";
-    if (EQ(str,"man")) return "men";
-    if (EQ(str,"woman")) return "women";
-    if (EQ(str,"child")) return "children";
-    if (EQ(str,"goose")) return "geese";
-    if (EQ(str,"mouse")) return "mice";
-    if (EQ(str,"deer")) return "deer";
-    if (EQ(str,"moose")) return "moose";
-    if (EQ(str,"sheep")) return "sheep";
-
-    pbuf[sl] = ch;
-    return strcat(pbuf, "s");
-}
-#endif
 
 /*
 
@@ -2719,22 +2378,22 @@ parse_one_plural(char *str)
 /* process_string
  *
  * Description:   Checks a string for the below occurences and replaces:
- *		  Fixes a call to a named function if the value is on the
+ *                  Fixes a call to a named function if the value is on the
  *                form: '@@function[:filename][|arg|arg]@@' Filename is
  *                optional.
- *		  Note that process_string does not recurse over returned
- *		  replacement values. If a function returns another function
- *		  description, that description will not be replaced.
+ *                  Note that process_string does not recurse over returned
+ *                  replacement values. If a function returns another function
+ *                  description, that description will not be replaced.
  *                Example (added after reading TMI docs :-)
  *                "You are chased by @@query_name:/obj/monster#123@@ eastward."
- *                 is replaced by:
+ *                 is replaced by: 
  *                "You are chased by Orc eastward."
  *                               (if query_name in monster#123 returns "Orc")
- *
+ *                 
  *                Note that both object and arguments are optional.
  * Arguments:     str: A string containing text and function descriptions as
- *		  as described above.
- * Returns: 	  String containing the result of all replacements.
+ *                  as described above.
+ * Returns:           String containing the result of all replacements.
  */
 char *
 process_string(char *str, int other_ob)
@@ -2746,17 +2405,17 @@ process_string(char *str, int other_ob)
     char *process_part(char *, int);
 
     if (str == NULL || strstr(str,"@@") == NULL)
-	return 0;
+        return 0;
 
-    /* This means we are called from notify_ in comm1
+    /* This means we are called from notify_ in comm1 
        We must temporary set eff_user to backbone uid for
        security reasons.
     */
     if (!current_object)
     {
-	current_object = command_giver;
+        current_object = command_giver;
     }
-
+        
     vec = explode_string(str, "@@");
 
     /* If the first two chars is '@@' then vec[0] is a potential VBFC
@@ -2768,38 +2427,38 @@ process_string(char *str, int other_ob)
 #endif
 
     /* Loop over each VBFC
-       Terminating space is no longer allowed.
+       Terminating space is no longer allowed. 
        A VBFC must be terminated with '@@'.
     */
-    for (changed = 0, il = pr_start; il < vec->size; il += 2)
+    for (changed = 0, il = pr_start; il < vec->size; il += 2) 
     {
-	p2 = process_part(vec->item[il].u.string, other_ob);
+        p2 = process_part(vec->item[il].u.string, other_ob);
 
-	if (p2 == vec->item[il].u.string)  /* VBFC not resolved */
-	{
-	    /* Put back the leading and trailing '@@'.
-	       If some other VBFC resolves, this is needed.
-	    */
-	    p3 = xalloc(5 + strlen(p2));
-	    (void)strcpy(p3, "@@");
-	    (void)strcat(p3, p2);
-	    (void)strcat(p3, "@@");
-	    p2 = p3;
-	}
-	else
-	    changed = 1;
+        if (p2 == vec->item[il].u.string)  /* VBFC not resolved */
+        {
+            /* Put back the leading and trailing '@@'. 
+               If some other VBFC resolves, this is needed.
+            */
+            p3 = xalloc(5 + strlen(p2));
+            (void)strcpy(p3, "@@"); 
+            (void)strcat(p3, p2);
+            (void)strcat(p3, "@@");
+            p2 = p3;
+        }
+        else
+            changed = 1;
 
-	free_svalue(&vec->item[il]);
-	vec->item[il].type = T_STRING;
-	vec->item[il].string_type = STRING_MSTRING;
-	vec->item[il].u.string = make_mstring(p2);
-	free(p2);
+        free_svalue(&vec->item[il]);
+        vec->item[il].type = T_STRING;
+        vec->item[il].string_type = STRING_MSTRING;
+        vec->item[il].u.string = make_mstring(p2);
+        free(p2);
     }
 
     if (changed)
-	buf = implode_string(vec, "");
+        buf = implode_string(vec, "");
     else
-	buf = 0;
+        buf = str;
 
     free_vector(vec);
 
@@ -2822,14 +2481,14 @@ process_part(char *str, int other_ob)
     struct svalue *process_value(char *, int);
 
     if (!(*str) || (str[0] < 'A') || (str[0] > 'z'))
-	return str;
+        return str;
 
     ret = process_value(str, other_ob);
 
     if ((ret) && (ret->type == T_STRING))
-	return string_copy(ret->u.string);
+        return string_copy(ret->u.string);
     else
-	return str;
+        return str;
 }
 
 /*
@@ -2848,9 +2507,9 @@ process_value(char *str, int other_ob)
     struct object *ob;
 
     if (!(*str) || (str[0] < 'A') || (str[0] > 'z'))
-	return &const0;
+        return &const0;
 
-    func = (char *) tmpalloc(strlen(str) + 1);
+    func = (char *) alloca(strlen(str) + 1);
     (void)strcpy(func, str);
 
     arg = strchr(func,'|'); if (arg) { *arg=0; arg++; }
@@ -2858,113 +2517,112 @@ process_value(char *str, int other_ob)
 
     /* Find the objectpointer
     */
-    if (!obj)
-	ob = current_object;
+    if (!obj) 
+        ob = current_object;
     else
-	ob = find_object2(obj);
+        ob = find_object2(obj);
 
     if (!ob)
     {
-	return &const0;
+        return &const0;
     }
 
     /* Push all arguments as strings to the stack
     */
     for (numargs = 0; arg; arg = narg)
     {
-	narg = strchr(arg,'|');
-	if (narg)
-	    *narg = 0;
-	push_string(arg, STRING_MSTRING);
-	numargs++;
-	if (narg)
-	{
-	    *narg = '|';
-	    narg++;
-	}
+        narg = strchr(arg,'|');
+        if (narg) 
+            *narg = 0; 
+        push_string(arg, STRING_MSTRING);
+        numargs++;
+        if (narg) 
+        {
+            *narg = '|'; 
+            narg++;
+        }
     }
 
     if (ob->flags & O_DESTRUCTED)
-	error("object used by process_string/process_value destructed\n");
-
+        error("object used by process_string/process_value destructed\n");
+    
     if (other_ob)
     {
-	extern char *pc;
+        extern char *pc;
 
-	if (!vbfc_object)
-	    error("No vbfc object.\n");
-	push_control_stack(vbfc_object, vbfc_object->prog, 0);
-	current_prog = vbfc_object->prog;
-	pc = vbfc_object->prog->program;	/* XXX */
-	inh_offset = current_prog->num_inherited;
-	previous_ob = current_object;
-	current_object = vbfc_object;
-	csp->ext_call = 1;
-
+        if (!vbfc_object)
+            error("No vbfc object.\n");
+        push_control_stack(vbfc_object, vbfc_object->prog, 0);
+        current_prog = vbfc_object->prog;
+        pc = vbfc_object->prog->program;    /* XXX */
+        inh_offset = current_prog->num_inherited;
+        previous_ob = current_object;
+        current_object = vbfc_object;
+        csp->ext_call = 1;
+        
     }
-
+    
     /*
      * Apply the function and see if adequate answer is returned
      */
     ret = apply(func, ob, numargs, 1);
 
     if (other_ob)
-	pop_control_stack();
-
+        pop_control_stack();
+    
     if (!ret)
-	return &const0;
+        return &const0;
     else
-	return ret;
+        return ret;
 }
 
 /*
  * Function name: break_string
  * Description:   Breaks a continous string without newlines into a string
- *		  with newlines inserted at regular intervalls replacing spaces
- *		  Each newline separated string can be indented with a given
- *		  number of spaces.
+ *                  with newlines inserted at regular intervalls replacing spaces
+ *                  Each newline separated string can be indented with a given
+ *                  number of spaces.
  * Arguments:     str: Original message
- *		  width: The total maximum width of each line.
- *		  indent: (optional) How many spaces to indent with or
+ *                  width: The total maximum width of each line.
+ *                  indent: (optional) How many spaces to indent with or 
  *                        indent string. (Max 1000 in indent)
  * Returns:       A string with newline separated strings
  */
 char *
 break_string(char *str, int width, struct svalue *indent)
 {
-    char 	*fstr, *istr;
-    struct 	vector *lines;
+    char         *fstr, *istr;
+    struct         vector *lines;
     long long l;
     int il, nchar, space, indlen;
 
 
     if (!indent)
-	istr = 0;
-
+        istr = 0;
     else if (indent->type == T_NUMBER && indent->u.number >= 0 && indent->u.number < 1000)
     {
-	l = indent->u.number;
-	istr = xalloc((size_t)l + 1);
-	for (il = 0; il < l; il++)
-	    istr[il] = ' ';
-	istr[il] = 0;
+        l = indent->u.number;
+        istr = xalloc((size_t)l + 1);
+        for (il = 0; il < l; il++)
+            istr[il] = ' ';
+        istr[il] = 0;
     }
     else if (indent->type == T_STRING)
-	istr = string_copy(indent->u.string);
+        istr = string_copy(indent->u.string);
     else
-	return 0;
+        return 0;
 
     if (width < 1)
-	width = 1;
+        width = 1;
 
     if (istr)
     {
-	indlen = strlen(istr);
-	if (width <= indlen)
-	    width = indlen + 1;
+        indlen = strlen(istr);
+        if (width <= indlen)
+            width = indlen + 1;
     }
     else
-	indlen = 0;
+        indlen = 0;
 
     l = strlen(str);
     if (l == 0) {
@@ -2980,17 +2638,17 @@ break_string(char *str, int width, struct svalue *indent)
     fstr = str;
     for (il = 0; il < l; il++)
     {
-	if (fstr[il] == ' ')
-	    space = il;
+        if (fstr[il] == ' ')
+            space = il;
 
-	if ((il - nchar) >= (width - indlen) && space >= 0)
-	{
+        if ((il - nchar) >= (width - indlen) && space >= 0)
+        {
             if (fstr == str)
                 fstr = make_mstring(str);
-	    fstr[space] = '\n';
-	    nchar = space + 1;
-	    space = -1;
-	}
+            fstr[space] = '\n';
+            nchar = space + 1;
+            space = -1;
+        }
     }
 
     /*
@@ -2998,11 +2656,11 @@ break_string(char *str, int width, struct svalue *indent)
      */
     if (!indlen)
     {
-	if (istr)
-	    free(istr);
+        if (istr)
+            free(istr);
         if (fstr == str)
             return 0;
-	return fstr;
+        return fstr;
     }
 
     /*
@@ -3019,7 +2677,7 @@ break_string(char *str, int width, struct svalue *indent)
      */
     for (nchar = 0, il = 0; il < lines->size; il++)
     {
-	nchar += indlen + strlen(lines->item[il].u.string) + 1;
+        nchar += indlen + strlen(lines->item[il].u.string) + 1;
     }
 
     fstr = allocate_mstring((size_t)nchar);
@@ -3027,16 +2685,16 @@ break_string(char *str, int width, struct svalue *indent)
 
     for (il = 0; il < lines->size - 1; il++)
     {
-	(void)strcat(fstr, istr);
-	(void)strcat(fstr, lines->item[il].u.string);
-	(void)strcat(fstr, "\n");
+        (void)strcat(fstr, istr);
+        (void)strcat(fstr, lines->item[il].u.string);
+        (void)strcat(fstr, "\n");
     }
     if (lines->size > 0) {
-	(void)strcat(fstr, istr);
-	(void)strcat(fstr, lines->item[il].u.string);
+        (void)strcat(fstr, istr);
+        (void)strcat(fstr, lines->item[il].u.string);
     }
     if (space)
-	(void)strcat(fstr, "\n");
+        (void)strcat(fstr, "\n");
     free(istr);
     free_vector(lines);
 
