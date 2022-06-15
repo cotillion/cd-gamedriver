@@ -1829,7 +1829,8 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     static struct svalue stmp = { T_NUMBER };
     int			cix, tix, obix, plur_flag, max_cix, match_all, rodzaj;
 	int                        all, len, max_len, *tmp_int;
-    int			match_object(int, struct vector *, int *, int *);
+    int                        match_object(int, struct vector *, int *, int *, 
+                                int *, int);
 
     tmp = allocate_array(obvec->size + 1);
 
@@ -2120,7 +2121,8 @@ struct svalue *
 single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 {
     int			cix, obix, plur_flag, rodzaj;
-    int			match_object(int, struct vector *, int *, int *);
+    int                        match_object(int, struct vector *, int *, int *,
+                                int *, int);
 
     for (obix = 0; obix < obvec->size; obix++)
     {
@@ -2130,7 +2132,7 @@ single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	cix = *cix_in;
 	load_lpc_info(obix, obvec->item[obix].u.ob);
 	plur_flag = 0;
-	if (match_object(obix, wvec, &cix, &plur_flag, &rodzaj))
+	if (match_object(obix, wvec, &cix, &plur_flag, &rodzaj,0))
 	{
 	    *cix_in = cix + 1;
 	    return &obvec->item[obix];
@@ -2244,7 +2246,7 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
  * Returns:		True if object matches.
  */
 int
-match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj)
+match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj, int max_len)
 {
     struct vector	*ids, *rodz, *adj1, *adj2;;
     int 		il, pos, cplur, old_cix, len;
