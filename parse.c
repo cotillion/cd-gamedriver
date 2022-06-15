@@ -1552,32 +1552,6 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
 }
 
 
-/*
-   We normally define these, see initial documentation (top of file)
-*/
-#ifndef PARSE_FOREIGN
-
-    static char *ord1[] = {"", "first", "second", "third", "fourth", "fifth",
-			   "sixth", "seventh", "eighth", "ninth", "tenth",
-			   "eleventh", "twelfth", "thirteenth", "fourteenth",
-			   "fifteenth", "sixteenth", "seventeenth",
-			   "eighteenth","nineteenth"};
-
-    static char *ord10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
-			    "seventy", "eighty","ninety"};
-
-    static char *sord10[] = {"", "", "twentieth", "thirtieth", "fortieth",
-			     "fiftieth", "sixtieth","seventieth", "eightieth",
-			     "ninetieth"};
-
-    static char *num1[] = {"", "one","two","three","four","five","six",
-			   "seven","eight","nine","ten",
-			   "eleven","twelve","thirteen","fourteen","fifteen",
-			   "sixteen", "seventeen","eighteen","nineteen"};
-
-    static char *num10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
-			   "seventy", "eighty","ninety"};
-#endif
 void
 zamien_przypadek(int num)
 {
