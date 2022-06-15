@@ -338,7 +338,7 @@ load_parse_information()
     else
 	gId_list_d = 0;
 
-    pval = apply_master_ob(M_QGET_RODZ, 0);
+    pval = apply_master_ob(M_PARSE_COMMAND_RODZ_LIST, 0);
     if (pval && pval->type == T_POINTER)
     {
         gRodz_list_d = pval->u.vec;
