@@ -1691,7 +1691,7 @@ zaimek_parse(struct vector *wvec, int *cix_in, int *fail)
  *			fail: Fail flag if parse did not match
  * Returns:		svalue holding result of parse.
  */
-struct svalue *
+/*struct svalue *
 item_number_parse(struct vector *wvec, int *cix_in, int *fail)
 {
     int cix, ten, ones;
@@ -1699,7 +1699,7 @@ item_number_parse(struct vector *wvec, int *cix_in, int *fail)
     char buf[100];
     static struct svalue stmp;	/* No need to free, only numbers */
 
-    cix = *cix_in; *fail = 0;
+   /* cix = *cix_in; *fail = 0;
 
     char *suffix;
     int matches = sscanf(wvec->item[cix].u.string, "%lld%ms", &num, &suffix);
@@ -1715,7 +1715,7 @@ item_number_parse(struct vector *wvec, int *cix_in, int *fail)
 	}
 	*fail = 1;
 	return 0; /* Only positive numbers */
-    }
+    /*}
 
     if (matches == 2)
     {
@@ -1782,7 +1782,7 @@ item_number_parse(struct vector *wvec, int *cix_in, int *fail)
     *fail = 1;
     return 0;
 }
-
+*/
 
 /*
  * Function name: 	item_parse
