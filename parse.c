@@ -292,6 +292,11 @@ Example:
 */
 #define QGET_ALLWORD "parse_command_all_word"
 #define M_QGET_ALLWORD M_PARSE_COMMAND_ALL_WORD
+
+#define QGET_ZAIMKA                "parse_command_obiekty_zaimka"
+#define QGET_RODZAJ_NAZWY        "query_rodzaj_nazwy"
+#define QSET_RODZAJ                "parse_command_set_rodzaj"
+#define QGET_BIT_ZAIMKOW        "parse_command_bit_zaimkow"
 /* Global vectors for 'caching' of ids
 
    The main 'parse' routine stores these on call, making the entire
