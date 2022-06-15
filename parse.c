@@ -338,7 +338,7 @@ load_parse_information()
     else
 	gId_list_d = 0;
 
-    pval = apply_master_ob(M_PARSE_COMMAND_RODZ_LIST, 0);
+    pval = apply_master_ob(M_QGET_RODZ, 0);
     if (pval && pval->type == T_POINTER)
     {
         gRodz_list_d = pval->u.vec;
@@ -2573,7 +2573,17 @@ member_string(char *str, struct vector *svec)
     }
     return -1;
 }
+int
+member_array(char *str, char *arr[])
+{
+    int x = -1;
+    
 
+    while (arr[++x][0] != '\0')
+        if (EQ(str, arr[x]))
+            return x;
+    return (-1);
+}
 #ifndef PARSE_FOREIGN
 /*
  * Function name: 	parse_to_plural
