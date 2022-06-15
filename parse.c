@@ -32,6 +32,9 @@ extern int d_flag; /* for debugging purposes */
 extern struct object *previous_ob;
 struct object *vbfc_object;
 
+static int przyp;
+static int match_all_flag;
+static int last_word_flag;
 #ifndef tolower			/* On some systems this is a function */
 extern int tolower (int);
 #endif
@@ -268,15 +271,19 @@ Example:
 /* Function in LPC which returns a list of ids
 */
 #define QGET_ID "parse_command_id_list"
+#define QGET_RODZAJ "parse_command_rodzaj_id_list"
 #define M_QGET_ID M_PARSE_COMMAND_ID_LIST
+#define M_QGET_RODZ M_PARSE_COMMAND_RODZ_LIST
 /* Function in LPC which returns a list of plural ids
 */
 #define QGET_PLURID "parse_command_plural_id_list"
+#define QGET_PRODZAJ "parse_command_plural_rodzaj_id_list"
 #define M_QGET_PLURID M_PARSE_COMMAND_PLURAL_ID_LIST
+#define M_QGET_PRODZ M_PARSE_COMMAND_PRODZ_LIST
 /* Function in LPC which returns a list of adjectiv ids
 */
-#define QGET_ADJID "parse_command_adjectiv_id_list"
-#define M_QGET_ADJID M_PARSE_COMMAND_ADJECTIV_ID_LIST
+#define QGET_ADJID1 "parse_command_adjectiv1_id_list" 
+#define QGET_ADJID2 "parse_command_adjectiv2_id_list"
 /* Function in LPC which returns a list of prepositions
 */
 #define QGET_PREPOS "parse_command_prepos_list"
@@ -292,9 +299,13 @@ Example:
 */
 static struct vector	*gId_list	= 0;
 static struct vector	*gPluid_list	= 0;
-static struct vector	*gAdjid_list	= 0;
+static struct vector    *gRodz_list        = 0;
+static struct vector    *gProdz_list        = 0;
+static struct vector    *gAdj1id_list        = 0;
+static struct vector    *gAdj2id_list        = 0;
 
 static struct vector	*gId_list_d	= 0;  /* From master */
+static struct vector    *gRodz_list_d        = 0;  /* From master */
 static struct vector	*gPluid_list_d	= 0;  /* From master */
 static struct vector	*gAdjid_list_d	= 0;  /* From master */
 static struct vector	*gPrepos_list	= 0;  /* From master */
@@ -321,6 +332,17 @@ load_parse_information()
     else
 	gId_list_d = 0;
 
+    pval = apply_master_ob(M_QGET_RODZ, 0);
+    if (pval && pval->type == T_POINTER)
+    {
+        gRodz_list_d = pval->u.vec;
+        INCREF(pval->u.vec->ref);            /* Otherwise next sapply will free it */
+    }
+    else
+        gRodz_list_d = 0;
+
+
+
     pval = apply_master_ob(M_QGET_PLURID,0);
     if (pval && pval->type == T_POINTER)
     {
@@ -330,14 +352,15 @@ load_parse_information()
     else
 	gPluid_list_d = 0;
 
-    pval = apply_master_ob(M_QGET_ADJID, 0);
-    if (pval && pval->type == T_POINTER)
+    pval = apply_master_ob(M_QGET_PRODZ,0);
+    if (pval && pval->type == T_POINTER)        
     {
-	gAdjid_list_d = pval->u.vec;
-	INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
+        gProdz_list_d = pval->u.vec;
+        INCREF(pval->u.vec->ref);          /* Otherwise next sapply will free it */
     }
     else
-	gAdjid_list_d = 0;
+        gProdz_list_d = 0;
+
 
     pval = apply_master_ob(M_QGET_PREPOS,0);
     if (pval && pval->type == T_POINTER)
@@ -379,67 +402,104 @@ load_lpc_info(int ix, struct object *ob)
 
     if (gPluid_list &&
 	gPluid_list->size > ix &&
-	gPluid_list->item[ix].type == T_NUMBER &&
+	gPluid_list->item[ix].type == T_NUMBER ||
 	gPluid_list->item[ix].u.number == 0)
     {
-	ret = apply(QGET_PLURID, ob, 0, 1);
-	if (ret && ret->type == T_POINTER)
-	    assign_svalue_no_free(&gPluid_list->item[ix], ret);
-	else
-	{
-	    make_plural = 1;
-	    gPluid_list->item[ix].u.number = 1;
-	}
+		ret = apply(QGET_PLURID, ob, 0, 1);
+		if (ret && ret->type == T_POINTER)
+			assign_svalue_no_free(&gPluid_list->item[ix], ret);
+		else
+		{
+			make_plural = 1;
+			gPluid_list->item[ix].u.number = 1;
+		}
     }
 
     if (gId_list &&
 	gId_list->size > ix &&
-	gId_list->item[ix].type == T_NUMBER &&
+	gId_list->item[ix].type == T_NUMBER ||
 	gId_list->item[ix].u.number == 0)
     {
-	ret = apply(QGET_ID, ob, 0, 1);
-	if (ret && ret->type == T_POINTER)
-	{
-	    assign_svalue_no_free(&gId_list->item[ix], ret);
-	    if (make_plural)
-	    {
-		tmp = allocate_array(ret->u.vec->size);
-		sing = ret->u.vec;
-
-		sval.type = T_STRING;
-		sval.string_type = STRING_MSTRING;
-		for (il = 0; il < tmp->size; il++)
+		ret = apply(QGET_ID, ob, 0, 1);
+		if (ret && ret->type == T_POINTER)
 		{
-		    if (sing->item[il].type == T_STRING)
-		    {
-			str = parse_to_plural(sing->item[il].u.string);
-			sval.u.string = str;
-			assign_svalue_no_free(&tmp->item[il],&sval);
-			free_mstring(sval.u.string);
-		    }
+			assign_svalue_no_free(&gId_list->item[ix], ret);
+			if (make_plural)
+			{
+			tmp = allocate_array(ret->u.vec->size);
+			sing = ret->u.vec;
+
+			sval.type = T_STRING;
+			sval.string_type = STRING_MSTRING;
+			for (il = 0; il < tmp->size; il++)
+			{
+				if (sing->item[il].type == T_STRING)
+				{
+				str = parse_to_plural(sing->item[il].u.string);
+				sval.u.string = str;
+				assign_svalue_no_free(&tmp->item[il],&sval);
+				free_mstring(sval.u.string);
+				}
+			}
+			sval.type = T_POINTER;
+			sval.u.vec = tmp;
+			assign_svalue_no_free(&gPluid_list->item[ix], &sval);
+			free_svalue(&sval);
+			}
 		}
-		sval.type = T_POINTER;
-		sval.u.vec = tmp;
-		assign_svalue_no_free(&gPluid_list->item[ix], &sval);
-		free_svalue(&sval);
-	    }
-	}
-	else
-	{
-	    gId_list->item[ix].u.number = 1;
-	}
+		else
+		{
+			gId_list->item[ix].u.number = 1;
+		}
     }
 
-    if (gAdjid_list &&
-	gAdjid_list->size > ix &&
-	gAdjid_list->item[ix].type == T_NUMBER &&
-	gAdjid_list->item[ix].u.number == 0)
+    if (gRodz_list && 
+        gRodz_list->size > ix &&         
+        (gRodz_list->item[ix].type != T_NUMBER ||
+        gRodz_list->item[ix].u.number == 0))
     {
-	ret = apply(QGET_ADJID, ob, 0, 1);
-	if (ret && ret->type == T_POINTER)
-	    assign_svalue_no_free(&gAdjid_list->item[ix], ret);
-	else
-	    gAdjid_list->item[ix].u.number = 1;
+        push_number(przyp);
+        ret = apply(QGET_RODZAJ, ob, 1, 1);
+        if (ret && ret->type == T_POINTER)
+            assign_svalue_no_free(&gRodz_list->item[ix], ret);
+        else
+            gRodz_list->item[ix].u.number = 1;
+    }
+    
+    if (gProdz_list && 
+        gProdz_list->size > ix &&         
+        (gProdz_list->item[ix].type != T_NUMBER ||
+        gProdz_list->item[ix].u.number == 0))
+    {
+        push_number(przyp);
+        ret = apply(QGET_PRODZAJ, ob, 1, 1);
+        if (ret && ret->type == T_POINTER)
+            assign_svalue_no_free(&gProdz_list->item[ix], ret);
+        else
+            gProdz_list->item[ix].u.number = 1;
+    }
+	if (gAdj1id_list && 
+        gAdj1id_list->size > ix &&         
+        (gAdj1id_list->item[ix].type != T_NUMBER ||
+        gAdj1id_list->item[ix].u.number == 0))
+    {
+        ret = apply(QGET_ADJID1, ob, 0, 1);
+        if (ret && ret->type == T_POINTER)
+            assign_svalue_no_free(&gAdj1id_list->item[ix], ret);
+        else
+            gAdj1id_list->item[ix].u.number = 1;
+    }
+
+    if (gAdj2id_list && 
+        gAdj2id_list->size > ix &&         
+        (gAdj2id_list->item[ix].type != T_NUMBER ||
+        gAdj2id_list->item[ix].u.number == 0))
+    {
+        ret = apply(QGET_ADJID2, ob, 0, 1);
+        if (ret && ret->type == T_POINTER)
+            assign_svalue_no_free(&gAdj2id_list->item[ix], ret);
+        else
+            gAdj2id_list->item[ix].u.number = 1;
     }
 }
 
@@ -452,9 +512,12 @@ free_parse_information()
     if (gPluid_list_d)
 	free_vector(gPluid_list_d);
     gPluid_list_d = 0;
-    if (gAdjid_list_d)
-	free_vector(gAdjid_list_d);
-    gAdjid_list_d = 0;
+
+    if (gRodz_list_d)
+        free_vector(gRodz_list_d);
+    if (gProdz_list_d)
+        free_vector(gProdz_list_d);
+
     if (gPrepos_list)
 	free_vector(gPrepos_list);
     gPrepos_list = 0;
@@ -494,7 +557,9 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
 */
 {
     struct vector	*obvec, *patvec, *wvec;
-    struct vector	*old_id, *old_plid, *old_adjid;
+    struct vector	*old_id, *old_plid, *old_adj1id, *old_adj2id,
+                            *old_rodz, *old_prodz;
+
     int			pix, cix, six, fail, fword, ocix, fpix;
     struct svalue	*pval;
     void		check_for_destr(struct svalue *);    /* In interpret.c */
@@ -543,11 +608,18 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
     */
     old_id      = gId_list;
     old_plid    = gPluid_list;
-    old_adjid   = gAdjid_list;
+    old_rodz        = gRodz_list;
+    old_prodz        = gProdz_list;
+    old_adj1id  = gAdj1id_list;
+    old_adj2id        = gAdj2id_list;
+
 
     gId_list    = allocate_array(obvec->size);
     gPluid_list  = allocate_array(obvec->size);
-    gAdjid_list = allocate_array(obvec->size);
+ 	gRodz_list   = allocate_array(obvec->size);
+    gProdz_list  = allocate_array(obvec->size);
+    gAdj1id_list = allocate_array(obvec->size);
+    gAdj2id_list = allocate_array(obvec->size);
 
     /* Loop through the pattern. Handle %s but not '/'
     */
@@ -666,14 +738,29 @@ parse (char *cmd, struct svalue *ob_or_array, char *pattern,
     {
 	free_vector(gPluid_list);
     }
-    if (gAdjid_list)
+  	if (gRodz_list)
     {
-	free_vector(gAdjid_list);
+        free_vector(gRodz_list);
+    }
+    if (gProdz_list)
+    {
+        free_vector(gProdz_list);
+    }
+    if (gAdj1id_list) 
+    {
+        free_vector(gAdj1id_list);
+    }
+    if (gAdj2id_list)
+    {
+         free_vector(gAdj2id_list);
     }
 
     gId_list = old_id;
     gPluid_list = old_plid;
-    gAdjid_list = old_adjid;
+    gRodz_list        = old_rodz;
+    gProdz_list        = old_prodz;
+    gAdj1id_list = old_adj1id;
+    gAdj2id_list = old_adj2id;
 
     DECREF(wvec->ref);
     DECREF(patvec->ref);
@@ -864,8 +951,29 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
 
     pval = 0;
 
+    if (pat[0] == '%')
+    {        
+        if ((strlen(pat) > 2) && (pat[2] == ':'))
+        {
+            sscanf(pat, "%%%*c:%i%*s", &przyp);
+        }
+        else 
+            przyp = 0;
+    }
+    else
+    {        
+        if ((strlen(pat) > 1) && (pat[1] == ':'))
+        {
+            sscanf(pat, "%*c:%i%*s", &przyp);
+        }
+        else
+            przyp = 0;
+    }
+
     switch (pat[0]) {
 	case '%':
+
+
 	    switch (pat[1]) {
 		case 'i':
 		    pval = item_parse(obvec, wvec, cix_in, fail);
@@ -939,6 +1047,42 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
     return pval;
 }
 
+    static char *je[] = { "den", "dnego", "dnemu", "dnym", "dna", "dnej",
+            "dno", "denascie", "denastu", "denastoma", "" };
+    static char *dw[] = { "a", "aj", "och", "om", "oma", "ie", "anascie", 
+            "unastu", "unastoma", "adziescia", "udziestu", "udziestoma", "" };
+    static char *tr[] = { "zy", "zech", "zej", "zem", "zema", "zynascie",
+            "zynastu", "zynastoma", "zydziesci", "zydziestu", "zydziestoma", 
+            "" };
+    static char *cz[] = { "tery", "terech", "terem", "terema", "terej", 
+            "ternastu", "ternascie", "ternastoma", "terdziesci",
+            "terdziestu", "terdziestoma", "" };
+    static char *pi[] = { "ec", "eciu", "ecioma", "etnascie", "etnastu", 
+            "etnastoma", "ecdziesiat", "ecdziesieciu", "ecdziesiecioma", "" };
+    static char *sz[] = { "esc", "esciu", "escioma", "esnascie", "esnastu",
+            "esnastoma", "escdziesiat", "escdziesieciu", "escdziesiecioma", 
+            "" };
+    static char *si[] = { "edem", "edmiu", "edmioma", "edemnascie", 
+            "edemnastu", "edemnastoma", "edemdziesiat", "edemdziesieciu", 
+            "edemdziesiecioma", "" };
+    static char *os[] = { "iem", "miu", "mioma", "iemnascie", "iemnastu", 
+            "iemnastoma", "iemdziesiat", "iemdziesieciu", "iemdziesiecioma", 
+            "" };
+    static char *dz[] = { "iewiec", "iewieciu", "iewiecioma", "iesiec", 
+            "iesieciu", "iesiecioma", "iewietnascie", "iewietnastu", 
+            "iewietnastoma", "iewiecdziesiat", "iewiecdziesieciu", 
+            "iewiecdziesiecioma", "" };
+
+    static char *ord1[] = { "pierwsz", "drug", "trzec", "czwart", "piat", 
+            "szost", "siodm", "osm", "dziewiat", "" };
+            
+    static char *ord11[] = { "dziesiat", "jedenast", "dwunast", "trzynast", 
+            "czternast", "pietnast", "szesnast", "siedemnast", "osiemnast", 
+            "dziewietnast", "" };
+            
+    static char *ord20[] = { "dwudziest", "trzydziest", "czterdziest", 
+            "piecdziesiat", "szescdziesiat", "siedemdziesiat", 
+            "osiemdziesiat", "dziewiecdziesiat", "" };
 
 /*
  * Parse a number %d style, restricted to range 0-<x>
@@ -946,24 +1090,459 @@ one_parse(struct vector *obvec, char *pat, struct vector *wvec, int *cix_in,
 struct svalue *
 number_parse(struct vector *wvec, int *cix_in, int *fail)
 {
-    int64_t num;
-    int cix = *cix_in; *fail = 0;
-    static struct svalue ret;
+    int cix, str_len, member, x, szf = 0, succ;
+    long long liczba = 0;
+    char buf[5], str[strlen(wvec->item[*cix_in].u.string)], 
+                   tmp[strlen(wvec->item[*cix_in].u.string)];
+    static struct svalue stmp;        /* No need to free, only numbers */
+    
+    int member_array(char *, char **);
 
-    ret = const0;
+    match_all_flag = last_word_flag = 0;
+    cix = *cix_in; *fail = 0;
 
-    if (sscanf(wvec->item[cix].u.string, "%" SCNd64, &num))
+    strcpy(str, wvec->item[cix].u.string);
+    char *suffix;
+    int matches = sscanf(wvec->item[cix].u.string, "%lld%ms", &liczba, &suffix);
+
+    if (matches == 1)
     {
-        if (num >= 0)
+        if (liczba > 0)
         {
             (*cix_in)++;
-            ret.type = T_NUMBER;
-            ret.u.number = num;
-            return &ret;
+            stmp.type = T_NUMBER;
+            stmp.u.number = liczba;
+            return &stmp;
+        }
+        *fail = 1;
+        return 0; /* Only positive numbers */
+    }
+    
+    /* Nie ma krotszych liczebnikow. Warunek zakladany dalej, bez niego
+     * moze sie wykrzaczac.
+     */
+    if (strlen(str) < 3)
+    {
+        *fail = 1;
+        return 0;
+    }
+
+/*    succ = 0;
+    switch(przyp)
+    {
+        case 0: succ = (EQ(str, "wszystko") || EQ(str, "wszyscy")); break;
+        case 1: succ = (EQ(str, "wszystkich") || EQ(str, "wszystkiego")); break;
+        case 2: succ = (EQ(str, "wszystkim") || EQ(str, "wszystkiemu")); break;
+        case 3: succ = (EQ(str, "wszystko") || EQ(str, "wszystkich") ||
+                        EQ(str, "wszystkie")); break;
+        case 4: succ = (EQ(str, "wszystkim") || EQ(str, "wszystkimi")); break;
+        case 5: succ = (EQ(str, "wszystkim") || EQ(str, "wszystkich")); break;
+        default: *fail = 1; return 0;
+    }*/
+
+    // delvert
+    succ = 0;
+    switch(przyp)
+    {
+        case 0: if (EQ(str, "wszystko"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszyscy"))
+                    match_all_flag = 1, last_word_flag = 0, succ = 1;
+                else if (EQ(str, "wszystkie"))
+                    match_all_flag = 0, last_word_flag = 2, succ = 1;
+                break;
+        case 1: if (EQ(str, "wszystkiego"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszystkich"))
+                    match_all_flag = 1, last_word_flag = 0, succ = 1;
+                break;
+        case 2: if (EQ(str, "wszystkiemu"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszystkim"))
+                    match_all_flag = 1, last_word_flag = 0, succ = 1;
+                break;
+        case 3: if (EQ(str, "wszystko"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszystkich"))
+                        match_all_flag = 1, last_word_flag = 0, succ = 1;
+                else if (EQ(str, "wszystkie"))
+                    match_all_flag = 0, last_word_flag = 2, succ = 1;
+                break;
+        case 4: if (EQ(str, "wszystkim"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszystkimi"))
+                    match_all_flag = 1, last_word_flag = 0, succ = 1;
+                break;
+        case 5: if (EQ(str, "wszystkim"))
+                    match_all_flag = 2, last_word_flag = 1, succ = 1;
+                else if (EQ(str, "wszystkich"))
+                    match_all_flag = 1, last_word_flag = 0, succ = 1;
+                break;
+        default: *fail = 1; return 0;
+    }
+    
+
+
+    
+    if (succ)
+    {
+        (*cix_in)++;
+        stmp.type = T_NUMBER;
+        stmp.u.number = 0;
+        return &stmp;
+    }
+
+/* Analiza pod katem liczebnika glownego */
+
+    strncpy(buf, str, 2); buf[2] = '\0';
+    strcpy(tmp, (str+2));
+        
+    if (EQ(buf, "je"))
+    {
+        if ((member = member_array(tmp, je)) != -1)
+        {
+            if (member < 7) liczba = 1;
+            else liczba = 11;
         }
     }
+    else if (EQ(buf, "dw"))
+    {
+        if ((member = member_array(tmp, dw)) != -1)
+        {
+            if (member < 6) liczba = 2;
+            else if (member < 9) liczba = 12;
+            else liczba = 20;
+        }
+    }
+    else if (EQ(buf, "tr"))
+    {
+        if ((member = member_array(tmp, tr)) != -1)
+        {
+            if (member < 5) liczba = 3;
+            else if (member < 8) liczba = 13;
+            else liczba = 30;
+        }
+    }
+    else if (EQ(buf, "cz"))
+    {
+        if ((member = member_array(tmp, cz)) != -1)
+        {
+            if (member < 5) liczba = 4;
+            else if (member < 8) liczba = 14;
+            else liczba = 40;
+        }
+    }
+    else if (EQ(buf, "pi"))
+    {
+        if ((member = member_array(tmp, pi)) != -1)
+        {
+            if (member < 3) liczba = 5;
+            else if (member < 6) liczba = 15;
+            else liczba = 50;
+        }
+    }
+    else if (EQ(buf, "sz"))
+    {
+        if ((member = member_array(tmp, sz)) != -1)
+        {
+            if (member < 3) liczba = 6;
+            else if (member < 6) liczba = 16;
+            else liczba = 60;
+        }
+    }
+    else if (EQ(buf, "si"))
+    {
+        if ((member = member_array(tmp, si)) != -1)
+        {
+            if (member < 3) liczba = 7;
+            else if (member < 6) liczba = 17;
+            else liczba = 70;
+        }
+    }
+    else if (EQ(buf, "os"))
+    {
+        if ((member = member_array(tmp, os)) != -1)
+        {
+            if (member < 3) liczba = 8;
+            else if (member < 6) liczba = 18;
+            else liczba = 80;
+        }
+    }
+    else if (EQ(buf, "dz"))
+    {
+        if ((member = member_array(tmp, dz)) != -1)
+        {
+            if (member < 3) liczba = 9;
+            else if (member < 6) liczba = 10;
+            else if (member < 9) liczba = 19;
+            else liczba = 90;
+        }
+    }
+    else liczba = 0;
+    
+    if (liczba && liczba < 20)
+    {
+        (*cix_in)++;
+        stmp.type = T_NUMBER;
+        stmp.u.number = liczba;
+        return &stmp;
+    }
+    else if ((liczba >= 20) && (cix + 1 < wvec->size))
+    {
+        cix++;
+        strncpy(buf, wvec->item[cix].u.string, 2); buf[2] = '\0';
+        strcpy(tmp, (wvec->item[cix].u.string + 2));
+        
+        if (EQ(buf, "je"))
+        {
+            if ((member = member_array(tmp, je)) != -1)
+            {
+                if (member < 7) member = 1;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "dw"))
+        {
+            if ((member = member_array(tmp, dw)) != -1)
+            {
+                if (member < 6) member = 2;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "tr"))
+        {
+            if ((member = member_array(tmp, tr)) != -1)
+            {
+                if (member < 5) member = 3;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "cz"))
+        {
+            if ((member = member_array(tmp, cz)) != -1)
+            {
+                if (member < 5) member = 4;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "pi"))
+        {
+            if ((member = member_array(tmp, pi)) != -1)
+            {
+                if (member < 3) member = 5;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "sz"))
+        {
+            if ((member = member_array(tmp, sz)) != -1)
+            {
+                if (member < 3) member = 6;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "si"))
+        {
+            if ((member = member_array(tmp, si)) != -1)
+            {
+                if (member < 3) member = 7;
+                else member = 0;
+            }
+        }
+        else if (EQ(buf, "os"))
+        {
+            if ((member = member_array(tmp, os)) != -1)
+            {
+                if (member < 3) member = 8;
+                else member = 0;
+                }
+        }
+        else if (EQ(buf, "dz"))
+        {
+            if ((member = member_array(tmp, dz)) != -1)
+            {
+                if (member < 3) member = 9;
+                else member = 0;
+            }
+        }
+        else member = 0;
+        
+        if (member)
+        {
+            liczba += member;
+            (*cix_in)++;
+        }
+    }
+    
+    if (liczba)
+    {
+        (*cix_in)++;
+        stmp.type = T_NUMBER;
+        stmp.u.number = liczba;
+        return &stmp;
+    }
+/* Koniec analizy pod katem liczebnika glownego */
+
+
+
+/* Analiza pod katem liczebnika porzadkowego */
+
+    /* str jest just ustawiony */
+    str_len = strlen(str);
+    
+    switch(str[str_len - 1])
+    {
+        case 'o': x = 1; szf = 3; strcpy(buf, "ego"); break;
+        case 'u': x = 2; szf = 3; strcpy(buf, "emu"); break;
+        case 'j': x = 3; szf = 2; strcpy(buf, "ej"); break;
+        case 'e': x = 4; szf = 1; strcpy(buf, "e"); break;
+        case 'a': x = 5; szf = 1; strcpy(buf, "a"); break;
+        case 'm': x = 6; break;
+        case 'i':
+        case 'y': x = 7; break;
+        default: *fail = 1; return 0;
+    }
+    
+    if (x == 7)
+    {
+        strncpy(tmp, str, (str_len - 1)); 
+        tmp[str_len - 1] = '\0';
+    }
+    else if (x != 6)
+    {
+        strncpy(tmp, (str + str_len - szf), szf); tmp[szf] = '\0';
+        if (!EQ(buf, tmp))
+        {
+            *fail = 1; 
+            return 0;
+        }
+            
+        if (str[str_len - (szf + 1)] != 'i')
+        {
+            strncpy(tmp, str, str_len - (szf)); 
+            tmp[str_len - szf] = '\0';
+        }
+        else
+        {
+            strncpy(tmp, str, str_len - (szf + 1)); 
+            tmp[str_len - (szf + 1)] = '\0';
+        }
+    }
+    else
+    {
+        switch(str[str_len - 2])
+        {
+            case 'y':
+            case 'i': strncpy(tmp, str, str_len - 2); 
+                      tmp[str_len - 2] = '\0'; break;
+            default: *fail = 1; return 0;
+        }
+    }
+    
+    if ((member = member_array(tmp, ord1)) != -1)
+        liczba = (member + 1);
+    else if ((member = member_array(tmp, ord11)) != -1)
+        liczba = (member + 10);
+    else if ((member = member_array(tmp, ord20)) != -1)
+    {
+        liczba = ((member + 2) * 10);
+        if (cix + 1 < wvec->size)
+        {
+            cix++;
+            strcpy(str, wvec->item[cix].u.string);
+            
+            str_len = strlen(str);
+
+            if (x == 7)
+            {
+                strncpy(tmp, str, (str_len - 1)); 
+                tmp[str_len - 1] = '\0';
+            }
+            else if (x != 6)
+            {
+                strncpy(tmp, (str + str_len - szf), szf); tmp[szf] = '\0';
+                if (!EQ(buf, tmp))
+                {
+                    *fail = 1; 
+                    return 0;
+                }
+                    
+                if (str[str_len - (szf + 1)] != 'i')
+                {
+                    strncpy(tmp, str, str_len - (szf)); 
+                    tmp[str_len - szf] = '\0';
+                }
+                else
+                {
+                    strncpy(tmp, str, str_len - (szf + 1)); 
+                    tmp[str_len - (szf + 1)] = '\0';
+                }
+            }
+            else
+            {
+                switch(str[str_len - 2])
+                {
+                    case 'y':
+                    case 'i': strncpy(tmp, str, str_len - 2); 
+                              tmp[str_len - 2] = '\0'; break;
+                    default: *fail = 1; return 0;
+                }
+            }
+            
+            if ((member = member_array(tmp, ord1)) != -1)
+            {
+                (*cix_in)++;
+                liczba += (member + 1);
+            }
+            else
+            {
+                *fail = 1; 
+                return 0;
+            }
+        }
+    }
+    
+    if (liczba)
+    {
+        (*cix_in)++;
+        stmp.type = T_NUMBER;
+        stmp.u.number = -liczba;
+        return &stmp;
+    }
+    
     *fail = 1;
-    return NULL;
+    return 0;
+
+#if 0
+
+    for (ten = 0; ten < 10; ten++)
+        for(ones = 0; ones < 10; ones++)
+        {
+            (void)sprintf(buf,"%s%s", num10[ten],
+                    (ten > 1) ? num1[ones] : num1[ten * 10 + ones]);
+            if (EQ(buf, wvec->item[cix].u.string))
+            {
+                (*cix_in)++;
+                stmp.type = T_NUMBER;
+                stmp.u.number = ten * 10 + ones;
+                return &stmp;
+            }
+        }
+
+    for (ten = 0; ten < 10; ten++)
+        for(ones = 0; ones < 10; ones++)
+        {
+            (void)sprintf(buf,"%s%s", (ones) ? ord10[ten] : sord10[ten],
+                    (ten > 1) ? ord1[ones] : ord1[ten * 10 + ones]);
+            if (EQ(buf, wvec->item[cix].u.string))
+            {
+                (*cix_in)++;
+                stmp.type = T_NUMBER;
+                stmp.u.number = -(ten * 10 + ones);
+                return &stmp;
+            }
+        }
+#endif /* 0 */
 }
 
 
@@ -993,6 +1572,131 @@ number_parse(struct vector *wvec, int *cix_in, int *fail)
     static char *num10[] = {"", "", "twenty","thirty","forty","fifty","sixty",
 			   "seventy", "eighty","ninety"};
 #endif
+void
+zamien_przypadek(int num)
+{
+    if ((przyp != 3) && (przyp != 0))
+        return ;
+        
+    if (num < 2)
+        return ;
+        
+    if ((num % 10 > 1) && (num % 10 < 5) && ((num / 10) % 10 != 1))
+        return ;
+        
+    przyp = 1;
+    
+    return ;
+    
+    /* Jedynym wyjatkiem sa liczebniki zbiorowe.. one zawsze
+       powinny zwracac dopelniacz w czlonie jednosci. Ale jako ze
+       parser nie dostaje informacji o rodzaju... przemilczamy to. */
+}
+#define R_MESKI         0
+#define R_ZENSKI         1
+#define R_NIJAKI        2
+#define R_MESKOOS        3
+#define R_NIEMESKOOS        4
+
+struct vector *
+zaimek_parse(struct vector *wvec, int *cix_in, int *fail)
+{
+    struct vector *ret;
+    struct svalue *apl;
+    char str[strlen(wvec->item[*cix_in].u.string)];
+    int f = 0, rodzaj = -1;
+    
+    strcpy(str, wvec->item[*cix_in].u.string);
+    switch(przyp)
+    {
+        case 1:
+            if (EQ(str, "niego") || EQ(str, "go"))
+                f = 1;
+            else if (EQ(str, "niej") || EQ(str, "jej"))
+                rodzaj = R_ZENSKI;
+            else if (EQ(str, "nich") || EQ(str, "ich"))
+                f = 2;
+            break;
+        case 2:
+            if (EQ(str, "mu"))
+                f = 1;
+            else if (EQ(str, "jej"))
+                rodzaj = R_ZENSKI;
+            else if (EQ(str, "im"))
+                f = 2;
+            break;
+        case 3:
+            if (EQ(str, "niego") || EQ(str, "go"))
+                rodzaj = R_MESKI;
+            else if (EQ(str, "nia") || EQ(str, "ja"))
+                rodzaj = R_ZENSKI;
+            else if (EQ(str, "nie") || EQ(str, "je"))
+                f = 3;
+            else if (EQ(str, "nich") || EQ(str, "ich"))
+                rodzaj = R_MESKOOS;
+            break;
+        case 4: 
+            if (EQ(str, "nim"))
+                f = 1;
+            else if (EQ(str, "nia"))
+                rodzaj = R_ZENSKI;
+            else if (EQ(str, "nimi"))
+                f = 2;
+            break;
+        case 5: 
+            if (EQ(str, "nim"))
+                f = 1;
+            else if (EQ(str, "niej"))
+                rodzaj = R_ZENSKI;
+            else if (EQ(str, "nich"))
+                f = 2;
+    }
+    
+    if (!f && rodzaj == -1)
+        return NULL;
+        
+    if (f)
+    {
+        apl = apply(QGET_BIT_ZAIMKOW, command_giver, 0, 1);
+        if (!apl || (apl->type != T_NUMBER))
+            return NULL;
+        rodzaj = apl->u.number;
+        free_svalue(apl);
+        switch (f)
+        {
+            case 1:
+                if (rodzaj & 1)
+                    rodzaj = R_MESKI;
+                else
+                    rodzaj = R_NIJAKI;
+                break;
+            case 2:
+                if (rodzaj & 2)
+                    rodzaj = R_NIEMESKOOS;
+                else
+                    rodzaj = R_MESKOOS;
+                break;
+            case 3:
+                if (rodzaj & 4)
+                    rodzaj = R_NIJAKI;
+                else
+                    rodzaj = R_NIEMESKOOS;
+        }
+    }
+    
+    push_number(rodzaj);
+    apl = apply(QGET_ZAIMKA, command_giver, 1, 1);
+    if (apl->type == T_POINTER && apl->u.vec->size)
+    {
+        ret = slice_array(apl->u.vec, 0, (apl->u.vec->size - 1));
+        (*cix_in)++;
+        free_svalue(apl);
+        return ret;
+    }
+    
+    free_svalue(apl);
+    return NULL;
+}
 
 /*
  * Function name: 	number_parse
@@ -1123,11 +1827,18 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     struct vector	*tmp, *ret;
     struct svalue	*pval;
     static struct svalue stmp = { T_NUMBER };
-    int			cix, tix, obix, plur_flag, max_cix, match_all;
+    int			cix, tix, obix, plur_flag, max_cix, match_all, rodzaj;
+	int                        all, len, max_len, *tmp_int;
     int			match_object(int, struct vector *, int *, int *);
 
     tmp = allocate_array(obvec->size + 1);
-    if ((pval = item_number_parse(wvec, cix_in, fail)) != NULL )
+
+    
+    if ( (pval = number_parse(wvec, cix_in, fail)) != NULL )
+    {
+        zamien_przypadek(pval->u.number);
+    }
+
 	assign_svalue_no_free(&tmp->item[0],pval);
 
     if ((pval) && (pval->u.number>1))
@@ -1142,50 +1853,183 @@ item_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
     }
     else
     {
-	plur_flag = 0;
-	match_all = 0;
+        plur_flag = 0;
+        match_all = 0;
+
+        if (!pval && (tmp = zaimek_parse(wvec, cix_in, fail)) != NULL)
+        {
+            if (!tmp->size)
+            {
+                free_vector(tmp);
+                *fail = 1;
+                return 0;
+            }
+            tmp_int = (int *)xalloc(sizeof(int) * tmp->size);
+
+            for (obix = 0, cix = 0; obix < tmp->size; obix++)
+            {
+                tix = -1;
+                while (++tix < obvec->size)
+                    if ((tmp->item[obix].type == T_OBJECT) &&
+                            !(tmp->item[obix].u.ob->flags & O_DESTRUCTED) &&
+                        (obvec->item[tix].u.ob == tmp->item[obix].u.ob))
+                    {
+                        tmp_int[cix++] = obix;
+                        break;
+                    }
+            }
+
+            if (!cix)
+            {
+                free_vector(tmp);
+                free(tmp_int);
+                *fail = 1;
+                return 0;
+            }
+
+            ret = allocate_array(cix + 1);
+            for (tix = 0; tix < cix; tix++)
+            {
+                assign_svalue_no_free(&ret->item[tix + 1], 
+                            &tmp->item[tmp_int[tix]]);
+            }
+
+            free_vector(tmp);
+            free(tmp_int);
+
+            ret->item[0].type = T_NUMBER;
+            ret->item[0].u.number = (cix > 1 ? 0 : 1);            
+            *fail = 0;
+            free_svalue(&stmp);
+            stmp.type = T_POINTER;
+            stmp.u.vec = ret;
+
+            return &stmp;
+        }
     }
 
     max_cix = *cix_in;
     tix = 1;
-    for (obix = 0; obix < obvec->size; obix++)
+	    // delvert
+    if (*cix_in >= wvec->size && last_word_flag == 2)
     {
-	*fail = 0; cix = *cix_in;
-	if (obvec->item[obix].type != T_OBJECT)
-	    continue;
-	if (cix == wvec->size && match_all)
-	{
-	    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
-	    continue;
-	}
-	load_lpc_info(obix, obvec->item[obix].u.ob);
-
-	if (match_object(obix, wvec, &cix, &plur_flag))
-	{
-	    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
-	    max_cix = (max_cix<cix) ? cix : max_cix;
-	}
+        *fail = 1;
+        return 0;
     }
 
-    if (tix < 2)
+    if (!match_all || cix != wvec->size)
     {
-	*fail = 1;
-	free_vector(tmp);
-	if (pval)
-	    (*cix_in)--;
-	return 0;
+        for (obix = 0; obix < obvec->size; obix++)
+        {
+            *fail = 0; cix = *cix_in;
+            if (obvec->item[obix].type != T_OBJECT)
+                continue;
+            if (cix == wvec->size && match_all)
+            {
+                assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
+                continue;
+            }
+            // delvert
+            if ((obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS) &&
+                match_all_flag == 2)
+                continue;
+            if (!(obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS) &&
+                match_all_flag == 1)
+                continue;
+
+            load_lpc_info(obix, obvec->item[obix].u.ob);
+            
+            if ((len = match_object(obix, wvec, &cix, &plur_flag, &rodzaj,
+                                   max_len)))
+            {
+                if (len > max_len)
+                {
+                    max_len = len;
+                    tix = 1; /* Zapelnianie tablicy od nowa */
+                }
+                assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
+                max_cix = (max_cix < cix) ? cix : max_cix;
+            }
+        }
+    }
+
+    if (match_all && tix < 2)
+    {
+        // delvert
+        if (last_word_flag == 2)
+        {
+            *fail = 1;
+            return 0;
+        }
+
+        // delvert
+        switch (match_all_flag) {
+            case 0:
+                    for (obix = 0; obix < obvec->size; obix++)
+                    {
+                    if (obvec->item[obix].type != T_OBJECT)
+                        continue;
+                    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
+                }
+                break;
+            case 1:
+                    for (obix = 0; obix < obvec->size; obix++)
+                    {
+                    if (obvec->item[obix].type != T_OBJECT ||
+                        !(obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS))
+                        continue;
+                    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
+                }
+                break;
+            case 2:
+                    for (obix = 0; obix < obvec->size; obix++)
+                    {
+                    if (obvec->item[obix].type != T_OBJECT ||
+                        (obvec->item[obix].u.ob->flags & O_ENABLE_COMMANDS))
+                        continue;
+                    assign_svalue_no_free(&tmp->item[tix++], &obvec->item[obix]);
+                }
+                break;
+        }
+        *fail = 0;
+        all = 1;
+    }
+    else
+        all = 0;
+
+	if (tix < 2)
+    {
+        *fail = 1;
+        free_vector(tmp);
+        if (pval)
+            (*cix_in)--;
+
+        return 0;
     }
     else
     {
-	if (*cix_in < wvec->size)
-	    *cix_in = max_cix + 1;
-	ret = slice_array(tmp, 0, tix - 1);
-	if (!pval)
-	{
-	    ret->item[0].type = T_NUMBER;
-	    ret->item[0].u.number = plur_flag ? 0 : 1;
-	}
-	free_vector(tmp);
+        if (!all && (*cix_in < wvec->size))
+            *cix_in = max_cix + 1;
+        ret = slice_array(tmp, 0, tix - 1);
+        if (!pval)
+        {
+            ret->item[0].type = T_NUMBER;
+            ret->item[0].u.number = plur_flag ? 0 : 1;
+        }
+        free_vector(tmp);
+    }	
+
+	if (!match_all)
+    {
+        push_number(rodzaj);
+        push_number(plur_flag);
+        apply(QSET_RODZAJ, command_giver, 2, 1);
+    }
+    else
+    {
+        push_number(-1);
+        push_number(0);
+        apply(QSET_RODZAJ, command_giver, 2, 1);
     }
 
     /* stmp is static, and may contain old info that must be freed
@@ -1275,7 +2119,7 @@ living_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 struct svalue *
 single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 {
-    int			cix, obix, plur_flag;
+    int			cix, obix, plur_flag, rodzaj;
     int			match_object(int, struct vector *, int *, int *);
 
     for (obix = 0; obix < obvec->size; obix++)
@@ -1286,7 +2130,7 @@ single_parse(struct vector *obvec, struct vector *wvec, int *cix_in, int *fail)
 	cix = *cix_in;
 	load_lpc_info(obix, obvec->item[obix].u.ob);
 	plur_flag = 0;
-	if (match_object(obix, wvec, &cix, &plur_flag))
+	if (match_object(obix, wvec, &cix, &plur_flag, &rodzaj))
 	{
 	    *cix_in = cix + 1;
 	    return &obvec->item[obix];
@@ -1400,13 +2244,18 @@ prepos_parse(struct vector *wvec, int *cix_in, int *fail,
  * Returns:		True if object matches.
  */
 int
-match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
+match_object(int obix, struct vector *wvec, int *cix_in, int *plur, int *rodzaj)
 {
-    struct vector	*ids;
-    int 		il, pos, cplur, old_cix;
+    struct vector	*ids, *rodz, *adj1, *adj2;;
+    int 		il, pos, cplur, old_cix, len;
+	int         max_len_cix, max_len_plur, max_len_rodzaj;
     char		*str;
     int			find_string(char *, struct vector *, int *);
-    int			check_adjectiv(int, struct vector *, int, int);
+    int                        check_adjectiv(struct vector *, struct vector *, int,
+                                    struct vector *, int, int, int *, int);
+ 
+ 
+    max_len_plur = max_len_rodzaj = max_len_cix = -1;
 
     for (cplur = (*plur * 2); cplur < 4; cplur++)
     {
@@ -1416,6 +2265,7 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 	    if (!gId_list_d)
 		continue;
 	    ids = gId_list_d;
+		rodz = gRodz_list_d;
 	    break;
 
 	case 1:
@@ -1424,6 +2274,7 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 		gId_list->item[obix].type != T_POINTER)
 		continue;
 	    ids = gId_list->item[obix].u.vec;
+		rodz = gRodz_list->item[obix].u.vec;
 	    break;
 
 	case 2:
@@ -1438,36 +2289,65 @@ match_object(int obix, struct vector *wvec, int *cix_in, int *plur)
 		gPluid_list->item[obix].type != T_POINTER)
 		continue;
 	    ids = gPluid_list->item[obix].u.vec;
+		rodz = gProdz_list->item[obix].u.vec;
 	    break;
 
 	default:
             return 0;
 	}
+	adj1 = gAdj1id_list->item[obix].u.vec;
+	adj2 = gAdj2id_list->item[obix].u.vec;
+        
+	if (rodz->size != ids->size)
+            continue;
 
-	for (il = 0; il < ids->size; il++)
-	{
-	    if (ids->item[il].type == T_STRING)
-	    {
-		str = ids->item[il].u.string;  /* A given id of the object */
-		old_cix = *cix_in;
-		if ((pos = find_string(str, wvec, cix_in)) >= 0)
-		{
-		    if (pos == old_cix)
-		    {
-			if (cplur > 1)
-			    *plur = 1;
-			return 1;
-		    }
-		    else if (check_adjectiv(obix, wvec, old_cix, pos-1))
-		    {
-			if (cplur > 1)
-			    *plur = 1;
-			return 1;
-		    }
-		}
-		*cix_in = old_cix;
-	    }
-	}
+	old_cix = *cix_in;
+
+        for (il = 0; il < ids->size; il++)
+        {
+            if (ids->item[il].type != T_STRING)
+                continue;
+                
+            str = ids->item[il].u.string;  /* A given id of the object */
+            
+            if ((pos = find_string(str, wvec, cix_in)) >= 0)
+            {
+                len = (*cix_in - pos) + 1;
+
+                if (len < max_len)
+                {
+                    *cix_in = old_cix;
+                    continue;
+                }
+
+                *rodzaj = rodz->item[il].u.number;
+                if (*rodzaj < 0)
+                    *rodzaj = (-(*rodzaj));
+                if (*rodzaj)
+                    (*rodzaj)--;
+
+                if ((pos == old_cix) || check_adjectiv(adj1, adj2, obix,
+                        wvec, old_cix, pos-1, rodzaj, (cplur > 1)))
+                {
+                    if (cplur > 1)
+                        *plur = 1;
+
+                    max_len_cix = *cix_in;
+                    max_len_plur = *plur;
+                    max_len = len;
+                    max_len_rodzaj = *rodzaj;
+                }
+            }
+            *cix_in = old_cix;
+        }
+		if (max_len_cix >= 0)
+        {
+            *cix_in = max_len_cix;
+            *plur = max_len_plur;
+            *rodzaj = max_len_rodzaj;
+            
+            return max_len;
+        }
     }
     return 0;
 }
@@ -1542,7 +2422,42 @@ find_string(char *str, struct vector *wvec, int *cix_in)
     }
     return -1;
 }
-
+struct vector *
+make_adjectiv_list(struct vector *adj1, struct vector *adj2, int *rodzaj, 
+    int plur)
+{
+    struct vector *rtrn;
+    char *przym;
+    int ix;
+    char *oblicz_przym(char *, char *, int, int, int);
+    
+    if (!adj1->size || adj1->size != adj2->size)
+        return 0;
+        
+    rtrn = allocate_array(adj1->size);
+    
+    ix = -1;
+    while (++ix < adj1->size)
+    {
+        przym = oblicz_przym(adj1->item[ix].u.string, 
+            adj2->item[ix].u.string, przyp, *rodzaj, plur);
+        if (przym)
+        {
+            rtrn->item[ix].type = T_STRING;
+            rtrn->item[ix].string_type = STRING_MSTRING;
+            rtrn->item[ix].u.string = make_mstring(przym);
+            
+            free(przym);
+        }
+        else
+        {
+            rtrn->item[ix].type = T_NUMBER;
+            rtrn->item[ix].u.number = 0;
+        }
+    }
+    
+    return rtrn;
+}
 /*
  * Function name: 	check_adjectiv
  * Description:		Checks a word to see if it fits as adjectiv of an
@@ -1553,8 +2468,9 @@ find_string(char *str, struct vector *wvec, int *cix_in)
  *			to:   last cmdword to test
  * Returns:		True if a match is made.
  */
-int
-check_adjectiv(int obix, struct vector *wvec, int from, int to)
+int 
+check_adjectiv(struct vector *adj1, struct vector *adj2, int obix, 
+        struct vector *wvec, int from, int to, int *rodzaj, int plur)
 {
     int il, back, fail;
     char *adstr;
@@ -1562,32 +2478,41 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
     struct vector *ids;
     int member_string(char *, struct vector *);
 
-    if (gAdjid_list->item[obix].type == T_POINTER)
-	ids = gAdjid_list->item[obix].u.vec;
-    else
-	ids = 0;
+    ids = make_adjectiv_list(adj1, adj2, rodzaj, plur);
+    
+    if (!ids || !ids->size)
+    {
+        if (ids) 
+            free_vector(ids);
+        return 0;
+    }
 
     sum = 0;
     fail = 0;
-    for (il = from; il<= to; il++)
+    for (il = from; il<= to; il++) 
     {
-	sum += strlen(wvec->item[il].u.string) + 1;
-	if ((member_string(wvec->item[il].u.string, ids) < 0) &&
-	    (member_string(wvec->item[il].u.string, gAdjid_list_d) < 0))
-	{
-	    fail = 1;
-	}
+        sum += strlen(wvec->item[il].u.string) + 1;
+        if (member_string(wvec->item[il].u.string, ids) < 0)
+        {
+            fail = 1;
+        }
     }
 
     /* Simple case: all adjs were single word
     */
     if (!fail)
-	return 1;
+    {
+        free_vector(ids);
+        return 1;
+    }
 
     if (from == to)
-	return 0;
+    {
+        free_vector(ids);
+        return 0;
+    }
 
-    adstr = alloca(sum);
+    adstr = alloca(sum); 
 
     /*
      * If we now have: "adj1 adj2 adj3 ... adjN"
@@ -1608,32 +2533,37 @@ check_adjectiv(int obix, struct vector *wvec, int from, int to)
     for (il = from; il <= to;)                /* adj1 .. adjN */
 #endif
     {
-	for (back = to; back >= il; back--)   /* back from adjN to adj[il] */
-	{
-	    /*
+        for (back = to; back >= il; back--)   /* back from adjN to adj[il] */ 
+        {
+            /* 
              * Create teststring with "adj[il] .. adj[back]"
              */
-	    (void)strcpy(adstr, "");
-	    for (sum = il; sum <= back; sum++) /* test "adj[il] .. adj[back] */
-	    {
-		if (sum > il)
-		    (void)strcat(adstr, " ");
-		(void)strcat(adstr, wvec->item[sum].u.string);
-	    }
-	    if ((member_string(adstr, ids) < 0) &&
-		(member_string(adstr, gAdjid_list_d) < 0))
-		continue;
+            (void)strcpy(adstr, "");
+            for (sum = il; sum <= back; sum++) /* test "adj[il] .. adj[back] */
+            {
+                if (sum > il)
+                    (void)strcat(adstr, " ");
+                (void)strcat(adstr, wvec->item[sum].u.string);
+            }
+            if (member_string(adstr, ids) < 0) 
+                continue;
             else
-	    {
+	        {
                 back = 0;
-		break;
-	    }
-	}
+                break;
+            }
+        }
         if (back)
-	   return 0;		/* adj[il] does not match at all => no match */
+        {
+           free_vector(ids);
+           return 0;                /* adj[il] does not match at all => no match */
+        }
     }
+    
+    free_vector(ids);
     return 1;
 }
+
 
 
 /*
