@@ -1,4 +1,4 @@
-gProdz_list_d/*
+/*
 
   Pattern Parser package for LPmud
 
