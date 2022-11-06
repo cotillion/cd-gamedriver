@@ -2310,6 +2310,26 @@ f_val2json(int num_arg)
 
 /* ARGSUSED */
 static void
+f_json2val(int num_arg)
+{
+    struct svalue sval = *sp;
+    char *json = sval.u.string;
+    struct svalue *ret;
+    
+    ret = json2val(json);
+    pop_stack();
+    if (ret)
+    {
+        push_svalue(ret);
+    }
+    else
+    {
+        push_number(0);
+    }
+}
+
+/* ARGSUSED */
+static void
 f_str2val(int num_arg)
 {
     struct svalue sval = *sp;

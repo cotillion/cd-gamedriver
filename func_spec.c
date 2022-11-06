@@ -169,6 +169,7 @@ int	write_file(string, string);
 void    write_socket(string|int);
 void    write_socket_gmcp(string, mixed);
 string  val2json(mixed);
+mixed   json2val(string);
 void    set_ip_number(object, string);
 
 #ifdef WORD_WRAP

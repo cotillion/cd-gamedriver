@@ -360,7 +360,7 @@ debug_message(char *fmt, ...)
     char *f;
 
     static FILE *fp = NULL;
-    char deb[100];
+    char deb[110];
     char name[100];
 
     if (fp == NULL) {
