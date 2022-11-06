@@ -1,10 +1,12 @@
 #ifndef INTERPRET_H
 #define INTERPRET_H
 
+#include <stdint.h>
 #include <stddef.h>
 #include <setjmp.h>
 
 #include "config.h"
+#include "exec.h"
 #include "simulate.h"
 
 #define push_svalue(val) \
@@ -104,8 +106,8 @@ struct control_stack {
     struct object *prev_ob;	/* Save previous object */
     struct program *prog;	/* Current program */
     int num_local_variables;	/* Local + arguments */
-    unsigned pc;
-    unsigned pc_save;
+    offset_t pc;
+    offset_t pc_save;
     struct svalue *fp;
     int extern_call;		/* Flag if evaluator should return */
     struct function *funp;	/* Only used for tracebacks */
