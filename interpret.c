@@ -392,7 +392,9 @@ equal_svalue(const struct svalue *sval1, const struct svalue *sval2)
 
 static offset_t read_address(char *addr)
 {
-    return *(offset_t *)addr;
+    static offset_t offset;
+    memcpy(&offset, addr, sizeof(offset_t));
+    return offset;
 }
 
 /*

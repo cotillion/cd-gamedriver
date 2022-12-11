@@ -322,7 +322,9 @@ read_short(offset_t offset)
 static offset_t
 read_address(offset_t offset)
 {
-    return *(offset_t *)&mem_block[A_PROGRAM].block[offset];
+    static offset_t out;
+    memcpy(&out, &mem_block[A_PROGRAM].block[offset], sizeof(offset_t));
+    return out;
 }
 
 static void
