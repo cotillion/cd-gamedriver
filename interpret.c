@@ -2317,7 +2317,7 @@ f_json2val(int num_arg)
     struct svalue sval = *sp;
     char *json = sval.u.string;
     struct svalue *ret;
-    
+
     ret = json2val(json);
     pop_stack();
     if (ret)
@@ -7334,6 +7334,12 @@ inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
     int filenum;
     char *filename;
 
+    // Line numbers may not have been created yet.
+    if (lineno_count == 0) {
+        snprintf(buff, sizeof(buff), "/%s Line: %d", name, 1);
+        return buff;
+    }
+
     if (hi->code <= code) {
         filenum = hi->file;
 
@@ -7348,7 +7354,8 @@ inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
             filename = strchr(filename, ':');
             filename++;
         }
-        (void)sprintf(buff, "/%s Line: %d", filename, hi->lineno);
+
+        snprintf(buff, sizeof(buff), "/%s Line: %d", filename, hi->lineno);
         return buff;
     }
 
@@ -7372,7 +7379,7 @@ inner_get_srccode_position(int code, struct lineno *lineno, int lineno_count,
         filename = strchr(filename, ':');
         filename++;
     }
-    (void)sprintf(buff, "/%s Line: %d", filename, lo->lineno);
+    snprintf(buff, sizeof(buff), "/%s Line: %d", filename, lo->lineno);
     return buff;
 }
 
