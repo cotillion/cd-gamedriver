@@ -118,33 +118,28 @@ multiply_array(struct vector *vec, long long factor)
 }
 
 struct vector *
-explode_string(char *str, char *del)
+explode_string(char *str, char *delim)
 {
-    char *p, *beg;
-    int num, extra;
-    struct vector *ret;
-    size_t len;
-    char *buff;
+    size_t delim_len = strlen(delim);
 
-    len = strlen(del);
     /*
      * Take care of the case where the delimiter is an
      * empty string. Then, return an array with only one element,
      * which is the original string.
      */
-    if (len == 0)
+    if (delim_len == 0)
     {
-	len = strlen(str);
-	ret = allocate_array((int)len);
-	for (num = 0; num < len; num++)
-	{
-	    ret->item[num].type = T_STRING;
-	    ret->item[num].string_type = STRING_MSTRING;
-	    ret->item[num].u.string = allocate_mstring(1);
-	    ret->item[num].u.string[0] = str[num];
-	    ret->item[num].u.string[1] = '\0';
-	}
-	return ret;
+        delim_len = strlen(str);
+        struct vector *arr = allocate_array(delim_len);
+        for (int num = 0; num < delim_len; num++)
+	    {
+	        arr->item[num].type = T_STRING;
+	        arr->item[num].string_type = STRING_MSTRING;
+	        arr->item[num].u.string = allocate_mstring(1);
+	        arr->item[num].u.string[0] = str[num];
+	        arr->item[num].u.string[1] = '\0';
+	    }
+	    return arr;
     }
 
     if (!*str) /* Empty string */
@@ -154,9 +149,9 @@ explode_string(char *str, char *del)
     /*
      * Skip leading 'del' strings, if any.
      */
-    while(strncmp(str, del, len) == 0)
+    while (strncmp(str, del, delim_len) == 0)
     {
-      str += len;
+      str += delim_len;
       if (str[0] == '\0')
           return allocate_array(0);
     }
@@ -164,68 +159,67 @@ explode_string(char *str, char *del)
     /*
      * Find number of occurences of the delimiter 'del'.
      */
-    extra = 1;
-    num = 0;
-    for (p = str; *p;)
+    int num = 0;
+    char *found;
+    char *p = str;
+    while ((found = strstr(p, delim)) != NULL)
     {
-	if (strncmp(p, del, len) == 0)
-	{
-	    num++;
-	    p += len;
-	    extra = 0;
-	}
-	else
-	{
-	    p += 1;
-	    extra = 1;
-	}
+        p = found + delim_len;
+        num++;
     }
-    /*
-     * Compute number of array items. It is either number of delimiters,
-     * or, one more.
-     */
+
+    /* Short circuit the most common case of no match */
+    if (p == str) {
+        /* TODO: Reference string */
+        struct vector *arr = allocate_array(num);
+        arr->item[0].type = T_STRING;
+        arr->item[0].string_type = STRING_MSTRING;
+        arr->item[0].u.string = make_mstring(str);
+        return arr;
+    }
+
+    if (*p == '\0') {
 #ifndef KINGDOMS_EXPLODE
-    if (extra)
+        /* Trailing delimeter, discarded */
+        num--;
 #endif
+    }
+
 	num++;
-    buff = tmpalloc(strlen(str) + 1);
-    ret = allocate_array(num);
-    beg = str;
+    struct vector *arr = allocate_array(num);
+
+
     num = 0;
-    for (p = str; *p; )
+    p = str;
+    while ((found = strstr(p, delim)) != NULL)
     {
-	if (strncmp(p, del, len) == 0)
-	{
-	    (void)strncpy(buff, beg, (size_t)(p - beg));
-	    buff[p-beg] = '\0';
-	    if (num >= ret->size)
-		fatal("Too big index in explode !\n");
-	    /* free_svalue(&ret->item[num]); Not needed for new array */
-	    ret->item[num].type = T_STRING;
-	    ret->item[num].string_type = STRING_MSTRING;
-	    ret->item[num].u.string = make_mstring(buff);
-	    num++;
-	    beg = p + len;
-	    p = beg;
-	}
-	else
-	{
-	    p += 1;
-	}
+        size_t len = found - p;
+
+        char *dst = allocate_mstring(len);
+        memcpy(dst, p, len);
+        dst[len] = '\0';
+
+        arr->item[num].type = T_STRING;
+        arr->item[num].string_type = STRING_MSTRING;
+        arr->item[num].u.string = dst;
+
+        num++;
+        p = found + delim_len;
     }
-    /* Copy last occurence, if there was not a 'del' at the end. */
-#ifndef KINGDOMS_EXPLODE
-    if (*beg != '\0')
+
+    if (*p == '\0') {
+#ifdef KINGDOMS_EXPLODE
+        arr->item[num].type = T_STRING;
+        arr->item[num].string_type = STRING_CSTRING;
+        arr->item[num].u.string = "";
 #endif
-    {
-	/* free_svalue(&ret->item[num]); Not needed for new array */
-	if (num >= ret->size)
-	    fatal("Too big index in explode !\n");
-	ret->item[num].type = T_STRING;
-	ret->item[num].string_type = STRING_MSTRING;
-	ret->item[num].u.string = make_mstring(beg);
+    } else {
+        arr->item[num].type = T_STRING;
+        arr->item[num].string_type = STRING_MSTRING;
+        arr->item[num].u.string = make_mstring(p);
     }
-    return ret;
+
+    return arr;
 }
 
 char *
