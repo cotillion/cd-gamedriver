@@ -171,7 +171,7 @@ explode_string(char *str, char *delim)
     /* Short circuit the most common case of no match */
     if (p == str) {
         /* TODO: Reference string */
-        struct vector *arr = allocate_array(num);
+        struct vector *arr = allocate_array(1);
         arr->item[0].type = T_STRING;
         arr->item[0].string_type = STRING_MSTRING;
         arr->item[0].u.string = make_mstring(str);

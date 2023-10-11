@@ -44,6 +44,7 @@ num vars 0 (0)
 num inherits 2 (48)
 total size 304
 Huge program size Ok.
+Loading /tests/test-explode.c -> Ok.
 Setting up ipc.
 Listening to telnet port: 0.0.0.0:3011
 Listening to telnet port: :::3011
