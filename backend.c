@@ -66,7 +66,7 @@ clear_state(void)
     current_interactive = 0;
     previous_ob = 0;
     current_prog = 0;
-    reset_machine();	/* Pop down the stack. */
+    reset_machine();    /* Pop down the stack. */
 }
 
 void
@@ -82,8 +82,8 @@ logon(struct object *ob)
     current_object = ob;
     ret = apply("logon", ob, 0, 0);
     if (ret == 0) {
-	(void)add_message("prog %s:\n", ob->name);
-	fatal("Could not find logon on the player %s\n", ob->name);
+        (void)add_message("prog %s:\n", ob->name);
+        fatal("Could not find logon on the player %s\n", ob->name);
     }
     current_object = save;
 }
@@ -162,7 +162,7 @@ init_tasks(void) {
 static void
 append_task(struct task *task) {
     if (!task)
-	return;
+        return;
     task->next = &task_head;
     task->prev = task_head.prev;
     task_head.prev->next = task;
@@ -209,13 +209,13 @@ void
 remove_task(struct task*t)
 {
     if (!t)
-	return;
+        return;
     if (t->next && t->next != t)
-	num_tasks--;
+        num_tasks--;
     if (t->prev)
-	t->prev->next = t->next;
+        t->prev->next = t->next;
     if (t->next)
-	t->next->prev = t->prev;
+        t->next->prev = t->prev;
 
     t->prev = t->next = 0;
 }
@@ -224,15 +224,15 @@ void
 reschedule_task(struct task *t)
 {
     if (!t)
-	return;
+        return;
 
     if (t->next == t)
-	return; /* It's the currently running task, it will be rescheduled
-		   when it is finnished */
+        return; /* It's the currently running task, it will be rescheduled
+                   when it is finnished */
     if (t->next == 0) {
-	t->prev = t->next = t; /* it's the currrently running task. Mark it
-				  for rescheduling */
-	return;
+        t->prev = t->next = t; /* it's the currrently running task. Mark it
+                                  for rescheduling */
+        return;
     }
     /* Move the task to the tail */
     remove_task(t);
@@ -248,15 +248,15 @@ runtask(struct task *t)
     exception_frame.e_catch = 0;
     exception = &exception_frame;
     clear_state();
-    tmpclean(); 		/* Free all temporary memory */
+    tmpclean();                 /* Free all temporary memory */
     remove_destructed_objects(); /* marion - before ref checks! */
     eval_cost = 0;
 
     if (setjmp(exception_frame.e_context) == 0) {
-	t->fkn(t->arg);
+        t->fkn(t->arg);
     }
     clear_state();
-    tmpclean(); 		/* Free all temporary memory */
+    tmpclean();                 /* Free all temporary memory */
     remove_destructed_objects(); /* marion - before ref checks! */
     eval_cost = 0;
 }
@@ -282,7 +282,7 @@ static void
 check_for_slow_shut_down(void)
 {
     if (!slow_shut_down_to_do || shutdown_task)
-	return;
+        return;
     shutdown_task = create_hiprio_task(slow_shut_down, 0);
 }
 
@@ -303,41 +303,41 @@ mainloop(void)
     (void) signal(SIGFPE, sigfpe_handler);
 
     while (!game_is_being_shut_down) {
-	while (task_head.next == &task_head) {
-	    set_current_time();
-	    deliver_signals();
-	    call_out(&tv);
-	    if (task_head.next != &task_head)
-		tv.tv_sec = tv.tv_usec = 0;
-	    nd_select(&tv);
-	    check_for_slow_shut_down();
-	}
-	set_current_time();
-	current_task = task_head.next;
-	remove_task(current_task);
-	runtask(current_task);
-	task_start = current_time;
-	set_current_time();
-	update_runq_av((num_tasks + 1.0) * (current_time - task_start));
+        while (task_head.next == &task_head) {
+            set_current_time();
+            deliver_signals();
+            call_out(&tv);
+            if (task_head.next != &task_head)
+                tv.tv_sec = tv.tv_usec = 0;
+            nd_select(&tv);
+            check_for_slow_shut_down();
+        }
+        set_current_time();
+        current_task = task_head.next;
+        remove_task(current_task);
+        runtask(current_task);
+        task_start = current_time;
+        set_current_time();
+        update_runq_av((num_tasks + 1.0) * (current_time - task_start));
 
-	/* process callouts and IO */
-	deliver_signals();
-	if (task_head.next != &task_head ||
-	    current_task->next == current_task) {
-	    tv.tv_sec = tv.tv_usec = 0;
-	    call_out(NULL);
+        /* process callouts and IO */
+        deliver_signals();
+        if (task_head.next != &task_head ||
+            current_task->next == current_task) {
+            tv.tv_sec = tv.tv_usec = 0;
+            call_out(NULL);
         } else
-	    call_out(&tv);
-	if (task_head.next != &task_head ||
-	    current_task->next == current_task)
-	    tv.tv_sec = tv.tv_usec = 0;
-	nd_select(&tv);
-	check_for_slow_shut_down();
+            call_out(&tv);
+        if (task_head.next != &task_head ||
+            current_task->next == current_task)
+            tv.tv_sec = tv.tv_usec = 0;
+        nd_select(&tv);
+        check_for_slow_shut_down();
 
-	if (current_task->next == current_task)
-	    append_task(current_task); /* reschedule the task */
-	else
-	    free(current_task);
+        if (current_task->next == current_task)
+            append_task(current_task); /* reschedule the task */
+        else
+            free(current_task);
     }
     shutdowngame();
 }
@@ -363,49 +363,49 @@ preload_objects(int eflag)
 
     if (setjmp(exception_frame.e_context))
     {
-	clear_state();
-	(void)add_message("Error in start_boot() in master_ob.\n");
-	exception = NULL;
-	return;
+        clear_state();
+        (void)add_message("Error in start_boot() in master_ob.\n");
+        exception = NULL;
+        return;
     }
     else
     {
-	exception_frame.e_exception = NULL;
-	exception_frame.e_catch = 0;
-	exception = &exception_frame;
-	push_number(eflag);
-	ret = apply_master_ob(M_START_BOOT, 1);
+        exception_frame.e_exception = NULL;
+        exception_frame.e_catch = 0;
+        exception = &exception_frame;
+        push_number(eflag);
+        ret = apply_master_ob(M_START_BOOT, 1);
     }
 
     if ((ret == 0) || (ret->type != T_POINTER))
-	return;
+        return;
     else
-	prefiles = ret->u.vec;
+        prefiles = ret->u.vec;
 
     if ((prefiles == 0) || (prefiles->size < 1))
-	return;
+        return;
 
     INCREF(prefiles->ref); /* Otherwise it will be freed next sapply */
 
     ix = -1;
     if (setjmp(exception_frame.e_context))
     {
-	clear_state();
-	(void)add_message("Anomaly in the fabric of world space.\n");
+        clear_state();
+        (void)add_message("Anomaly in the fabric of world space.\n");
     }
 
     while (++ix < prefiles->size)
     {
         set_current_time();
-	if (s_flag)
-	    reset_mudstatus();
-	eval_cost = 0;
-	push_svalue(&(prefiles->item[ix]));
-	(void)apply_master_ob(M_PRELOAD_BOOT, 1);
-	if (s_flag)
-	    print_mudstatus(prefiles->item[ix].u.string, eval_cost,
-			    get_millitime(), get_processtime());
-	tmpclean();
+        if (s_flag)
+            reset_mudstatus();
+        eval_cost = 0;
+        push_svalue(&(prefiles->item[ix]));
+        (void)apply_master_ob(M_PRELOAD_BOOT, 1);
+        if (s_flag)
+            print_mudstatus(prefiles->item[ix].u.string, eval_cost,
+                            get_millitime(), get_processtime());
+        tmpclean();
     }
     free_vector(prefiles);
     exception = NULL;
@@ -422,8 +422,8 @@ remove_destructed_objects(void)
     struct object *ob, *next;
     for (ob = obj_list_destruct; ob; ob = next)
     {
-	next = ob->next_all;
-	destruct2(ob);
+        next = ob->next_all;
+        destruct2(ob);
     }
     obj_list_destruct = 0;
 }
@@ -439,18 +439,18 @@ write_file(char *file, char *str)
     file = check_valid_path(file, current_object, "write_file", 1);
 
     if (!file)
-	return 0;
+        return 0;
     f = fopen(file, "a");
     if (f == 0)
-	error("Wrong permissions for opening file %s for append.\n", file);
+        error("Wrong permissions for opening file %s for append.\n", file);
     if (s_flag)
-	num_filewrite++;
+        num_filewrite++;
     if (fwrite(str, strlen(str), 1, f) != 1) {
-	(void)fclose(f);
-	return 0;
+        (void)fclose(f);
+        return 0;
     }
     if (fclose(f) == EOF)
-	return 0;
+        return 0;
     return 1;
 }
 
@@ -568,38 +568,38 @@ read_bytes(char *file, int start, size_t len)
     int f;
 
     if(len > MAX_BYTE_TRANSFER)
-	return 0;
+        return 0;
 
     file = check_valid_path(file, current_object, "read_bytes", 0);
 
     if (!file)
-	return 0;
+        return 0;
     f = open(file, O_RDONLY);
     if (f < 0)
-	return 0;
+        return 0;
 
 #ifdef PURIFY
     (void)memset(&st, '\0', sizeof(st));
 #endif
 
     if (fstat(f, &st) == -1)
-	fatal("Could not stat an open file.\n");
+        fatal("Could not stat an open file.\n");
     size = (int)st.st_size;
     if(start < 0)
-	start = size + start;
+        start = size + start;
 
     if (start >= size)
     {
-	(void)close(f);
-	return 0;
+        (void)close(f);
+        return 0;
     }
     if ((start+len) > size)
-	len = (size - start);
+        len = (size - start);
 
     if ((size = (int)lseek(f, (off_t)start, 0)) < 0)
     {
-	(void)close(f);
-	return 0;
+        (void)close(f);
+        return 0;
     }
 
     str = allocate_mstring(len);
@@ -611,13 +611,13 @@ read_bytes(char *file, int start, size_t len)
     if (size <= 0)
     {
         free_mstring(str);
-	return 0;
+        return 0;
     }
 
     /* We want to allow all characters to pass untouched!
     for (il = 0; il < size; il++)
-	if (!isprint(str[il]) && !isspace(str[il]))
-	    str[il] = ' ';
+        if (!isprint(str[il]) && !isspace(str[il]))
+            str[il] = ' ';
 
     */
     /*
@@ -639,38 +639,38 @@ write_bytes(char *file, int start, char *str)
     file = check_valid_path(file, current_object, "write_bytes", 1);
 
     if (!file)
-	return 0;
+        return 0;
     if (strlen(str) > MAX_BYTE_TRANSFER)
-	return 0;
+        return 0;
     f = open(file, O_WRONLY);
     if (f < 0)
-	return 0;
+        return 0;
 
 #ifdef PURIFY
     (void)memset(&st, '\0', sizeof(st));
 #endif
 
     if (fstat(f, &st) == -1)
-	fatal("Could not stat an open file.\n");
+        fatal("Could not stat an open file.\n");
     size = (int)st.st_size;
     if(start < 0)
-	start = size + start;
+        start = size + start;
 
     if (start >= size)
     {
-	(void)close(f);
-	return 0;
+        (void)close(f);
+        return 0;
     }
     if ((start + strlen(str)) > size)
     {
-	(void)close(f);
-	return 0;
+        (void)close(f);
+        return 0;
     }
 
     if ((size = (int)lseek(f, (off_t)start, 0)) < 0)
     {
-	(void)close(f);
-	return 0;
+        (void)close(f);
+        return 0;
     }
 
     size = write(f, str, strlen(str));
@@ -678,7 +678,7 @@ write_bytes(char *file, int start, char *str)
     (void)close(f);
 
     if (size <= 0) {
-	return 0;
+        return 0;
     }
 
     return 1;
@@ -692,22 +692,22 @@ file_size(char *file)
 
     file = check_valid_path(file, current_object, "file_size", 0);
     if (!file)
-	return -1;
+        return -1;
 
     if (file[0] == '/')
-	file++;
+        file++;
 
     if (!legal_path(file))
-	return -1;
+        return -1;
 
 #ifdef PURIFY
     (void)memset(&st, '\0', sizeof(st));
 #endif
 
     if (stat(file, &st) == -1)
-	return -1;
+        return -1;
     if (S_IFDIR & st.st_mode)
-	return -2;
+        return -2;
     return (int)st.st_size;
 }
 
@@ -719,14 +719,14 @@ file_time(char *file)
     file = check_valid_path(file, current_object, "file_time", 0);
 
     if (!file)
-	return 0;
+        return 0;
 
 #ifdef PURIFY
     (void)memset(&st, '\0', sizeof(st));
 #endif
 
     if (stat(file, &st) == -1)
-	return 0;
+        return 0;
     return (int)st.st_mtime;
 }
 
@@ -745,13 +745,13 @@ update_av(av_t *av, double amount)
 
 
     av->avg1 = expl(-delta / 60.0l) * av->avg1 +
-	(1.0l - expl(-1.0l/60.0l)) * amount;
+        (1.0l - expl(-1.0l/60.0l)) * amount;
 
     av->avg5 = expl(-delta / 300.0l) * av->avg5 +
-	(1.0l - expl(-1.0l/300.0l)) * amount;
+        (1.0l - expl(-1.0l/300.0l)) * amount;
 
     av->avg15 = expl(-delta / 900.0l) * av->avg15 +
-	(1.0l - expl(-1.0l/900.0l)) * amount;
+        (1.0l - expl(-1.0l/900.0l)) * amount;
 }
 
 static av_t tcp_av = {0.0, 0.0, 0.0, 0.0};
@@ -812,18 +812,18 @@ query_load_av(void)
     update_av(&udp_av, 0);
     update_av(&tcp_av, 0);
     snprintf(buff, sizeof(buff) - 1,
-	     "%.2f/%.2f/%.2f cmds/s, "
-	     "%.2f/%.2f/%.2f comp lines/s, "
-	     "%.2f/%.2f/%.2f alarms/s, "
-	     "%.2f/%.2f/%.2f udp requests/s, "
-	     "%.2f/%.2f/%.2f service requests/s, "
-	     "%.2f/%.2f/%.2f runqueue length (current %ld)",
-	     load_av.avg1, load_av.avg5, load_av.avg15,
-	     compile_av.avg1, compile_av.avg5, compile_av.avg15,
-	     alarm_av.avg1, alarm_av.avg5, alarm_av.avg15,
-	     udp_av.avg1, udp_av.avg5, udp_av.avg15,
-	     tcp_av.avg1, tcp_av.avg5, tcp_av.avg15,
-	     runq_av.avg1, runq_av.avg5, runq_av.avg15, num_tasks + 1);
+             "%.2f/%.2f/%.2f cmds/s, "
+             "%.2f/%.2f/%.2f comp lines/s, "
+             "%.2f/%.2f/%.2f alarms/s, "
+             "%.2f/%.2f/%.2f udp requests/s, "
+             "%.2f/%.2f/%.2f service requests/s, "
+             "%.2f/%.2f/%.2f runqueue length (current %ld)",
+             load_av.avg1, load_av.avg5, load_av.avg15,
+             compile_av.avg1, compile_av.avg5, compile_av.avg15,
+             alarm_av.avg1, alarm_av.avg5, alarm_av.avg15,
+             udp_av.avg1, udp_av.avg5, udp_av.avg15,
+             tcp_av.avg1, tcp_av.avg5, tcp_av.avg15,
+             runq_av.avg1, runq_av.avg5, runq_av.avg15, num_tasks + 1);
     buff[sizeof(buff) - 1] = 0;
     return buff;
 }

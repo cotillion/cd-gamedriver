@@ -41,54 +41,54 @@ object_check_call(struct svalue *fp)
 
     if (fp[0].type != T_STRING && fp[0].type != T_FUNCTION)
     {
-	push_svalue(&fp[0]);
-	return;
+        push_svalue(&fp[0]);
+        return;
     }
 
     assign_svalue(&VAR(obj_prev), &fp[1]);
 
     if (fp[0].type == T_FUNCTION)
     {
-	fun = fp[0].u.func;
-	(void)call_var(0, fun);
-	assign_svalue(&VAR(obj_prev), &const0);
-	return;
+        fun = fp[0].u.func;
+        (void)call_var(0, fun);
+        assign_svalue(&VAR(obj_prev), &const0);
+        return;
     }
 
     str = fp[0].u.string;
     if (str[0] == '@' && str[1] == '@')
     {
-	p = &str[2];
-	p2 = &p[-1];
-	while ((p2 = (char *) strchr(&p2[1], '@')) &&
-	       (p2[1] != '@'))
-	    ;
-	if (!p2)
-	{
-	    ret = process_value(p, 1);
-	}
-	else if (p2[2] == '\0')
-	{
-	    size_t len = strlen(p);
-	    p2 = (char *) alloca(len - 1);
-	    (void)strncpy(p2, p, len - 2);
-	    p2[len - 2] = '\0';
-	    ret = process_value(p2, 1);
-	}
-	else
-	    retstr = process_string(str, 1);
+        p = &str[2];
+        p2 = &p[-1];
+        while ((p2 = (char *) strchr(&p2[1], '@')) &&
+               (p2[1] != '@'))
+            ;
+        if (!p2)
+        {
+            ret = process_value(p, 1);
+        }
+        else if (p2[2] == '\0')
+        {
+            size_t len = strlen(p);
+            p2 = (char *) alloca(len - 1);
+            (void)strncpy(p2, p, len - 2);
+            p2[len - 2] = '\0';
+            ret = process_value(p2, 1);
+        }
+        else
+            retstr = process_string(str, 1);
     }
     else
         retstr = process_string(str, 1);
 
     if (ret)
     {
-	push_svalue(ret);
+        push_svalue(ret);
     }
     else
     {
         if (retstr)
-	    push_mstring(retstr);
+            push_mstring(retstr);
         else
             push_svalue(&fp[0]);
     }
@@ -118,34 +118,34 @@ object_query_prop(struct svalue *fp)
     char *p, *p2, *str, *retstr = NULL;
 
     extern struct svalue *get_map_lvalue(struct mapping *,
-					 struct svalue *, int );
+                                         struct svalue *, int );
     if (VAR(obj_props).type != T_MAPPING)
     {
-	push_number(0);
-	return;
+        push_number(0);
+        return;
     }
 
     val = get_map_lvalue(VAR(obj_props).u.map, fp, 0);
     if (val->type != T_STRING && val->type != T_FUNCTION)
     {
-	if (val->type == T_OBJECT && (val->u.ob->flags & O_DESTRUCTED))
-	    free_svalue(val);
-	push_svalue(val);
-	return;
+        if (val->type == T_OBJECT && (val->u.ob->flags & O_DESTRUCTED))
+            free_svalue(val);
+        push_svalue(val);
+        return;
     }
 
     if (previous_ob != NULL) {
-	tmp.type = T_OBJECT;
-	tmp.u.ob = previous_ob;
-	assign_svalue(&VAR(obj_prev), &tmp);
+        tmp.type = T_OBJECT;
+        tmp.u.ob = previous_ob;
+        assign_svalue(&VAR(obj_prev), &tmp);
     }
     else
-	assign_svalue(&VAR(obj_prev), &const0);
+        assign_svalue(&VAR(obj_prev), &const0);
 
 
     if (val->type == T_FUNCTION)
     {
-	fun = val->u.func;
+        fun = val->u.func;
 
         if (!legal_closure(fun))
         {
@@ -153,45 +153,45 @@ object_query_prop(struct svalue *fp)
             return;
         }
 
-	(void)call_var(0, fun);
-	assign_svalue(&VAR(obj_prev), &const0);
-	return;
+        (void)call_var(0, fun);
+        assign_svalue(&VAR(obj_prev), &const0);
+        return;
     }
 
     str = val->u.string;
     if (str[0] == '@' && str[1] == '@')
     {
-	p = &str[2];
-	p2 = &p[-1];
-	while ((p2 = (char *) strchr(&p2[1], '@')) &&
-	       (p2[1] != '@'))
-	    ;
-	if (!p2)
-	{
-	    ret = process_value(p, 1);
-	}
-	else if (p2[2] == '\0')
-	{
-	    size_t len = strlen(p);
-	    p2 = (char *) tmpalloc(len - 1);
-	    (void)strncpy(p2, p, len - 2);
-	    p2[len - 2] = '\0';
-	    ret = process_value(p2, 1);
-	}
-	else
-	    retstr = process_string(str, 1);
+        p = &str[2];
+        p2 = &p[-1];
+        while ((p2 = (char *) strchr(&p2[1], '@')) &&
+               (p2[1] != '@'))
+            ;
+        if (!p2)
+        {
+            ret = process_value(p, 1);
+        }
+        else if (p2[2] == '\0')
+        {
+            size_t len = strlen(p);
+            p2 = (char *) tmpalloc(len - 1);
+            (void)strncpy(p2, p, len - 2);
+            p2[len - 2] = '\0';
+            ret = process_value(p2, 1);
+        }
+        else
+            retstr = process_string(str, 1);
     }
     else
         retstr = process_string(str, 1);
 
     if (ret)
     {
-	push_svalue(ret);
+        push_svalue(ret);
     }
     else
     {
         if (retstr)
-	    push_mstring(retstr);
+            push_mstring(retstr);
         else
             push_svalue(val);
     }
@@ -210,7 +210,7 @@ static void
 object_add_prop(struct svalue *fp)
 {
    extern struct svalue *get_map_lvalue(struct mapping *,
-					 struct svalue *, int );
+                                         struct svalue *, int );
    struct svalue *oval;
 
    if (VAR(obj_no_change).u.number || VAR(obj_props).type != T_MAPPING)

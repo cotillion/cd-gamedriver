@@ -7,5 +7,5 @@ create()
 
     funp = this_object;
     if (!functionp(funp))
-	throw("Bad functionp()\n");
+        throw("Bad functionp()\n");
 }

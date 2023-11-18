@@ -24,10 +24,10 @@ get_C_fun_address(char *prog_name, char *name))(struct svalue *)
 {
     int i, j;
     for(i = 0; interface[i]; i++)
-	if (strcmp(interface[i]->program, prog_name) == 0)
-	    for(j = 0; interface[i]->funcs[j]; j++)
-		if (strcmp(interface[i]->funcs[j]->name, name) == 0)
-		    return interface[i]->funcs[j]->address;
+        if (strcmp(interface[i]->program, prog_name) == 0)
+            for(j = 0; interface[i]->funcs[j]; j++)
+                if (strcmp(interface[i]->funcs[j]->name, name) == 0)
+                    return interface[i]->funcs[j]->address;
     
     return (void (*)(struct svalue *))0;
 }
@@ -38,6 +38,6 @@ init_cfuns()
     int i,j;
 
     for(i = 0; interface[i]; i++)
-	for(j = 0; interface[i]->vars[j]; j++)
-	    interface[i]->vars[j]->num = j;
+        for(j = 0; interface[i]->vars[j]; j++)
+            interface[i]->vars[j]->num = j;
 }

@@ -51,7 +51,7 @@
 #include "tcpsvc.h"
 
 #ifndef EPROTO
-#define	EPROTO	EPROTOTYPE
+#define EPROTO  EPROTOTYPE
 #endif
 
 #ifdef SERVICE_PORT
@@ -64,9 +64,9 @@
  * TCP Service Control Block.
  */
 typedef struct {
-    u_char	ts_flags;
-    nqueue_t *	ts_canq;
-    nqueue_t *	ts_rawq;
+    u_char      ts_flags;
+    nqueue_t *  ts_canq;
+    nqueue_t *  ts_rawq;
     ndesc_t  *  ts_nd;
     struct task *task;
 } tcpsvc_t;
@@ -74,18 +74,18 @@ typedef struct {
 /*
  * TCP Service Flags.
  */
-#define	TF_CLOSE	0x01
+#define TF_CLOSE        0x01
 
 /*
  * Queue Sizes.
  */
-#define	TCPSVC_RAWQ_SIZE        32768
-#define	TCPSVC_CANQ_SIZE        32768
+#define TCPSVC_RAWQ_SIZE        32768
+#define TCPSVC_CANQ_SIZE        32768
 
 /*
  * Maximum # of concurrent TCP Service.
  */
-#define	TCPSVC_MAX		32
+#define TCPSVC_MAX              32
 
 // static ndesc_t *tcpsvc_nd = NULL;
 static int tcpsvc_count = 0;
@@ -142,7 +142,7 @@ static void
 tcpsvc_shutdown(ndesc_t *nd, tcpsvc_t *tsp)
 {
     if (tsp)
-	tsp->ts_flags |= TF_CLOSE;
+        tsp->ts_flags |= TF_CLOSE;
 }
 
 static void
@@ -161,17 +161,17 @@ tcpsvc_process(void *vp)
         nd_detach(tsp->ts_nd);
         tcpsvc_free(tsp);
         tcpsvc_count--;
-	return;
+        return;
     }
 
     update_tcp_av();
 
     if (nq_full(tsp->ts_canq))
     {
-	nq_init(tsp->ts_canq);
-	nq_puts(tsp->ts_canq, (u_char *)"ERROR Service request too long.\n");
-	tcpsvc_disconnect(tsp->ts_nd, tsp);
-	return;
+        nq_init(tsp->ts_canq);
+        nq_puts(tsp->ts_canq, (u_char *)"ERROR Service request too long.\n");
+        tcpsvc_disconnect(tsp->ts_nd, tsp);
+        return;
     }
 
 
@@ -182,12 +182,12 @@ tcpsvc_process(void *vp)
 
     if (setjmp(exception_frame.e_context) == 0)
     {
-	push_string((char *)nq_rptr(tsp->ts_canq), STRING_MSTRING);
-	svp = apply_master_ob(M_INCOMING_SERVICE, 1);
+        push_string((char *)nq_rptr(tsp->ts_canq), STRING_MSTRING);
+        svp = apply_master_ob(M_INCOMING_SERVICE, 1);
     }
     else
     {
-	svp = NULL;
+        svp = NULL;
     }
 
     exception = exception->e_exception;
@@ -196,16 +196,16 @@ tcpsvc_process(void *vp)
 
     if (svp == NULL || svp->type != T_STRING)
     {
-	nq_puts(tsp->ts_canq, (u_char *)"ERROR Service calls not supported.\n");
-	tcpsvc_disconnect(tsp->ts_nd, tsp);
-	return;
+        nq_puts(tsp->ts_canq, (u_char *)"ERROR Service calls not supported.\n");
+        tcpsvc_disconnect(tsp->ts_nd, tsp);
+        return;
     }
 
     if (strlen(svp->u.string) > nq_size(tsp->ts_canq))
     {
-	nq_puts(tsp->ts_canq, (u_char *)"ERROR Service response too long.\n");
-	tcpsvc_disconnect(tsp->ts_nd, tsp);
-	return;
+        nq_puts(tsp->ts_canq, (u_char *)"ERROR Service response too long.\n");
+        tcpsvc_disconnect(tsp->ts_nd, tsp);
+        return;
     }
 
     nq_puts(tsp->ts_canq, (u_char *)svp->u.string);
@@ -222,49 +222,49 @@ tcpsvc_read(ndesc_t *nd, tcpsvc_t *tsp)
 
     if (!nq_full(tsp->ts_rawq))
     {
-	cc = nq_recv(tsp->ts_rawq, nd_fd(nd), NULL);
-	if (cc == -1)
-	{
-	    switch (errno)
-	    {
-	    case EWOULDBLOCK:
-	    case EINTR:
-	    case EPROTO:
-		break;
+        cc = nq_recv(tsp->ts_rawq, nd_fd(nd), NULL);
+        if (cc == -1)
+        {
+            switch (errno)
+            {
+            case EWOULDBLOCK:
+            case EINTR:
+            case EPROTO:
+                break;
 
-	    default:
-		tcpsvc_disconnect(nd, tsp);
+            default:
+                tcpsvc_disconnect(nd, tsp);
                 nd_disable(nd, ND_W);
-		tsp->task = create_task(tcpsvc_process, tsp);
-		return;
-	    }
-	}
+                tsp->task = create_task(tcpsvc_process, tsp);
+                return;
+            }
+        }
 
-	if (cc == 0)
-	{
-	    tcpsvc_disconnect(nd, tsp);
+        if (cc == 0)
+        {
+            tcpsvc_disconnect(nd, tsp);
             nd_disable(nd, ND_W);
-	    tsp->task = create_task(tcpsvc_process, tsp);
-	    return;
-	}
+            tsp->task = create_task(tcpsvc_process, tsp);
+            return;
+        }
 
     }
     for (;;)
     {
-	if (nq_empty(tsp->ts_rawq))
-	{
-	    nq_init(tsp->ts_rawq);
-	    return;
-	}
-	c = nq_getc(tsp->ts_rawq);
-	if (c == '\n')
-	    break;
-	if (!nq_full(tsp->ts_canq))
-	    nq_putc(tsp->ts_canq, c);
+        if (nq_empty(tsp->ts_rawq))
+        {
+            nq_init(tsp->ts_rawq);
+            return;
+        }
+        c = nq_getc(tsp->ts_rawq);
+        if (c == '\n')
+            break;
+        if (!nq_full(tsp->ts_canq))
+            nq_putc(tsp->ts_canq, c);
     }
     nd_disable(tsp->ts_nd, ND_R);
     if (!nq_full(tsp->ts_canq))
-	nq_putc(tsp->ts_canq, '\0');
+        nq_putc(tsp->ts_canq, '\0');
     tsp->task = create_task(tcpsvc_process, tsp);
 }
 
@@ -276,25 +276,25 @@ tcpsvc_write(ndesc_t *nd, tcpsvc_t *tsp)
 {
     if (!nq_empty(tsp->ts_canq))
     {
-	if (nq_send(tsp->ts_canq, nd_fd(nd), NULL) == -1)
-	{
-	    switch (errno)
-	    {
-	    case EWOULDBLOCK:
-	    case EINTR:
-	    case EPROTO:
-		break;
+        if (nq_send(tsp->ts_canq, nd_fd(nd), NULL) == -1)
+        {
+            switch (errno)
+            {
+            case EWOULDBLOCK:
+            case EINTR:
+            case EPROTO:
+                break;
 
-	    default:
+            default:
             tcpsvc_disconnect(nd, tsp);
             nd_disable(nd, ND_W);
-	        tsp->task = create_task(tcpsvc_process, tsp);
-		return;
-	    }
-	}
+                tsp->task = create_task(tcpsvc_process, tsp);
+                return;
+            }
+        }
 
-	if (!nq_empty(tsp->ts_canq))
-	    return;
+        if (!nq_empty(tsp->ts_canq))
+            return;
     }
 
     nq_init(tsp->ts_canq);
@@ -303,8 +303,8 @@ tcpsvc_write(ndesc_t *nd, tcpsvc_t *tsp)
     if (tsp->ts_flags & TF_CLOSE)
     {
 
-	tsp->task = create_task(tcpsvc_process, tsp);
-	return;
+        tsp->task = create_task(tcpsvc_process, tsp);
+        return;
     }
     nd_enable(nd, ND_R);
 }
@@ -331,15 +331,15 @@ tcpsvc_accept(void *vp)
     s = accept(nd_fd(nd), (struct sockaddr *)&addr, &addrlen);
     if (s == -1)
     {
-	switch (errno)
-	{
-	  default:
-	    fatal("svc_server: accept() errno = %d.\n", errno);
-	  case EWOULDBLOCK:
-	  case EINTR:
-	  case EPROTO:
-	    return;
-	}
+        switch (errno)
+        {
+          default:
+            fatal("svc_server: accept() errno = %d.\n", errno);
+          case EWOULDBLOCK:
+          case EINTR:
+          case EPROTO:
+            return;
+        }
     }
 
     getnameinfo((struct sockaddr *)&addr, addrlen, host, sizeof(host), port, sizeof(port), NI_NUMERICHOST | NI_NUMERICSERV);
@@ -375,10 +375,10 @@ tcpsvc_accept(void *vp)
 
     if (++tcpsvc_count > TCPSVC_MAX)
     {
-	nq_puts(tsp->ts_canq, (u_char *)"ERROR Too many services in use.\n");
-	nd_enable(tsp->ts_nd, ND_W);
-	tcpsvc_disconnect(tsp->ts_nd, tsp);
-	return;
+        nq_puts(tsp->ts_canq, (u_char *)"ERROR Too many services in use.\n");
+        nd_enable(tsp->ts_nd, ND_W);
+        tcpsvc_disconnect(tsp->ts_nd, tsp);
+        return;
     }
     nd_enable(tsp->ts_nd, ND_R);
 }
@@ -403,7 +403,7 @@ tcpsvc_init(u_short port_nr)
     ndesc_t *nd;
 
     if (service_port < 0)
-	return;
+        return;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;

@@ -38,122 +38,122 @@ efun_sort(struct svalue *fp)
 
     if (fp[0].type == T_POINTER)
     {
-	start = p = 0;
-	end = fp[0].u.vec->size;
-	if (fp[1].type == T_FUNCTION) {
-	    compare = fp[1].u.func;
+        start = p = 0;
+        end = fp[0].u.vec->size;
+        if (fp[1].type == T_FUNCTION) {
+            compare = fp[1].u.func;
             if (compare->funtype == FUN_EFUN)
             {
                 error("sort_array with efun function");
             }
             
-	    while (p || (end - start) > 1)
-	    {
-		if ((end - start) < 2)
-		{
-		    start = ss[--p];
-		    end = es[p];
-		}
-		else
-		{
-		    h = A[((start + end) / 2)];
-		    for (c = l = start, r = end; c < r;)
-		    {
-			push_svalue(&A[c]);
-			push_svalue(&h);
-			(void)call_var(2, compare);
-			i = ((sp->type == T_NUMBER) ? (sp->u.number) : 0);
-			pop_stack();
-			if (i < 0)
-			{
-			    t =  A[l];
-			    A[l++] = A[c];
-			    A[c++] = t;
-			}
-			else if (i > 0)
-			{
-			    t = A[--r];
-			    A[r] = A[c];
-			    A[c] = t;
-			}
-			else
-			    c++;
-		    }
-		    if ((l - start) < (end - c))
-		    {  /* Push the larger part, keep recursion to a minimum */
-			ss[p] = c;
-			es[p++] = end;
-			end = l;
-		    }
-		    else
-		    {
-			ss[p] = start;
-			es[p++] = l;
-			start = c;
-		    }
-		}
-	    }
-	}
-	else
-	{ /* No compare function */
-	    while (p || (end - start) > 1)
-	    {
-		if ((end - start) < 2)
-		{
-		    start = ss[--p];
-		    end = es[p];
-		}
-		else
-		{
-		    h = A[((start + end) / 2)];
-		    for (c = l = start, r = end; c < r;)
-		    {
-			switch ((A[c].type == h.type) ? A[c].type : 0)
-			{
-			    case T_NUMBER:
-				i = (A[c].u.number - h.u.number);
-				break;
-			    case T_FLOAT:
-				i = (((A[c].u.real - h.u.real) < 0) ?
-					-1 :
-					((A[c].u.real - h.u.real) > 0) ? 1 : 0);
-				break;
-			    case T_STRING:
-				i = (strcmp(A[c].u.string, h.u.string ));
-				break;
-			    default:
-				i =  (A[c].type - h.type);
-			}
-			if (i < 0)
-			{
-			    t =  A[l];
-			    A[l++] = A[c];
-			    A[c++] = t;
-			}
-			else if (i > 0)
-			{
-			    t = A[--r];
-			    A[r] = A[c];
-			    A[c] = t;
-			}
-			else
-			    c++;
-		    }
-		    if ((l - start) < (end - c))
-		    {  /* Push the larger part, keep recursion to a minimum */
-			ss[p] = c;
-			es[p++] = end;
-			end = l;
-		    }
-		    else
-		    {
-			ss[p] = start;
-			es[p++] = l;
-			start = c;
-		    }
-		}
-	    }
-	}
+            while (p || (end - start) > 1)
+            {
+                if ((end - start) < 2)
+                {
+                    start = ss[--p];
+                    end = es[p];
+                }
+                else
+                {
+                    h = A[((start + end) / 2)];
+                    for (c = l = start, r = end; c < r;)
+                    {
+                        push_svalue(&A[c]);
+                        push_svalue(&h);
+                        (void)call_var(2, compare);
+                        i = ((sp->type == T_NUMBER) ? (sp->u.number) : 0);
+                        pop_stack();
+                        if (i < 0)
+                        {
+                            t =  A[l];
+                            A[l++] = A[c];
+                            A[c++] = t;
+                        }
+                        else if (i > 0)
+                        {
+                            t = A[--r];
+                            A[r] = A[c];
+                            A[c] = t;
+                        }
+                        else
+                            c++;
+                    }
+                    if ((l - start) < (end - c))
+                    {  /* Push the larger part, keep recursion to a minimum */
+                        ss[p] = c;
+                        es[p++] = end;
+                        end = l;
+                    }
+                    else
+                    {
+                        ss[p] = start;
+                        es[p++] = l;
+                        start = c;
+                    }
+                }
+            }
+        }
+        else
+        { /* No compare function */
+            while (p || (end - start) > 1)
+            {
+                if ((end - start) < 2)
+                {
+                    start = ss[--p];
+                    end = es[p];
+                }
+                else
+                {
+                    h = A[((start + end) / 2)];
+                    for (c = l = start, r = end; c < r;)
+                    {
+                        switch ((A[c].type == h.type) ? A[c].type : 0)
+                        {
+                            case T_NUMBER:
+                                i = (A[c].u.number - h.u.number);
+                                break;
+                            case T_FLOAT:
+                                i = (((A[c].u.real - h.u.real) < 0) ?
+                                        -1 :
+                                        ((A[c].u.real - h.u.real) > 0) ? 1 : 0);
+                                break;
+                            case T_STRING:
+                                i = (strcmp(A[c].u.string, h.u.string ));
+                                break;
+                            default:
+                                i =  (A[c].type - h.type);
+                        }
+                        if (i < 0)
+                        {
+                            t =  A[l];
+                            A[l++] = A[c];
+                            A[c++] = t;
+                        }
+                        else if (i > 0)
+                        {
+                            t = A[--r];
+                            A[r] = A[c];
+                            A[c] = t;
+                        }
+                        else
+                            c++;
+                    }
+                    if ((l - start) < (end - c))
+                    {  /* Push the larger part, keep recursion to a minimum */
+                        ss[p] = c;
+                        es[p++] = end;
+                        end = l;
+                    }
+                    else
+                    {
+                        ss[p] = start;
+                        es[p++] = l;
+                        start = c;
+                    }
+                }
+            }
+        }
     }
     push_svalue(fp);
 }
@@ -171,23 +171,23 @@ efun_cat_file(struct svalue *fp)
     char *str;
     
     if (fp[0].type != T_STRING || fp[1].type != T_NUMBER
-	|| fp[2].type != T_NUMBER)
+        || fp[2].type != T_NUMBER)
     {
-	push_number(0);
-	return;
+        push_number(0);
+        return;
     }
     str = read_file(fp[0].u.string, fp[1].u.number, fp[2].u.number);
     if (str)
     {
-	push_mstring(str);
-	if (command_giver)
-	    (void)apply("catch_tell", command_giver, 1, 0);
-	else
-	    (void)apply("catch_tell", current_interactive, 1, 0);
-	push_number(read_file_len);
+        push_mstring(str);
+        if (command_giver)
+            (void)apply("catch_tell", command_giver, 1, 0);
+        else
+            (void)apply("catch_tell", current_interactive, 1, 0);
+        push_number(read_file_len);
     }
     else
-	push_number(0);
+        push_number(0);
 }
 
 static func func_cat_file = 
@@ -208,63 +208,63 @@ efun_tell_room(struct svalue *fp)
     if (fp[3].type == T_OBJECT)
         tp = fp[3].u.ob; 
     else if (command_giver && !(command_giver->flags & O_DESTRUCTED))
-	tp = command_giver;
+        tp = command_giver;
     else
-	tp = 0;
+        tp = 0;
     
     if (fp[0].type == T_STRING)
-	room = find_object2(fp[0].u.string);
+        room = find_object2(fp[0].u.string);
     else if (fp[0].type == T_OBJECT)
-	room = fp[0].u.ob;
+        room = fp[0].u.ob;
     if (!room)
        return;
     switch (fp[2].type)
     {
     case T_OBJECT:
-	size = 1;
-	oblist = &fp[2];
-	break;
+        size = 1;
+        oblist = &fp[2];
+        break;
     case T_POINTER:
-	size = fp[2].u.vec->size;
-	oblist = fp[2].u.vec->item;
-	break;
+        size = fp[2].u.vec->size;
+        oblist = fp[2].u.vec->item;
+        break;
     default:
-	size = 0;
-	break;
+        size = 0;
+        break;
     }
 
     /* tell folx in room */
     for(ob = room->contains; ob; ob = ob->next_inv)
     {
-	print = 1;
-	for (i = 0; i < size; i++)
-	    if (oblist[i].u.ob == ob)
-	    {
-		print = 0;
-		break;
-	    }
-	/* before we push, check if it's a living */
-	if ((ob->flags & O_ENABLE_COMMANDS) && print)
-	{
-	   push_svalue(&fp[1]);
-	   push_object(tp); 
-	   (void)apply("catch_msg", ob, 2, 0); 
-	}
+        print = 1;
+        for (i = 0; i < size; i++)
+            if (oblist[i].u.ob == ob)
+            {
+                print = 0;
+                break;
+            }
+        /* before we push, check if it's a living */
+        if ((ob->flags & O_ENABLE_COMMANDS) && print)
+        {
+           push_svalue(&fp[1]);
+           push_object(tp); 
+           (void)apply("catch_msg", ob, 2, 0); 
+        }
     }
     
     /* tell room */
     print = 1; ob = room;
     for (i = 0; i < size; i++)
-	if (oblist[i].u.ob == ob)
-	{
-	    print = 0;
-	    break;
-	}
+        if (oblist[i].u.ob == ob)
+        {
+            print = 0;
+            break;
+        }
     if ((ob->flags & O_ENABLE_COMMANDS) && print)
     {
-	push_svalue(&fp[1]);
-	push_object(tp); 
-	(void)apply("catch_msg", ob, 2, 0); 
+        push_svalue(&fp[1]);
+        push_object(tp); 
+        (void)apply("catch_msg", ob, 2, 0); 
     }
 }
 
@@ -282,9 +282,9 @@ efun_write(struct svalue *fp)
 
     if (!command_giver)
     {
-	if (fp[0].type == T_STRING)
-	    (void)printf("%s", fp[0].u.string);
-	return;
+        if (fp[0].type == T_STRING)
+            (void)printf("%s", fp[0].u.string);
+        return;
     }
     push_svalue(fp);
     (void)apply("catch_tell", command_giver, 1, 0);
@@ -308,9 +308,9 @@ efun_say(struct svalue *fp)
     push_number(0);
     
     if (command_giver && !(command_giver->flags & O_DESTRUCTED))
-	tp = command_giver;
+        tp = command_giver;
     else
-	tp = previous_ob;
+        tp = previous_ob;
 
     if (tp == NULL)
         return;
@@ -324,75 +324,75 @@ efun_say(struct svalue *fp)
     switch (fp[1].type)
     {
     case T_OBJECT:
-	size = 1;
-	oblist = &fp[1];
-	break;
+        size = 1;
+        oblist = &fp[1];
+        break;
     case T_POINTER:
-	size = fp[1].u.vec->size;
-	oblist = fp[1].u.vec->item;
-	break;
+        size = fp[1].u.vec->size;
+        oblist = fp[1].u.vec->item;
+        break;
     default:
-	if (tp)
-	{
-	   size = 1;
-	   oblist = &tp_svalue;
-	}
-	else size = 0;
-	break;
+        if (tp)
+        {
+           size = 1;
+           oblist = &tp_svalue;
+        }
+        else size = 0;
+        break;
     }
 
     /* tell folx in room */
     if (tp && tp->super)
     {
-	for (ob = tp->super->contains; ob; ob = ob->next_inv)
-	{
-	    print = 1;
-	    for (i = 0; i < size; i++)
-		if (oblist[i].u.ob == ob)
-		    print = 0;
-	    /* before we push, check if it's a living */
-	    if ((ob->flags & O_ENABLE_COMMANDS) && print)
-	    {
-		push_svalue(fp);
-		push_svalue(&tp_svalue); 
-		(void)apply("catch_msg", ob, 2, 0); 
-	    }
-	}
+        for (ob = tp->super->contains; ob; ob = ob->next_inv)
+        {
+            print = 1;
+            for (i = 0; i < size; i++)
+                if (oblist[i].u.ob == ob)
+                    print = 0;
+            /* before we push, check if it's a living */
+            if ((ob->flags & O_ENABLE_COMMANDS) && print)
+            {
+                push_svalue(fp);
+                push_svalue(&tp_svalue); 
+                (void)apply("catch_msg", ob, 2, 0); 
+            }
+        }
 
-	/* tell room */
-	print = 1; ob = tp->super;
-	for (i = 0; i < size; i++)
-	    if (oblist[i].u.ob == ob)
-		print = 0;
-	if ((ob->flags & O_ENABLE_COMMANDS) && print)
-	{
-	    push_svalue(fp);
-	    push_svalue(&tp_svalue); 
-	    (void)apply("catch_msg", ob, 2, 0); 
-	}
+        /* tell room */
+        print = 1; ob = tp->super;
+        for (i = 0; i < size; i++)
+            if (oblist[i].u.ob == ob)
+                print = 0;
+        if ((ob->flags & O_ENABLE_COMMANDS) && print)
+        {
+            push_svalue(fp);
+            push_svalue(&tp_svalue); 
+            (void)apply("catch_msg", ob, 2, 0); 
+        }
     }
     
     /* tell folx in player */
     for (ob = tp->contains; ob; ob = ob->next_inv)
     {
-	print = 1;
-	for (i = 0; i < size; i++)
-	    if (oblist[i].u.ob == ob)
-		print = 0;
-	/* before we push, check if it's a living */
-	if ((ob->flags & O_ENABLE_COMMANDS) && print)
-	{
-	   push_svalue(fp);
-	   push_svalue(&tp_svalue);
-	   (void)apply("catch_msg", ob, 2, 0);
-	}
+        print = 1;
+        for (i = 0; i < size; i++)
+            if (oblist[i].u.ob == ob)
+                print = 0;
+        /* before we push, check if it's a living */
+        if ((ob->flags & O_ENABLE_COMMANDS) && print)
+        {
+           push_svalue(fp);
+           push_svalue(&tp_svalue);
+           (void)apply("catch_msg", ob, 2, 0);
+        }
     }
 
     /* tell this_player */
     print = 1; ob = tp;
     for (i = 0; i < size; i++)
        if (oblist[i].u.ob == ob)
-	  print = 0;
+          print = 0;
     if (ob && (ob->flags & O_ENABLE_COMMANDS) && print)
     {
        push_svalue(fp);
@@ -411,9 +411,9 @@ static void
 efun_atoi(struct svalue *fp)
 {
     if (fp->type == T_STRING)
-	push_number(atoi(fp->u.string));
+        push_number(atoi(fp->u.string));
     else
-	push_number(0);
+        push_number(0);
 }
 static func func_atoi =
 {

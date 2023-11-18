@@ -3,10 +3,10 @@
 #include "interpret.h"
 
 #define VAR(i) (current_object->variables[\
-		current_object->prog->inherit[inh_offset +\
-		current_prog->cfuns[(i).num].inh].\
-		variable_index_offset	+\
-		current_prog->cfuns[(i).num].idx])
+                current_object->prog->inherit[inh_offset +\
+                current_prog->cfuns[(i).num].inh].\
+                variable_index_offset   +\
+                current_prog->cfuns[(i).num].idx])
 
 typedef struct var_info
 {

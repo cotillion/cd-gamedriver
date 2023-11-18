@@ -7,5 +7,5 @@ create()
 
     parse_command("0", ({ this_object() }), "%i", obs);
     if (sizeof(obs))
-	throw("parse_command botch\n");
+        throw("parse_command botch\n");
 }

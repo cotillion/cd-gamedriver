@@ -12,5 +12,5 @@ create()
     b[0] = b;
 
     if (a == b)
-	throw("Bad array handling\n");
+        throw("Bad array handling\n");
 }

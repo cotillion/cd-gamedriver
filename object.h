@@ -6,7 +6,7 @@
  * 0: There is an error in the reset() in this object. Never call it again.
  * 1: Normal state.
  * 2 or higher: This is an interactive player, that has not given any commands
- *		for a number of reset periods.
+ *              for a number of reset periods.
  */
 #include "config.h"
 #include "interpret.h"
@@ -14,25 +14,25 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
-#define O_CREATED		0x02  /* Has 'create()' been called */
-#define O_ENABLE_COMMANDS	0x04  /* Can it execute commands ? */
-#define O_CLONE			0x08  /* Is it cloned from a master copy ? */
-#define O_DESTRUCTED		0x10  /* Is it destructed ? */
-#define O_SWAPPED		0x20  /* Is it swapped to file */
-#define O_ONCE_INTERACTIVE	0x40  /* Has it ever been interactive ? */
-#define O_OBSOLETE_WARNING	0x80  /* Object has already generated a warning */
-#define O_ADDED_COMMAND 	0x100 /* Has it created a sentence? */
+#define O_CREATED               0x02  /* Has 'create()' been called */
+#define O_ENABLE_COMMANDS       0x04  /* Can it execute commands ? */
+#define O_CLONE                 0x08  /* Is it cloned from a master copy ? */
+#define O_DESTRUCTED            0x10  /* Is it destructed ? */
+#define O_SWAPPED               0x20  /* Is it swapped to file */
+#define O_ONCE_INTERACTIVE      0x40  /* Has it ever been interactive ? */
+#define O_OBSOLETE_WARNING      0x80  /* Object has already generated a warning */
+#define O_ADDED_COMMAND         0x100 /* Has it created a sentence? */
 
 struct call;
 
 struct object {
-    unsigned short flags;	/* Bits or'ed together from above */
+    unsigned short flags;       /* Bits or'ed together from above */
     unsigned short debug_flags;
-    int created;		/* Time of creation of this object */
-    int time_of_ref;		/* Time when last referenced. Used by swap */
-    unsigned int ref;		/* Reference count. */
+    int created;                /* Time of creation of this object */
+    int time_of_ref;            /* Time when last referenced. Used by swap */
+    unsigned int ref;           /* Reference count. */
 #ifdef DEBUG
-    int extra_ref;		/* Used to check ref count. */
+    int extra_ref;              /* Used to check ref count. */
 #endif
     struct program *prog;
     char *name;
@@ -42,19 +42,19 @@ struct object {
     struct object *next_call_out;
     struct object *next_all, *prev_all, *next_inv, *next_hash;
     struct object *contains;
-    struct object *super;		/* Which object surround us ? */
-    struct object *shadowing;		/* Is this object shadowing ? */
-    struct object *shadowed;		/* Is this object shadowed ? */
-    struct interactive *interactive;	/* Data about an interactive player */
+    struct object *super;               /* Which object surround us ? */
+    struct object *shadowing;           /* Is this object shadowing ? */
+    struct object *shadowed;            /* Is this object shadowed ? */
+    struct interactive *interactive;    /* Data about an interactive player */
     struct sentence *sent;
     struct object *next_hashed_living;
-    char *living_name;			/* Name of living object if in hash */
-    struct svalue *variables;		/* All variables to this program */
+    char *living_name;                  /* Name of living object if in hash */
+    struct svalue *variables;           /* All variables to this program */
     struct svalue auth;                 /* The protected auth variable */
 };
 
-#define WARNOBSOLETE(ob, msg)	if (((ob)->flags & O_OBSOLETE_WARNING) == 0) \
-				    warnobsolete(ob, msg)
+#define WARNOBSOLETE(ob, msg)   if (((ob)->flags & O_OBSOLETE_WARNING) == 0) \
+                                    warnobsolete(ob, msg)
 
 void warnobsolete(struct object *ob, char *msg);
 

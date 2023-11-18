@@ -11,10 +11,10 @@
 
 #define push_svalue(val) \
     { \
-	if (sp + 1 >= &start_of_stack[EVALUATOR_STACK_SIZE]) \
-	    error("Stack overflow\n"); \
-	sp++; \
-	assign_svalue_no_free(sp, val); \
+        if (sp + 1 >= &start_of_stack[EVALUATOR_STACK_SIZE]) \
+            error("Stack overflow\n"); \
+        sp++; \
+        assign_svalue_no_free(sp, val); \
     }
 
 union u {
@@ -42,19 +42,19 @@ struct svalue {
 extern struct svalue *sp;
 extern struct svalue start_of_stack[];
 
-#define T_INVALID	0x0
-#define T_LVALUE	0x1
-#define T_NUMBER	0x2
-#define T_STRING	0x4
-#define T_POINTER	0x8
-#define T_OBJECT	0x10
-#define T_MAPPING	0x20
+#define T_INVALID       0x0
+#define T_LVALUE        0x1
+#define T_NUMBER        0x2
+#define T_STRING        0x4
+#define T_POINTER       0x8
+#define T_OBJECT        0x10
+#define T_MAPPING       0x20
 #define T_FLOAT         0x40
-#define T_FUNCTION	0x80
+#define T_FUNCTION      0x80
 
-#define STRING_MSTRING	0	/* Allocated by malloc() */
-#define STRING_SSTRING	1	/* Allocated by the shared string library */
-#define STRING_CSTRING	2	/* Do not has to be freed at all */
+#define STRING_MSTRING  0       /* Allocated by malloc() */
+#define STRING_SSTRING  1       /* Allocated by the shared string library */
+#define STRING_CSTRING  2       /* Do not has to be freed at all */
 
 struct vector {
     unsigned int size;
@@ -67,7 +67,7 @@ struct vector {
 
 #define ALLOC_VECTOR(nelem) \
     (struct vector *)xalloc(sizeof (struct vector) + \
-			    sizeof(struct svalue) * (nelem - 1))
+                            sizeof(struct svalue) * (nelem - 1))
 
 /*
  * Function stuff.
@@ -85,12 +85,12 @@ struct closure {
 #define FUN_SFUN 2
 #define FUN_EFUN 3
 #define FUN_LFUNO 4
-#define FUN_COMPOSE 5		/* used for compositions */
-#define FUN_EMPTY 6		/* used for empty argument slots */
+#define FUN_COMPOSE 5           /* used for compositions */
+#define FUN_EMPTY 6             /* used for empty argument slots */
 #define FUN_LFUN_NOMASK 7       /* used for nomask functions */
     unsigned short funno, funinh; /* function no, and inherit no. used in call */
-    struct object *funobj;	/* object where function is, or 0 */
-    struct vector *funargs;	/* function arguments, or 0 */
+    struct object *funobj;      /* object where function is, or 0 */
+    struct vector *funargs;     /* function arguments, or 0 */
     /* "empty" argument slots in the argument array contain
        function nodes with the FUN_EMPTY tag */
 };
@@ -102,15 +102,15 @@ struct closure {
  * The pointer, csp, will point to the values that will be used at return.
  */
 struct control_stack {
-    struct object *ob;		/* Current object */
-    struct object *prev_ob;	/* Save previous object */
-    struct program *prog;	/* Current program */
-    int num_local_variables;	/* Local + arguments */
+    struct object *ob;          /* Current object */
+    struct object *prev_ob;     /* Save previous object */
+    struct program *prog;       /* Current program */
+    int num_local_variables;    /* Local + arguments */
     offset_t pc;
     offset_t pc_save;
     struct svalue *fp;
-    int extern_call;		/* Flag if evaluator should return */
-    struct function *funp;	/* Only used for tracebacks */
+    int extern_call;            /* Flag if evaluator should return */
+    struct function *funp;      /* Only used for tracebacks */
     int inh_offset;
     char ext_call;
 #if defined(PROFILE_LPC)
@@ -130,21 +130,21 @@ struct control_stack {
  */
 struct gdexception {
     struct gdexception *e_exception;
-    int			e_catch;
-    jmp_buf		e_context;
+    int                 e_catch;
+    jmp_buf             e_context;
 };
 
 /*
  * Boolean Type
  */
 
-typedef int	bool_t;
+typedef int     bool_t;
 
 #ifndef FALSE
-#define	FALSE	0
+#define FALSE   0
 #endif
 #ifndef TRUE
-#define	TRUE	1
+#define TRUE    1
 #endif
 
 extern struct gdexception *exception;
@@ -158,7 +158,7 @@ extern int function_index_found;
 extern struct program *function_prog_found;
 extern unsigned short function_type_mod_found;
 extern int function_inherit_found;
-extern struct control_stack *csp;	/* Points to last element pushed */
+extern struct control_stack *csp;       /* Points to last element pushed */
 
 #define INCREF(x) if (x) x++
 #define DECREF(x) if (x) x--

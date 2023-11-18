@@ -16,20 +16,20 @@ static string
 type_name(mixed etwas)
 {
     if (intp(etwas))
-	return "int";
+        return "int";
     else if (floatp(etwas))
-	return "float";
+        return "float";
     else if (stringp(etwas))
-	return "string";
+        return "string";
     else if (objectp(etwas))
-	return "object";
+        return "object";
     else if (pointerp(etwas))
-	return "array";
+        return "array";
     else if (mappingp(etwas))
-	return "mapping";
+        return "mapping";
 #ifdef _FUNCTION
     else if (functionp(etwas))
-	return "function";
+        return "function";
 #endif
     return "!UNKNOWN!";
 }
@@ -44,29 +44,29 @@ dump_array(mixed a, string tab)
 {
     int             n,
                     m;
-    mixed 	    ix, val;
+    mixed           ix, val;
 
     if (!tab)
-	tab = "";
+        tab = "";
     if (!pointerp(a) && !mappingp(a))
     {
-	dump_elem(a, tab);
-	return;
+        dump_elem(a, tab);
+        return;
     }
     else if (pointerp(a))
     {
-	write("(Array)\n");
-	m = sizeof(a);
-	n = 0;
-	while (n < m)
-	{
-	    write(tab + "[" + n + "] =");
-	    dump_elem(a[n], tab);
-	    n += 1;
-	}
+        write("(Array)\n");
+        m = sizeof(a);
+        n = 0;
+        while (n < m)
+        {
+            write(tab + "[" + n + "] =");
+            dump_elem(a[n], tab);
+            n += 1;
+        }
     }
     else /* Mappingp */
-	dump_mapping(a, tab);
+        dump_mapping(a, tab);
 }
 
 /*
@@ -82,68 +82,68 @@ dump_mapping(mapping m, string tab)
     string dval, val;
 
     if (!tab)
-	tab = "";
+        tab = "";
 
     d = m_indexes(m);
     s = sizeof(d);
     write("(Mapping) ([\n");
     for(i = 0; i < s; i++) {
-	if (intp(d[i]))
-	    dval = "(int)" + d[i];
+        if (intp(d[i]))
+            dval = "(int)" + d[i];
 
-	if (floatp(d[i]))
-	    dval = "(float)" + ftoa(d[i]);
+        if (floatp(d[i]))
+            dval = "(float)" + ftoa(d[i]);
 
-	if (stringp(d[i]))
-	    dval = "\"" + d[i] + "\"";
+        if (stringp(d[i]))
+            dval = "\"" + d[i] + "\"";
 
-	if (objectp(d[i]))
-	    dval = file_name(d[i]);
+        if (objectp(d[i]))
+            dval = file_name(d[i]);
 
-	if (pointerp(d[i]))
-	    dval = "(array:" + sizeof(d[i]) + ")";
+        if (pointerp(d[i]))
+            dval = "(array:" + sizeof(d[i]) + ")";
 
-	if (mappingp(d[i]))
-	    dval = "(mapping:" + m_sizeof(d[i]) + ")";
+        if (mappingp(d[i]))
+            dval = "(mapping:" + m_sizeof(d[i]) + ")";
 #ifdef _FUNCTION
-	if (functionp(d[i]))
-	    dval = sprintf("%O", d[i]);
+        if (functionp(d[i]))
+            dval = sprintf("%O", d[i]);
 
-	if (functionp(m[d[i]]))
-	    val = sprintf("%O", m[d[i]]);
+        if (functionp(m[d[i]]))
+            val = sprintf("%O", m[d[i]]);
 #endif
-	
-	if (intp(m[d[i]]))
-	    val = "(int)" + m[d[i]];
+        
+        if (intp(m[d[i]]))
+            val = "(int)" + m[d[i]];
 
-	if (floatp(m[d[i]]))
-	    val = "(float)" + ftoa(m[d[i]]);
+        if (floatp(m[d[i]]))
+            val = "(float)" + ftoa(m[d[i]]);
 
-	if (stringp(m[d[i]]))
-	    val = "\"" + m[d[i]] + "\"";
+        if (stringp(m[d[i]]))
+            val = "\"" + m[d[i]] + "\"";
 
-	if (objectp(m[d[i]]))
-	    val = file_name(m[d[i]]);
+        if (objectp(m[d[i]]))
+            val = file_name(m[d[i]]);
 
-	if (pointerp(m[d[i]]))
-	    val = "(array:" + sizeof(m[d[i]]) + ")";
+        if (pointerp(m[d[i]]))
+            val = "(array:" + sizeof(m[d[i]]) + ")";
 
-	if (mappingp(m[d[i]]))
-	    val = "(mapping:" + m_sizeof(m[d[i]]) + ")";
+        if (mappingp(m[d[i]]))
+            val = "(mapping:" + m_sizeof(m[d[i]]) + ")";
 
-	write(tab + dval + ":" + val + "\n");
+        write(tab + dval + ":" + val + "\n");
 
-	if (pointerp(d[i]))
-	    dump_array(d[i]);
+        if (pointerp(d[i]))
+            dump_array(d[i]);
 
-	if (pointerp(m[d[i]]))
-	    dump_array(m[d[i]]);
+        if (pointerp(m[d[i]]))
+            dump_array(m[d[i]]);
 
-	if (mappingp(d[i]))
-	    dump_mapping(d[i], tab + "   ");
+        if (mappingp(d[i]))
+            dump_mapping(d[i], tab + "   ");
 
-	if (mappingp(m[d[i]]))
-	    dump_mapping(m[d[i]], tab + "   ");
+        if (mappingp(m[d[i]]))
+            dump_mapping(m[d[i]], tab + "   ");
     }
     write("])\n");
 }
@@ -153,21 +153,21 @@ dump_elem(mixed sak, string tab)
 {
     if (pointerp(sak))
     {
-	dump_array(sak, tab + "   ");
+        dump_array(sak, tab + "   ");
     }
     else if (mappingp(sak))
     {
-	dump_mapping(sak, tab + "   ");
+        dump_mapping(sak, tab + "   ");
     }
     else
     {
-	write("(" + type_name(sak) + ") ");
-	if (objectp(sak))
-	    write(file_name(sak));
-	else if (floatp(sak))
-	    write(ftoa(sak));
-	else
-	    write(sprintf("%O",sak));
+        write("(" + type_name(sak) + ") ");
+        if (objectp(sak))
+            write(file_name(sak));
+        else if (floatp(sak))
+            write(ftoa(sak));
+        else
+            write(sprintf("%O",sak));
     }
     write("\n");
 }
@@ -250,16 +250,16 @@ int
 mkcompare_util(function f, mixed x, mixed y)
 {
     if (f(x,y))
-	return -1;
+        return -1;
     if (f(y,x))
-	return 1;
+        return 1;
     return 0;
 }
 
 /*
  * Function name: mkcompare
  * Description:   takes a normal comparison function, like < and
- *		  returns a function suitable for sort_array
+ *                returns a function suitable for sort_array
  * Arguments:     f: the function
  * Returns:       another function
  */

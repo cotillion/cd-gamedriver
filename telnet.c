@@ -54,7 +54,7 @@
 #include "backend.h"
 
 #ifndef EPROTO
-#define	EPROTO	EPROTOTYPE
+#define EPROTO  EPROTOTYPE
 #endif
 
 /*
@@ -64,16 +64,16 @@
 /*
  * Queue Sizes.
  */
-#define	TELNET_CANQ_SIZE	(1024 * 8)
-#define	TELNET_RAWQ_SIZE    (1024 * 4)
-#define	TELNET_OPTQ_SIZE    (1024)
-#define	TELNET_OUTQ_SIZE	(32*1024)
+#define TELNET_CANQ_SIZE        (1024 * 8)
+#define TELNET_RAWQ_SIZE    (1024 * 4)
+#define TELNET_OPTQ_SIZE    (1024)
+#define TELNET_OUTQ_SIZE        (32*1024)
 
 /*
  * Output Queue Flow Control Parameters.
  */
-#define	TELNET_OUTQ_LOWAT       (TELNET_OUTQ_SIZE/2)
-#define	TELNET_OUTQ_HIWAT       (TELNET_OUTQ_SIZE - 256)
+#define TELNET_OUTQ_LOWAT       (TELNET_OUTQ_SIZE/2)
+#define TELNET_OUTQ_HIWAT       (TELNET_OUTQ_SIZE - 256)
 
 /*
  * The following parameter specifies the minimum number of bytes that must
@@ -82,7 +82,7 @@
  * TELNET command.  N.B. Do not change this unless you know what you
  * are doing!
  */
-#define	TELNET_OUTQ_REQUIRED	12
+#define TELNET_OUTQ_REQUIRED    12
 
 /*
  * The folowing parameters are used to set the kernel socket buffer
@@ -90,18 +90,18 @@
  * and receive buffers to 4k.  It makes more sense to increase the
  * send size and reduce the receive size for a MUD.
  */
-#define	TELNET_RCVBUF_SIZE	2048
-#define	TELNET_SNDBUF_SIZE	TELNET_OUTQ_SIZE
+#define TELNET_RCVBUF_SIZE      2048
+#define TELNET_SNDBUF_SIZE      TELNET_OUTQ_SIZE
 
 /*
  * ASCII Definitions.
  */
-#define	NUL			0
-#define	BEL			7
-#define	BS			8
-#define	LF			10
-#define	CR			13
-#define	DEL			127
+#define NUL                     0
+#define BEL                     7
+#define BS                      8
+#define LF                      10
+#define CR                      13
+#define DEL                     127
 
 #define TRUNCATED   "*** Truncated. ***\r\n"
 

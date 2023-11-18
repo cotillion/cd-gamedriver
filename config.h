@@ -14,7 +14,7 @@
 /*
  * Max size of a file allowed to be read by 'read_file()'.
  */
-#define READ_FILE_MAX_SIZE	500000
+#define READ_FILE_MAX_SIZE      500000
 
 /* Version of the game in the form xx.xx.xx (leading zeroes) gc.
  * Two digits will be appended, that is the patch level.
@@ -42,12 +42,12 @@
 /*
  * Should the indent code in "ed" be enabled?
  */
-#define	ED_INDENT
+#define ED_INDENT
 
 /*
  * Should we warn if the same file is included multiple times?
  */
-#define	WARN_INCLUDES
+#define WARN_INCLUDES
 
 /*
  * What file, if any, to automatically include.
@@ -77,7 +77,7 @@
 /*
  * The maximum number of call outs per object
  */
-#define	MAX_CALL_OUT	512
+#define MAX_CALL_OUT    512
 
 /*
  * How to extract an unsigned char from a char *.
@@ -91,18 +91,18 @@
  * Define the maximum stack size of the stack machine. This stack will also
  * contain all local variables and arguments.
  */
-#define EVALUATOR_STACK_SIZE	0x2000
+#define EVALUATOR_STACK_SIZE    0x2000
 
 /*
  * Define the maximum call depth for functions.
  */
-#define MAX_TRACE		0x400
+#define MAX_TRACE               0x400
 
 /*
  * Define the size of the compiler stack. This defines how complex
  * expressions the compiler can parse. The value should be big enough.
  */
-#define COMPILER_STACK_SIZE	0x2000
+#define COMPILER_STACK_SIZE     0x2000
 
 /*
  * With this option defined you can trace mudlib execution from within the
@@ -143,22 +143,22 @@
  * Maximum number of bits in a bit field. They are stored in printable
  * strings, 6 bits per byte.
  */
-#define MAX_BITS		49152 /* even 6 */
+#define MAX_BITS                49152 /* even 6 */
 
 /*
  * There is a hash table for living objects, used by find_living().
  */
-#define LIVING_HASH_SIZE	0x1000
+#define LIVING_HASH_SIZE        0x1000
 
 /*
  * Define what port number the game is to use.
  */
-#define PORTNO			3011
+#define PORTNO                  3011
 
 /*
  * Max number of local variables in a function.
  */
-#define MAX_LOCAL	127
+#define MAX_LOCAL       127
 
 /*
  * The hashing function used for pointers to shared strings.
@@ -171,7 +171,7 @@
 /* Maximum number of evaluated nodes/loop.
  * If this is exceeded, current function is halted.
  */
-#define MAX_COST	5000000
+#define MAX_COST        5000000
 
 /*
  * EXTRA_COST
@@ -180,23 +180,23 @@
  * Note that in the event of recursive catch() calls, only
  * the top level catch() will get the extra limit applied.
  */
-#define	EXTRA_COST	10000
+#define EXTRA_COST      10000
 
 /*
  * Maximum length of inherit chain
  */
-#define MAX_INHERIT	42
+#define MAX_INHERIT     42
 
 /*
  * Maximum number of nested includes
  */
-#define	MAX_INCLUDE	30
+#define MAX_INCLUDE     30
 
 /*
  * Where to swap out objects. This file is not used if NUM_RESET_TO_SWAP
  * is 0.
  */
-#define SWAP_FILE		"LP_SWAP"
+#define SWAP_FILE               "LP_SWAP"
 
 /*
  * This is the maximum array size allowed for one single array.
@@ -213,16 +213,16 @@
  *
  * This is the absolute maximum, the mudlib will probably set a lower level.
  */
-#define MAX_PLAYERS	4000
+#define MAX_PLAYERS     4000
 
 /*
  * Reserve an extra memory area from malloc(), to free when we run out
  * of memory to get some warning and tell master about our memory troubles.
  * If this value is 0, no area will be reserved.
  */
-#define RESERVED_SIZE		(1 << 24)
+#define RESERVED_SIZE           (1 << 24)
 /*
-#define RESERVED_SIZE		(1 << 17)
+#define RESERVED_SIZE           (1 << 17)
 */
 
 /* Define the size of the shared string hash table.  This number should
@@ -233,7 +233,7 @@
  * need more, and you will still get good results with a smaller table.
  * THIS IS NOT IMPLEMENTED YET.
  */
-#define	HTABLE_SIZE 262144
+#define HTABLE_SIZE 262144
 
 /*
  * Object hash table size.
@@ -241,13 +241,13 @@
  * the number of objects in a game, as the distribution of accesses to
  * objects is somewhat more uniform than that of strings.
  */
-#define OTABLE_SIZE	262144	/* we have several thousand obs usually */
+#define OTABLE_SIZE     262144  /* we have several thousand obs usually */
 
 /*
  * Define SYSV if you are running system V with a lower release level than
  * Sys V.4.
  */
-#undef	SYSV
+#undef  SYSV
 
 /*
  * Define FCHMOD_MISSING only if your system doesn't have fchmod().
@@ -267,7 +267,7 @@
  * specific port. If == -1 it will not be used unless the mud is started
  * with the -u### flag. Where ### is the portnumber for the udp port.
  * If undefined the -u flag will be ignored.
-   #define CATCH_UDP_PORT	2500
+   #define CATCH_UDP_PORT       2500
  */
 #undef CATCH_UDP_PORT
 
@@ -289,7 +289,7 @@
  * with the -p### flag. Where ### is the portnumber for the service
  * port. If undefined the -p flag will be ignored.
  */
-#define SERVICE_PORT	3003
+#define SERVICE_PORT    3003
 
 /*
  * ALLOWED_SERVICE

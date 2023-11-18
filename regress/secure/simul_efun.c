@@ -9,9 +9,9 @@ varargs nomask mixed
 sort_array(mixed arr, mixed lfunc, object obj)
 {
     if (stringp(lfunc)) {
-	if (!obj)
-	    obj = previous_object();
-	lfunc = mkfunction(lfunc, obj);
+        if (!obj)
+            obj = previous_object();
+        lfunc = mkfunction(lfunc, obj);
     }
     return sort(arr, lfunc);
 }

@@ -32,7 +32,7 @@
 #define _NDESC_H
 typedef struct ndesc {
     int                 nd_fd;
-    int		        nd_mask;
+    int                 nd_mask;
     int                 nd_poll;
     void                (*nd_rfunc)(struct ndesc *, void *);
     void                (*nd_wfunc)(struct ndesc *, void *);
@@ -43,10 +43,10 @@ typedef struct ndesc {
     struct ndesc *      nd_prev;
 } ndesc_t;
 
-#define	ND_R	0x01
-#define	ND_W	0x02
-#define	ND_X	0x04
-#define	ND_MASK	0x07
+#define ND_R    0x01
+#define ND_W    0x02
+#define ND_X    0x04
+#define ND_MASK 0x07
 
 struct timeval;
 

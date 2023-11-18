@@ -46,7 +46,7 @@ sig_handler(int sig)
     }
 
     for (i = 0; disp[i].sig && disp[i].sig != sig; i++)
-	;
+        ;
     
     pending_signals |= 1 << i;
 }
@@ -65,7 +65,7 @@ init_signals()
     act.sa_mask = sigs_to_block;
     act.sa_flags = SA_RESTART;
     for (i = 0; disp[i].sig; i++)
-	(void)sigaction(disp[i].sig, &act, NULL);
+        (void)sigaction(disp[i].sig, &act, NULL);
 }
 
 static struct task *signal_task;
@@ -77,7 +77,7 @@ send_signals(void *x)
     
     sigprocmask(SIG_BLOCK, &sigs_to_block, NULL);
     for (i = 0; i < MAX_SIGNALS; i++)
-	if (pending_signals & (1 << i))
+        if (pending_signals & (1 << i))
             break;
 
     pending_signals &= ~(1 << i);

@@ -49,7 +49,7 @@
 #ifdef CATCH_UDP_PORT
 
 #ifndef INADDR_NONE
-#define INADDR_NONE	0xffffffff
+#define INADDR_NONE     0xffffffff
 #endif
 
 /*
@@ -59,7 +59,7 @@
 /*
  * Maximum UDP Datagram Size.
  */
-#define	UDPSVC_RAWQ_SIZE	1024
+#define UDPSVC_RAWQ_SIZE        1024
 
 /*
  * Send a UDP datagram.
@@ -71,7 +71,7 @@ udpsvc_send(udpsvc_t *svc, char *dest, int port, char *cp)
     int cc;
 
     if (udpsvc_nd == NULL || port < 0)
-	return 0;
+        return 0;
 
     memset(&addr, 0, sizeof (addr));
     addr.sin_family = AF_INET;
@@ -81,19 +81,19 @@ udpsvc_send(udpsvc_t *svc, char *dest, int port, char *cp)
     if (addr.sin_addr.s_addr == INADDR_NONE)
     {
 #ifdef UDP_SEND_HOSTNAME
-	struct hostent *hp;
+        struct hostent *hp;
 
-	hp = gethostbyname(addr);
-	if (hp == NULL)
-	    return 0;
-	memcpy(&addr.sin_addr, hp->h_addr, hp->h_length);
+        hp = gethostbyname(addr);
+        if (hp == NULL)
+            return 0;
+        memcpy(&addr.sin_addr, hp->h_addr, hp->h_length);
 #else
-	return 0;
+        return 0;
 #endif
     }
 
     cc = sendto(nd_fd(svc->nd), cp, strlen(cp), 0,
-	     (struct sockaddr *)&addr, sizeof (addr));
+             (struct sockaddr *)&addr, sizeof (addr));
 
     return cc != -1;
 }
@@ -106,10 +106,10 @@ read_datagram(udpsvc_t *svc)
 
     /* Get another datagram */
     cc = recvfrom(nd_fd(svc->nd), nq_wptr(svc->nq), nq_size(svc->nq) - 1, 0,
-	     (struct sockaddr *)&addr, &addrlen);
+             (struct sockaddr *)&addr, &addrlen);
 
     if (cc == -1) {
-	return 0;
+        return 0;
     }
 
     nq_wptr(svc->nq)[cc] = '\0';
@@ -134,17 +134,17 @@ udpsvc_process(udpsvc_t *svc)
     
     if (setjmp(exception_frame.e_context) == 0)
     {
-	push_string(inet_ntoa(addr.sin_addr), STRING_MSTRING);
-	push_string((char *)nq_rptr(svc->nq), STRING_MSTRING);
-	(void)apply_master_ob(M_INCOMING_UDP, 2);
+        push_string(inet_ntoa(addr.sin_addr), STRING_MSTRING);
+        push_string((char *)nq_rptr(svc->nq), STRING_MSTRING);
+        (void)apply_master_ob(M_INCOMING_UDP, 2);
     }
     exception = exception->e_exception;
     addrlen = sizeof (addr);
 
     if (!read_datagram(svc)) {
-	nd_enable(svc->nd, ND_R);
-	svc->task = 0;
-	return;
+        nd_enable(svc->nd, ND_R);
+        svc->task = 0;
+        return;
     }
     reschedule_task(svc->task);
 }
@@ -160,8 +160,8 @@ udpsvc_read(ndesc_t *nd, udpsvc_t *svc)
     struct gdexception exception_frame;
 
     if (read_datagram(svc)) {
-	nd_disable(udpsvc_nd, ND_R);
-	svc->task = create_task(udpsvc_process);
+        nd_disable(udpsvc_nd, ND_R);
+        svc->task = create_task(udpsvc_process);
     }
 }
 
@@ -189,7 +189,7 @@ udpsvc_init(int port)
     
     s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (s == -1)
-	fatal("udp_init: socket() error = %d.\n", errno);
+        fatal("udp_init: socket() error = %d.\n", errno);
 
     enable_reuseaddr(s);
 
@@ -200,17 +200,17 @@ udpsvc_init(int port)
 
     if (bind(s, (struct sockaddr *)&addr, sizeof (addr)) == -1)
     {
-	if (errno == EADDRINUSE) 
-	{
-	    (void)fprintf(stderr, "UDP Socket already bound!\n");
-	    debug_message("UDP Socket already bound!\n");
-	    (void)close(s);
-	    return 0;
-	} 
-	else 
-	{
-	    fatal("udp_init: bind() error = %d.\n", errno);
-	}
+        if (errno == EADDRINUSE) 
+        {
+            (void)fprintf(stderr, "UDP Socket already bound!\n");
+            debug_message("UDP Socket already bound!\n");
+            (void)close(s);
+            return 0;
+        } 
+        else 
+        {
+            fatal("udp_init: bind() error = %d.\n", errno);
+        }
     }
 
     enable_nbio(s);

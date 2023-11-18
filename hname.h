@@ -30,7 +30,7 @@
  */
 
 typedef void (*hname_callback_t)(const char *addr, int lport, int rport,
-				 const char *ip_name, const char *rname);
+                                 const char *ip_name, const char *rname);
 
 void *hname_init(hname_callback_t, void (*)(void *));
 void hname_sendreq(void *, const char *addr, u_short lport, u_short rport);

@@ -29,9 +29,9 @@
 
 extern int current_line;
 
-int d_flag = 0;	/* Run with debug */
-int t_flag = 0;	/* Disable heart beat and reset */
-int e_flag = 0;	/* Load empty, without castles. */
+int d_flag = 0; /* Run with debug */
+int t_flag = 0; /* Disable heart beat and reset */
+int e_flag = 0; /* Load empty, without castles. */
 int s_flag = 0; /* Make statistics and dump to /MUDstatistics */
 int no_ip_demon = 0;
 int unlimited = 0; /* Run without eval cost limits */
@@ -57,7 +57,7 @@ int udp_port = CATCH_UDP_PORT;
 #ifdef SERVICE_PORT
 int service_port = SERVICE_PORT;
 #endif
-char *reserved_area;	/* reserved for malloc() */
+char *reserved_area;    /* reserved for malloc() */
 struct svalue const0, const1, constempty;
 struct closure funcempty;
 
@@ -232,61 +232,61 @@ main(int argc, char **argv)
     }
     else
     {
-	exception_frame.e_exception = NULL;
-	exception_frame.e_catch = 0;
-	exception = &exception_frame;
-	auto_ob = 0;
-	master_ob = 0;
+        exception_frame.e_exception = NULL;
+        exception_frame.e_catch = 0;
+        exception = &exception_frame;
+        auto_ob = 0;
+        master_ob = 0;
 
-	if ((auto_ob = load_object("secure/auto", 1, 0, 0)) != NULL)
-	{
-	    add_ref(auto_ob, "main");
-	    auto_ob->prog->flags |= PRAGMA_RESIDENT;
-	}
+        if ((auto_ob = load_object("secure/auto", 1, 0, 0)) != NULL)
+        {
+            add_ref(auto_ob, "main");
+            auto_ob->prog->flags |= PRAGMA_RESIDENT;
+        }
 
-	get_simul_efun();
-	master_ob = load_object("secure/master", 1, 0, 0);
-	if (master_ob)
-	{
-	    /*
-	     * Make sure master_ob is never made a dangling pointer.
-	     * Look at apply_master_ob() for more details.
-	     */
-	    add_ref(master_ob, "main");
-	    master_ob->prog->flags |= PRAGMA_RESIDENT;
+        get_simul_efun();
+        master_ob = load_object("secure/master", 1, 0, 0);
+        if (master_ob)
+        {
+            /*
+             * Make sure master_ob is never made a dangling pointer.
+             * Look at apply_master_ob() for more details.
+             */
+            add_ref(master_ob, "main");
+            master_ob->prog->flags |= PRAGMA_RESIDENT;
             resolve_master_fkntab();
-	    create_object(master_ob);
+            create_object(master_ob);
             load_parse_information();
-	    clear_state();
-	}
+            clear_state();
+        }
     }
     exception = NULL;
     if (auto_ob == 0)
     {
-	(void)fprintf(stderr, "The file secure/auto must be loadable.\n");
-	exit(1);
+        (void)fprintf(stderr, "The file secure/auto must be loadable.\n");
+        exit(1);
     }
     if (master_ob == 0)
     {
-	(void)fprintf(stderr, "The file secure/master must be loadable.\n");
-	exit(1);
+        (void)fprintf(stderr, "The file secure/master must be loadable.\n");
+        exit(1);
     }
     set_inc_list(apply_master_ob(M_DEFINE_INCLUDE_DIRS, 0));
 
     {
-	struct svalue* ret1;
+        struct svalue* ret1;
 
-	ret1 = apply_master_ob(M_PREDEF_DEFINES, 0);
-	if (ret1 && ret1->type == T_POINTER)
-	{
-	    int ii;
+        ret1 = apply_master_ob(M_PREDEF_DEFINES, 0);
+        if (ret1 && ret1->type == T_POINTER)
+        {
+            int ii;
 
-	    for (ii = 0; ii < ret1->u.vec->size; ii++)
-		if (ret1->u.vec->item[ii].type == T_STRING)
-		{
+            for (ii = 0; ii < ret1->u.vec->size; ii++)
+                if (ret1->u.vec->item[ii].type == T_STRING)
+                {
                     add_pre_define(ret1->u.vec->item[ii].u.string);
-		}
-	}
+                }
+        }
     }
 
     if (flag != NULL)
@@ -309,28 +309,28 @@ main(int argc, char **argv)
 
     if (ret && ret->type == T_STRING)
     {
-	struct lpc_predef_s *tmp;
+        struct lpc_predef_s *tmp;
 
-	tmp = (struct lpc_predef_s *)
-	    xalloc(sizeof(struct lpc_predef_s));
-	if (!tmp)
-	    fatal("xalloc failed\n");
-	tmp->flag = string_copy(ret->u.string);
-	tmp->next = lpc_predefs;
-	lpc_predefs = tmp;
+        tmp = (struct lpc_predef_s *)
+            xalloc(sizeof(struct lpc_predef_s));
+        if (!tmp)
+            fatal("xalloc failed\n");
+        tmp->flag = string_copy(ret->u.string);
+        tmp->next = lpc_predefs;
+        lpc_predefs = tmp;
     }
 
     ret = apply_master_ob(M_GET_VBFC_OBJECT, 0);
     if (ret && ret->type == T_OBJECT)
     {
-	vbfc_object = ret->u.ob;
-	INCREF(vbfc_object->ref);
+        vbfc_object = ret->u.ob;
+        INCREF(vbfc_object->ref);
     }
     else
-	vbfc_object = 0;
+        vbfc_object = 0;
 
     if (game_is_being_shut_down)
-	exit(1);
+        exit(1);
 
     init_call_out();
     preload_objects(e_flag);
@@ -364,15 +364,15 @@ debug_message(char *fmt, ...)
     char name[100];
 
     if (fp == NULL) {
-	(void)gethostname(name,sizeof name);
-	if ((f = strchr(name, '.')) != NULL)
-	    *f = '\0';
-	snprintf(deb, sizeof(deb), "%s.debug.log", name);
-	fp = fopen(deb, "w");
-	if (fp == NULL) {
-	    perror(deb);
-	    abort();
-	}
+        (void)gethostname(name,sizeof name);
+        if ((f = strchr(name, '.')) != NULL)
+            *f = '\0';
+        snprintf(deb, sizeof(deb), "%s.debug.log", name);
+        fp = fopen(deb, "w");
+        if (fp == NULL) {
+            perror(deb);
+            abort();
+        }
     }
 
     va_start(argp, fmt);
@@ -386,30 +386,30 @@ debug_message_svalue(struct svalue *v)
 {
     if (v == 0)
     {
-	debug_message("<NULL>");
-	return;
+        debug_message("<NULL>");
+        return;
     }
     switch(v->type)
     {
     case T_NUMBER:
-	debug_message("%lld", v->u.number);
-	return;
+        debug_message("%lld", v->u.number);
+        return;
     case T_FLOAT:
-	debug_message("%.18g", v->u.real);
-	return;
+        debug_message("%.18g", v->u.real);
+        return;
     case T_STRING:
-	debug_message("\"%s\"", v->u.string);
-	return;
+        debug_message("\"%s\"", v->u.string);
+        return;
     case T_OBJECT:
-	debug_message("OBJ(%s)", v->u.ob->name);
-	return;
+        debug_message("OBJ(%s)", v->u.ob->name);
+        return;
     case T_LVALUE:
-	debug_message("Pointer to ");
-	debug_message_svalue(v->u.lvalue);
-	return;
+        debug_message("Pointer to ");
+        debug_message_svalue(v->u.lvalue);
+        return;
     default:
-	debug_message("<INVALID>\n");
-	return;
+        debug_message("<INVALID>\n");
+        return;
     }
 }
 

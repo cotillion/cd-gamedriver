@@ -49,19 +49,19 @@ find_obj_n(char *s)
     
     while (curr)
     {
-	obj_probes++;
-	if (strcmp(curr->name, s) == 0) { /* found it */
-	    if (prev)
-	    { /* not at head of list */
-		prev->next_hash = curr->next_hash;
-		curr->next_hash = obj_table[h];
-		obj_table[h] = curr;
-	    }
-	    objs_found++;
-	    return(curr);	/* pointer to object */
-	}
-	prev = curr;
-	curr = curr->next_hash;
+        obj_probes++;
+        if (strcmp(curr->name, s) == 0) { /* found it */
+            if (prev)
+            { /* not at head of list */
+                prev->next_hash = curr->next_hash;
+                curr->next_hash = obj_table[h];
+                obj_table[h] = curr;
+            }
+            objs_found++;
+            return(curr);       /* pointer to object */
+        }
+        prev = curr;
+        curr = curr->next_hash;
     }
     
     return(0); /* not found */
@@ -81,40 +81,40 @@ enter_object_hash(struct object *ob)
 
     /* Add to object list */
     if (ob->flags & O_CLONE && ob->prog->clones) {
-	sibling = ob->prog->clones;
-	ob->next_all = sibling;
-	ob->prev_all = sibling->prev_all;
-	sibling->prev_all->next_all = ob;
-	sibling->prev_all = ob;
-	if (sibling == obj_list)
-	    obj_list = ob;
+        sibling = ob->prog->clones;
+        ob->next_all = sibling;
+        ob->prev_all = sibling->prev_all;
+        sibling->prev_all->next_all = ob;
+        sibling->prev_all = ob;
+        if (sibling == obj_list)
+            obj_list = ob;
     } else if (obj_list) {
-	ob->next_all = obj_list;
-	ob->prev_all = obj_list->prev_all;
-	obj_list->prev_all->next_all = ob;
-	obj_list->prev_all = ob;
-	obj_list = ob;
+        ob->next_all = obj_list;
+        ob->prev_all = obj_list->prev_all;
+        obj_list->prev_all->next_all = ob;
+        obj_list->prev_all = ob;
+        obj_list = ob;
     }
     else
-	obj_list = ob->next_all = ob->prev_all = ob;
+        obj_list = ob->next_all = ob->prev_all = ob;
 
     if (ob->flags & O_CLONE) {
-	ob->prog->clones = ob;
-	ob->prog->num_clones++;
+        ob->prog->clones = ob;
+        ob->prog->num_clones++;
     }
 
     s = find_obj_n(ob->name);
     if (s) {
-	if (s != ob)
-	    fatal("Duplicate object \"%s\" in object hash table\n",
-		  ob->name);
-	else
-	    fatal("Entering object \"%s\" twice in object table\n",
-		  ob->name);
+        if (s != ob)
+            fatal("Duplicate object \"%s\" in object hash table\n",
+                  ob->name);
+        else
+            fatal("Entering object \"%s\" twice in object table\n",
+                  ob->name);
     }
     if (ob->next_hash)
-	fatal("Object \"%s\" not found in object table but next link not null\n",
-	      ob->name);
+        fatal("Object \"%s\" not found in object table but next link not null\n",
+              ob->name);
     ob->next_hash = obj_table[h];
     obj_table[h] = ob;
     objs_in_table++;
@@ -134,27 +134,27 @@ remove_object_hash(struct object *ob)
     s = find_obj_n(ob->name);
     
     if (s != ob)
-	fatal("Remove object \"%s\": found a different object!\n",
-	      ob->name);
+        fatal("Remove object \"%s\": found a different object!\n",
+              ob->name);
     
     obj_table[h] = ob->next_hash;
     ob->next_hash = 0;
     objs_in_table--;
 
     if (ob->flags & O_CLONE)
-	ob->prog->num_clones--;
+        ob->prog->num_clones--;
     if (ob->prog->clones == ob) {
-	if (ob->next_all->prog == ob->prog &&
-	    ob->next_all->flags & O_CLONE &&
-	    ob->next_all != ob)
-	    ob->prog->clones = ob->next_all;
-	else
-	    ob->prog->clones = NULL;
+        if (ob->next_all->prog == ob->prog &&
+            ob->next_all->flags & O_CLONE &&
+            ob->next_all != ob)
+            ob->prog->clones = ob->next_all;
+        else
+            ob->prog->clones = NULL;
     }
     if (ob->next_all == ob)
-	obj_list = NULL;
+        obj_list = NULL;
     else if (ob == obj_list)
-	obj_list = ob->next_all;
+        obj_list = ob->next_all;
 
     ob->prev_all->next_all = ob->next_all;
     ob->next_all->prev_all = ob->prev_all;
@@ -172,10 +172,10 @@ static int user_obj_lookups = 0, user_obj_found = 0;
 struct object * 
 lookup_object_hash(char *s)
 {
-	struct object * ob = find_obj_n(s);
-	user_obj_lookups++;
-	if (ob) user_obj_found++;
-	return(ob);
+        struct object * ob = find_obj_n(s);
+        user_obj_lookups++;
+        if (ob) user_obj_found++;
+        return(ob);
 }
 
 /*
@@ -188,11 +188,11 @@ add_otable_status(char *debinf)
     (void)strcat(debinf, "\nObject name hash table status:\n");
     (void)strcat(debinf, "------------------------------\n");
     (void)sprintf(debinf + strlen(debinf), "Average hash chain length            %.2f\n",
-		  (double)objs_in_table / OTABLE_SIZE);
+                  (double)objs_in_table / OTABLE_SIZE);
     (void)sprintf(debinf + strlen(debinf), "Searches/average search length       %lld (%.2f)\n",
-		  obj_searches, (double)obj_probes / (double)obj_searches);
+                  obj_searches, (double)obj_probes / (double)obj_searches);
     (void)sprintf(debinf + strlen(debinf), "External lookups succeeded (succeed) %d (%d)\n",
-		  user_obj_lookups, user_obj_found);
+                  user_obj_lookups, user_obj_found);
 }
 
 #ifdef DEALLOCATE_MEMORY_AT_SHUTDOWN
@@ -202,6 +202,6 @@ clear_otable()
     int i;
 
     for (i = 0; i < OTABLE_SIZE; i++)
-	obj_table[i] = NULL;
+        obj_table[i] = NULL;
 }
 #endif

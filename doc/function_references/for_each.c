@@ -12,7 +12,7 @@ for_each(mixed elements, function mapfunc)
 
     arr=elements;
     if (mappingp(elements))
-	elements = m_values(elements);
+        elements = m_values(elements);
     for (i=0;i<sizeof(arr);i++)
-	mapfunc(elements[i]);
+        mapfunc(elements[i]);
 }

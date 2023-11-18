@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/time.h>
-#include <sys/types.h>		/* sys/types.h and netinet/in.h are here to enable include of comm.h below */
+#include <sys/types.h>          /* sys/types.h and netinet/in.h are here to enable include of comm.h below */
 #include <sys/stat.h>
 /* #include <netinet/in.h> Included in comm.h below */
 #include <memory.h>
@@ -38,12 +38,12 @@ free_apairs(struct apair *p)
     int pairs = 0;
     
     for (;p;p = next) {
-	free_svalue(&p->arg);
-	free_svalue(&p->val);
-	next = p->next;
-	free((char *)p);
-	total_mapping_size -= sizeof(struct apair);
-	pairs++;
+        free_svalue(&p->arg);
+        free_svalue(&p->val);
+        next = p->next;
+        free((char *)p);
+        total_mapping_size -= sizeof(struct apair);
+        pairs++;
     }
     return pairs;
 }
@@ -54,12 +54,12 @@ free_mapping(struct mapping *m)
     unsigned int i;
 
     if (!m->ref || --m->ref > 0)
-	return;
+        return;
     for (i = 0; i < m->size; i++)
-	m->card -= free_apairs(m->pairs[i]);
+        m->card -= free_apairs(m->pairs[i]);
     num_mappings--;
     total_mapping_size -= (sizeof(struct apair *) * m->size + 
-			   sizeof(struct mapping));
+                           sizeof(struct mapping));
     free((char *)m->pairs);
     free((char *)m);
 }
@@ -72,7 +72,7 @@ allocate_map(unsigned int msize)
     unsigned int size;
 
     for(size = 1, u = (msize*100)/FILL_FACTOR; u && size < MAX_MAPPING_SIZE; size <<= 1, u >>= 1)
-	;
+        ;
 
     num_mappings++;
     m = (struct mapping *) xalloc(sizeof(struct mapping));
@@ -137,8 +137,8 @@ get_map_lvalue(struct mapping *m, struct svalue *k, int c)
     h = hash % m->size;
 
     for (p = m->pairs[h]; p; p = p->next) {
-	if (p->hashval == hash && equal_svalue(k, &p->arg))
-	    break;
+        if (p->hashval == hash && equal_svalue(k, &p->arg))
+            break;
     }
     if (!p) {
         if (c) {
@@ -148,14 +148,14 @@ get_map_lvalue(struct mapping *m, struct svalue *k, int c)
             }
 
             m->pairs[h] = p = newpair(m->pairs[h], k, &const0, hash);
-	    if (++m->card > m->mcard) {
-		/* We need to extend the hash table */
-		rehash_map(m);
-	    }
-	} else {
-	    /* Return address of a dummy location, with 0. */
-	    return &const0;
-	}
+            if (++m->card > m->mcard) {
+                /* We need to extend the hash table */
+                rehash_map(m);
+            }
+        } else {
+            /* Return address of a dummy location, with 0. */
+            return &const0;
+        }
     }
     return &p->val;
 }
@@ -171,8 +171,8 @@ struct mapping *m;
     cnt = m->card;
     d = allocate_array(cnt);
     for (k = 0, i = 0; i < m->size; i++)
-	for(p = m->pairs[i]; p; p = p->next)
-	    assign_svalue_no_free (&d->item[k++], &p->arg);
+        for(p = m->pairs[i]; p; p = p->next)
+            assign_svalue_no_free (&d->item[k++], &p->arg);
     return d;
 }
 
@@ -186,8 +186,8 @@ map_codomain(struct mapping *m)
     cnt = m->card;
     d = allocate_array(cnt);
     for (k = 0, i = 0; i < m->size; i++)
-	for(p = m->pairs[i]; p; p = p->next)
-	    assign_svalue_no_free(&d->item[k++], &p->val);
+        for(p = m->pairs[i]; p; p = p->next)
+            assign_svalue_no_free(&d->item[k++], &p->val);
     return d;
 }
 
@@ -204,29 +204,29 @@ make_mapping(struct vector *ind, struct vector *val)
 #endif
 
     if (ind != NULL && val != NULL) {
-	max = ind->size < val->size ? ind->size : val->size;
-	m = allocate_map(max);
-	for (i = 0 ; i < max ; i++)
-	{
-	    assign_svalue(get_map_lvalue(m, &ind->item[i], 1), 
-				  &val->item[i]);
-	}
+        max = ind->size < val->size ? ind->size : val->size;
+        m = allocate_map(max);
+        for (i = 0 ; i < max ; i++)
+        {
+            assign_svalue(get_map_lvalue(m, &ind->item[i], 1), 
+                                  &val->item[i]);
+        }
     } else if (ind != NULL && val == NULL) {
-	m = allocate_map(ind->size);
-	for (i = 0 ; i < ind->size ; i++)
-	{
-	    tmp.u.number = i;
-	    assign_svalue(get_map_lvalue(m, &ind->item[i], 1), &tmp);
-	}
+        m = allocate_map(ind->size);
+        for (i = 0 ; i < ind->size ; i++)
+        {
+            tmp.u.number = i;
+            assign_svalue(get_map_lvalue(m, &ind->item[i], 1), &tmp);
+        }
     } else if (ind == NULL && val != NULL) {
-	m = allocate_map(val->size);
-	for (i = 0 ; i < val->size ; i++)
-	{
-	    tmp.u.number = i;
-	    assign_svalue_no_free(get_map_lvalue(m, &tmp, 1), &val->item[i]);
-	}
+        m = allocate_map(val->size);
+        for (i = 0 ; i < val->size ; i++)
+        {
+            tmp.u.number = i;
+            assign_svalue_no_free(get_map_lvalue(m, &tmp, 1), &val->item[i]);
+        }
     } else {
-	m = allocate_map(0);
+        m = allocate_map(0);
     }
 
     return m;
@@ -243,13 +243,13 @@ add_mapping(struct mapping *m1, struct mapping *m2)
 
     for (i = 0 ; i < m1->size ; i++)
     {
-	for (p = m1->pairs[i]; p ; p = p->next)
-	    assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
+        for (p = m1->pairs[i]; p ; p = p->next)
+            assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
     }
     for (i = 0 ; i < m2->size ; i++)
     {
-	for (p = m2->pairs[i]; p ; p = p->next)
-	    assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
+        for (p = m2->pairs[i]; p ; p = p->next)
+            assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
     }
     return retm;
 }
@@ -262,8 +262,8 @@ addto_mapping(struct mapping *m1, struct mapping *m2)
 
     for (i = 0 ; i < m2->size ; i++)
     {
-	for (p = m2->pairs[i]; p ; p = p->next)
-	    assign_svalue(get_map_lvalue(m1, &p->arg, 1), &p->val);
+        for (p = m2->pairs[i]; p ; p = p->next)
+            assign_svalue(get_map_lvalue(m1, &p->arg, 1), &p->val);
     }
 }
 
@@ -277,12 +277,12 @@ remove_from_mapping(struct mapping *m, struct svalue *val)
 
     for (p = &m->pairs[h]; *p; p = &(*p)->next)
       if (equal_svalue(val, &(*p)->arg)) {
-	struct apair *del = *p;
-	*p = del->next;
-	del->next = NULL;
-	m->card--;
-	free_apairs(del);
-	return;
+        struct apair *del = *p;
+        *p = del->next;
+        del->next = NULL;
+        m->card--;
+        free_apairs(del);
+        return;
       }
     return;
 
@@ -300,16 +300,16 @@ remove_mapping(struct mapping *m, struct svalue *val)
 
     for (i = 0 ; i < m->size ; i++)
     {
-	for (p = m->pairs[i] ; p ; p = p->next)
-	{
-	    if (h == i)
-	    {
-		if (!equal_svalue(val, &p->arg))
-		    assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
-	    }
-	    else
-		assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
-	}
+        for (p = m->pairs[i] ; p ; p = p->next)
+        {
+            if (h == i)
+            {
+                if (!equal_svalue(val, &p->arg))
+                    assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
+            }
+            else
+                assign_svalue(get_map_lvalue(retm, &p->arg, 1), &p->val);
+        }
     }
     return retm;
 }
@@ -323,20 +323,20 @@ rehash_map(struct mapping *map)
 
     nsize = map->size * 2;
     if (nsize > MAX_MAPPING_SIZE) {
-	error("Too large mapping.\n");
-	return;
+        error("Too large mapping.\n");
+        return;
     }
 
     pairs = (struct apair **)xalloc(sizeof(struct apair *) * nsize);
     (void)memset(pairs, 0, sizeof(struct apair *) * nsize);
 
     for (i = 0 ; i < map->size ; i++) {
-	for (ptr = map->pairs[i]; ptr; ptr = next) {
-	    hval = ptr->hashval & (nsize-1);
-	    next = ptr->next;
-	    ptr->next = pairs[hval];
-	    pairs[hval] = ptr;
-	}
+        for (ptr = map->pairs[i]; ptr; ptr = next) {
+            hval = ptr->hashval & (nsize-1);
+            next = ptr->next;
+            ptr->next = pairs[hval];
+            pairs[hval] = ptr;
+        }
     }
 
     free((char *)map->pairs);
@@ -364,8 +364,8 @@ copy_mapping(struct mapping *m)
     cm->card = m->card;
     cm->mcard = m->mcard;
     for (i = 0; i < m->size; i++)
-	for(pair = m->pairs[i]; pair; pair = pair->next)
-	    cm->pairs[i] = newpair(cm->pairs[i], &pair->arg, &pair->val, pair->hashval);
+        for(pair = m->pairs[i]; pair; pair = pair->next)
+            cm->pairs[i] = newpair(cm->pairs[i], &pair->arg, &pair->val, pair->hashval);
     return cm;
 }
 
@@ -381,15 +381,15 @@ map_map(struct mapping *map, struct closure *fun)
     struct apair *p;
     unsigned int i;
 
-    r = copy_mapping(map);	/* copy entire mapping */
+    r = copy_mapping(map);      /* copy entire mapping */
     push_mapping(r, 0);
     for (i = 0 ; i < r->size ; i++) {
-	for(p = r->pairs[i]; p; p = p->next) {
-	    push_svalue(&p->val);
-	    (void)call_var(1, fun);
-	    assign_svalue(&p->val, sp);	/* replace old value */
-	    pop_stack();	/* and pop it */
-	}
+        for(p = r->pairs[i]; p; p = p->next) {
+            push_svalue(&p->val);
+            (void)call_var(1, fun);
+            assign_svalue(&p->val, sp); /* replace old value */
+            pop_stack();        /* and pop it */
+        }
     }
     sp--;
     return r;
@@ -411,23 +411,23 @@ filter_map(struct mapping *map, struct closure *fun)
 
     r = copy_mapping(map);
     for (i = 0; i < r->size; i++) {
-	for(p = &r->pairs[i]; *p;) {
-	    push_svalue(&(*p)->val);
-	    (void)call_var(1, fun);
-	    if (sp->type == T_NUMBER && sp->u.number == 0) {
-		/* remove it from the list */
-		struct apair *ap = *p;
-		*p = (*p)->next;	/* remove element, but don't move p */
-		free_svalue(&ap->arg);
-		free_svalue(&ap->val);
-		free(ap);
-		total_mapping_size -= sizeof(struct apair);
-		r->card--;
-	    } else {
-		p = &(*p)->next; /* step to next */
-	    }
-	    pop_stack();
-	}
+        for(p = &r->pairs[i]; *p;) {
+            push_svalue(&(*p)->val);
+            (void)call_var(1, fun);
+            if (sp->type == T_NUMBER && sp->u.number == 0) {
+                /* remove it from the list */
+                struct apair *ap = *p;
+                *p = (*p)->next;        /* remove element, but don't move p */
+                free_svalue(&ap->arg);
+                free_svalue(&ap->val);
+                free(ap);
+                total_mapping_size -= sizeof(struct apair);
+                r->card--;
+            } else {
+                p = &(*p)->next; /* step to next */
+            }
+            pop_stack();
+        }
     }
     return r;
 }

@@ -12,5 +12,5 @@ void
 create()
 {
     this_object()->test();
-    test();			// Only this call crashes
+    test();                     // Only this call crashes
 }

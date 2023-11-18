@@ -23,64 +23,64 @@ create()
     f5 = &ob->func() @ &func();
 
     if (!functionp(f1))
-	throw("parent functionp(&ob->func()) broken\n");
+        throw("parent functionp(&ob->func()) broken\n");
     if (!functionp(f2))
-	throw("parent functionp(&ob->func(f1)) broken\n");
+        throw("parent functionp(&ob->func(f1)) broken\n");
     if (!functionp(f3))
-	throw("parent functionp(mkfunction(\"func\", ob)) broken\n");
+        throw("parent functionp(mkfunction(\"func\", ob)) broken\n");
     if (!functionp(f4))
-	throw("parent functionp(&func @ &ob->func()) broken\n");
+        throw("parent functionp(&func @ &ob->func()) broken\n");
     if (!functionp(f5))
-	throw("parent functionp(&ob->func() @ &func()) broken\n");
+        throw("parent functionp(&ob->func() @ &func()) broken\n");
     if (!functionp(g1))
-	throw("child functionp(&ob->func()) broken\n");
+        throw("child functionp(&ob->func()) broken\n");
     if (!functionp(g2))
-	throw("child functionp(&ob->func(&func())) broken\n");
+        throw("child functionp(&ob->func(&func())) broken\n");
     if (!functionp(g3))
-	throw("child functionp(mkfunction(\"func\", ob)) broken\n");
+        throw("child functionp(mkfunction(\"func\", ob)) broken\n");
     if (!functionp(g4))
-	throw("child functionp(&func()) broken\n");
+        throw("child functionp(&func()) broken\n");
     if (!functionp(g5))
-	throw("child functionp(&func(&func())) broken\n");
+        throw("child functionp(&func(&func())) broken\n");
     if (!functionp(g6))
-	throw("child functionp(&file_name(this_object())) broken\n");
+        throw("child functionp(&file_name(this_object())) broken\n");
     if (!functionp(g7))
-	throw("child functionp(&sin(10.0)) broken\n");
+        throw("child functionp(&sin(10.0)) broken\n");
 
     if (g6() != "/tests/functions#1")
-	throw("child &file_name(this_object()) evaluates wrong\n");
+        throw("child &file_name(this_object()) evaluates wrong\n");
 
     ob->remove_object();
 
     if (functionp(f1))
-	throw("parent functionp(&ob->func()) did not detect destructed object\n");
+        throw("parent functionp(&ob->func()) did not detect destructed object\n");
     if (functionp(f2))
-	throw("parent functionp(&ob->func(f1)) did not detect destructed object\n");
+        throw("parent functionp(&ob->func(f1)) did not detect destructed object\n");
     if (functionp(f3))
-	throw("parent functionp(mkfunction(\"func\", ob)) did not detect destructed object\n");
+        throw("parent functionp(mkfunction(\"func\", ob)) did not detect destructed object\n");
     if (functionp(f4))
-	throw("parent functionp(&func() @ &ob->func()) did not detect destructed object\n");
+        throw("parent functionp(&func() @ &ob->func()) did not detect destructed object\n");
     if (functionp(f5))
-	throw("parent functionp(&ob->func() @ &func()) did not detect destructed object\n");
+        throw("parent functionp(&ob->func() @ &func()) did not detect destructed object\n");
     if (functionp(g1))
-	throw("child functionp(&ob->func()) did not detect destructed object\n");
+        throw("child functionp(&ob->func()) did not detect destructed object\n");
     if (functionp(g2))
-	throw("child functionp(&ob->func(&func())) did not detect destructed object\n");
+        throw("child functionp(&ob->func(&func())) did not detect destructed object\n");
     if (functionp(g3))
-	throw("child functionp(mkfunction(\"func\", ob)) did not detect destructed object\n");
+        throw("child functionp(mkfunction(\"func\", ob)) did not detect destructed object\n");
     if (functionp(g4))
-	throw("child functionp(&func()) did not detect destructed object\n");
+        throw("child functionp(&func()) did not detect destructed object\n");
     if (functionp(g5))
-	throw("child functionp(&func(&func())) did not detect destructed object\n");
+        throw("child functionp(&func(&func())) did not detect destructed object\n");
     if (!functionp(g6))
-	throw("child functionp(&file_name(this_object())) was affected by destructed object\n");
+        throw("child functionp(&file_name(this_object())) was affected by destructed object\n");
     if (!functionp(g7))
-	throw("child functionp(&sin(10.0)) was affected by destructed object\n");
+        throw("child functionp(&sin(10.0)) was affected by destructed object\n");
 }
 
 void 
 set_funcs(function f1, function f2, function f3, function f4,
-	  function f5, function f6, function f7)
+          function f5, function f6, function f7)
 {
     g1 = f1; 
     g2 = f2;

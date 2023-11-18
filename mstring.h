@@ -35,29 +35,29 @@
 
 struct mstring_hdr {
 #ifdef DEBUG
-	uint64_t	magic;
+        uint64_t        magic;
 #endif
-	uint32_t	length;
-	uint16_t	count;
+        uint32_t        length;
+        uint16_t        count;
 };
 
-#define	mstring_header \
-	sizeof (struct mstring_hdr)
+#define mstring_header \
+        sizeof (struct mstring_hdr)
 
 #ifdef DEBUG
 
-#define	MSTRING_MAGIC	0x12311943
+#define MSTRING_MAGIC   0x12311943
 
-#define	mstring_magic(cp) \
-	(((struct mstring_hdr *)((char *)(cp) - mstring_header))->magic)
+#define mstring_magic(cp) \
+        (((struct mstring_hdr *)((char *)(cp) - mstring_header))->magic)
 
 #endif
 
-#define	mstring_len(cp) \
-	(((struct mstring_hdr *)((char *)(cp) - mstring_header))->length)
+#define mstring_len(cp) \
+        (((struct mstring_hdr *)((char *)(cp) - mstring_header))->length)
 
-#define	mstring_count(cp) \
-	(((struct mstring_hdr *)((char *)(cp) - mstring_header))->count)
+#define mstring_count(cp) \
+        (((struct mstring_hdr *)((char *)(cp) - mstring_header))->count)
 
 char *allocate_mstring(size_t);
 char *make_mstring(const char *);
@@ -66,48 +66,48 @@ void free_mstring(char *);
 
 struct sstring_hdr {
 #ifdef DEBUG
-	uint64_t	magic;
+        uint64_t        magic;
 #endif
-	char		*prev;
-	char		*next;
-	uint32_t	length;
-	uint16_t	count;
-	uint32_t	hash;
+        char            *prev;
+        char            *next;
+        uint32_t        length;
+        uint16_t        count;
+        uint32_t        hash;
 };
 
-#define	sstring_header \
-	sizeof (struct sstring_hdr)
+#define sstring_header \
+        sizeof (struct sstring_hdr)
 
 #ifdef DEBUG
 
-#define	SSTRING_MAGIC	0x04301963
+#define SSTRING_MAGIC   0x04301963
 
-#define	sstring_magic(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->magic)
+#define sstring_magic(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->magic)
 
 #endif
 
-#define	sstring_prev(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->prev)
+#define sstring_prev(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->prev)
 
-#define	sstring_next(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->next)
+#define sstring_next(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->next)
 
-#define	sstring_len(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->length)
+#define sstring_len(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->length)
 
-#define	sstring_count(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->count)
+#define sstring_count(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->count)
 
-#define	sstring_hash(cp) \
-	(((struct sstring_hdr *)((char *)(cp) - sstring_header))->hash)
+#define sstring_hash(cp) \
+        (((struct sstring_hdr *)((char *)(cp) - sstring_header))->hash)
 
 char *reference_sstring(char *);
 char *make_sstring(const char *);
 void free_sstring(char *);
 char *find_sstring(char *);
 
-#define	HASH_SSTRING(cp)	(hash_string(cp) % HTABLE_SIZE)
+#define HASH_SSTRING(cp)        (hash_string(cp) % HTABLE_SIZE)
 
 #ifdef DEBUG
 void dump_sstrings(void);

@@ -67,7 +67,7 @@ allocate_mstring(size_t len)
 {
     char *cp;
     if (len < 0 || len > MAX_STRING_SIZE)
-	error("Illegal string size.\n"); 
+        error("Illegal string size.\n"); 
 
     cp = (char *)xalloc(mstring_header + len + 1) + mstring_header;
 #ifdef DEBUG
@@ -100,11 +100,11 @@ reference_mstring(char *cp)
 {
 #ifdef DEBUG
     if (mstring_magic(cp) != MSTRING_MAGIC)
-	fatal("Bad m-magic: %lx %x\n", mstring_magic(cp), MSTRING_MAGIC);
+        fatal("Bad m-magic: %lx %x\n", mstring_magic(cp), MSTRING_MAGIC);
 #endif
 
     if (mstring_count(cp) != 0)
-	mstring_count(cp)++;
+        mstring_count(cp)++;
 
     allocd_strings_malloced++;
     allocd_bytes_malloced += mstring_header + mstring_len(cp) + 1;
@@ -117,22 +117,22 @@ free_mstring(char *cp)
 {
 #ifdef DEBUG
     if (mstring_magic(cp) != MSTRING_MAGIC)
-	fatal("Bad m-magic: %lx %x\n", mstring_magic(cp), MSTRING_MAGIC);
+        fatal("Bad m-magic: %lx %x\n", mstring_magic(cp), MSTRING_MAGIC);
 #endif
 
     if (mstring_count(cp) != 0) {
-	allocd_strings_malloced--;
-	allocd_bytes_malloced -= mstring_header + mstring_len(cp) + 1;
-	if (--mstring_count(cp) == 0)
-	{
+        allocd_strings_malloced--;
+        allocd_bytes_malloced -= mstring_header + mstring_len(cp) + 1;
+        if (--mstring_count(cp) == 0)
+        {
 #ifdef DEBUG
-	    mstring_magic(cp) = 0;
+            mstring_magic(cp) = 0;
 #endif
-	    num_distinct_strings_malloced--;
-	    bytes_distinct_strings_malloced -= mstring_len(cp) + 1;
-	    overhead_bytes_malloced -= mstring_header;
-	    free(cp - mstring_header);
-	}
+            num_distinct_strings_malloced--;
+            bytes_distinct_strings_malloced -= mstring_len(cp) + 1;
+            overhead_bytes_malloced -= mstring_header;
+            free(cp - mstring_header);
+        }
     }
 }
 
@@ -141,11 +141,11 @@ reference_sstring(char *cp)
 {
 #ifdef DEBUG
     if (sstring_magic(cp) != SSTRING_MAGIC)
-	fatal("Bad s-magic: %lx %x\n", sstring_magic(cp), SSTRING_MAGIC);
+        fatal("Bad s-magic: %lx %x\n", sstring_magic(cp), SSTRING_MAGIC);
 #endif
 
     if (sstring_count(cp) != 0)
-	sstring_count(cp)++;
+        sstring_count(cp)++;
 
     allocd_strings_shared++;
     allocd_bytes_shared += sstring_header + sstring_len(cp) + 1;
@@ -164,25 +164,25 @@ find_sstring(char *cp)
     num_str_searches++;
     while (xp != NULL)
     {
-	search_len++;
+        search_len++;
 #ifdef DEBUG
-	if (sstring_magic(xp) != SSTRING_MAGIC)
-	    fatal("Bad s-magic: %lx %x\n", sstring_magic(xp), SSTRING_MAGIC);
+        if (sstring_magic(xp) != SSTRING_MAGIC)
+            fatal("Bad s-magic: %lx %x\n", sstring_magic(xp), SSTRING_MAGIC);
 #endif
-	if (xp == cp || (*xp == *cp && strcmp(xp, cp) == 0))
-	{
-	    if (sstring_prev(xp) != NULL) {
-		sstring_next(sstring_prev(xp)) = sstring_next(xp);
-		if (sstring_next(xp) != NULL)
-		    sstring_prev(sstring_next(xp)) = sstring_prev(xp);
-		sstring_prev(xp) = NULL;
-		sstring_next(xp) = sstring_table[hash];
-		sstring_prev(sstring_table[hash]) = xp;
-		sstring_table[hash] = xp;
-	    }
-	    return xp;
-	}
-	xp = sstring_next(xp);
+        if (xp == cp || (*xp == *cp && strcmp(xp, cp) == 0))
+        {
+            if (sstring_prev(xp) != NULL) {
+                sstring_next(sstring_prev(xp)) = sstring_next(xp);
+                if (sstring_next(xp) != NULL)
+                    sstring_prev(sstring_next(xp)) = sstring_prev(xp);
+                sstring_prev(xp) = NULL;
+                sstring_next(xp) = sstring_table[hash];
+                sstring_prev(sstring_table[hash]) = xp;
+                sstring_table[hash] = xp;
+            }
+            return xp;
+        }
+        xp = sstring_next(xp);
     }
 
     return NULL;
@@ -200,29 +200,29 @@ make_sstring(const char *cp)
     num_str_searches++;
     while (xp != NULL)
     {
-	search_len++;
+        search_len++;
 #ifdef DEBUG
-	if (sstring_magic(xp) != SSTRING_MAGIC)
-	    fatal("Bad s-magic: %lx %x\n", sstring_magic(xp), SSTRING_MAGIC);
+        if (sstring_magic(xp) != SSTRING_MAGIC)
+            fatal("Bad s-magic: %lx %x\n", sstring_magic(xp), SSTRING_MAGIC);
 #endif
-	if (xp == cp || (*xp == *cp && strcmp(xp, cp) == 0))
-	{
-	    if (sstring_prev(xp) != NULL) {
-		sstring_next(sstring_prev(xp)) = sstring_next(xp);
-		if (sstring_next(xp) != NULL)
-		    sstring_prev(sstring_next(xp)) = sstring_prev(xp);
-		sstring_prev(xp) = NULL;
-		sstring_next(xp) = sstring_table[hash];
-		sstring_prev(sstring_table[hash]) = xp;
-		sstring_table[hash] = xp;
-	    }
-	    return reference_sstring(xp);
-	}
-	xp = sstring_next(xp);
+        if (xp == cp || (*xp == *cp && strcmp(xp, cp) == 0))
+        {
+            if (sstring_prev(xp) != NULL) {
+                sstring_next(sstring_prev(xp)) = sstring_next(xp);
+                if (sstring_next(xp) != NULL)
+                    sstring_prev(sstring_next(xp)) = sstring_prev(xp);
+                sstring_prev(xp) = NULL;
+                sstring_next(xp) = sstring_table[hash];
+                sstring_prev(sstring_table[hash]) = xp;
+                sstring_table[hash] = xp;
+            }
+            return reference_sstring(xp);
+        }
+        xp = sstring_next(xp);
     }
     len = strlen(cp);
     if (len < 0 || len > MAX_STRING_SIZE)
-	error("Illegal string size.\n"); 
+        error("Illegal string size.\n"); 
 
     xp = (char *)xalloc(sstring_header + len + 1) + sstring_header;
 #ifdef DEBUG
@@ -231,7 +231,7 @@ make_sstring(const char *cp)
     sstring_prev(xp) = NULL;
     sstring_next(xp) = sstring_table[hash];
     if (sstring_next(xp) != NULL)
-	sstring_prev(sstring_next(xp)) = xp;
+        sstring_prev(sstring_next(xp)) = xp;
     sstring_hash(xp) = hash;
     sstring_count(xp) = 1;
     sstring_len(xp) = len;
@@ -251,29 +251,29 @@ free_sstring(char *cp)
 {
 #ifdef DEBUG
     if (sstring_magic(cp) != SSTRING_MAGIC)
-	fatal("Bad s-magic: %lx %x\n", sstring_magic(cp), SSTRING_MAGIC);
+        fatal("Bad s-magic: %lx %x\n", sstring_magic(cp), SSTRING_MAGIC);
 #endif
 
     if (sstring_count(cp) != 0) {
-	allocd_strings_shared--;
-	allocd_bytes_shared -= sstring_header + sstring_len(cp) + 1;
+        allocd_strings_shared--;
+        allocd_bytes_shared -= sstring_header + sstring_len(cp) + 1;
 
-	if (--sstring_count(cp) == 0)
-	{
-	    if (sstring_prev(cp) != NULL)
-		sstring_next(sstring_prev(cp)) = sstring_next(cp);
-	    else
-		sstring_table[sstring_hash(cp)] = sstring_next(cp);
-	    if (sstring_next(cp) != NULL)
-		sstring_prev(sstring_next(cp)) = sstring_prev(cp);
+        if (--sstring_count(cp) == 0)
+        {
+            if (sstring_prev(cp) != NULL)
+                sstring_next(sstring_prev(cp)) = sstring_next(cp);
+            else
+                sstring_table[sstring_hash(cp)] = sstring_next(cp);
+            if (sstring_next(cp) != NULL)
+                sstring_prev(sstring_next(cp)) = sstring_prev(cp);
 #ifdef DEBUG
-	    sstring_magic(cp) = 0;
+            sstring_magic(cp) = 0;
 #endif
-	    num_distinct_strings_shared--;
-	    bytes_distinct_strings_shared -= sstring_len(cp) + 1;
-	    overhead_bytes_shared -= sstring_header;
-	    free(cp - sstring_header);
-	}
+            num_distinct_strings_shared--;
+            bytes_distinct_strings_shared -= sstring_len(cp) + 1;
+            overhead_bytes_shared -= sstring_header;
+            free(cp - sstring_header);
+        }
     }
 }
 
@@ -284,16 +284,16 @@ multiply_string(char *str, long long factor)
     long long size, newsize, offset;
 
     if (factor <= 0 || (size = strlen(str)) == 0) {
-	return make_mstring("");
+        return make_mstring("");
     }
 
     if (factor > MAX_STRING_SIZE)
-	error("Illegal string size.\n"); 
+        error("Illegal string size.\n"); 
 
     newsize = size * factor;
     result = allocate_mstring(newsize);
     for (offset = 0; offset < newsize; offset += size) {
-	strcpy(result + offset, str);
+        strcpy(result + offset, str);
     }
     return result;
 }
@@ -315,21 +315,21 @@ add_string_status(char *debinf)
      */
     for (i = 0; i < HTABLE_SIZE; i++)
     {
-	n = 0;
-	for (cp = sstring_table[i]; cp != NULL; cp = sstring_next(cp))
-	    n++;
-	if (min > n)
-	    min = n;
-	if (max < n)
-	    max = n;
-	sum1 += n;
-	sum2 += n * n;
+        n = 0;
+        for (cp = sstring_table[i]; cp != NULL; cp = sstring_next(cp))
+            n++;
+        if (min > n)
+            min = n;
+        if (max < n)
+            max = n;
+        sum1 += n;
+        sum2 += n * n;
     }
 
     if (sum1 == 0)
     {
-	min = 0;
-	max = 0;
+        min = 0;
+        max = 0;
     }
 
     /*
@@ -341,49 +341,49 @@ add_string_status(char *debinf)
      * Compute the standard deviation.
      */
     stddev = sqrt(((double)sum2 -
-	(((double)sum1 * (double)sum1) / HTABLE_SIZE)) / HTABLE_SIZE);
+        (((double)sum1 * (double)sum1) / HTABLE_SIZE)) / HTABLE_SIZE);
 
     (void)strcat(debinf, "\nShared string hash table:\n");
     (void)strcat(debinf, "-------------------------     Strings        Bytes\n");
     
     (void)sprintf(debinf + strlen(debinf), "Total asked for\t\t%12d %12ld\n",
-	    allocd_strings_shared, allocd_bytes_shared);
+            allocd_strings_shared, allocd_bytes_shared);
     (void)sprintf(debinf + strlen(debinf), "Actually used\t\t%12d %12ld\n",
-	    num_distinct_strings_shared,
-	    bytes_distinct_strings_shared + overhead_bytes_shared);
+            num_distinct_strings_shared,
+            bytes_distinct_strings_shared + overhead_bytes_shared);
 
     (void)sprintf(debinf + strlen(debinf),
-	    "Space actually required/total string bytes %6.2f%%\n",
-	    (bytes_distinct_strings_shared + overhead_bytes_shared)*100.0 /
-	    (double)allocd_bytes_shared);
+            "Space actually required/total string bytes %6.2f%%\n",
+            (bytes_distinct_strings_shared + overhead_bytes_shared)*100.0 /
+            (double)allocd_bytes_shared);
 
     (void)sprintf(debinf + strlen(debinf),
-	    "Searches     : %12lld  Average search: %7.3f\n",
-	    num_str_searches,
-	    (double)search_len / (double)num_str_searches);
+            "Searches     : %12lld  Average search: %7.3f\n",
+            num_str_searches,
+            (double)search_len / (double)num_str_searches);
 
     (void)sprintf(debinf + strlen(debinf),
-	    "Hash size    : %12d\n", HTABLE_SIZE);
+            "Hash size    : %12d\n", HTABLE_SIZE);
     (void)sprintf(debinf + strlen(debinf),
-	    "Minimum depth: %12d  Average depth : %7.3f\n",
-	    min, mean);
+            "Minimum depth: %12d  Average depth : %7.3f\n",
+            min, mean);
     (void)sprintf(debinf + strlen(debinf),
-	    "Maximum depth: %12d  Std. deviation: %7.3f\n",
-	    max, stddev);
+            "Maximum depth: %12d  Std. deviation: %7.3f\n",
+            max, stddev);
 
     (void)strcat(debinf, "\nMalloced string table:\n");
     (void)strcat(debinf, "----------------------\t     Strings        Bytes\n");
     
     (void)sprintf(debinf + strlen(debinf), "Total asked for\t\t%12d %12ld\n",
-	    allocd_strings_malloced, allocd_bytes_malloced);
+            allocd_strings_malloced, allocd_bytes_malloced);
     (void)sprintf(debinf + strlen(debinf), "Actually used\t\t%12d %12ld\n",
-	    num_distinct_strings_malloced,
-	    bytes_distinct_strings_malloced + overhead_bytes_malloced);
+            num_distinct_strings_malloced,
+            bytes_distinct_strings_malloced + overhead_bytes_malloced);
 
     (void)sprintf(debinf + strlen(debinf),
-	    "Space actually required/total string bytes %6.2f%%\n",
-	    (bytes_distinct_strings_malloced + overhead_bytes_malloced)*100.0 /
-	    (double)allocd_bytes_malloced);
+            "Space actually required/total string bytes %6.2f%%\n",
+            (bytes_distinct_strings_malloced + overhead_bytes_malloced)*100.0 /
+            (double)allocd_bytes_malloced);
 }
 
 #ifdef DEBUG
@@ -396,17 +396,17 @@ dump_sstrings(void)
     int i;
 
     if ((fp = fopen("SSTRING_DUMP", "w")) == NULL)
-	return;
+        return;
     for (i = 0; i < HTABLE_SIZE; i++) {
-	str = sstring_table[i];
-	while (str) {
-	    if (sstring_magic(str) != SSTRING_MAGIC)
-		fatal("Bad s-magic: %lx %x\n", sstring_magic(str), SSTRING_MAGIC);
-	    len = sstring_len(str);
-	    (void)fwrite(&len, sizeof(len), 1, fp);
-	    (void)fwrite(str, sizeof(char), strlen(str) + 1, fp);
-	    str = sstring_next(str);
-	}
+        str = sstring_table[i];
+        while (str) {
+            if (sstring_magic(str) != SSTRING_MAGIC)
+                fatal("Bad s-magic: %lx %x\n", sstring_magic(str), SSTRING_MAGIC);
+            len = sstring_len(str);
+            (void)fwrite(&len, sizeof(len), 1, fp);
+            (void)fwrite(str, sizeof(char), strlen(str) + 1, fp);
+            str = sstring_next(str);
+        }
     }
     (void)fclose(fp);
 }
@@ -419,6 +419,6 @@ remove_string_hash()
     int i;
 
     for (i = 0 ; i < HTABLE_SIZE ; i++)
-	sstring_table[i] = NULL;
+        sstring_table[i] = NULL;
 }
 #endif /* DEALLOCATE_MEMORY_AT_SHUTDOWN */

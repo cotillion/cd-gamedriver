@@ -33,32 +33,32 @@
  * Telnet Option Block.
  */
 typedef struct {
-    u_char	o_us;
-    u_char	o_usq;
-    u_char	o_him;
-    u_char	o_himq;
+    u_char      o_us;
+    u_char      o_usq;
+    u_char      o_him;
+    u_char      o_himq;
 } opt_t;
 
 /*
  * Option States.
  */
-#define	OS_NO			0
-#define	OS_YES			1
-#define	OS_WANTNO		2
-#define	OS_WANTYES		3
+#define OS_NO                   0
+#define OS_YES                  1
+#define OS_WANTNO               2
+#define OS_WANTYES              3
 
 /*
  * Option Queue States.
  */
-#define	OQ_EMPTY		0
-#define	OQ_OPPOSITE		2
+#define OQ_EMPTY                0
+#define OQ_OPPOSITE             2
 
 /*
  * Options.
  */
-#define	OP_ECHO			0
-#define	OP_SGA			1
-#define	OP_CDM			2
+#define OP_ECHO                 0
+#define OP_SGA                  1
+#define OP_CDM                  2
 #define OP_GMCP         3
 #define OP_MSSP         4
 #define OP_CHARSET      5
@@ -68,56 +68,56 @@ typedef struct {
  * Telnet Control Block.
  */
 typedef struct {
-    u_short	t_flags;
-    u_char	t_state;
-    u_char	t_opt;
-    opt_t	t_optb[OP_SIZE];
-    ndesc_t *	t_nd;
-    nqueue_t *	t_rawq;
-    nqueue_t *	t_canq; nqueue_t *	t_optq;
-    nqueue_t *	t_outq;
-    void *	t_ip;
-    u_int	t_rblen;
-    u_int	t_sblen;
+    u_short     t_flags;
+    u_char      t_state;
+    u_char      t_opt;
+    opt_t       t_optb[OP_SIZE];
+    ndesc_t *   t_nd;
+    nqueue_t *  t_rawq;
+    nqueue_t *  t_canq; nqueue_t *      t_optq;
+    nqueue_t *  t_outq;
+    void *      t_ip;
+    u_int       t_rblen;
+    u_int       t_sblen;
     struct task *task;
 } telnet_t;
 
 /*
  * Telnet Flags.
  */
-#define	TF_ATTACH		0x0001
+#define TF_ATTACH               0x0001
 #define TF_INPUT        0x0002
 #define TF_DISCONNECT   0x0004
 
-#define TF_OVFLCANQ		0x0010
-#define TF_OVFLOPTQ		0x0020
-#define	TF_OVFLOUTQ		0x0040
-#define TF_SYNCH		0x0080
-#define TF_URGENT		0x0100
-#define	TF_GA			0x0200
-#define	TF_ECHO			0x1000
-#define	TF_SGA			0x2000
+#define TF_OVFLCANQ             0x0010
+#define TF_OVFLOPTQ             0x0020
+#define TF_OVFLOUTQ             0x0040
+#define TF_SYNCH                0x0080
+#define TF_URGENT               0x0100
+#define TF_GA                   0x0200
+#define TF_ECHO                 0x1000
+#define TF_SGA                  0x2000
 #define TF_GMCP         0x4000
 
 
 /*
  * Telnet Input States.
  */
-#define	TS_DATA			0
-#define	TS_CR			1
-#define	TS_IAC			2
-#define	TS_IAC_SB		3
-#define	TS_IAC_SB_DATA		4
-#define	TS_IAC_SB_IAC		5
-#define	TS_IAC_WILL		6
-#define	TS_IAC_WONT		7
-#define	TS_IAC_DO		8
-#define	TS_IAC_DONT		9
+#define TS_DATA                 0
+#define TS_CR                   1
+#define TS_IAC                  2
+#define TS_IAC_SB               3
+#define TS_IAC_SB_DATA          4
+#define TS_IAC_SB_IAC           5
+#define TS_IAC_WILL             6
+#define TS_IAC_WONT             7
+#define TS_IAC_DO               8
+#define TS_IAC_DONT             9
 
 #define TELOPT_CHARSET  42
 #define TELOPT_MSSP     70
 #define TELOPT_GMCP     201
-#define	TELOPT_CDM		205
+#define TELOPT_CDM              205
 
 /*
  * MSSP Data Block

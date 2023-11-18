@@ -32,10 +32,10 @@
 #define _NQUEUE_H
 
 typedef struct {
-    u_short	nq_size;
-    u_short	nq_len;
-    u_short	nq_rptr;
-    u_short	nq_wptr;
+    u_short     nq_size;
+    u_short     nq_len;
+    u_short     nq_rptr;
+    u_short     nq_wptr;
 } nqueue_t;
 
 void nq_init(nqueue_t *);

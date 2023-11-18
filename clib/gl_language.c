@@ -30,7 +30,7 @@ global_article(struct svalue *fp)
     if (fp->type != T_STRING)
     {
         push_number(0);
-	    return;
+            return;
     }
 
     size_t len = strlen(fp->u.string);
@@ -245,8 +245,8 @@ global_plural_word(struct svalue *fp)
 
     if (fp->type != T_STRING)
     {
-	    push_number(0);
-	    return;
+            push_number(0);
+            return;
     }
 
     char *str = fp->u.string;
@@ -261,7 +261,7 @@ global_plural_word(struct svalue *fp)
     if (sl < 3 || sl > 100)
     {
         push_svalue(fp);
-	    return;
+            return;
     }
 
     char *tmp = alloca(sl + 10);
@@ -275,37 +275,37 @@ global_plural_word(struct svalue *fp)
     case 's':
     case 'x':
     case 'h':
-	(void)strcat(tmp, "es");
-	break;
+        (void)strcat(tmp, "es");
+        break;
     case 'y':
-	if (penultimate == 'a' || penultimate == 'e' || penultimate == 'o')
-	    (void)strcat(tmp, "s");
-	else
-	{
-	    tmp[sl - 1] = '\0';
-	    (void)strcat(tmp, "ies");
-	}
-	break;
+        if (penultimate == 'a' || penultimate == 'e' || penultimate == 'o')
+            (void)strcat(tmp, "s");
+        else
+        {
+            tmp[sl - 1] = '\0';
+            (void)strcat(tmp, "ies");
+        }
+        break;
     case 'e':
-	if (penultimate == 'f')
-	{
-	    tmp[sl - 2] = '\0';
-	    (void)strcat(tmp, "ves");
-	}
-	else
-	    (void)strcat(tmp, "s");
-	break;
+        if (penultimate == 'f')
+        {
+            tmp[sl - 2] = '\0';
+            (void)strcat(tmp, "ves");
+        }
+        else
+            (void)strcat(tmp, "s");
+        break;
     case 'f':
-	if (penultimate == 'f')
-	{
-	    tmp[sl - 2] = '\0';
-	}
-	tmp[sl - 1] = '\0';
-	(void)strcat(tmp, "ves");
-	break;
+        if (penultimate == 'f')
+        {
+            tmp[sl - 2] = '\0';
+        }
+        tmp[sl - 1] = '\0';
+        (void)strcat(tmp, "ves");
+        break;
     default:
-	(void)strcat(tmp, "s");
-	break;
+        (void)strcat(tmp, "s");
+        break;
     }
     push_string(tmp, STRING_MSTRING);
     return;

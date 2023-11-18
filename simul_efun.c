@@ -38,13 +38,13 @@ get_simul_efun()
     f = fopen(SIMULFILE, "r");
     if (f == 0)
     {
-	(void)fprintf(stderr, SIMULFILE " not found.\n");
-	exit(1);
+        (void)fprintf(stderr, SIMULFILE " not found.\n");
+        exit(1);
     }
 #if 1
     init_smart_log();
     start_new_file(f);
-    current_file = string_copy(SIMULFILE);	/* This one is freed below */
+    current_file = string_copy(SIMULFILE);      /* This one is freed below */
     current_loaded_file = SIMULFILE;
     compile_file();
     end_new_file();
@@ -56,17 +56,17 @@ get_simul_efun()
     dump_smart_log();
     if (inherit_file || num_parse_error > 0 || prog == 0) 
     {
-	(void)fprintf(stderr, "Error in " SIMULFILE ".\n");
-	return;
+        (void)fprintf(stderr, "Error in " SIMULFILE ".\n");
+        return;
     }
 
     (void)fprintf(stderr,"%s loaded: %d functions\n", SIMULFILE,
-	    prog->num_functions);
+            prog->num_functions);
     if (prog->num_functions == 0)
-	return;
+        return;
 
     /*
-	We make an object so that it can be updated.
+        We make an object so that it can be updated.
      */
     ob = get_empty_object();
     ob->name = string_copy("secure/simul_efun");
@@ -75,20 +75,20 @@ get_simul_efun()
     
     simul_efun_ob = ob;
     add_ref(ob, "simul_efun");
-    enter_object_hash(ob);	/* add name to fast object lookup table */
+    enter_object_hash(ob);      /* add name to fast object lookup table */
     {
-	int num_var, i;
-	extern int tot_alloc_variable_size;
+        int num_var, i;
+        extern int tot_alloc_variable_size;
 
-	num_var = ob->prog->num_variables + ob->prog->inherit[ob->prog->num_inherited - 1].variable_index_offset;
+        num_var = ob->prog->num_variables + ob->prog->inherit[ob->prog->num_inherited - 1].variable_index_offset;
 
-	if (ob->variables)
-	    fatal("Object already initialized!\n");
-	
-	ob->variables = (struct svalue *)xalloc(num_var * sizeof(struct svalue));
-	tot_alloc_variable_size += num_var * sizeof(struct svalue);
-	for (i = 0; i < num_var; i++)
-	    ob->variables[i] = const0;
+        if (ob->variables)
+            fatal("Object already initialized!\n");
+        
+        ob->variables = (struct svalue *)xalloc(num_var * sizeof(struct svalue));
+        tot_alloc_variable_size += num_var * sizeof(struct svalue);
+        for (i = 0; i < num_var; i++)
+            ob->variables[i] = const0;
     }
     current_object = 0;
 #else

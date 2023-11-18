@@ -205,21 +205,21 @@ nq_puts(nqueue_t *nq, u_char *cp)
 
     while (len > 0)
     {
-	if (nq->nq_rptr > nq->nq_wptr)
-	    size = nq->nq_rptr - nq->nq_wptr;
-	else
-	    size = nq->nq_size - nq->nq_wptr;
+        if (nq->nq_rptr > nq->nq_wptr)
+            size = nq->nq_rptr - nq->nq_wptr;
+        else
+            size = nq->nq_size - nq->nq_wptr;
 
-	if (size > len)
-	    size = len;
+        if (size > len)
+            size = len;
 
-	memcpy(nq_wptr(nq), cp, size);
+        memcpy(nq_wptr(nq), cp, size);
 
-	nq->nq_len += size, nq->nq_wptr += size;
-	if (nq->nq_wptr == nq->nq_size)
-	    nq->nq_wptr = 0;
+        nq->nq_len += size, nq->nq_wptr += size;
+        if (nq->nq_wptr == nq->nq_size)
+            nq->nq_wptr = 0;
 
-	cp += size, len -= size;
+        cp += size, len -= size;
     }
 }
 
@@ -247,20 +247,20 @@ nq_recv(nqueue_t *nq, int fd, u_int *uip)
     int len, cc;
 
     if (nq->nq_rptr > nq->nq_wptr)
-	len = nq->nq_rptr - nq->nq_wptr;
+        len = nq->nq_rptr - nq->nq_wptr;
     else
-	len = nq->nq_size - nq->nq_wptr;
+        len = nq->nq_size - nq->nq_wptr;
 
     cc = recv(fd, nq_wptr(nq), len, 0);
 
     if (cc > 0)
     {
-	nq->nq_len += cc, nq->nq_wptr += cc;
-	if (nq->nq_wptr == nq->nq_size)
-	    nq->nq_wptr = 0;
+        nq->nq_len += cc, nq->nq_wptr += cc;
+        if (nq->nq_wptr == nq->nq_size)
+            nq->nq_wptr = 0;
 
-	if (uip != NULL)
-	    *uip += cc;
+        if (uip != NULL)
+            *uip += cc;
     }
 
     return cc;
@@ -276,25 +276,25 @@ nq_send(nqueue_t *nq, int fd, u_int *uip)
 
     while (nq->nq_len > 0)
     {
-	len = nq->nq_size - nq->nq_rptr;
+        len = nq->nq_size - nq->nq_rptr;
 
-	if (len > nq->nq_len)
-	    len = nq->nq_len;
+        if (len > nq->nq_len)
+            len = nq->nq_len;
 
-	cc = send(fd, nq_rptr(nq), len, 0);
+        cc = send(fd, nq_rptr(nq), len, 0);
 
-	if (cc > 0)
-	{
-	    nq->nq_len -= cc, nq->nq_rptr += cc;
-	    if (nq->nq_rptr == nq->nq_size)
-		nq->nq_rptr = 0;
+        if (cc > 0)
+        {
+            nq->nq_len -= cc, nq->nq_rptr += cc;
+            if (nq->nq_rptr == nq->nq_size)
+                nq->nq_rptr = 0;
 
-	    if (uip != NULL)
-		*uip += cc;
-	}
+            if (uip != NULL)
+                *uip += cc;
+        }
 
-	if (cc != len)
-	    break;
+        if (cc != len)
+            break;
     }
 
     return cc;

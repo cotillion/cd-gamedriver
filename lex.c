@@ -132,54 +132,54 @@ calculate_include_path(char *name, char *dest)
 
     if ( (current = strrchr(dest, '/')) == NULL)   /* strip filename */
     {
-	/* current_file is in the root directory */
-	current = dest;
+        /* current_file is in the root directory */
+        current = dest;
     }
     *current = '\0';
 
     while (*name == '/')
     {
-	name++;
-	current = dest;
-	*current = '\0';  /* absolute path */
+        name++;
+        current = dest;
+        *current = '\0';  /* absolute path */
     }
 
     while (*name)
     {
-	if (strncmp(name, "../", 3) == 0)
-	{
-	    if (*dest == '\0') /* including from above mudlib is NOT allowed */
-		break;
+        if (strncmp(name, "../", 3) == 0)
+        {
+            if (*dest == '\0') /* including from above mudlib is NOT allowed */
+                break;
 
-	    /* Remove previous path element */
-	    while (current > dest)
-	    {
-		*current-- = '\0';
-		if (*current == '/')
-		    break;
-	    }
-	    if (current == dest)
-	    {
-		*current = '\0';
-	    }
+            /* Remove previous path element */
+            while (current > dest)
+            {
+                *current-- = '\0';
+                if (*current == '/')
+                    break;
+            }
+            if (current == dest)
+            {
+                *current = '\0';
+            }
 
-	    name += 3;   /* skip "../" */
-	}
-	else if (strncmp(name, "./", 2) == 0)
-	{
-	    name += 2;
-	}
-	else
-	{ /* append first component to dest */
-	    if (*dest)
-		*current++ = '/';    /* only if dest is not empty !! */
-	    while (*name != '\0' && *name != '/')
-		*current++ = *name++;
-	    if (*name == '/')
-		name++;
-	    else
-		*current = '\0'; /* Last element */
-	}
+            name += 3;   /* skip "../" */
+        }
+        else if (strncmp(name, "./", 2) == 0)
+        {
+            name += 2;
+        }
+        else
+        { /* append first component to dest */
+            if (*dest)
+                *current++ = '/';    /* only if dest is not empty !! */
+            while (*name != '\0' && *name != '/')
+                *current++ = *name++;
+            if (*name == '/')
+                name++;
+            else
+                *current = '\0'; /* Last element */
+        }
     }
 }
 
@@ -219,7 +219,7 @@ gobble(int c)
     int d;
     d = mygetc();
     if (c == d)
-	return 1;
+        return 1;
     *--outp = d;
     nbuf++;
     return 0;
@@ -322,16 +322,16 @@ handle_cond(int c)
     /*(void)fprintf(stderr, "cond %d\n", c);*/
     if (c || skip_to("else", "endif"))
     {
-	p = (struct ifstate *)xalloc(sizeof(struct ifstate));
-	p->next = iftop;
-	iftop = p;
-	p->state = c ? EXPECT_ELSE : EXPECT_ENDIF;
+        p = (struct ifstate *)xalloc(sizeof(struct ifstate));
+        p->next = iftop;
+        iftop = p;
+        p->state = c ? EXPECT_ELSE : EXPECT_ENDIF;
     }
     if (!c)
     {
-	store_line_number_info(current_incfile, current_line);
-	current_line++;
-	total_lines++;
+        store_line_number_info(current_incfile, current_line);
+        current_line++;
+        total_lines++;
     }
 }
 
@@ -346,9 +346,9 @@ check_valid_compile_path(char *path, char *file_name, char *calling_function)
 
     while (*p)
     {
-	if (p[0] == '.' && p[1] == '.')
-	    return NULL;
-	p++;
+        if (p[0] == '.' && p[1] == '.')
+            return NULL;
+        p++;
     }
 #if 0
     push_string(path, STRING_MSTRING);
@@ -356,7 +356,7 @@ check_valid_compile_path(char *path, char *file_name, char *calling_function)
     push_string(calling_function, STRING_MSTRING);
     ret = apply_master_ob(M_VALID_COMPILE_PATH, 3);
     if (ret)
-	path = tmpstring_copy(ret->u.string);
+        path = tmpstring_copy(ret->u.string);
 #endif
     return path;
 }
@@ -376,23 +376,23 @@ inc_try(char *buf)
     new_name = check_valid_compile_path(buf, current_loaded_file, "include");
     if (!new_name)
     {
-	lexerror("Invalid include.");
-	return NULL;
+        lexerror("Invalid include.");
+        return NULL;
     }
     if (new_name && (f = fopen(new_name, "r")) != NULL)
     {
 #ifdef WARN_INCLUDES
-	for (inc = inctop ; inc ; inc = inc->next)
-	    if (strcmp(inc->file, new_name) == 0)
-	    {
-		(void)snprintf(errbuf, sizeof(errbuf), "File /%s already included,", buf);
-		lexwarning(errbuf);
-	    }
+        for (inc = inctop ; inc ; inc = inc->next)
+            if (strcmp(inc->file, new_name) == 0)
+            {
+                (void)snprintf(errbuf, sizeof(errbuf), "File /%s already included,", buf);
+                lexwarning(errbuf);
+            }
 #endif
-	if (s_flag)
-	    num_fileread++;
-	remember_include(new_name);
-	return f;
+        if (s_flag)
+            num_fileread++;
+        remember_include(new_name);
+        return f;
     }
     return NULL;
 }
@@ -406,21 +406,21 @@ inc_open(char *buf, size_t len, char *name)
 
     if (incdepth >= MAX_INCLUDE)
     {
-	lexerror("To deep recursion of includes.");
-	return NULL;
+        lexerror("To deep recursion of includes.");
+        return NULL;
     }
     (void)strcpy(buf, current_file);
     calculate_include_path(name, buf);
     if ((f = inc_try(buf)) != NULL)
-	return f;
+        return f;
     /*
      * Search all include dirs specified.
      */
     for (i = 0; i < inc_list_size; i++)
     {
         (void)snprintf(buf, len, "%s%s", inc_list[i], name);
-	if ((f = inc_try(buf)) != NULL)
-	    return f;
+        if ((f = inc_try(buf)) != NULL)
+            return f;
     }
     return NULL;
 }
@@ -436,43 +436,43 @@ handle_include(char *name, int ignore_errors)
 
     if (*name != '"' && *name != '<')
     {
-	struct defn *d;
-	if ((d = lookup_define(name)) && d->nargs == -1)
-	{
-	    char *q;
-	    q = d->exps;
-	    while (isspace(*q))
-		q++;
-	    return handle_include(q, ignore_errors);
-	}
-	else
-	{
+        struct defn *d;
+        if ((d = lookup_define(name)) && d->nargs == -1)
+        {
+            char *q;
+            q = d->exps;
+            while (isspace(*q))
+                q++;
+            return handle_include(q, ignore_errors);
+        }
+        else
+        {
             if (!ignore_errors)
-	        lexerror("Missing leading \" or < in #include");
+                lexerror("Missing leading \" or < in #include");
             return 0;
-	}
+        }
     }
     delim = *name++ == '"' ? '"' : '>';
     for (p = name; *p && *p != delim; p++)
-	;
+        ;
     if (!*p)
     {
         if (!ignore_errors)
-	    lexerror("Missing trailing \" or > in #include");
-	return 0;
+            lexerror("Missing trailing \" or > in #include");
+        return 0;
     }
     if (strlen(name) > sizeof(buf) - 100)
     {
         if (!ignore_errors)
-	    lexerror("Include name too long.");
-	return 0;
+            lexerror("Include name too long.");
+        return 0;
     }
     *p = 0;
 
     if ((f = inc_open(buf, sizeof(buf), name)) == NULL)
     {
         if (!ignore_errors) {
-	    lexerror("Cannot #include %s\n", name);
+            lexerror("Cannot #include %s\n", name);
         }
 
         return 0;
@@ -521,9 +521,9 @@ handle_exception(int action, char *message)
     (void)strcpy(buf, "\"");
 
     if (strlen(message) < 2)
-	(void)strcat(buf, "Unspecified condition");
+        (void)strcat(buf, "Unspecified condition");
     else
-	(void)strcat(buf, message);
+        (void)strcat(buf, message);
     (void)strcat(buf, "\"");
 
     push_number(action);
@@ -533,7 +533,7 @@ handle_exception(int action, char *message)
     (void)apply_master_ob(M_PARSE_EXCEPTION, 4);
 
     if (action == ERROR)
-	lexerror("Parse aborted on #error statement,");
+        lexerror("Parse aborted on #error statement,");
 }
 
 static void
@@ -543,31 +543,31 @@ skip_comment(void)
 
     for (;;)
     {
-	while ((c = mygetc()) != '*')
-	{
-	    if (c == EOF)
-	    {
-		lexerror("End of file in a comment");
-		return;
-	    }
-	    if (c == '\n')
-	    {
-		nexpands=0;
-		store_line_number_info(current_incfile, current_line);
-		current_line++;
-	    }
-	}
-	do
-	{
-	    if ((c = mygetc()) == '/')
-		return;
-	    if (c == '\n')
-	    {
-		nexpands=0;
-		store_line_number_info(current_incfile, current_line);
-		current_line++;
-	    }
-	} while (c == '*');
+        while ((c = mygetc()) != '*')
+        {
+            if (c == EOF)
+            {
+                lexerror("End of file in a comment");
+                return;
+            }
+            if (c == '\n')
+            {
+                nexpands=0;
+                store_line_number_info(current_incfile, current_line);
+                current_line++;
+            }
+        }
+        do
+        {
+            if ((c = mygetc()) == '/')
+                return;
+            if (c == '\n')
+            {
+                nexpands=0;
+                store_line_number_info(current_incfile, current_line);
+                current_line++;
+            }
+        } while (c == '*');
     }
 }
 
@@ -577,10 +577,10 @@ skip_comment2(void)
     int c;
 
     while ((c = mygetc()) != '\n' && c != EOF)
-	;
+        ;
     if (c == EOF) {
-	lexerror("End of file in a // comment");
-	return;
+        lexerror("End of file in a // comment");
+        return;
     }
     nexpands=0;
     store_line_number_info(current_incfile, current_line);
@@ -595,13 +595,13 @@ deltrail(char *ap)
     char *p = ap;
     if (!*p)
     {
-	lexerror("Illegal # command");
+        lexerror("Illegal # command");
     }
     else
     {
-	while (*p && !isspace(*p))
-	    p++;
-	*p = 0;
+        while (*p && !isspace(*p))
+            p++;
+        *p = 0;
     }
 }
 
@@ -617,19 +617,19 @@ static void
 handle_pragma(char *str)
 {
     if (strcmp(str, "strict_types") == 0)
-	pragma_strict_types = 1;
+        pragma_strict_types = 1;
     else if (strcmp(str, "save_binary") == 0)
-	;
+        ;
     else if (strcmp(str, "no_clone") == 0)
-	pragma_no_clone = 1;
+        pragma_no_clone = 1;
     else if (strcmp(str, "no_inherit") == 0)
-	pragma_no_inherit = 1;
+        pragma_no_inherit = 1;
     else if (strcmp(str, "no_shadow") == 0)
-	pragma_no_shadow = 1;
+        pragma_no_shadow = 1;
     else if (strcmp(str, "resident") == 0)
-	pragma_resident = 1;
+        pragma_resident = 1;
     else
-	handle_exception(WARNING, "Unknown pragma");
+        handle_exception(WARNING, "Unknown pragma");
 }
 
 static struct keyword {
@@ -656,7 +656,7 @@ static struct keyword reswords[] = {
 { "else",       F_ELSE, },
 { "float",      F_FLOAT, },
 { "for",        F_FOR, },
-{ "foreach",	F_FOREACH, },
+{ "foreach",    F_FOREACH, },
 { "function",       F_FUNCTION, },
 { "if",         F_IF, },
 { "inherit",        F_INHERIT, },
@@ -675,7 +675,7 @@ static struct keyword reswords[] = {
 { "status",     F_STATUS, },
 { "string",     F_STRING_DECL, },
 { "switch",     F_SWITCH, },
-{ "throw",	F_THROW },
+{ "throw",      F_THROW },
 { "try",        F_TRY, },
 { "varargs",        F_VARARGS, },
 { "void",       F_VOID, },
@@ -692,16 +692,16 @@ lookupword(char *s, struct keyword *words, int h)
     l = 0;
     for (;;)
     {
-	i = (l + h) / 2;
-	r = strcmp(s, words[i].word);
-	if (r == 0)
-	    return words[i].token;
-	else if (l == i)
-	    return -1;
-	else if (r < 0)
-	    h = i;
-	else
-	    l = i;
+        i = (l + h) / 2;
+        r = strcmp(s, words[i].word);
+        if (r == 0)
+            return words[i].token;
+        else if (l == i)
+            return -1;
+        else if (r < 0)
+            h = i;
+        else
+            l = i;
     }
 }
 
@@ -720,425 +720,425 @@ yylex1(void)
 
     for (;;)
     {
-	if (lex_fatal)
-	{
-	    return -1;
-	}
-	switch(c = mygetc())
-	{
-	case EOF:
-	    if (inctop)
-	    {
-		struct incstate *p;
-		p = inctop;
-		(void)fclose(yyin);
-		/*(void)fprintf(stderr, "popping to %s\n", p->file);*/
-		free(current_file);
-		nexpands = 0;
-		current_file = p->file;
-		current_line = p->line + 1;
-		current_incfile = p->incfnum;
-		pragma_strict_types = p->pragma_strict_types;
-		yyin = p->yyin;
-		slast = p->slast;
-		lastchar = p->lastchar;
-		inctop = p->next;
+        if (lex_fatal)
+        {
+            return -1;
+        }
+        switch(c = mygetc())
+        {
+        case EOF:
+            if (inctop)
+            {
+                struct incstate *p;
+                p = inctop;
+                (void)fclose(yyin);
+                /*(void)fprintf(stderr, "popping to %s\n", p->file);*/
+                free(current_file);
+                nexpands = 0;
+                current_file = p->file;
+                current_line = p->line + 1;
+                current_incfile = p->incfnum;
+                pragma_strict_types = p->pragma_strict_types;
+                yyin = p->yyin;
+                slast = p->slast;
+                lastchar = p->lastchar;
+                inctop = p->next;
 
-		if (p->nbuf)
-		{
-		    nbuf = p->nbuf;
-		    outp = defbuf + DEFMAX - nbuf;
-		    memcpy(outp, p->outp, nbuf);
-		    free((char *)p->outp);
-		}
-		else
-		{
-		    nbuf = 0;
-		    outp = defbuf + DEFMAX;
-		}
+                if (p->nbuf)
+                {
+                    nbuf = p->nbuf;
+                    outp = defbuf + DEFMAX - nbuf;
+                    memcpy(outp, p->outp, nbuf);
+                    free((char *)p->outp);
+                }
+                else
+                {
+                    nbuf = 0;
+                    outp = defbuf + DEFMAX;
+                }
 
-		store_line_number_info(current_incfile, current_line);
-		incdepth--;
+                store_line_number_info(current_incfile, current_line);
+                incdepth--;
 
-		free((char *)p);
-		break;
-	    }
-	    if (iftop)
-	    {
-		struct ifstate *p = iftop;
-		lexerror(p->state == EXPECT_ENDIF ? "Missing #endif" : "Missing #else");
-		while (iftop)
-		{
-		    p = iftop;
-		    iftop = p->next;
-		    free((char *)p);
-		}
-	    }
-	    return -1;
-	case '\n':
-	{
-	    nexpands=0;
-	    store_line_number_info(current_incfile, current_line);
-	    current_line++;
-	    total_lines++;
-	}
+                free((char *)p);
+                break;
+            }
+            if (iftop)
+            {
+                struct ifstate *p = iftop;
+                lexerror(p->state == EXPECT_ENDIF ? "Missing #endif" : "Missing #else");
+                while (iftop)
+                {
+                    p = iftop;
+                    iftop = p->next;
+                    free((char *)p);
+                }
+            }
+            return -1;
+        case '\n':
+        {
+            nexpands=0;
+            store_line_number_info(current_incfile, current_line);
+            current_line++;
+            total_lines++;
+        }
         /* FALLTHROUGH */
-	case ' ':
-	case '\t':
-	case '\f':
-	case '\v':
-	    break;
-	case '+':
-	    TRY('+', F_INC);
-	    TRY('=', F_ADD_EQ);
-	    return c;
-	case '-':
-	    TRY('>', F_ARROW);
-	    TRY('-', F_DEC);
-	    TRY('=', F_SUB_EQ);
-	    return c;
-	case '&':
-	    TRY('&', F_LAND);
-	    TRY('=', F_AND_EQ);
-	    return c;
-	case '|':
-	    TRY('|', F_LOR);
-	    TRY('=', F_OR_EQ);
-	    return c;
-	case '^':
-	    TRY('=', F_XOR_EQ);
-	    return c;
-	case '<':
-	    if (gobble('<')) {
-		TRY('=', F_LSH_EQ);
-		return F_LSH;
-	    }
-	    TRY('=', F_LE);
-	    return c;
-	case '>':
-	    if (gobble('>'))
-	    {
-		TRY('=', F_RSH_EQ);
-		return F_RSH;
-	    }
-	    TRY('=', F_GE);
-	    return c;
-	case '*':
-	    TRY('=', F_MULT_EQ);
-	    return c;
-	case '%':
-	    TRY('=', F_MOD_EQ);
-	    return F_MOD;
-	case '/':
-	    if (gobble('*'))
-	    {
-		skip_comment();
-		break;
-	    }
-	    else if (gobble('/'))
-	    {
-		skip_comment2();
-		break;
-	    }
-	    TRY('=', F_DIV_EQ);
-	    return c;
-	case '=':
-	    TRY('=', F_EQ);
-	    return c;
-	case ';':
-	case '(':
-	case ')':
-	case ',':
-	case '{':
-	case '}':
-	case '~':
-	case '[':
-	case ']':
-	case '?':
-	case '@':
-	    return c;
-	case '!':
-	    TRY('=', F_NE);
-	    return F_NOT;
-	case ':':
-	    TRY(':', F_COLON_COLON);
-	    return ':';
-	case '.':
-	    if (gobble('.'))
-	    {
-		if (gobble('.'))
-		    return F_VARARG;
-		else
-		    return F_RANGE;
-	    }
-	    return c;
-	case '#':
-	    if (lastchar == '\n')
-	    {
-		char *ssp = 0;
-		int quote;
+        case ' ':
+        case '\t':
+        case '\f':
+        case '\v':
+            break;
+        case '+':
+            TRY('+', F_INC);
+            TRY('=', F_ADD_EQ);
+            return c;
+        case '-':
+            TRY('>', F_ARROW);
+            TRY('-', F_DEC);
+            TRY('=', F_SUB_EQ);
+            return c;
+        case '&':
+            TRY('&', F_LAND);
+            TRY('=', F_AND_EQ);
+            return c;
+        case '|':
+            TRY('|', F_LOR);
+            TRY('=', F_OR_EQ);
+            return c;
+        case '^':
+            TRY('=', F_XOR_EQ);
+            return c;
+        case '<':
+            if (gobble('<')) {
+                TRY('=', F_LSH_EQ);
+                return F_LSH;
+            }
+            TRY('=', F_LE);
+            return c;
+        case '>':
+            if (gobble('>'))
+            {
+                TRY('=', F_RSH_EQ);
+                return F_RSH;
+            }
+            TRY('=', F_GE);
+            return c;
+        case '*':
+            TRY('=', F_MULT_EQ);
+            return c;
+        case '%':
+            TRY('=', F_MOD_EQ);
+            return F_MOD;
+        case '/':
+            if (gobble('*'))
+            {
+                skip_comment();
+                break;
+            }
+            else if (gobble('/'))
+            {
+                skip_comment2();
+                break;
+            }
+            TRY('=', F_DIV_EQ);
+            return c;
+        case '=':
+            TRY('=', F_EQ);
+            return c;
+        case ';':
+        case '(':
+        case ')':
+        case ',':
+        case '{':
+        case '}':
+        case '~':
+        case '[':
+        case ']':
+        case '?':
+        case '@':
+            return c;
+        case '!':
+            TRY('=', F_NE);
+            return F_NOT;
+        case ':':
+            TRY(':', F_COLON_COLON);
+            return ':';
+        case '.':
+            if (gobble('.'))
+            {
+                if (gobble('.'))
+                    return F_VARARG;
+                else
+                    return F_RANGE;
+            }
+            return c;
+        case '#':
+            if (lastchar == '\n')
+            {
+                char *ssp = 0;
+                int quote;
 
-		yyp = yytext;
-		do
-		{
-		    c = mygetc();
-		} while (isspace(c));
+                yyp = yytext;
+                do
+                {
+                    c = mygetc();
+                } while (isspace(c));
 
-		for (quote = 0;;)
-		{
-		    if (c == '"')
-			quote ^= 1;
+                for (quote = 0;;)
+                {
+                    if (c == '"')
+                        quote ^= 1;
 
-		    /*gc - handle comments cpp-like! 1.6.91 @@@*/
-		    while (!quote && c == '/')
-		    {
-			if (gobble('*'))
-			{
-			    skip_comment();
-			    c = mygetc();
-			}
-			else
-			    break;
-		    }
+                    /*gc - handle comments cpp-like! 1.6.91 @@@*/
+                    while (!quote && c == '/')
+                    {
+                        if (gobble('*'))
+                        {
+                            skip_comment();
+                            c = mygetc();
+                        }
+                        else
+                            break;
+                    }
 
-		    if (!ssp && isspace(c))
-			ssp = yyp;
-		    if (c == '\n' || c == EOF)
-			break;
-		    SAVEC;
-		    c = mygetc();
-		}
-		if (ssp)
-		{
-		    *ssp++ = 0;
-		    while (isspace(*ssp))
-			ssp++;
-		}
-		else
-		{
-		    ssp = yyp;
-		}
-		*yyp = 0;
-		if (strcmp("define", yytext) == 0)
-		{
-		    handle_define(ssp);
-		}
-		else if (strcmp("if", yytext) == 0)
-		{
+                    if (!ssp && isspace(c))
+                        ssp = yyp;
+                    if (c == '\n' || c == EOF)
+                        break;
+                    SAVEC;
+                    c = mygetc();
+                }
+                if (ssp)
+                {
+                    *ssp++ = 0;
+                    while (isspace(*ssp))
+                        ssp++;
+                }
+                else
+                {
+                    ssp = yyp;
+                }
+                *yyp = 0;
+                if (strcmp("define", yytext) == 0)
+                {
+                    handle_define(ssp);
+                }
+                else if (strcmp("if", yytext) == 0)
+                {
 #if 0
-		    short int nega=0; /*@@@ allow #if !VAR gc 1.6.91*/
-		    if (*ssp=='!'){ ssp++; nega=1;}
-		    if (isdigit(*ssp))
-		    {
-			char *p;
-			long l;
-			l = strtol(ssp, &p, 10);
-			while (isspace(*p))
-			    p++;
-			if (*p)
-			    lexerror("Condition too complex in #if");
-			else
-			    handle_cond(nega ? !(int)l : (int)l);
-		    }
-		    else if (isalunum(*ssp))
-		    {
-			char *p = ssp;
-			while (isalunum(*p))
-			    p++;
-			if (*p)
-			{
-			    *p++ = 0;
-			    while (isspace(*p))
-				p++;
-			}
-			if (*p)
-			    lexerror("Condition too complex in #if");
-			else
-			{
-			    struct defn *d;
-			    d = lookup_define(ssp);
-			    if (d)
-			    {
-				handle_cond(nega ? !atoi(d->exps) : atoi(d->exps));/* a hack! */
-			    }
-			    else
-			    {
-				handle_cond(nega?1:0); /* cpp-like gc*/
-			    }
-			}
-		    }
-		    else
-			lexerror("Condition too complex in #if");
+                    short int nega=0; /*@@@ allow #if !VAR gc 1.6.91*/
+                    if (*ssp=='!'){ ssp++; nega=1;}
+                    if (isdigit(*ssp))
+                    {
+                        char *p;
+                        long l;
+                        l = strtol(ssp, &p, 10);
+                        while (isspace(*p))
+                            p++;
+                        if (*p)
+                            lexerror("Condition too complex in #if");
+                        else
+                            handle_cond(nega ? !(int)l : (int)l);
+                    }
+                    else if (isalunum(*ssp))
+                    {
+                        char *p = ssp;
+                        while (isalunum(*p))
+                            p++;
+                        if (*p)
+                        {
+                            *p++ = 0;
+                            while (isspace(*p))
+                                p++;
+                        }
+                        if (*p)
+                            lexerror("Condition too complex in #if");
+                        else
+                        {
+                            struct defn *d;
+                            d = lookup_define(ssp);
+                            if (d)
+                            {
+                                handle_cond(nega ? !atoi(d->exps) : atoi(d->exps));/* a hack! */
+                            }
+                            else
+                            {
+                                handle_cond(nega?1:0); /* cpp-like gc*/
+                            }
+                        }
+                    }
+                    else
+                        lexerror("Condition too complex in #if");
 #else
-		    int cond;
+                    int cond;
 
-		    myungetc(0);
-		    add_input(ssp);
-		    cond = cond_get_exp(0);
-		    if (mygetc())
-		    {
-			lexerror("Condition too complex in #if");
-			while (mygetc())
-			    ;
-		    }
-		    else
-			handle_cond(cond);
+                    myungetc(0);
+                    add_input(ssp);
+                    cond = cond_get_exp(0);
+                    if (mygetc())
+                    {
+                        lexerror("Condition too complex in #if");
+                        while (mygetc())
+                            ;
+                    }
+                    else
+                        handle_cond(cond);
 #endif
-		}
-		else if (strcmp("ifdef", yytext) == 0)
-		{
-		    deltrail(ssp);
-		    handle_cond(lookup_define(ssp) != 0);
-		}
-		else if (strcmp("ifndef", yytext) == 0)
-		{
-		    deltrail(ssp);
-		    handle_cond(lookup_define(ssp) == 0);
-		}
-		else if (strcmp("else", yytext) == 0)
-		{
-		    if (iftop && iftop->state == EXPECT_ELSE)
-		    {
-			struct ifstate *p = iftop;
+                }
+                else if (strcmp("ifdef", yytext) == 0)
+                {
+                    deltrail(ssp);
+                    handle_cond(lookup_define(ssp) != 0);
+                }
+                else if (strcmp("ifndef", yytext) == 0)
+                {
+                    deltrail(ssp);
+                    handle_cond(lookup_define(ssp) == 0);
+                }
+                else if (strcmp("else", yytext) == 0)
+                {
+                    if (iftop && iftop->state == EXPECT_ELSE)
+                    {
+                        struct ifstate *p = iftop;
 
-			/*(void)fprintf(stderr, "found else\n");*/
-			iftop = p->next;
-			free((char *)p);
-			(void)skip_to("endif", (char *)0);
-			store_line_number_info(current_incfile, current_line);
-			current_line++;
-			total_lines++;
-		    }
-		    else
-		    {
-			lexerror("Unexpected #else");
-		    }
-		}
-		else if (strcmp("endif", yytext) == 0)
-		{
-		    if (iftop && (iftop->state == EXPECT_ENDIF ||
-				  iftop->state == EXPECT_ELSE))
-		    {
-			struct ifstate *p = iftop;
+                        /*(void)fprintf(stderr, "found else\n");*/
+                        iftop = p->next;
+                        free((char *)p);
+                        (void)skip_to("endif", (char *)0);
+                        store_line_number_info(current_incfile, current_line);
+                        current_line++;
+                        total_lines++;
+                    }
+                    else
+                    {
+                        lexerror("Unexpected #else");
+                    }
+                }
+                else if (strcmp("endif", yytext) == 0)
+                {
+                    if (iftop && (iftop->state == EXPECT_ENDIF ||
+                                  iftop->state == EXPECT_ELSE))
+                    {
+                        struct ifstate *p = iftop;
 
-			/*(void)fprintf(stderr, "found endif\n");*/
-			iftop = p->next;
-			free((char *)p);
-		    }
-		    else
-		    {
-			lexerror("Unexpected #endif");
-		    }
-		}
-		else if (strcmp("undef", yytext) == 0)
-		{
-		    struct defn *d;
+                        /*(void)fprintf(stderr, "found endif\n");*/
+                        iftop = p->next;
+                        free((char *)p);
+                    }
+                    else
+                    {
+                        lexerror("Unexpected #endif");
+                    }
+                }
+                else if (strcmp("undef", yytext) == 0)
+                {
+                    struct defn *d;
 
-		    deltrail(ssp);
-		    if ((d = lookup_define(ssp)) != NULL )
-			d->undef++;
-		}
-		else if (strcmp("echo", yytext) == 0)
-		{
-		    (void)fprintf(stderr, "%s\n", ssp);
-		}
-		else if (strcmp("include", yytext) == 0)
-		{
-		    /*(void)fprintf(stderr, "including %s\n", ssp);     */
-		    handle_include(ssp, 0);
-		}
-		else if (strcmp("pragma", yytext) == 0)
-		{
-		    deltrail(ssp);
-		    handle_pragma(ssp);
-		}
-		else if (strcmp("error", yytext) == 0)
-		{
-		    handle_exception(ERROR, ssp);
-		}
-		else if (strcmp("warning", yytext) == 0)
-		{
-		    handle_exception(WARNING, ssp);
-		}
-		else
-		{
-		    lexerror("Unrecognised # directive");
-		}
-		myungetc('\n');
-		break;
-	    }
-	    else
-		goto badlex;
-	case '\'':
-	    yylval.number = mygetc();
-	    if (yylval.number == '\\')
-	    {
-		int tmp = mygetc();
-		switch (tmp)
-		{
-		case 'n': yylval.number = '\n'; break;
-		case 't': yylval.number = '\t'; break;
-		case 'b': yylval.number = '\b'; break;
-		case 'a': yylval.number = '\a'; break;
-		case 'v': yylval.number = '\v'; break;
-		case '\'':
-		case '\\':
-		case '"':
-		    yylval.number = tmp; break;
-		default:
-		    lexwarning("Bad character escape sequence");
-		    yylval.number = tmp;
-		    break;
-		}
-	    }
-	    if (!gobble('\''))
-		lexerror("Illegal character constant");
-	    return F_NUMBER;
-	case '"':
-	    yyp = yytext;
-	    *yyp++ = c;
-	    for (;;)
-	    {
-		c = mygetc();
-		if (c == EOF)
-		{
-		    lexerror("End of file in string");
-		    return string("\"\"");
-		}
-		else if (c == '\n')
-		{
-		    lexerror("Newline in string");
-		    return string("\"\"");
-		}
-		SAVEC;
-		if (c == '"')
-		    break;
-		if (c == '\\')
-		{
-		    c = mygetc();
-		    if ( c == '\n' )
-		    {
-			yyp--;
-			store_line_number_info(current_incfile, current_line);
-			current_line++;
-			total_lines++;
-		    }
-		    else if ( c == EOF )
-		    {
-			/* some operating systems give EOF only once */
-			myungetc(c);
-		    }
-		    else
-			*yyp++ = c;
-		}
-	    }
-	    *yyp = 0;
-	    return string(yytext);
+                    deltrail(ssp);
+                    if ((d = lookup_define(ssp)) != NULL )
+                        d->undef++;
+                }
+                else if (strcmp("echo", yytext) == 0)
+                {
+                    (void)fprintf(stderr, "%s\n", ssp);
+                }
+                else if (strcmp("include", yytext) == 0)
+                {
+                    /*(void)fprintf(stderr, "including %s\n", ssp);     */
+                    handle_include(ssp, 0);
+                }
+                else if (strcmp("pragma", yytext) == 0)
+                {
+                    deltrail(ssp);
+                    handle_pragma(ssp);
+                }
+                else if (strcmp("error", yytext) == 0)
+                {
+                    handle_exception(ERROR, ssp);
+                }
+                else if (strcmp("warning", yytext) == 0)
+                {
+                    handle_exception(WARNING, ssp);
+                }
+                else
+                {
+                    lexerror("Unrecognised # directive");
+                }
+                myungetc('\n');
+                break;
+            }
+            else
+                goto badlex;
+        case '\'':
+            yylval.number = mygetc();
+            if (yylval.number == '\\')
+            {
+                int tmp = mygetc();
+                switch (tmp)
+                {
+                case 'n': yylval.number = '\n'; break;
+                case 't': yylval.number = '\t'; break;
+                case 'b': yylval.number = '\b'; break;
+                case 'a': yylval.number = '\a'; break;
+                case 'v': yylval.number = '\v'; break;
+                case '\'':
+                case '\\':
+                case '"':
+                    yylval.number = tmp; break;
+                default:
+                    lexwarning("Bad character escape sequence");
+                    yylval.number = tmp;
+                    break;
+                }
+            }
+            if (!gobble('\''))
+                lexerror("Illegal character constant");
+            return F_NUMBER;
+        case '"':
+            yyp = yytext;
+            *yyp++ = c;
+            for (;;)
+            {
+                c = mygetc();
+                if (c == EOF)
+                {
+                    lexerror("End of file in string");
+                    return string("\"\"");
+                }
+                else if (c == '\n')
+                {
+                    lexerror("Newline in string");
+                    return string("\"\"");
+                }
+                SAVEC;
+                if (c == '"')
+                    break;
+                if (c == '\\')
+                {
+                    c = mygetc();
+                    if ( c == '\n' )
+                    {
+                        yyp--;
+                        store_line_number_info(current_incfile, current_line);
+                        current_line++;
+                        total_lines++;
+                    }
+                    else if ( c == EOF )
+                    {
+                        /* some operating systems give EOF only once */
+                        myungetc(c);
+                    }
+                    else
+                        *yyp++ = c;
+                }
+            }
+            *yyp = 0;
+            return string(yytext);
 
-	case '0':
-	    c = mygetc();
-	    if ( c == 'X' || c == 'x' || c == 'o')
-	    {
+        case '0':
+            c = mygetc();
+            if ( c == 'X' || c == 'x' || c == 'o')
+            {
                 char *endptr;
                 long long value;
                 int base = 16;
@@ -1146,16 +1146,16 @@ yylex1(void)
                     base = 8;
 
 
-		yyp = yytext;
+                yyp = yytext;
 
-		for (;;)
-		{
-		    c = mygetc();
-		    if (!isxdigit(c))
-			break;
+                for (;;)
+                {
+                    c = mygetc();
+                    if (!isxdigit(c))
+                        break;
                     SAVEC;
-		}
-		myungetc(c);
+                }
+                myungetc(c);
                 *yyp = '\0';
 
                 value = strtoll(yytext, &endptr, base);
@@ -1166,79 +1166,79 @@ yylex1(void)
                 }
 
                 return number(value);
-	    }
-	    myungetc(c);
-	    c = '0';
-	    /* FALLTHROUGH */
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	    yyp = yytext;
-	    *yyp++ = c;
-	    for (;;)
-	    {
-		c = mygetc();
-		if (!isdigit(c))
-		    break;
-		SAVEC;
-	    }
-	    if (c == '.')
-	    {
-		if (isdigit(c1 = mygetc()))
-		{
-		    SAVEC;
-		    c = c1;
-		    SAVEC;
-		    for (c = mygetc(); isdigit(c); c = mygetc())
-			SAVEC;
-		    if (c == 'e' || c == 'E')
-		    {
-			c1 = mygetc();
-			if (c1 == '-' || c1 == '+')
-			{
-			    c2 = mygetc();
-			    if (isdigit(c2))
-			    {
-				SAVEC;
-				c = c1;
-				SAVEC;
-				c = c2;
-				SAVEC;
-				for (c = mygetc(); isdigit(c); c = mygetc())
-				    SAVEC;
-			    }
-			    else
-			    {
-				myungetc(c2);
-				myungetc(c1);
-			    }
-			}
-			else if (isdigit(c1))
-			{
-			    SAVEC;
-			    c = c1;
-			    SAVEC;
-			    for (c = mygetc(); isdigit(c); c = mygetc())
-				SAVEC;
-			}
-			else
-			    myungetc(c1);
-		    }
-		    myungetc(c);
-		    *yyp = 0;
-		    return real(strtod(yytext, NULL));
-		}
-		myungetc(c1);
-	    }
-	    myungetc(c);
-	    *yyp = 0;
-	    if (*yytext == '0')
+            }
+            myungetc(c);
+            c = '0';
+            /* FALLTHROUGH */
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            yyp = yytext;
+            *yyp++ = c;
+            for (;;)
+            {
+                c = mygetc();
+                if (!isdigit(c))
+                    break;
+                SAVEC;
+            }
+            if (c == '.')
+            {
+                if (isdigit(c1 = mygetc()))
+                {
+                    SAVEC;
+                    c = c1;
+                    SAVEC;
+                    for (c = mygetc(); isdigit(c); c = mygetc())
+                        SAVEC;
+                    if (c == 'e' || c == 'E')
+                    {
+                        c1 = mygetc();
+                        if (c1 == '-' || c1 == '+')
+                        {
+                            c2 = mygetc();
+                            if (isdigit(c2))
+                            {
+                                SAVEC;
+                                c = c1;
+                                SAVEC;
+                                c = c2;
+                                SAVEC;
+                                for (c = mygetc(); isdigit(c); c = mygetc())
+                                    SAVEC;
+                            }
+                            else
+                            {
+                                myungetc(c2);
+                                myungetc(c1);
+                            }
+                        }
+                        else if (isdigit(c1))
+                        {
+                            SAVEC;
+                            c = c1;
+                            SAVEC;
+                            for (c = mygetc(); isdigit(c); c = mygetc())
+                                SAVEC;
+                        }
+                        else
+                            myungetc(c1);
+                    }
+                    myungetc(c);
+                    *yyp = 0;
+                    return real(strtod(yytext, NULL));
+                }
+                myungetc(c1);
+            }
+            myungetc(c);
+            *yyp = 0;
+            if (*yytext == '0')
             {
                 /* OCTALS */
                 char *endptr;
@@ -1252,43 +1252,43 @@ yylex1(void)
                 if (value != 0)
                     lexwarning("Obsolete octal format used. Use 0o111 syntax");
 
-		return number(value);
+                return number(value);
             }
-	    return number(atoll(yytext));
-	default:
-	    if (isalpha(c) || c == '_') {
-		int r;
+            return number(atoll(yytext));
+        default:
+            if (isalpha(c) || c == '_') {
+                int r;
 
-		yyp = yytext;
-		*yyp++ = c;
-		for (;;)
-		{
-		    c = mygetc();
-		    if (!isalunum(c))
-			break;
-		    SAVEC;
-		}
-		*yyp = 0;
+                yyp = yytext;
+                *yyp++ = c;
+                for (;;)
+                {
+                    c = mygetc();
+                    if (!isalunum(c))
+                        break;
+                    SAVEC;
+                }
+                *yyp = 0;
 
-		myungetc(c);
-		if (!expand_define())
-		{
-		    r = lookup_resword(yytext);
-		    if (r >= 0)
-		    {
-			return r;
-		    }
-		    else
-			return ident(yytext);
-		}
-		break;
-	    }
-	    goto badlex;
-	}
+                myungetc(c);
+                if (!expand_define())
+                {
+                    r = lookup_resword(yytext);
+                    if (r >= 0)
+                    {
+                        return r;
+                    }
+                    else
+                        return ident(yytext);
+                }
+                break;
+            }
+            goto badlex;
+        }
     }
   badlex:
     {
-	lexerror("Illegal character (hex %02x) '%c'", c, c);
+        lexerror("Illegal character (hex %02x) '%c'", c, c);
         return ' ';
     }
 }
@@ -1300,16 +1300,16 @@ yylex(void)
 
     if (keep1.token != -47)
     {
-	/*
-	 * something in keep buffer. shift it out.
-	 */
-	r = keep1.token;
-	current_line = keep1.line;
-	yylval = keep1.lval;
-	keep1 = keep2;
-	keep2 = keep3;
-	keep3.token = -47;
-	return r;
+        /*
+         * something in keep buffer. shift it out.
+         */
+        r = keep1.token;
+        current_line = keep1.line;
+        yylval = keep1.lval;
+        keep1 = keep2;
+        keep2 = keep3;
+        keep3.token = -47;
+        return r;
     }
     yytext[0] = 0;
     /*
@@ -1317,68 +1317,68 @@ yylex(void)
      */
     if ((r = yylex1()) == F_STRING)
     {
-	keep4.lval = yylval;
-	keep4.line = current_line;
-	yytext[0] = 0;
-	r = yylex1();
-	for (;;)
-	{
-	    keep1.line = current_line;
-	    keep1.lval = yylval;
-	    if (r != '+')
-	    {
-		/*
-		 * 1:string 2:non-'+'
-		 *  save 2, return 1
-		 */
-		keep1.token = r;
-		yylval = keep4.lval;
-		current_line = keep4.line;
-		return F_STRING;
-	    }
-	    yytext[0] = 0;
-	    r = yylex1();
-	    keep2.line = current_line;
-	    keep2.lval = yylval;
-	    if (r != F_STRING)
-	    {
-		/*
-		 * 1:string 2:'+' 3:non-string
-		 *  save 2 and 3, return 1
-		 */
-		keep1.token = '+';
-		keep2.token = r;
-		current_line = keep4.line;
-		yylval = keep4.lval;
-		return F_STRING;
-	    }
-	    yytext[0] = 0;
-	    r = yylex1();
-	    keep3.line = current_line;
-	    keep3.lval = yylval;
-	    if (r == '[' || r == F_ARROW)
-	    {
-		/*
-		 * 1:string 2:'+' 3:string 4:[->
-		 *  save 2, 3, 4, return 1
-		 */
-		keep1.token = '+';
-		keep2.token = F_STRING;
-		keep3.token = r;
-		current_line = keep4.line;
-		yylval = keep4.lval;
-		return F_STRING;
-	    }
-	    /*
-	     * concatenate string constants
-	     */
-	    keep3.lval.string = pool_alloc(&lex_allocations, strlen(keep4.lval.string) +
-					 strlen(keep2.lval.string) + 1);
-	    (void)strcpy(keep3.lval.string, keep4.lval.string);
-	    (void)strcat(keep3.lval.string, keep2.lval.string);
-	    keep4.line = keep2.line;
-	    keep4.lval.string = keep3.lval.string;
-	}
+        keep4.lval = yylval;
+        keep4.line = current_line;
+        yytext[0] = 0;
+        r = yylex1();
+        for (;;)
+        {
+            keep1.line = current_line;
+            keep1.lval = yylval;
+            if (r != '+')
+            {
+                /*
+                 * 1:string 2:non-'+'
+                 *  save 2, return 1
+                 */
+                keep1.token = r;
+                yylval = keep4.lval;
+                current_line = keep4.line;
+                return F_STRING;
+            }
+            yytext[0] = 0;
+            r = yylex1();
+            keep2.line = current_line;
+            keep2.lval = yylval;
+            if (r != F_STRING)
+            {
+                /*
+                 * 1:string 2:'+' 3:non-string
+                 *  save 2 and 3, return 1
+                 */
+                keep1.token = '+';
+                keep2.token = r;
+                current_line = keep4.line;
+                yylval = keep4.lval;
+                return F_STRING;
+            }
+            yytext[0] = 0;
+            r = yylex1();
+            keep3.line = current_line;
+            keep3.lval = yylval;
+            if (r == '[' || r == F_ARROW)
+            {
+                /*
+                 * 1:string 2:'+' 3:string 4:[->
+                 *  save 2, 3, 4, return 1
+                 */
+                keep1.token = '+';
+                keep2.token = F_STRING;
+                keep3.token = r;
+                current_line = keep4.line;
+                yylval = keep4.lval;
+                return F_STRING;
+            }
+            /*
+             * concatenate string constants
+             */
+            keep3.lval.string = pool_alloc(&lex_allocations, strlen(keep4.lval.string) +
+                                         strlen(keep2.lval.string) + 1);
+            (void)strcpy(keep3.lval.string, keep4.lval.string);
+            (void)strcat(keep3.lval.string, keep2.lval.string);
+            keep4.line = keep2.line;
+            keep4.lval.string = keep3.lval.string;
+        }
     }
     /*    (void)fprintf(stderr, "lex=%d(%s) ", r, yytext);*/
     return r;
@@ -1400,36 +1400,36 @@ string(const char *str)
 {
     if (!*str)
     {
-	str = "\"\"";
+        str = "\"\"";
     }
     char *p = pool_alloc(&lex_allocations, strlen(str) + 1);
     yylval.string = p;
 
     for (str++; str[0] && str[1] ; str++, p++)
     {
-	/* Copy the similar one to here /JH */
-	if (str[0] == '\\') {
-	    if (str[1] == 'n') {
-		*p = '\n';
-	    } else if (str[1] == 't') {
-		*p = '\t';
-	    } else if (str[1] == 'r') {
-		*p = '\r';
-	    } else if (str[1] == 'b') {
-		*p = '\b';
-	    } else if (str[1] == 'a') {
-		*p = '\a';
-	    } else if (str[1] == 'v') {
-		*p = '\v';
-	    } else if (str[1] == '"' || str[1] == '\\' || str[1] == '\'') {
-		*p = str[1];
-	    } else {
-		lexwarning("Bad string escape sequence.");
-		*p = str[1];
-	    }
-	    str++;
-	} else
-	    *p = *str;
+        /* Copy the similar one to here /JH */
+        if (str[0] == '\\') {
+            if (str[1] == 'n') {
+                *p = '\n';
+            } else if (str[1] == 't') {
+                *p = '\t';
+            } else if (str[1] == 'r') {
+                *p = '\r';
+            } else if (str[1] == 'b') {
+                *p = '\b';
+            } else if (str[1] == 'a') {
+                *p = '\a';
+            } else if (str[1] == 'v') {
+                *p = '\v';
+            } else if (str[1] == '"' || str[1] == '\\' || str[1] == '\'') {
+                *p = str[1];
+            } else {
+                lexwarning("Bad string escape sequence.");
+                *p = str[1];
+            }
+            str++;
+        } else
+            *p = *str;
     }
     *p = '\0';
     return F_STRING;
@@ -1454,28 +1454,28 @@ end_new_file(void)
 {
     while (inctop)
     {
-	struct incstate *p;
-	p = inctop;
-	(void)fclose(yyin);
-	free(current_file);
-	current_file = p->file;
-	yyin = p->yyin;
-	inctop = p->next;
+        struct incstate *p;
+        p = inctop;
+        (void)fclose(yyin);
+        free(current_file);
+        current_file = p->file;
+        yyin = p->yyin;
+        inctop = p->next;
 
-	if (p->outp != NULL)
-	{
-	    free((char *)p->outp);
-	}
+        if (p->outp != NULL)
+        {
+            free((char *)p->outp);
+        }
 
-	free((char *)p);
+        free((char *)p);
     }
     while (iftop)
     {
-	struct ifstate *p;
+        struct ifstate *p;
 
-	p = iftop;
-	iftop = p->next;
-	free((char *)p);
+        p = iftop;
+        iftop = p->next;
+        free((char *)p);
     }
     free_defines();
     pool_free(&lex_allocations);
@@ -1517,16 +1517,16 @@ start_new_file(FILE *f)
 
     for (tmpf = lpc_predefs; tmpf; tmpf = tmpf->next)
     {
-	char namebuf[NSIZE];
-	char mtext[MLEN];
+        char namebuf[NSIZE];
+        char mtext[MLEN];
 
-	*mtext='\0';
-	(void)sscanf(tmpf->flag, "%[^=]=%[ -~=]", namebuf, mtext);
-	if (strlen(namebuf) >= NSIZE)
-	    fatal("NSIZE exceeded\n");
-	if (strlen(mtext) >= MLEN)
-	    fatal("MLEN exceeded\n");
-	add_define(namebuf,-1,mtext);
+        *mtext='\0';
+        (void)sscanf(tmpf->flag, "%[^=]=%[ -~=]", namebuf, mtext);
+        if (strlen(namebuf) >= NSIZE)
+            fatal("NSIZE exceeded\n");
+        if (strlen(mtext) >= MLEN)
+            fatal("MLEN exceeded\n");
+        add_define(namebuf,-1,mtext);
     }
     keep1.token = keep2.token = keep3.token = -47;
     yyin = f;
@@ -1597,17 +1597,17 @@ init_num_args(void)
 
     for (i = 0; i<NELEM(predefs); i++)
     {
-	n = predefs[i].token - EFUN_FIRST;
-	if (n < 0 || n > NELEM(instrs))
-	    fatal("Token %s has illegal value %d.\n", predefs[i].word, n);
-	instrs[n].min_arg = predefs[i].min_args;
-	instrs[n].max_arg = predefs[i].max_args;
-	instrs[n].name = predefs[i].word;
-	instrs[n].type[0] = predefs[i].arg_type1;
-	instrs[n].type[1] = predefs[i].arg_type2;
-	instrs[n].Default = predefs[i].Default;
-	instrs[n].ret_type = predefs[i].ret_type;
-	instrs[n].arg_index = predefs[i].arg_index;
+        n = predefs[i].token - EFUN_FIRST;
+        if (n < 0 || n > NELEM(instrs))
+            fatal("Token %s has illegal value %d.\n", predefs[i].word, n);
+        instrs[n].min_arg = predefs[i].min_args;
+        instrs[n].max_arg = predefs[i].max_args;
+        instrs[n].name = predefs[i].word;
+        instrs[n].type[0] = predefs[i].arg_type1;
+        instrs[n].type[1] = predefs[i].arg_type2;
+        instrs[n].Default = predefs[i].Default;
+        instrs[n].ret_type = predefs[i].ret_type;
+        instrs[n].arg_index = predefs[i].arg_index;
     }
     add_instr_opname("+", F_ADD, TYPE_ANY, T_ANY, T_ANY);
     add_instr_opname("-", F_SUBTRACT, TYPE_ANY, T_ANY, T_ANY);
@@ -1689,12 +1689,12 @@ char *
 get_f_name(int n)
 {
     if (instrs[n-EFUN_FIRST].name)
-	return instrs[n-EFUN_FIRST].name;
+        return instrs[n-EFUN_FIRST].name;
     else
     {
-	static char buf[30];
-	(void)snprintf(buf, sizeof(buf), "<OTHER %d>", n);
-	return buf;
+        static char buf[30];
+        (void)snprintf(buf, sizeof(buf), "<OTHER %d>", n);
+        return buf;
     }
 }
 
@@ -1728,15 +1728,15 @@ cmygetc(void)
 
     for (;;)
     {
-	c = mygetc();
-	if (c == '/')
-	{
-	    if (gobble('*'))
-		skip_comment();
-	    else
-		return c;
-	} else
-	    return c;
+        c = mygetc();
+        if (c == '/')
+        {
+            if (gobble('*'))
+                skip_comment();
+            else
+                return c;
+        } else
+            return c;
     }
 }
 
@@ -1749,14 +1749,14 @@ refill(void)
     p = yytext;
     do
     {
-	c = cmygetc();
-	if (p < yytext+MAXLINE-5)
-	    *p++ = c;
-	else
-	{
-	    lexerror("Line too long");
-	    break;
-	}
+        c = cmygetc();
+        if (p < yytext+MAXLINE-5)
+            *p++ = c;
+        else
+        {
+            lexerror("Line too long");
+            break;
+        }
     } while (c != '\n' && c != EOF);
     p[-1] = ' ';
     *p = 0;
@@ -1779,113 +1779,113 @@ handle_define(char *yyt)
     GETALPHA(p, q, namebuf+NSIZE-1);
     if (*p == '(')
     {       /* if "function macro" */
-	int arg;
-	int inid;
-	char *ids = 0;
-	p++;            /* skip '(' */
-	SKIPWHITE;
-	if (*p == ')')
-	{
-	    arg = 0;
-	}
-	else
-	{
-	    for (arg = 0; arg < NARGS; )
-	    {
-		q = args[arg];
-		GETALPHA(p, q, args[arg] + NSIZE - 1);
-		arg++;
-		SKIPWHITE;
-		if (*p == ')')
-		    break;
-		if (*p++ != ',')
-		{
-		    lexerror("Missing ',' in #define parameter list");
-		    return;
-		}
-		SKIPWHITE;
-	    }
-	    if (arg == NARGS)
-	    {
-		lexerror("Too many macro arguments");
-		return;
-	    }
-	}
-	p++;            /* skip ')' */
-	for (inid = 0, q = mtext; *p; )
-	{
-	    if (isalunum(*p))
-	    {
-		if (!inid)
-		{
-		    inid++;
-		    ids = p;
-		}
-	    }
-	    else
-	    {
-		if (inid)
-		{
-		    size_t l, idlen = p - ids;
-		    int n;
+        int arg;
+        int inid;
+        char *ids = 0;
+        p++;            /* skip '(' */
+        SKIPWHITE;
+        if (*p == ')')
+        {
+            arg = 0;
+        }
+        else
+        {
+            for (arg = 0; arg < NARGS; )
+            {
+                q = args[arg];
+                GETALPHA(p, q, args[arg] + NSIZE - 1);
+                arg++;
+                SKIPWHITE;
+                if (*p == ')')
+                    break;
+                if (*p++ != ',')
+                {
+                    lexerror("Missing ',' in #define parameter list");
+                    return;
+                }
+                SKIPWHITE;
+            }
+            if (arg == NARGS)
+            {
+                lexerror("Too many macro arguments");
+                return;
+            }
+        }
+        p++;            /* skip ')' */
+        for (inid = 0, q = mtext; *p; )
+        {
+            if (isalunum(*p))
+            {
+                if (!inid)
+                {
+                    inid++;
+                    ids = p;
+                }
+            }
+            else
+            {
+                if (inid)
+                {
+                    size_t l, idlen = p - ids;
+                    int n;
 
-		    for (n = 0; n < arg; n++)
-		    {
-			l = strlen(args[n]);
-			if (l == idlen && strncmp(args[n], ids, l) == 0)
-			{
-			    q -= idlen;
-			    *q++ = MARKS;
-			    *q++ = n+MARKS+1;
-			    break;
-			}
-		    }
-		    inid = 0;
-		}
-	    }
-	    *q = *p;
-	    if (*p++ == MARKS)
-		*++q = MARKS;
-	    if (q < mtext + MLEN - 2)
-		q++;
-	    else
-	    {
-		lexerror("Macro text too long");
-		return;
-	    }
-	    if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
-	    {
-		q -= 2;
-		refill();
-		p = yytext;
-	    }
-	}
+                    for (n = 0; n < arg; n++)
+                    {
+                        l = strlen(args[n]);
+                        if (l == idlen && strncmp(args[n], ids, l) == 0)
+                        {
+                            q -= idlen;
+                            *q++ = MARKS;
+                            *q++ = n+MARKS+1;
+                            break;
+                        }
+                    }
+                    inid = 0;
+                }
+            }
+            *q = *p;
+            if (*p++ == MARKS)
+                *++q = MARKS;
+            if (q < mtext + MLEN - 2)
+                q++;
+            else
+            {
+                lexerror("Macro text too long");
+                return;
+            }
+            if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
+            {
+                q -= 2;
+                refill();
+                p = yytext;
+            }
+        }
 
-	*--q = 0;
-	add_define(namebuf, arg, mtext);
+        *--q = 0;
+        add_define(namebuf, arg, mtext);
     }
     else
     {
-	for (q = mtext; *p; )
-	{
-	    *q = *p++;
-	    if (q < mtext + MLEN - 2)
-		q++;
-	    else
-	    {
-		lexerror("Macro text too long");
-		return;
-	    }
-	    if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
-	    {
-		q -= 2;
-		refill();
-		p = yytext;
-	    }
-	}
+        for (q = mtext; *p; )
+        {
+            *q = *p++;
+            if (q < mtext + MLEN - 2)
+                q++;
+            else
+            {
+                lexerror("Macro text too long");
+                return;
+            }
+            if (!*p && strlen(yytext) >= 2 && p[-2] == '\\')
+            {
+                q -= 2;
+                refill();
+                p = yytext;
+            }
+        }
 
-	*--q = 0;
-	add_define(namebuf, -1, mtext);
+        *--q = 0;
+        add_define(namebuf, -1, mtext);
     }
     return;
 }
@@ -1904,8 +1904,8 @@ add_input(char *p)
 
     if (nbuf+l >= DEFMAX-10)
     {
-	lexerror("Macro expansion buffer overflow");
-	return;
+        lexerror("Macro expansion buffer overflow");
+        return;
     }
     outp -= l;
     nbuf += l;
@@ -1936,11 +1936,11 @@ add_define(char *name, int nargs, char *exps)
 
     if ((p = lookup_define(name)) != NULL)
     {
-	if (nargs != p->nargs || strcmp(exps, p->exps) != 0)
-	{
-	    lexerror("Redefinition of #define %s", name);
-	}
-	return;
+        if (nargs != p->nargs || strcmp(exps, p->exps) != 0)
+        {
+            lexerror("Redefinition of #define %s", name);
+        }
+        return;
     }
     p = (struct defn *)xalloc(sizeof(struct defn));
     p->name = xalloc(strlen(name)+1);
@@ -1963,14 +1963,14 @@ free_defines(void)
 
     for (i = 0; i < DEFHASH; i++)
     {
-	for (p = defns[i]; p; p = q)
-	{
-	    q = p->next;
-	    free(p->name);
-	    free(p->exps);
-	    free((char *)p);
-	}
-	defns[i] = 0;
+        for (p = defns[i]; p; p = q)
+        {
+            q = p->next;
+            free(p->name);
+            free(p->exps);
+            free((char *)p);
+        }
+        defns[i] = 0;
     }
     nexpands = 0;
 }
@@ -1983,8 +1983,8 @@ lookup_define(char *s)
 
     h = defhash(s);
     for (p = defns[h]; p; p = p->next)
-	if (!p->undef && strcmp(s, p->name) == 0)
-	    return p;
+        if (!p->undef && strcmp(s, p->name) == 0)
+            return p;
     return 0;
 }
 
@@ -2006,147 +2006,147 @@ expand_define(void)
 
     if (nexpands++ > EXPANDMAX)
     {
-	lexerror("Too many macro expansions");
-	return 0;
+        lexerror("Too many macro expansions");
+        return 0;
     }
     p = lookup_define(yytext);
     if (!p)
     {
-	return 0;
+        return 0;
     }
     if (p->nargs == -1)
     {
-	add_input(p->exps);
+        add_input(p->exps);
     }
     else
     {
-	int c, parcnt = 0, dquote = 0, squote = 0;
-	int n;
-	SKIPW;
-	if (c != '(')
-	{
-	    lexerror("Missing '(' in macro call");
-	    return 0;
-	}
-	SKIPW;
-	if (c == ')')
-	    n = 0;
-	else
-	{
-	    q = expbuf;
-	    args[0] = q;
-	    for (n = 0; n < NARGS; )
-	    {
-		switch(c)
-		{
-		case '"':
-		    if (!squote)
-			dquote ^= 1;
-		    break;
-		case '\'':
-		    if (!dquote)
-			squote ^= 1;
-		    break;
-		case '(':
-		    if (!squote && !dquote)
-			parcnt++;
-		    break;
-		case ')':
-		    if (!squote && !dquote)
-			parcnt--;
-		    break;
-		case '\\':
-		    if (squote || dquote)
-		    {
-			*q++ = c;
-			c = mygetc();}
-		    break;
-		case '\n':
-		    if (squote || dquote)
-		    {
-			lexerror("Newline in string");
-			return 0;
-		    }
-		    break;
-		}
-		if (c == ',' && !parcnt && !dquote && !squote)
-		{
-		    *q++ = 0;
-		    args[++n] = q;
-		}
-		else if (parcnt < 0)
-		{
-		    *q++ = 0;
-		    n++;
-		    break;
-		}
-		else
-		{
-		    if (c == EOF)
-		    {
-			lexerror("Unexpected end of file");
-			return 0;
-		    }
-		    if (q >= expbuf + DEFMAX - 5)
-		    {
-			lexerror("Macro argument overflow");
-			return 0;
-		    }
-		    else
-		    {
-			*q++ = c;
-		    }
-		}
-		if (!squote && ! dquote)
-		    c = cmygetc();
-		else
-		    c = mygetc();
-	    }
-	    if (n == NARGS)
-	    {
-		lexerror("Maximum macro argument count exceeded");
-		return 0;
-	    }
-	}
-	if (n != p->nargs)
-	{
-	    lexerror("Wrong number of macro arguments");
-	    return 0;
-	}
-	/* Do expansion */
-	b = buf;
-	e = p->exps;
-	while (*e)
-	{
-	    if (*e == MARKS)
-	    {
-		if (*++e == MARKS)
-		    *b++ = *e++;
-		else
-		{
-		    for (q = args[*e++ - MARKS - 1]; *q; )
-		    {
-			*b++ = *q++;
-			if (b >= buf+DEFMAX)
-			{
-			    lexerror("Macro expansion overflow");
-			    return 0;
-			}
-		    }
-		}
-	    }
-	    else
-	    {
-		*b++ = *e++;
-		if (b >= buf+DEFMAX)
-		{
-		    lexerror("Macro expansion overflow");
-		    return 0;
-		}
-	    }
-	}
-	*b++ = 0;
-	add_input(buf);
+        int c, parcnt = 0, dquote = 0, squote = 0;
+        int n;
+        SKIPW;
+        if (c != '(')
+        {
+            lexerror("Missing '(' in macro call");
+            return 0;
+        }
+        SKIPW;
+        if (c == ')')
+            n = 0;
+        else
+        {
+            q = expbuf;
+            args[0] = q;
+            for (n = 0; n < NARGS; )
+            {
+                switch(c)
+                {
+                case '"':
+                    if (!squote)
+                        dquote ^= 1;
+                    break;
+                case '\'':
+                    if (!dquote)
+                        squote ^= 1;
+                    break;
+                case '(':
+                    if (!squote && !dquote)
+                        parcnt++;
+                    break;
+                case ')':
+                    if (!squote && !dquote)
+                        parcnt--;
+                    break;
+                case '\\':
+                    if (squote || dquote)
+                    {
+                        *q++ = c;
+                        c = mygetc();}
+                    break;
+                case '\n':
+                    if (squote || dquote)
+                    {
+                        lexerror("Newline in string");
+                        return 0;
+                    }
+                    break;
+                }
+                if (c == ',' && !parcnt && !dquote && !squote)
+                {
+                    *q++ = 0;
+                    args[++n] = q;
+                }
+                else if (parcnt < 0)
+                {
+                    *q++ = 0;
+                    n++;
+                    break;
+                }
+                else
+                {
+                    if (c == EOF)
+                    {
+                        lexerror("Unexpected end of file");
+                        return 0;
+                    }
+                    if (q >= expbuf + DEFMAX - 5)
+                    {
+                        lexerror("Macro argument overflow");
+                        return 0;
+                    }
+                    else
+                    {
+                        *q++ = c;
+                    }
+                }
+                if (!squote && ! dquote)
+                    c = cmygetc();
+                else
+                    c = mygetc();
+            }
+            if (n == NARGS)
+            {
+                lexerror("Maximum macro argument count exceeded");
+                return 0;
+            }
+        }
+        if (n != p->nargs)
+        {
+            lexerror("Wrong number of macro arguments");
+            return 0;
+        }
+        /* Do expansion */
+        b = buf;
+        e = p->exps;
+        while (*e)
+        {
+            if (*e == MARKS)
+            {
+                if (*++e == MARKS)
+                    *b++ = *e++;
+                else
+                {
+                    for (q = args[*e++ - MARKS - 1]; *q; )
+                    {
+                        *b++ = *q++;
+                        if (b >= buf+DEFMAX)
+                        {
+                            lexerror("Macro expansion overflow");
+                            return 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                *b++ = *e++;
+                if (b >= buf+DEFMAX)
+                {
+                    lexerror("Macro expansion overflow");
+                    return 0;
+                }
+            }
+        }
+        *b++ = 0;
+        add_input(buf);
     }
     return 1;
 }
@@ -2162,61 +2162,61 @@ exgetc(void)
     c = mygetc();
     while (isalpha(c) || c == '_')
     {
-	yyp = yytext;
-	do
-	{
-	    SAVEC;
-	    c = mygetc();
-	} while (isalunum(c));
-	myungetc(c);
-	*yyp = '\0';
-	if (strcmp(yytext, "defined") == 0)
-	{
-	    /* handle the defined "function" in #if */
-	    do
-		c = mygetc();
-	    while (isspace(c));
+        yyp = yytext;
+        do
+        {
+            SAVEC;
+            c = mygetc();
+        } while (isalunum(c));
+        myungetc(c);
+        *yyp = '\0';
+        if (strcmp(yytext, "defined") == 0)
+        {
+            /* handle the defined "function" in #if */
+            do
+                c = mygetc();
+            while (isspace(c));
 
-	    if (c != '(')
-	    {
-		lexerror("Missing ( in defined");
-		continue;
-	    }
-	    do
-		c = mygetc();
-	    while (isspace(c));
+            if (c != '(')
+            {
+                lexerror("Missing ( in defined");
+                continue;
+            }
+            do
+                c = mygetc();
+            while (isspace(c));
 
-	    yyp = yytext;
-	    while (isalunum(c))
-	    {
-		SAVEC;
-		c = mygetc();
-	    }
-	    *yyp = '\0';
-	    while (isspace(c))
-		c = mygetc();
-	    if (c != ')')
-	    {
-		lexerror("Missing ) in defined");
-		continue;
-	    }
+            yyp = yytext;
+            while (isalunum(c))
+            {
+                SAVEC;
+                c = mygetc();
+            }
+            *yyp = '\0';
+            while (isspace(c))
+                c = mygetc();
+            if (c != ')')
+            {
+                lexerror("Missing ) in defined");
+                continue;
+            }
 
-	    /* Skip whitespace */
-	    do
-		c = mygetc();
-	    while (isspace(c));
-	    myungetc(c);
+            /* Skip whitespace */
+            do
+                c = mygetc();
+            while (isspace(c));
+            myungetc(c);
 
-	    if (lookup_define(yytext))
-		add_input(" 1 ");
-	    else
-		add_input(" 0 ");
-	}
-	else
-	{
-	    if (!expand_define()) add_input(" 0 ");
-	}
-	c = mygetc();
+            if (lookup_define(yytext))
+                add_input(" 1 ");
+            else
+                add_input(" 0 ");
+        }
+        else
+        {
+            if (!expand_define()) add_input(" 0 ");
+        }
+        c = mygetc();
     }
     return c;
 }
@@ -2264,174 +2264,174 @@ cond_get_exp(int priority)
     int value, value2, x;
 
     do
-	c = exgetc();
+        c = exgetc();
     while (isspace(c));
 
     if (c == '(')
     {
-	value = cond_get_exp(0);
-	do
-	    c = exgetc();
-	while (isspace(c));
-	if (c != ')')
-	{
-	    lexerror("bracket not paired in #if");
-	    if (!c)
-		myungetc('\0');
-	}
+        value = cond_get_exp(0);
+        do
+            c = exgetc();
+        while (isspace(c));
+        if (c != ')')
+        {
+            lexerror("bracket not paired in #if");
+            if (!c)
+                myungetc('\0');
+        }
     }
     else if (ispunct(c))
     {
-	x = (_optab-' ')[c];
-	if (!x)
-	{
-	    lexerror("illegal character in #if");
-	    return 0;
-	}
-	value = cond_get_exp(12);
-	switch ( optab2[x-1] )
-	{
-	case BNOT  : value = ~value; break;
-	case LNOT  : value = !value; break;
-	case UMINUS: value = -value; break;
-	case UPLUS : /* value =  value; */ break;
-	default :
-	    lexerror("illegal unary operator in #if");
-	    return 0;
-	}
+        x = (_optab-' ')[c];
+        if (!x)
+        {
+            lexerror("illegal character in #if");
+            return 0;
+        }
+        value = cond_get_exp(12);
+        switch ( optab2[x-1] )
+        {
+        case BNOT  : value = ~value; break;
+        case LNOT  : value = !value; break;
+        case UMINUS: value = -value; break;
+        case UPLUS : /* value =  value; */ break;
+        default :
+            lexerror("illegal unary operator in #if");
+            return 0;
+        }
     }
     else
     {
-	int base;
+        int base;
 
-	if (!isdigit(c))
-	{
-	    if (!c)
-	    {
-		lexerror("missing expression in #if");
-		myungetc('\0');
-	    }
-	    else
-		lexerror("illegal character in #if");
-	    return 0;
-	}
-	value = 0;
-	if (c!='0')
-	    base = 10;
-	else
-	{
-	    c = mygetc();
-	    if ( c == 'x' || c == 'X' )
-	    {
-		base = 16;
-		c = mygetc();
-	    }
-	    else
-		base=8;
-	}
-	for (;;)
-	{
-	    if ( isdigit(c) )
-		x = -'0';
-	    else if (isupper(c))
-		x = -'A' + 10;
-	    else if (islower(c))
-		x = -'a' + 10;
-	    else
-		break;
-	    x += c;
-	    if (x > base)
-		break;
-	    value = value*base + x;
-	    c = mygetc();
-	}
-	myungetc(c);
+        if (!isdigit(c))
+        {
+            if (!c)
+            {
+                lexerror("missing expression in #if");
+                myungetc('\0');
+            }
+            else
+                lexerror("illegal character in #if");
+            return 0;
+        }
+        value = 0;
+        if (c!='0')
+            base = 10;
+        else
+        {
+            c = mygetc();
+            if ( c == 'x' || c == 'X' )
+            {
+                base = 16;
+                c = mygetc();
+            }
+            else
+                base=8;
+        }
+        for (;;)
+        {
+            if ( isdigit(c) )
+                x = -'0';
+            else if (isupper(c))
+                x = -'A' + 10;
+            else if (islower(c))
+                x = -'a' + 10;
+            else
+                break;
+            x += c;
+            if (x > base)
+                break;
+            value = value*base + x;
+            c = mygetc();
+        }
+        myungetc(c);
     }
     for (;;)
     {
-	do
-	    c = exgetc();
-	while (isspace(c));
+        do
+            c = exgetc();
+        while (isspace(c));
 
-	if (!ispunct(c))
-	    break;
-	x = (_optab-' ')[c];
-	if (!x)
-	    break;
-	value2 = mygetc();
-	for (;;x += 3)
-	{
-	    if (!optab2[x])
-	    {
-		myungetc(value2);
-		if (!optab2[x + 1])
-		{
-		    lexerror("illegal operator use in #if");
-		    return 0;
-		}
-		break;
-	    }
-	    if (value2 == optab2[x])
-		break;
-	}
-	if (priority >= optab2[x + 2])
-	{
-	    if (optab2[x])
-		myungetc(value2);
-	    break;
-	}
-	value2 = cond_get_exp(optab2[x + 2]);
-	switch ( optab2[x + 1] )
-	{
-	case MULT   : value *=  value2;                    break;
-	case BPLUS  : value +=  value2;                    break;
-	case BMINUS : value -=  value2;                    break;
-	case LSHIFT : value <<= value2;                    break;
-	case RSHIFT : value =   (unsigned)value >> value2; break;
-	case LESS   : value =   value <  value2;           break;
-	case LEQ    : value =   value <= value2;           break;
-	case GREAT  : value =   value >  value2;           break;
-	case GEQ    : value =   value >= value2;           break;
-	case EQ     : value =   value == value2;           break;
-	case NEQ    : value =   value != value2;           break;
-	case BAND   : value &=  value2;                    break;
-	case XOR    : value ^=  value2;                    break;
-	case BOR    : value |=  value2;                    break;
-	case LAND   : value =  value && value2;            break;
-	case LOR    : value =  value || value2;            break;
-	case MOD:
+        if (!ispunct(c))
+            break;
+        x = (_optab-' ')[c];
+        if (!x)
+            break;
+        value2 = mygetc();
+        for (;;x += 3)
+        {
+            if (!optab2[x])
+            {
+                myungetc(value2);
+                if (!optab2[x + 1])
+                {
+                    lexerror("illegal operator use in #if");
+                    return 0;
+                }
+                break;
+            }
+            if (value2 == optab2[x])
+                break;
+        }
+        if (priority >= optab2[x + 2])
+        {
+            if (optab2[x])
+                myungetc(value2);
+            break;
+        }
+        value2 = cond_get_exp(optab2[x + 2]);
+        switch ( optab2[x + 1] )
+        {
+        case MULT   : value *=  value2;                    break;
+        case BPLUS  : value +=  value2;                    break;
+        case BMINUS : value -=  value2;                    break;
+        case LSHIFT : value <<= value2;                    break;
+        case RSHIFT : value =   (unsigned)value >> value2; break;
+        case LESS   : value =   value <  value2;           break;
+        case LEQ    : value =   value <= value2;           break;
+        case GREAT  : value =   value >  value2;           break;
+        case GEQ    : value =   value >= value2;           break;
+        case EQ     : value =   value == value2;           break;
+        case NEQ    : value =   value != value2;           break;
+        case BAND   : value &=  value2;                    break;
+        case XOR    : value ^=  value2;                    break;
+        case BOR    : value |=  value2;                    break;
+        case LAND   : value =  value && value2;            break;
+        case LOR    : value =  value || value2;            break;
+        case MOD:
             if (!value2) {
                 lexerror("Modulo by zero in #if");
                 return 0;
             }
             value %= value2;
             break;
-	case DIV:
+        case DIV:
             if (!value2) {
                 lexerror("Division by zero in #if");
                 return 0;
             }
             value /= value2;
             break;
-	case QMARK  :
-	    do
-		c = exgetc();
-	    while (isspace(c));
+        case QMARK  :
+            do
+                c = exgetc();
+            while (isspace(c));
             if (c != ':')
-	    {
-		lexerror("'?' without ':' in #if");
-		myungetc(c);
-		return 0;
-	    }
-	    if (value)
-	    {
-		(void)cond_get_exp(1);
-		value = value2;
-	    }
-	    else
-		value = cond_get_exp(1);
-	    break;
-	}
+            {
+                lexerror("'?' without ':' in #if");
+                myungetc(c);
+                return 0;
+            }
+            if (value)
+            {
+                (void)cond_get_exp(1);
+                value = value2;
+            }
+            else
+                value = cond_get_exp(1);
+            break;
+        }
     }
     myungetc(c);
     return value;
@@ -2445,9 +2445,9 @@ free_inc_list(void)
     int i;
 
     for (i = 0; i < inc_list_size; i++)
-	free(inc_list[i]);
+        free(inc_list[i]);
     if (inc_list)
-	free(inc_list);
+        free(inc_list);
 
 }
 
@@ -2464,74 +2464,74 @@ set_inc_list(struct svalue *sv)
     free_inc_list();
     if (sv == 0)
     {
-	inc_list_size = 0;
-	inc_list = NULL;
-	return;
+        inc_list_size = 0;
+        inc_list = NULL;
+        return;
     }
     if (sv->type != T_POINTER)
     {
-	(void)fprintf(stderr, "'define_include_dirs' in master.c did not return an array.\n");
-	exit(1);
-	inc_list_size = 0;
-	inc_list = NULL;
-	return;
+        (void)fprintf(stderr, "'define_include_dirs' in master.c did not return an array.\n");
+        exit(1);
+        inc_list_size = 0;
+        inc_list = NULL;
+        return;
     }
     v = sv->u.vec;
     if (v->size == 0) {
-	(void)fprintf(stderr, "'define_include_dirs' returned an empty array\n");
-	inc_list_size = 0;
-	inc_list = NULL;
-	return;
+        (void)fprintf(stderr, "'define_include_dirs' returned an empty array\n");
+        inc_list_size = 0;
+        inc_list = NULL;
+        return;
     }
 
     tmp_inc_list = (char **) xalloc(v->size * sizeof (char *));
     inc_list_size = 0;
     for (i = 0; i < v->size; i++)
     {
-	if (v->item[i].type != T_STRING)
-	{
-	    (void)fprintf(stderr, "Illegal value returned from 'define_include_dirs' in master.c\n");
-	    continue;
-	}
-	p = v->item[i].u.string;
-	if (*p == '/')
-	    p++;
-	/*
-	 * Even make sure that the game administrator has not made an error.
-	 */
-	if (!legal_path(p))
-	{
-	    (void)fprintf(stderr, "'define_include_dirs' must give paths without any '..'\n");
-	    continue;
-	}
-	if ((end = strstr(p, "%s"))) {
-	    if (end != p + strlen(p) - 2) {
-		(void)fprintf(stderr, "'define_include_dirs' may only contain %%s last.");
-		continue;
-	    }
-	}
-	else
-	    end = p + strlen(p);
-	if (end != p && end[-1] != '/') {
-	    tmp_inc_list[inc_list_size] = xalloc(end - p + 2);
-	    strncpy(tmp_inc_list[inc_list_size], p, end - p);
-	    tmp_inc_list[inc_list_size][end - p] = '/';
-	    tmp_inc_list[inc_list_size][end - p + 1] = '\0';
-	} else {
-	    tmp_inc_list[inc_list_size] = xalloc(end - p + 1);
-	    strncpy(tmp_inc_list[inc_list_size], p, end - p);
-	    tmp_inc_list[inc_list_size][end - p] = '\0';
-	}
-	inc_list_size++;
+        if (v->item[i].type != T_STRING)
+        {
+            (void)fprintf(stderr, "Illegal value returned from 'define_include_dirs' in master.c\n");
+            continue;
+        }
+        p = v->item[i].u.string;
+        if (*p == '/')
+            p++;
+        /*
+         * Even make sure that the game administrator has not made an error.
+         */
+        if (!legal_path(p))
+        {
+            (void)fprintf(stderr, "'define_include_dirs' must give paths without any '..'\n");
+            continue;
+        }
+        if ((end = strstr(p, "%s"))) {
+            if (end != p + strlen(p) - 2) {
+                (void)fprintf(stderr, "'define_include_dirs' may only contain %%s last.");
+                continue;
+            }
+        }
+        else
+            end = p + strlen(p);
+        if (end != p && end[-1] != '/') {
+            tmp_inc_list[inc_list_size] = xalloc(end - p + 2);
+            strncpy(tmp_inc_list[inc_list_size], p, end - p);
+            tmp_inc_list[inc_list_size][end - p] = '/';
+            tmp_inc_list[inc_list_size][end - p + 1] = '\0';
+        } else {
+            tmp_inc_list[inc_list_size] = xalloc(end - p + 1);
+            strncpy(tmp_inc_list[inc_list_size], p, end - p);
+            tmp_inc_list[inc_list_size][end - p] = '\0';
+        }
+        inc_list_size++;
     }
     if (inc_list_size == 0) {
-	inc_list = NULL;
-	free(tmp_inc_list);
+        inc_list = NULL;
+        free(tmp_inc_list);
     } else if (inc_list_size != v->size) {
-	inc_list = (char **) xalloc(inc_list_size * sizeof (char *));
-	for (i = 0; i < inc_list_size; i++)
-	    inc_list[i] = tmp_inc_list[i];
-	free(tmp_inc_list);
+        inc_list = (char **) xalloc(inc_list_size * sizeof (char *));
+        for (i = 0; i < inc_list_size; i++)
+            inc_list[i] = tmp_inc_list[i];
+        free(tmp_inc_list);
     } else
-	inc_list = tmp_inc_list;
+        inc_list = tmp_inc_list;
 }

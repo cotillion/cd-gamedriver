@@ -46,7 +46,7 @@
 #include "nqueue.h"
 
 #ifndef IPTOS_LOWDELAY
-#define	IPTOS_LOWDELAY	0x10
+#define IPTOS_LOWDELAY  0x10
 #endif
 
 /*
@@ -69,7 +69,7 @@ enable_keepalive(int s)
     int keepalive = 1;
 
     if (setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char *)&keepalive, sizeof (keepalive)) == -1)
-	fatal("enable_keepalive: setsockopt() errno = %d.\n", errno);
+        fatal("enable_keepalive: setsockopt() errno = %d.\n", errno);
 }
 
 /*
@@ -81,7 +81,7 @@ enable_reuseaddr(int s)
     int reuse = 1;
 
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof (reuse)) == -1)
-	fatal("enable_reuseaddr: setsockopt() errno = %d.\n", errno);
+        fatal("enable_reuseaddr: setsockopt() errno = %d.\n", errno);
 }
 
 /*
@@ -93,7 +93,7 @@ enable_oobinline(int s)
     int oobinline = 1;
 
     if (setsockopt(s, SOL_SOCKET, SO_OOBINLINE, (char *)&oobinline, sizeof (oobinline)) == -1)
-	fatal("enable_oobinline: setsockopt() errno = %d.\n", errno);
+        fatal("enable_oobinline: setsockopt() errno = %d.\n", errno);
 }
 
 /*
@@ -124,7 +124,7 @@ enable_lowdelay(int s)
 // should not crash the mud so regularly. Outcommented until a proper fix
 // can be installed. Mercade.
 //    if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof (tos)) == -1)
-//	fatal("enable_lowdelay: setsockopt() errno = %d.\n", errno);
+//      fatal("enable_lowdelay: setsockopt() errno = %d.\n", errno);
 #endif
 }
 
@@ -149,8 +149,8 @@ at_mark(int fd)
 
     if (ioctl(fd, SIOCATMARK, &atmark) != -1)
     {
-	if (atmark)
-	    return 1;
+        if (atmark)
+            return 1;
     }
 
     return 0;

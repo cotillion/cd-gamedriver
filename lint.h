@@ -19,22 +19,22 @@
 /*
  * Some structure forward declarations are needed.
  */
-#define DEBUG_CHK_REF	1
-#define DEBUG_RESET	2
-#define DEBUG_CLEAN_UP	4
-#define DEBUG_SWAP	8
-#define DEBUG_OUTPUT	16
-#define DEBUG_CONNECT	32
-#define DEBUG_TELNET	64
-#define DEBUG_RESTORE	128
-#define DEBUG_OB_REF	256
-#define DEBUG_PROG_REF	512
-#define DEBUG_LOAD	1024
-#define DEBUG_DESTRUCT	2048
-#define DEBUG_LIVING	4096
-#define DEBUG_COMMAND	8192
+#define DEBUG_CHK_REF   1
+#define DEBUG_RESET     2
+#define DEBUG_CLEAN_UP  4
+#define DEBUG_SWAP      8
+#define DEBUG_OUTPUT    16
+#define DEBUG_CONNECT   32
+#define DEBUG_TELNET    64
+#define DEBUG_RESTORE   128
+#define DEBUG_OB_REF    256
+#define DEBUG_PROG_REF  512
+#define DEBUG_LOAD      1024
+#define DEBUG_DESTRUCT  2048
+#define DEBUG_LIVING    4096
+#define DEBUG_COMMAND   8192
 #define DEBUG_ADD_ACTION 16384
-#define DEBUG_SENTENCE	32768
+#define DEBUG_SENTENCE  32768
 #define DEBUG_BREAK_POINT 65536
 
 /* Calculation of average */

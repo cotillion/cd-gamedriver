@@ -11,4 +11,4 @@ struct mem_block {
     int max_size;
 };
 
-#define START_BLOCK_SIZE	4096
+#define START_BLOCK_SIZE        4096

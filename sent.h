@@ -8,8 +8,8 @@ struct sentence {
     unsigned short short_verb;
 };
 
-#define	V_SHORT		0x1	/* Only leading characters count */
-#define	V_NO_SPACE	0x2	/* A space is not required */
+#define V_SHORT         0x1     /* Only leading characters count */
+#define V_NO_SPACE      0x2     /* A space is not required */
 
 struct sentence *alloc_sentence(void);
 

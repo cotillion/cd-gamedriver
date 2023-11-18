@@ -47,11 +47,11 @@
 #include "backend.h"
 
 #ifndef INADDR_LOOPBACK
-#define	INADDR_LOOPBACK		0x7f000001
+#define INADDR_LOOPBACK         0x7f000001
 #endif
 
 #ifndef INADDR_NONE
-#define	INADDR_NONE		0xffffffff
+#define INADDR_NONE             0xffffffff
 #endif
 
 #ifndef EPROTO
@@ -69,10 +69,10 @@
  */
 
 typedef struct {
-    u_char	h_flags;
-    nqueue_t *	h_rawq;
-    nqueue_t *	h_canq;
-    nqueue_t *	h_outq;
+    u_char      h_flags;
+    nqueue_t *  h_rawq;
+    nqueue_t *  h_canq;
+    nqueue_t *  h_outq;
     ndesc_t  *  h_nd;
     struct task *task;
     hname_callback_t callback;
@@ -83,15 +83,15 @@ typedef struct {
 /*
  * Hostname Server Flags.
  */
-#define	HF_CLOSE	0x01
-#define	HF_ENABW	0x04
+#define HF_CLOSE        0x01
+#define HF_ENABW        0x04
 #define HF_INPUT        0x08
 /*
  * Queue Sizes.
  */
-#define	HNAME_RAWQ_SIZE	128
-#define	HNAME_CANQ_SIZE	128
-#define	HNAME_OUTQ_SIZE	128
+#define HNAME_RAWQ_SIZE 128
+#define HNAME_CANQ_SIZE 128
+#define HNAME_OUTQ_SIZE 128
 
 
 /*
@@ -135,7 +135,7 @@ hname_input(hname_t *hp)
     char *addr, *rname, *ip_name, *cp, *end;
 
     if ((hp->h_flags & HF_INPUT) == 0)
-	return;
+        return;
 
     hp->h_flags &= ~HF_INPUT;
     cp = (char *)nq_rptr(hp->h_canq);
@@ -176,45 +176,45 @@ hname_readbytes(hname_t *hp)
 
     if (!nq_full(hp->h_rawq))
     {
-	cc = nq_recv(hp->h_rawq, nd_fd(hp->h_nd), NULL);
-	if (cc == -1)
-	{
-	    switch (errno)
-	    {
-	    case EWOULDBLOCK:
-	    case EINTR:
-	    case EPROTO:
-	      break;
+        cc = nq_recv(hp->h_rawq, nd_fd(hp->h_nd), NULL);
+        if (cc == -1)
+        {
+            switch (errno)
+            {
+            case EWOULDBLOCK:
+            case EINTR:
+            case EPROTO:
+              break;
 
-	    default:
-	        hp->h_flags |= HF_CLOSE;
-	    }
-	    return;
-	}
-	if (cc == 0)
-	{
-	    hp->h_flags |= HF_CLOSE;
-	    return;
-	}
+            default:
+                hp->h_flags |= HF_CLOSE;
+            }
+            return;
+        }
+        if (cc == 0)
+        {
+            hp->h_flags |= HF_CLOSE;
+            return;
+        }
     }
     for (;;)
     {
-	if (nq_empty(hp->h_rawq))
-	{
-	    nq_init(hp->h_rawq);
-	    return;
-	}
-	c = nq_getc(hp->h_rawq);
-	if (c == '\n') {
-	    break;
-	}
+        if (nq_empty(hp->h_rawq))
+        {
+            nq_init(hp->h_rawq);
+            return;
+        }
+        c = nq_getc(hp->h_rawq);
+        if (c == '\n') {
+            break;
+        }
 
-	if (!nq_full(hp->h_canq))
-	    nq_putc(hp->h_canq, c);
+        if (!nq_full(hp->h_canq))
+            nq_putc(hp->h_canq, c);
     }
 
     if (nq_full(hp->h_canq))
-	nq_unputc(hp->h_canq);
+        nq_unputc(hp->h_canq);
     nq_putc(hp->h_canq, '\0');
     hp->h_flags |= HF_INPUT;
 }
@@ -228,7 +228,7 @@ hname_shutdown(hname_t *hp)
     nd_detach(hp->h_nd);
     hp->h_nd = 0;
     if (hp->shutdown_callback)
-	hp->shutdown_callback(hp);
+        hp->shutdown_callback(hp);
     hname_free(hp);
 }
 
@@ -240,20 +240,20 @@ hname_readline(void *vp)
 
     if (hp->h_flags & HF_CLOSE)
     {
-	hname_shutdown(hp);
-	return;
+        hname_shutdown(hp);
+        return;
     }
     hname_input(hp);
     hname_readbytes(hp);
     if (hp->h_flags & HF_CLOSE)
     {
-	hname_shutdown(hp);
-	return;
+        hname_shutdown(hp);
+        return;
     }
     if (hp->h_flags & HF_INPUT) {
-	reschedule_task(hp->task);
-	nd_disable(hp->h_nd, ND_R);
-	return;
+        reschedule_task(hp->task);
+        nd_disable(hp->h_nd, ND_R);
+        return;
     }
     hp->task = NULL;
     nd_enable(hp->h_nd, ND_R);
@@ -267,7 +267,7 @@ hname_disconnect(ndesc_t *nd, hname_t *hp)
 {
     hp->h_flags |= HF_CLOSE;
     if (!hp->task)
-	hp->task = create_task(hname_readline, hp);
+        hp->task = create_task(hname_readline, hp);
 }
 
 /*
@@ -292,10 +292,10 @@ hname_write(ndesc_t *nd, hname_t *hp)
                 nd_disable(nd, ND_W);
             return;
             }
-	}
+        }
 
-	if (!nq_empty(hp->h_outq))
-	    return;
+        if (!nq_empty(hp->h_outq))
+            return;
     }
 
     nq_init(hp->h_outq);
@@ -312,9 +312,9 @@ hname_read(ndesc_t *nd, hname_t *hp)
 {
     hname_readbytes(hp);
     if (hp->h_flags & (HF_INPUT | HF_CLOSE)) {
-	if (!hp->task)
-	    hp->task = create_task(hname_readline, hp);
-	nd_disable(nd, ND_R);
+        if (!hp->task)
+            hp->task = create_task(hname_readline, hp);
+        nd_disable(nd, ND_R);
     }
 }
 
@@ -330,31 +330,31 @@ hname_init(hname_callback_t callback, void (*shutdown_callback)(void *))
     int sockets[2];
 
     if(socketpair(AF_LOCAL, SOCK_STREAM, 0, sockets) == -1)
-	return NULL;
+        return NULL;
 
     pid = fork();
     if (pid == -1)
     {
-	(void)close(sockets[0]);
-	(void)close(sockets[1]);
-	return NULL;
+        (void)close(sockets[0]);
+        (void)close(sockets[1]);
+        return NULL;
     }
 
     if (pid == 0)
     {
-	close(sockets[0]);
-	dup2(sockets[1], 0);
-	dup2(sockets[1], 1);
+        close(sockets[0]);
+        dup2(sockets[1], 0);
+        dup2(sockets[1], 1);
 
-	for (int i = 3; i < FD_SETSIZE; i++)
-	    (void)close(i);
+        for (int i = 3; i < FD_SETSIZE; i++)
+            (void)close(i);
 
         snprintf(path, sizeof(path), "%s/hname", BINDIR);
         execl(path, "hname", NULL);
 
         fprintf(stderr, "exec of hname failed.\n");
 
-	exit(1);
+        exit(1);
     }
 
     enable_nbio(sockets[0]);
@@ -377,12 +377,12 @@ hname_sendreq(void *vp, const char *addr, u_short lport, u_short rport)
     hname_t *hp = vp;
 
     if (hp == NULL || hp->h_nd == NULL)
-	return;
+        return;
 
     snprintf(req, sizeof(req), "%s,%hu,%hu\n", addr, lport, rport);
 
     if (nq_avail(hp->h_outq) < strlen(req))
-	return;
+        return;
 
     nq_puts(hp->h_outq, (u_char *)req);
     nd_enable(hp->h_nd, ND_W);

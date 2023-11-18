@@ -1,17 +1,17 @@
 
 
 struct apair {
-    struct apair *next;		/* next pair in hashed at this value */
-    struct svalue arg, val;	/* index and value for this element */
-    unsigned int hashval;	/* cached hash value */
+    struct apair *next;         /* next pair in hashed at this value */
+    struct svalue arg, val;     /* index and value for this element */
+    unsigned int hashval;       /* cached hash value */
 };
 
 struct mapping {
-    unsigned int size;	        /* current size (no of pairs entries) */
-    unsigned int ref;		/* reference count */
-    unsigned int card;			/* number of elements in the mapping */
-    unsigned int mcard;		/* extend when card exceeds this value */
-    struct apair **pairs;	/* array of lists of elements */
+    unsigned int size;          /* current size (no of pairs entries) */
+    unsigned int ref;           /* reference count */
+    unsigned int card;                  /* number of elements in the mapping */
+    unsigned int mcard;         /* extend when card exceeds this value */
+    struct apair **pairs;       /* array of lists of elements */
 };    
 
 void free_mapping (struct mapping *);

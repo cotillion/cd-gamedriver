@@ -87,9 +87,9 @@ nd_append(ndesc_t *nd)
 {
     nd->nd_next = NULL;
     if ((nd->nd_prev = nd_tail) != NULL)
-	nd->nd_prev->nd_next = nd;
+        nd->nd_prev->nd_next = nd;
     else
-	nd_head = nd;
+        nd_head = nd;
     nd_tail = nd;
 }
 
@@ -101,14 +101,14 @@ static void
 nd_remove(ndesc_t *nd)
 {
     if (nd->nd_next != NULL)
-	nd->nd_next->nd_prev = nd->nd_prev;
+        nd->nd_next->nd_prev = nd->nd_prev;
     else
-	nd_tail = nd->nd_prev;
+        nd_tail = nd->nd_prev;
 
     if (nd->nd_prev != NULL)
-	nd->nd_prev->nd_next = nd->nd_next;
+        nd->nd_prev->nd_next = nd->nd_next;
     else
-	nd_head = nd->nd_next;
+        nd_head = nd->nd_next;
 }
 
 /*
@@ -281,7 +281,7 @@ nd_shutdown(void)
     {
         next = nd->nd_next;
 
-	if (nd->nd_sfunc != NULL)
-	    (*nd->nd_sfunc)(nd, nd->nd_vp);
+        if (nd->nd_sfunc != NULL)
+            (*nd->nd_sfunc)(nd, nd->nd_vp);
     }
 }

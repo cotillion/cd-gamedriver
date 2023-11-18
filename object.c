@@ -55,20 +55,20 @@ add_strbuf(struct savebuf *sbuf, char *str)
     size_t len = strlen(str);
 
     if (sbuf->f) {
-	fwrite(str, len, 1, sbuf->f);
-	return;
+        fwrite(str, len, 1, sbuf->f);
+        return;
     }
 
     if (sbuf->size + len + 1 > sbuf->max_size)
     {
-	char *nbuf;
-	size_t nsize;
-	nsize = ((len + sbuf->size) / STRBUFSIZE + 1) * STRBUFSIZE;
-	nbuf = xalloc(nsize);
-	(void)memcpy(nbuf, sbuf->buf, sbuf->size);
-	sbuf->max_size = nsize;
-	free(sbuf->buf);
-	sbuf->buf = nbuf;
+        char *nbuf;
+        size_t nsize;
+        nsize = ((len + sbuf->size) / STRBUFSIZE + 1) * STRBUFSIZE;
+        nbuf = xalloc(nsize);
+        (void)memcpy(nbuf, sbuf->buf, sbuf->size);
+        sbuf->max_size = nsize;
+        free(sbuf->buf);
+        sbuf->buf = nbuf;
     }
     (void)strcpy(&(sbuf->buf[sbuf->size]), str);
     sbuf->size += len;
@@ -88,23 +88,23 @@ save_string(struct savebuf *f, char *s)
     add_strbuf(f, "\"");
     while (*s)
     {
-	switch (*s)
-	{
-	case '"':
-	    add_strbuf(f, "\\\"");
-	    break;
-	case '\\':
-	    add_strbuf(f, "\\\\");
-	    break;
-	case '\n':
-	    add_strbuf(f, "\\n");
-	    break;
-	default:
-	    buf[0] = *s;
-	    add_strbuf(f, buf);
-	    break;
-	}
-	s++;
+        switch (*s)
+        {
+        case '"':
+            add_strbuf(f, "\\\"");
+            break;
+        case '\\':
+            add_strbuf(f, "\\\\");
+            break;
+        case '\n':
+            add_strbuf(f, "\\n");
+            break;
+        default:
+            buf[0] = *s;
+            add_strbuf(f, buf);
+            break;
+        }
+        s++;
     }
     add_strbuf(f, "\"");
 
@@ -121,8 +121,8 @@ save_array(struct savebuf *f, struct vector *v)
     add_strbuf(f, "({");
     for (i = 0; i < v->size; i++)
     {
-	save_one(f, &v->item[i]);
-	add_strbuf(f,",");
+        save_one(f, &v->item[i]);
+        add_strbuf(f,",");
     }
     add_strbuf(f,"})");
 }
@@ -136,13 +136,13 @@ save_mapping(struct savebuf *f, struct mapping *m)
     add_strbuf(f, "([");
     for (i = 0; i < m->size; i++)
     {
-	for(p = m->pairs[i]; p; p = p->next)
-	{
-	    save_one(f, &p->arg);
-	    add_strbuf(f,":");
-	    save_one(f, &p->val);
-	    add_strbuf(f,",");
-	}
+        for(p = m->pairs[i]; p; p = p->next)
+        {
+            save_one(f, &p->arg);
+            add_strbuf(f,":");
+            save_one(f, &p->val);
+            add_strbuf(f,",");
+        }
     }
     add_strbuf(f,"])");
 }
@@ -162,36 +162,36 @@ save_one(struct savebuf *f, struct svalue *v)
 
     switch(v->type) {
     case T_FLOAT:
-	(void)sprintf(buf,"#%a#", v->u.real);
-	add_strbuf(f, buf);
-	break;
+        (void)sprintf(buf,"#%a#", v->u.real);
+        add_strbuf(f, buf);
+        break;
     case T_NUMBER:
-	(void)sprintf(buf, "%lld", v->u.number);
-	add_strbuf(f, buf);
-	break;
+        (void)sprintf(buf, "%lld", v->u.number);
+        add_strbuf(f, buf);
+        break;
     case T_STRING:
-	save_string(f, v->u.string);
-	break;
+        save_string(f, v->u.string);
+        break;
     case T_POINTER:
-	save_array(f, v->u.vec);
-	break;
+        save_array(f, v->u.vec);
+        break;
     case T_MAPPING:
-	save_mapping(f, v->u.map);
-	break;
+        save_mapping(f, v->u.map);
+        break;
     case T_OBJECT:
-	(void)sprintf(buf, "$%d@", v->u.ob->created);
-	add_strbuf(f, buf);
-	add_strbuf(f, v->u.ob->name);
-	add_strbuf(f, "$");
+        (void)sprintf(buf, "$%d@", v->u.ob->created);
+        add_strbuf(f, buf);
+        add_strbuf(f, v->u.ob->name);
+        add_strbuf(f, "$");
         break;
 #if 0
     case T_FUNCTION:
-	add_strbuf(f, "&FUNCTION&"); /* XXX function */
-	break;
+        add_strbuf(f, "&FUNCTION&"); /* XXX function */
+        break;
 #endif
     default:
-	add_strbuf(f, "0");
-	break;
+        add_strbuf(f, "0");
+        break;
     }
 
     depth--;
@@ -213,11 +213,11 @@ void save_object(struct object *ob, char *file)
     /* struct svalue *v; */
 
     if (ob->flags & O_DESTRUCTED)
-	return;
+        return;
 
     file = check_valid_path(file, ob, "save_object", 1);
     if (file == 0)
-	error("Illegal use of save_object()\n");
+        error("Illegal use of save_object()\n");
 
     len = strlen(file);
     name = tmpalloc(len + 2 + 1);
@@ -231,9 +231,9 @@ void save_object(struct object *ob, char *file)
     (void)sprintf(tmp_name, "%s.tmp", name);
     f = fopen(tmp_name, "w");
     if (s_flag)
-	num_filewrite++;
+        num_filewrite++;
     if (f == 0) {
-	error("Could not open %s for a save.\n", tmp_name);
+        error("Could not open %s for a save.\n", tmp_name);
     }
     failed = 0;
 
@@ -244,41 +244,41 @@ void save_object(struct object *ob, char *file)
 
     for (j = 0; j < (int)ob->prog->num_inherited; j++)
     {
-	struct program *prog = ob->prog->inherit[j].prog;
-	if (ob->prog->inherit[j].type & TYPE_MOD_SECOND ||
-	    prog->num_variables == 0)
-	    continue;
-	for (i = 0; i < (int)prog->num_variables; i++) {
-	    struct svalue *v =
-		&ob->variables[i + ob->prog->inherit[j].variable_index_offset];
+        struct program *prog = ob->prog->inherit[j].prog;
+        if (ob->prog->inherit[j].type & TYPE_MOD_SECOND ||
+            prog->num_variables == 0)
+            continue;
+        for (i = 0; i < (int)prog->num_variables; i++) {
+            struct svalue *v =
+                &ob->variables[i + ob->prog->inherit[j].variable_index_offset];
 
-	    if (ob->prog->inherit[j].prog->variable_names[i].type & TYPE_MOD_STATIC)
-		continue;
-	    if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
-		|| v->type == T_MAPPING || v->type == T_OBJECT || v->type == T_FLOAT) {	/* XXX function */
-		add_strbuf(&sbuf, ob->prog->inherit[j].prog->variable_names[i].name);
-		add_strbuf(&sbuf, " ");
-		save_one(&sbuf, v);
-		add_strbuf(&sbuf, "\n");
-	    }
-	}
+            if (ob->prog->inherit[j].prog->variable_names[i].type & TYPE_MOD_STATIC)
+                continue;
+            if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
+                || v->type == T_MAPPING || v->type == T_OBJECT || v->type == T_FLOAT) { /* XXX function */
+                add_strbuf(&sbuf, ob->prog->inherit[j].prog->variable_names[i].name);
+                add_strbuf(&sbuf, " ");
+                save_one(&sbuf, v);
+                add_strbuf(&sbuf, "\n");
+            }
+        }
     }
 
     fwrite(sbuf.buf, sbuf.size, 1, f);
     free(sbuf.buf);
     if (fclose(f) == EOF)
-	failed = 1;
+        failed = 1;
     if (failed)
     {
-	(void)unlink(tmp_name);
-	error("Failed to save to file. Disk could be full.\n");
+        (void)unlink(tmp_name);
+        error("Failed to save to file. Disk could be full.\n");
     }
     if (rename(tmp_name, name) == -1)
     {
-	(void)unlink(tmp_name);
-	perror(name);
-	(void)printf("Failed to link %s to %s\n", tmp_name, name);
-	error("Failed to save object !\n");
+        (void)unlink(tmp_name);
+        perror(name);
+        (void)printf("Failed to link %s to %s\n", tmp_name, name);
+        error("Failed to save object !\n");
     }
 }
 
@@ -293,32 +293,32 @@ m_save_object(struct object *ob)
     struct svalue s = const0;
 
     if (ob->flags & O_DESTRUCTED)
-	return allocate_map(0);	/* XXX is this right /LA */
+        return allocate_map(0); /* XXX is this right /LA */
 
     ret = allocate_map((short)(ob->prog->num_variables +
-			       ob->prog->inherit[ob->prog->num_inherited - 1].
-			       variable_index_offset));
+                               ob->prog->inherit[ob->prog->num_inherited - 1].
+                               variable_index_offset));
 
     for (j = 0; j < (int)ob->prog->num_inherited; j++)
     {
-	struct program *prog = ob->prog->inherit[j].prog;
-	if (ob->prog->inherit[j].type & TYPE_MOD_SECOND ||
-	    prog->num_variables == 0)
-	    continue;
-	for (i = 0; i < (int)prog->num_variables; i++)
-	{
-	    struct svalue *v =
-		&ob->variables[i + ob->prog->inherit[j].
-			       variable_index_offset];
+        struct program *prog = ob->prog->inherit[j].prog;
+        if (ob->prog->inherit[j].type & TYPE_MOD_SECOND ||
+            prog->num_variables == 0)
+            continue;
+        for (i = 0; i < (int)prog->num_variables; i++)
+        {
+            struct svalue *v =
+                &ob->variables[i + ob->prog->inherit[j].
+                               variable_index_offset];
 
-	    if (prog->variable_names[i].type & TYPE_MOD_STATIC)
-		continue;
-	    free_svalue(&s);
-	    s.type = T_STRING;
-	    s.string_type = STRING_SSTRING;
-	    s.u.string = make_sstring(prog->variable_names[i].name);
-	    assign_svalue(get_map_lvalue(ret, &s, 1), v);
-	}
+            if (prog->variable_names[i].type & TYPE_MOD_STATIC)
+                continue;
+            free_svalue(&s);
+            s.type = T_STRING;
+            s.string_type = STRING_SSTRING;
+            s.u.string = make_sstring(prog->variable_names[i].name);
+            assign_svalue(get_map_lvalue(ret, &s, 1), v);
+        }
     }
 
     free_svalue(&s);
@@ -340,16 +340,16 @@ save_map(struct object *ob, struct mapping *map, char *file)
 
     file = check_valid_path(file, ob, "save_map", 1);
     if (file == 0)
-	error("Illegal use of save_map()\n");
+        error("Illegal use of save_map()\n");
 
     for (j = 0; j < map->size; j++)
     {
-	for (i = map->pairs[j]; i; i = i->next) {
-	    if (i->arg.type != T_STRING)
-		error("Non-string index in mapping\n");
-	    if (strpbrk(i->arg.u.string, " \n\r\t\f\v\b") != NULL)
-		error("Mapping index cannot have whitespace\n");
-	}
+        for (i = map->pairs[j]; i; i = i->next) {
+            if (i->arg.type != T_STRING)
+                error("Non-string index in mapping\n");
+            if (strpbrk(i->arg.u.string, " \n\r\t\f\v\b") != NULL)
+                error("Mapping index cannot have whitespace\n");
+        }
     }
 
     len = strlen(file);
@@ -364,9 +364,9 @@ save_map(struct object *ob, struct mapping *map, char *file)
     (void)sprintf(tmp_name, "%s.tmp", name);
     f = fopen(tmp_name, "w");
     if (s_flag)
-	num_filewrite++;
+        num_filewrite++;
     if (f == 0) {
-	error("Could not open %s for a save.\n", tmp_name);
+        error("Could not open %s for a save.\n", tmp_name);
     }
     failed = 0;
 
@@ -377,36 +377,36 @@ save_map(struct object *ob, struct mapping *map, char *file)
 
     for (j = 0; j < map->size; j++)
     {
-	for (i = map->pairs[j]; i; i = i->next) {
-	    struct svalue *v =
-		&i->val;
+        for (i = map->pairs[j]; i; i = i->next) {
+            struct svalue *v =
+                &i->val;
 
-	    if (i->arg.type != T_STRING)
-		continue;
-	    if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
-		|| v->type == T_MAPPING || v->type == T_OBJECT || v->type == T_FLOAT) { /* XXX function */
-		add_strbuf(&sbuf, i->arg.u.string);
-		add_strbuf(&sbuf, " ");
-		save_one(&sbuf, v);
-		add_strbuf(&sbuf, "\n");
-	    }
-	}
+            if (i->arg.type != T_STRING)
+                continue;
+            if (v->type == T_NUMBER || v->type == T_STRING || v->type == T_POINTER
+                || v->type == T_MAPPING || v->type == T_OBJECT || v->type == T_FLOAT) { /* XXX function */
+                add_strbuf(&sbuf, i->arg.u.string);
+                add_strbuf(&sbuf, " ");
+                save_one(&sbuf, v);
+                add_strbuf(&sbuf, "\n");
+            }
+        }
     }
     fwrite(sbuf.buf, sbuf.size, 1, f);
     free(sbuf.buf);
     if (fclose(f) == EOF)
-	failed = 1;
+        failed = 1;
     if (failed)
     {
-	(void)unlink(tmp_name);
-	error("Failed to save to file. Disk could be full.\n");
+        (void)unlink(tmp_name);
+        error("Failed to save to file. Disk could be full.\n");
     }
     if (rename(tmp_name, name) == -1)
     {
-	(void)unlink(tmp_name);
-	perror(name);
-	(void)printf("Failed to link %s to %s\n", tmp_name, name);
-	error("Failed to save mapping !\n");
+        (void)unlink(tmp_name);
+        perror(name);
+        (void)printf("Failed to link %s to %s\n", tmp_name, name);
+        error("Failed to save mapping !\n");
     }
 }
 
@@ -438,46 +438,46 @@ restore_array(char **str)
 
     tmp = (struct svalue *)xalloc(nmax * sizeof(struct svalue));
     for(k = 0; k < nmax; k++)
-	tmp[k] = const0;
+        tmp[k] = const0;
     i = 0;
     for(;;)
     {
-	if (**str == '}')
-	{
-	    if (*++*str == ')')
-	    {
-		struct vector *v;
+        if (**str == '}')
+        {
+            if (*++*str == ')')
+            {
+                struct vector *v;
 
-		++*str;
-		v = allocate_array(i);
-		(void)memcpy((char *)&v->item[0], (char *)tmp, sizeof(struct svalue) * i);
-		free(tmp);
-		return v;
-	    }
-	    else
-		break;
-	}
-	else
-	{
-	    if (i >= nmax)
-	    {
-		struct svalue *ntmp = (struct svalue *)xalloc(nmax * 2 * sizeof(struct svalue));
-		(void)memcpy((char *)ntmp, (char *)tmp, sizeof(struct svalue) * nmax);
-		free(tmp);
-		tmp = ntmp;
-		nmax *= 2;
-		for(k = i; k < nmax; k++)
-		    tmp[k] = const0;
-	    }
-	    if (!restore_one(&tmp[i++], str))
-		break;
-	    if (*(*str)++ != ',')
-		break;
-	}
-	}
-	for (i--; i >= 0; i--)
-		free_svalue(&(tmp[i]));
-	free(tmp);
+                ++*str;
+                v = allocate_array(i);
+                (void)memcpy((char *)&v->item[0], (char *)tmp, sizeof(struct svalue) * i);
+                free(tmp);
+                return v;
+            }
+            else
+                break;
+        }
+        else
+        {
+            if (i >= nmax)
+            {
+                struct svalue *ntmp = (struct svalue *)xalloc(nmax * 2 * sizeof(struct svalue));
+                (void)memcpy((char *)ntmp, (char *)tmp, sizeof(struct svalue) * nmax);
+                free(tmp);
+                tmp = ntmp;
+                nmax *= 2;
+                for(k = i; k < nmax; k++)
+                    tmp[k] = const0;
+            }
+            if (!restore_one(&tmp[i++], str))
+                break;
+            if (*(*str)++ != ',')
+                break;
+        }
+        }
+        for (i--; i >= 0; i--)
+                free_svalue(&(tmp[i]));
+        free(tmp);
     return 0;
 }
 
@@ -489,34 +489,34 @@ restore_mapping(char **str)
     m = allocate_map(0);
     for(;;)
     {
-	if (**str == ']')
-	{
-	    if (*++*str == ')')
-	    {
-		++*str;
-		return m;
-	    }
-	    else
-		break;
-	}
-	else
-	{
-	    struct svalue arg, *val;
-	    arg = const0;
-	    if (!restore_one(&arg, str))
-		break;
-      	    if (*(*str)++ != ':')
-	    {
-		free_svalue(&arg);
-		break;
-	    }
-	    val = get_map_lvalue(m, &arg, 1);
-	    free_svalue(&arg);
+        if (**str == ']')
+        {
+            if (*++*str == ')')
+            {
+                ++*str;
+                return m;
+            }
+            else
+                break;
+        }
+        else
+        {
+            struct svalue arg, *val;
+            arg = const0;
+            if (!restore_one(&arg, str))
+                break;
+            if (*(*str)++ != ':')
+            {
+                free_svalue(&arg);
+                break;
+            }
+            val = get_map_lvalue(m, &arg, 1);
+            free_svalue(&arg);
 
-	    if (!restore_one(val, str) ||
-		*(*str)++ != ',')
-		break;
-	}
+            if (!restore_one(val, str) ||
+                *(*str)++ != ',')
+                break;
+        }
     }
     free_mapping(m);
     return 0;
@@ -531,45 +531,45 @@ restore_one(struct svalue *v, char **msp)
     s = *msp;
     switch(*s) {
     case '(':
-	switch(*++s)
-	{
-	case '[':
-	    {
-		struct mapping *map;
-		s++;
-		map = restore_mapping(&s);
-		if (!map) {
-		    return 0;
-		}
-		free_svalue(v);
-		v->type = T_MAPPING;
-		v->u.map = map;
-	    }
-	    break;
+        switch(*++s)
+        {
+        case '[':
+            {
+                struct mapping *map;
+                s++;
+                map = restore_mapping(&s);
+                if (!map) {
+                    return 0;
+                }
+                free_svalue(v);
+                v->type = T_MAPPING;
+                v->u.map = map;
+            }
+            break;
 
-	case '{':
-	    {
-		struct vector *vec;
-		s++;
-		vec = restore_array(&s);
-		if (!vec) {
-		    return 0;
-		}
-		free_svalue(v);
-		v->type = T_POINTER;
-		v->u.vec = vec;
-	    }
-	    break;
+        case '{':
+            {
+                struct vector *vec;
+                s++;
+                vec = restore_array(&s);
+                if (!vec) {
+                    return 0;
+                }
+                free_svalue(v);
+                v->type = T_POINTER;
+                v->u.vec = vec;
+            }
+            break;
 
-	default:
-	    return 0;
-	}
-	break;
+        default:
+            return 0;
+        }
+        break;
     case '"':
-	for (p = s + 1, q = s; *p && *p != '"'; p++)
-	{
-	    if (*p == '\\') {
-		switch (*++p) {
+        for (p = s + 1, q = s; *p && *p != '"'; p++)
+        {
+            if (*p == '\\') {
+                switch (*++p) {
                     case '\0':
                         /* string can't end with \ */
                         return 0;
@@ -580,38 +580,38 @@ restore_one(struct svalue *v, char **msp)
                     default:
                         *q++ = *p;
                         break;
-		}
-	    } else {
-		/* Have to be able to restore old format... */
-		if (*p == '\r')
-		    *q++ = '\n';
-		else
-		    *q++ = *p;
-	    }
-	}
-	*q = 0;
-	if (*p != '"')
+                }
+            } else {
+                /* Have to be able to restore old format... */
+                if (*p == '\r')
+                    *q++ = '\n';
+                else
+                    *q++ = *p;
+            }
+        }
+        *q = 0;
+        if (*p != '"')
             return 0;
-	free_svalue(v);
-	v->type = T_STRING;
-	v->string_type = STRING_SSTRING;
-	v->u.string = make_sstring(s);
-	s = p+1;
-	break;
+        free_svalue(v);
+        v->type = T_STRING;
+        v->string_type = STRING_SSTRING;
+        v->u.string = make_sstring(s);
+        s = p+1;
+        break;
     case '$':
         {
-	    int ct;
+            int ct;
             struct object *ob;
             char name[1024];
             char *b = strchr(s + 1,'$');
 
-	    *name = '\0';
+            *name = '\0';
             if (b == NULL)
                 return 0;
             if (sscanf(s,"$%d@%[^$ \n\t]$",&ct,name) != 2)
                 return 0;
             ob = find_object2(name);
-	    free_svalue(v);
+            free_svalue(v);
             if (ob && ob->created == ct)
             {
                 v->type = T_OBJECT;
@@ -627,27 +627,27 @@ restore_one(struct svalue *v, char **msp)
         }
         break;
     case '#':
-	{
-	    double f;
-	    char *b = strchr(s + 1, '#');
-	    if (b == NULL)
-		return 0;
+        {
+            double f;
+            char *b = strchr(s + 1, '#');
+            if (b == NULL)
+                return 0;
             f = strtod(s + 1, NULL);
-	    free_svalue(v);
-	    v->type = T_FLOAT;
-	    v->u.real = f;
-	    s = b + 1;
-	}
-	break;
+            free_svalue(v);
+            v->type = T_FLOAT;
+            v->u.real = f;
+            s = b + 1;
+        }
+        break;
     default:
-	if (!isdigit(*s) && *s != '-')
-	    return 0;
-	free_svalue(v);
-	v->type = T_NUMBER;
-	v->u.number = atoll(s);
-	while(isdigit(*s) || *s == '-')
-	    s++;
-	break;
+        if (!isdigit(*s) && *s != '-')
+            return 0;
+        free_svalue(v);
+        v->type = T_NUMBER;
+        v->u.number = atoll(s);
+        while(isdigit(*s) || *s == '-')
+            s++;
+        break;
     }
     *msp = s;
     return 1;
@@ -664,64 +664,64 @@ restore_object(struct object *ob, char *file)
     int p;
 
     if (current_object != ob)
-	fatal("Bad argument to restore_object()\n");
+        fatal("Bad argument to restore_object()\n");
     if (ob->flags & O_DESTRUCTED)
-	return 0;
+        return 0;
 
     file = check_valid_path(file, ob, "restore_object", 0);
     if (file == 0)
-	error("Illegal use of restore_object()\n");
+        error("Illegal use of restore_object()\n");
 
     len = strlen(file);
     name = tmpalloc(len + 3);
     (void)strcpy(name, file);
     if (name[len-2] == '.' && name[len-1] == 'c')
-	name[len-1] = 'o';
+        name[len-1] = 'o';
     else
-	(void)strcat(name, ".o");
+        (void)strcat(name, ".o");
     f = fopen(name, "r");
     if (s_flag)
-	num_fileread++;
+        num_fileread++;
     if (!f || fstat(fileno(f), &st) == -1) {
-	if (f)
-	    (void)fclose(f);
-	return 0;
+        if (f)
+            (void)fclose(f);
+        return 0;
     }
     if (st.st_size == 0) {
-	(void)fclose(f);
-	return 0;
+        (void)fclose(f);
+        return 0;
     }
     buff = xalloc((size_t)st.st_size + 1);
     current_object = ob;
 
     for (;;) {
-	struct svalue *v;
+        struct svalue *v;
 
-	if (fgets(buff, (int)st.st_size + 1, f) == 0)
-	    break;
-	/* Remember that we have a newline at end of buff ! */
-	space = strchr(buff, ' ');
-	if (space == 0 || space - buff >= sizeof (var)) {
-	    (void)fclose(f);
-	    free(buff);
-	    error("Illegal format when restoring %s.\n", file);
-	}
-	(void)strncpy(var, buff, (size_t)(space - buff));
-	var[space - buff] = '\0';
-	p = find_status(ob->prog, var, TYPE_MOD_STATIC);
-	if (p == -1)
-	    continue;
-	v = &ob->variables[p];
-	space++;
-	if (!restore_one(v, &space)) {
-	    (void)fclose(f);
-	    free(buff);
-	    error("Illegal format when restoring %s from %s.\n", var, file);
-	}
+        if (fgets(buff, (int)st.st_size + 1, f) == 0)
+            break;
+        /* Remember that we have a newline at end of buff ! */
+        space = strchr(buff, ' ');
+        if (space == 0 || space - buff >= sizeof (var)) {
+            (void)fclose(f);
+            free(buff);
+            error("Illegal format when restoring %s.\n", file);
+        }
+        (void)strncpy(var, buff, (size_t)(space - buff));
+        var[space - buff] = '\0';
+        p = find_status(ob->prog, var, TYPE_MOD_STATIC);
+        if (p == -1)
+            continue;
+        v = &ob->variables[p];
+        space++;
+        if (!restore_one(v, &space)) {
+            (void)fclose(f);
+            free(buff);
+            error("Illegal format when restoring %s from %s.\n", var, file);
+        }
     }
     current_object = save;
     if (d_flag & DEBUG_RESTORE)
-	debug_message("Object %s restored from %s.\n", ob->name, file);
+        debug_message("Object %s restored from %s.\n", ob->name, file);
     free(buff);
     (void)fclose(f);
     return 1;
@@ -734,21 +734,21 @@ m_restore_object(struct object *ob, struct mapping *map)
     struct apair *j;
 
     if (ob->flags & O_DESTRUCTED)
-	return 0;
+        return 0;
 
     for (i = 0; i < map->size; i++)
     {
-	for (j = map->pairs[i]; j ; j = j->next)
-	{
-	    if (j->arg.type != T_STRING)
-		continue;
+        for (j = map->pairs[i]; j ; j = j->next)
+        {
+            if (j->arg.type != T_STRING)
+                continue;
 
-	    if ((p = find_status(ob->prog, j->arg.u.string, TYPE_MOD_STATIC))
-		== -1)
-		continue;
+            if ((p = find_status(ob->prog, j->arg.u.string, TYPE_MOD_STATIC))
+                == -1)
+                continue;
 
-	    assign_svalue(&ob->variables[p], &j->val);
-	}
+            assign_svalue(&ob->variables[p], &j->val);
+        }
     }
 
     return 1;
@@ -764,60 +764,60 @@ restore_map(struct object *ob, struct mapping *map, char *file)
     struct stat st;
 
     if (current_object != ob)
-	fatal("Bad argument to restore_map()\n");
+        fatal("Bad argument to restore_map()\n");
     if (ob->flags & O_DESTRUCTED)
-	return;
+        return;
 
     file = check_valid_path(file, ob, "restore_map", 0);
     if (file == 0)
-	error("Illegal use of restore_map()\n");
+        error("Illegal use of restore_map()\n");
 
     len = strlen(file);
     name = tmpalloc(len + 2 + 1);
     (void)strcpy(name, file);
     if (name[len-2] == '.' && name[len-1] == 'c')
-	name[len-1] = 'o';
+        name[len-1] = 'o';
     else
-	(void)strcat(name, ".o");
+        (void)strcat(name, ".o");
     f = fopen(name, "r");
     if (s_flag)
-	num_fileread++;
+        num_fileread++;
     if (!f || fstat(fileno(f), &st) == -1) {
-	if (f)
-	    (void)fclose(f);
-	return;
+        if (f)
+            (void)fclose(f);
+        return;
     }
     if (st.st_size == 0) {
-	(void)fclose(f);
-	return;
+        (void)fclose(f);
+        return;
     }
     buff = xalloc((size_t)st.st_size + 1);
 
     for (;;) {
-	struct svalue v;
+        struct svalue v;
 
-	v.type = T_STRING;
-	v.string_type = STRING_SSTRING;
+        v.type = T_STRING;
+        v.string_type = STRING_SSTRING;
 
-	if (fgets(buff, (int)st.st_size + 1, f) == 0)
-	    break;
-	/* Remember that we have a newline at end of buff ! */
-	space = strchr(buff, ' ');
-	if (space == 0) {
-	    (void)fclose(f);
-	    free(buff);
-	    error("Illegal format when restoring %s.\n", file);
-	}
-	*space++ = '\0';
-	v.u.string = make_sstring(buff);
+        if (fgets(buff, (int)st.st_size + 1, f) == 0)
+            break;
+        /* Remember that we have a newline at end of buff ! */
+        space = strchr(buff, ' ');
+        if (space == 0) {
+            (void)fclose(f);
+            free(buff);
+            error("Illegal format when restoring %s.\n", file);
+        }
+        *space++ = '\0';
+        v.u.string = make_sstring(buff);
 
-	if (!restore_one(get_map_lvalue(map,&v,1), &space)) {
-	    (void)fclose(f);
-	    free(buff);
-	    free_svalue(&v);
-	    error("Illegal format when restoring %s.\n", file);
-	}
-	free_svalue(&v);
+        if (!restore_one(get_map_lvalue(map,&v,1), &space)) {
+            (void)fclose(f);
+            free(buff);
+            free_svalue(&v);
+            error("Illegal format when restoring %s.\n", file);
+        }
+        free_svalue(&v);
     }
     current_object = save;
     free(buff);
@@ -828,27 +828,27 @@ void
 free_object(struct object *ob, char *from)
 {
     if (d_flag & DEBUG_OB_REF)
-	(void)printf("Subtr ref to ob %s: %d (%s)\n", ob->name,
-		      ob->ref, from);
+        (void)printf("Subtr ref to ob %s: %d (%s)\n", ob->name,
+                      ob->ref, from);
     if (!ob->ref || --ob->ref > 0)
-	return;
+        return;
     if (!(ob->flags & O_DESTRUCTED))
     {
-	/* This is fatal, and should never happen. */
-	fatal("FATAL: Object %p %s ref count 0, but not destructed (from %s).\n",
-	    ob, ob->name, from);
+        /* This is fatal, and should never happen. */
+        fatal("FATAL: Object %p %s ref count 0, but not destructed (from %s).\n",
+            ob, ob->name, from);
     }
     if (ob->interactive)
-	fatal("Tried to free an interactive object.\n");
+        fatal("Tried to free an interactive object.\n");
     /*
      * If the program is freed, then we can also free the variable
      * declarations.
      */
     if (ob->name) {
-	if (lookup_object_hash(ob->name) == ob)
-	    fatal("Freeing object %s but name still in name table\n", ob->name);
-	free(ob->name);
-	ob->name = 0;
+        if (lookup_object_hash(ob->name) == ob)
+            fatal("Freeing object %s but name still in name table\n", ob->name);
+        free(ob->name);
+        ob->name = 0;
     }
     tot_alloc_object--;
     tot_alloc_dest_object--;
@@ -862,8 +862,8 @@ add_ref(struct object *ob, char *from)
 {
     INCREF(ob->ref);
     if (d_flag & DEBUG_OB_REF)
-	(void)printf("Add reference to object %s: %d (%s)\n", ob->name,
-	       ob->ref, from);
+        (void)printf("Add reference to object %s: %d (%s)\n", ob->name,
+               ob->ref, from);
 }
 
 /*
@@ -920,26 +920,26 @@ remove_all_objects()
     exception_frame.e_catch = 0;
 
     for (;;) {
-	ob = obj_list;
-	n = 0;
-	while (ob == master_ob ||
-	       ob == vbfc_object ||
-	       ob == auto_ob ||
-	       ob == simul_efun_ob) {
-	    ob = ob->next_all;
-	    if (n++ > 3)
-		break;
-	}
-	if (n > 3 || ob == 0)
-	    break;
-	if (setjmp(exception_frame.e_context))
-	    clear_state();
-	else {
-	    exception = &exception_frame;
-	    ob->prog->flags &= ~PRAGMA_RESIDENT;
-	    destruct_object(ob);
-	    exception = NULL;
-	}
+        ob = obj_list;
+        n = 0;
+        while (ob == master_ob ||
+               ob == vbfc_object ||
+               ob == auto_ob ||
+               ob == simul_efun_ob) {
+            ob = ob->next_all;
+            if (n++ > 3)
+                break;
+        }
+        if (n > 3 || ob == 0)
+            break;
+        if (setjmp(exception_frame.e_context))
+            clear_state();
+        else {
+            exception = &exception_frame;
+            ob->prog->flags &= ~PRAGMA_RESIDENT;
+            destruct_object(ob);
+            exception = NULL;
+        }
     }
     /*
      * In case we have objects referenced through
@@ -984,19 +984,19 @@ check_ob_ref(struct object *ob, char *from)
     int i;
 
     for (o = obj_list, i=0; o; o = o->next_all) {
-	if (o->inherit == ob)
-	    i++;
+        if (o->inherit == ob)
+            i++;
     }
     if (i+1 > ob->ref) {
-	fatal("FATAL too many references to inherited object %s (%d) from %s.\n",
-	      ob->name, ob->ref, from);
-	if (current_object)
-	    (void)fprintf(stderr, "current_object: %s\n", current_object->name);
-	for (o = obj_list; o; o = o->next_all) {
-	    if (o->inherit != ob)
-		continue;
-	    (void)fprintf(stderr, "  %s\n", ob->name);
-	}
+        fatal("FATAL too many references to inherited object %s (%d) from %s.\n",
+              ob->name, ob->ref, from);
+        if (current_object)
+            (void)fprintf(stderr, "current_object: %s\n", current_object->name);
+        for (o = obj_list; o; o = o->next_all) {
+            if (o->inherit != ob)
+                continue;
+            (void)fprintf(stderr, "  %s\n", ob->name);
+        }
     }
 }
 #endif /* 0 */
@@ -1016,17 +1016,17 @@ find_living_object(char *str)
     num_searches++;
     hl = &hashed_living[LivHash(str)];
     for (obp = hl; *obp; obp = &(*obp)->next_hashed_living) {
-	search_length++;
-	if (!((*obp)->flags & O_ENABLE_COMMANDS))
-	    continue;
-	if (strcmp((*obp)->living_name, str) == 0)
-	    break;
+        search_length++;
+        if (!((*obp)->flags & O_ENABLE_COMMANDS))
+            continue;
+        if (strcmp((*obp)->living_name, str) == 0)
+            break;
     }
     if (*obp == 0)
-	return 0;
+        return 0;
     /* Move the found ob first. */
     if (obp == hl)
-	return *obp;
+        return *obp;
     tmp = *obp;
     *obp = tmp->next_hashed_living;
     tmp->next_hashed_living = *hl;
@@ -1045,26 +1045,26 @@ find_living_objects(char *str)
     num_searches++;
     hl = &hashed_living[LivHash(str)];
     for (count = 0, obp = hl; *obp; obp = &(*obp)->next_hashed_living) {
-	search_length++;
-	if (!((*obp)->flags & O_ENABLE_COMMANDS))
-	    continue;
-	if (strcmp((*obp)->living_name, str) == 0)
-	    count++;
+        search_length++;
+        if (!((*obp)->flags & O_ENABLE_COMMANDS))
+            continue;
+        if (strcmp((*obp)->living_name, str) == 0)
+            count++;
     }
 
     ret = allocate_array(count);
 
     for (count = 0, obp = hl; *obp; obp = &(*obp)->next_hashed_living)
     {
-	search_length++;
-	if (!((*obp)->flags & O_ENABLE_COMMANDS))
-	    continue;
-	if (strcmp((*obp)->living_name, str) == 0)
-	{
-	    ret->item[count].type = T_OBJECT;
-	    ret->item[count++].u.ob = *obp;
-	    add_ref(*obp, "find_living_objects");
-	}
+        search_length++;
+        if (!((*obp)->flags & O_ENABLE_COMMANDS))
+            continue;
+        if (strcmp((*obp)->living_name, str) == 0)
+        {
+            ret->item[count].type = T_OBJECT;
+            ret->item[count++].u.ob = *obp;
+            add_ref(*obp, "find_living_objects");
+        }
     }
 
     return ret;
@@ -1076,18 +1076,18 @@ set_living_name(struct object *ob, char *str)
     struct object **hl;
 
     if (ob->flags & O_DESTRUCTED)
-	return;
+        return;
     if (ob->living_name) {
-	remove_living_name(ob);
+        remove_living_name(ob);
 #ifdef SUPER_SNOOP
-	if (ob->interactive && ob->interactive->snoop_fd >= 0) {
-	    (void) close(ob->interactive->snoop_fd);
-	    ob->interactive->snoop_fd = -1;
-	}
+        if (ob->interactive && ob->interactive->snoop_fd >= 0) {
+            (void) close(ob->interactive->snoop_fd);
+            ob->interactive->snoop_fd = -1;
+        }
 #endif
     }
     if (!*str)
-	return;
+        return;
     num_living_names++;
     hl = &hashed_living[LivHash(str)];
     ob->next_hashed_living = *hl;
@@ -1106,16 +1106,16 @@ remove_living_name(struct object *ob)
 
     num_living_names--;
     if (!ob->living_name)
-	fatal("remove_living_name: no living name set.\n");
+        fatal("remove_living_name: no living name set.\n");
     hl = &hashed_living[LivHash(ob->living_name)];
     while(*hl) {
-	if (*hl == ob)
-	    break;
-	hl = &(*hl)->next_hashed_living;
+        if (*hl == ob)
+            break;
+        hl = &(*hl)->next_hashed_living;
     }
     if (*hl == 0)
-	fatal("remove_living_name: Object named %s no in hash list.\n",
-	      ob->living_name);
+        fatal("remove_living_name: Object named %s no in hash list.\n",
+              ob->living_name);
     *hl = ob->next_hashed_living;
     free_sstring(ob->living_name);
     ob->next_hashed_living = 0;
@@ -1128,7 +1128,7 @@ stat_living_objects()
     static char tmp[400];
 
     (void)sprintf(tmp,"Hash table of living objects:\n-----------------------------\n%d living named objects, average search length: %4.2f\n",
-	    num_living_names, (double)search_length / num_searches);
+            num_living_names, (double)search_length / num_searches);
     return tmp;
 }
 
@@ -1137,8 +1137,8 @@ reference_prog (struct program *progp, char *from)
 {
     INCREF(progp->ref);
     if (d_flag & DEBUG_PROG_REF)
-	(void)printf("reference_prog: %s ref %d (%s)\n",
-	    progp->name, progp->ref, from);
+        (void)printf("reference_prog: %s ref %d (%s)\n",
+            progp->name, progp->ref, from);
 }
 
 struct program *prog_list;
@@ -1148,14 +1148,14 @@ void register_program(struct program *prog)
 {
     if (prog_list)
     {
-	prog->next_all = prog_list;
-	prog->prev_all = prog_list->prev_all;
-	prog_list->prev_all->next_all = prog;
-	prog_list->prev_all = prog;
-	prog_list = prog;
+        prog->next_all = prog_list;
+        prog->prev_all = prog_list->prev_all;
+        prog_list->prev_all->next_all = prog;
+        prog_list->prev_all = prog;
+        prog_list = prog;
     }
     else
-	prog_list = prog->next_all = prog->prev_all = prog;
+        prog_list = prog->next_all = prog->prev_all = prog;
 }
 
 /*
@@ -1172,19 +1172,19 @@ free_prog(struct program *progp)
     int i;
 
     if (d_flag & DEBUG_PROG_REF)
-	(void)printf("free_prog: %s\n", progp->name);
+        (void)printf("free_prog: %s\n", progp->name);
     if (!progp->ref || --progp->ref > 0)
-	return;
+        return;
     if (progp->ref < 0)
-	fatal("Negative ref count for prog ref.\n");
+        fatal("Negative ref count for prog ref.\n");
 
     if (progp == prog_list)
-	prog_list = progp->next_all;
+        prog_list = progp->next_all;
 
     progp->prev_all->next_all = progp->next_all;
     progp->next_all->prev_all = progp->prev_all;
     if (progp->next_all == progp)
-	prog_list = 0;
+        prog_list = 0;
 
     total_program_size -= progp->exec_size;
 
@@ -1193,24 +1193,24 @@ free_prog(struct program *progp)
 
     /* Free all function names. */
     for (i=0; i < progp->num_functions; i++)
-	if (progp->functions[i].name)
-	    free_sstring(progp->functions[i].name);
+        if (progp->functions[i].name)
+            free_sstring(progp->functions[i].name);
 
     /* Free all variable names */
     for (i=0; i < progp->num_variables; i++)
-	free_sstring(progp->variable_names[i].name);
+        free_sstring(progp->variable_names[i].name);
 
     /* Free all inherited objects */
     for (i=0; i < progp->num_inherited - 1; i++)
     {
-	free_prog(progp->inherit[i].prog);
-	free_sstring(progp->inherit[i].name);
+        free_prog(progp->inherit[i].prog);
+        free_sstring(progp->inherit[i].name);
     }
     free_sstring(progp->inherit[i].name);
     free(progp->name);
     free((char *)progp->program);
     if (progp->line_numbers != 0)
-	free((char *)progp->line_numbers);
+        free((char *)progp->line_numbers);
     free((char *)progp);
 }
 
@@ -1221,25 +1221,25 @@ create_object(struct object *ob)
 
     if (!(ob->flags & O_CREATED))
     {
-	ob->flags |= O_CREATED;
-	ob->created = current_time;
-	for (i = 0; i < (int)ob->prog->num_inherited; i++)
-	    if (!(ob->prog->inherit[i].type & TYPE_MOD_SECOND))
-	    {
-		if (ob->prog->inherit[i].prog->ctor_index !=
-		    (unsigned short) -1)
-		{
-		    call_function(ob, i,
-				  (unsigned int)ob->prog->inherit[i].prog->ctor_index, 0);
-		    pop_stack();
-		}
-	    }
-	if (search_for_function("create", ob->prog))
-	{
-	    call_function(ob, function_inherit_found,
-			  (unsigned int)function_index_found, 0);
-	    pop_stack();
-	}
+        ob->flags |= O_CREATED;
+        ob->created = current_time;
+        for (i = 0; i < (int)ob->prog->num_inherited; i++)
+            if (!(ob->prog->inherit[i].type & TYPE_MOD_SECOND))
+            {
+                if (ob->prog->inherit[i].prog->ctor_index !=
+                    (unsigned short) -1)
+                {
+                    call_function(ob, i,
+                                  (unsigned int)ob->prog->inherit[i].prog->ctor_index, 0);
+                    pop_stack();
+                }
+            }
+        if (search_for_function("create", ob->prog))
+        {
+            call_function(ob, function_inherit_found,
+                          (unsigned int)function_index_found, 0);
+            pop_stack();
+        }
     }
 }
 void
@@ -1251,33 +1251,33 @@ recreate_object(struct object *ob, struct object *old_ob)
     if (!(ob->flags & O_CREATED))
     {
         need_create = 1;
-	ob->flags |= O_CREATED;
-	if (!ob->created)
-	    ob->created = current_time;
-	for (i = 0; i < (int)ob->prog->num_inherited; i++)
-	    if (!(ob->prog->inherit[i].type & TYPE_MOD_SECOND))
-	    {
-		if (ob->prog->inherit[i].prog->ctor_index !=
-		    (unsigned short) -1)
-		{
-		    call_function(ob, i,
-				  (unsigned int)ob->prog->inherit[i].prog->ctor_index, 0);
-		    pop_stack();
-		}
-	    }
+        ob->flags |= O_CREATED;
+        if (!ob->created)
+            ob->created = current_time;
+        for (i = 0; i < (int)ob->prog->num_inherited; i++)
+            if (!(ob->prog->inherit[i].type & TYPE_MOD_SECOND))
+            {
+                if (ob->prog->inherit[i].prog->ctor_index !=
+                    (unsigned short) -1)
+                {
+                    call_function(ob, i,
+                                  (unsigned int)ob->prog->inherit[i].prog->ctor_index, 0);
+                    pop_stack();
+                }
+            }
     }
     if (search_for_function("recreate", ob->prog))
     {
-	push_object(old_ob);
-	call_function(ob, function_inherit_found,
-		      (unsigned int)function_index_found, 1);
-	pop_stack();
+        push_object(old_ob);
+        call_function(ob, function_inherit_found,
+                      (unsigned int)function_index_found, 1);
+        pop_stack();
     }
     else if (need_create && search_for_function("create", ob->prog))
     {
         call_function(ob, function_inherit_found,
-		      (unsigned int)function_index_found, 0);
-	pop_stack();
+                      (unsigned int)function_index_found, 0);
+        pop_stack();
     }
 }
 
@@ -1295,9 +1295,9 @@ inherit_list(struct object *ob)
 
     for (inh = 0; inh < (int)ob->prog->num_inherited; inh++ )
     {
-	ret->item[inh].type = T_STRING;
-	ret->item[inh].string_type = STRING_MSTRING;
-	ret->item[inh].u.string = add_slash(ob->prog->inherit[inh].prog->name);
+        ret->item[inh].type = T_STRING;
+        ret->item[inh].string_type = STRING_MSTRING;
+        ret->item[inh].u.string = add_slash(ob->prog->inherit[inh].prog->name);
     }
     return ret;
 }
@@ -1318,6 +1318,6 @@ warnobsolete(struct object *ob, char *msg)
 
     ob->flags |= O_OBSOLETE_WARNING;
     if (!warnobsoleteflag)
-	return;
+        return;
     (void)fprintf(stderr, "OBSOLETE: %s: %s\n", ob->name, msg);
 }

@@ -40,10 +40,10 @@
 #endif
 #define malloc xalloc
 
-#define YYMAXDEPTH	600
+#define YYMAXDEPTH      600
 
-#define BREAK_ON_STACK		0x40000
-#define BREAK_FROM_CASE		0x80000
+#define BREAK_ON_STACK          0x40000
+#define BREAK_FROM_CASE         0x80000
 
 /* make shure that this struct has a size that is a power of two */
 struct case_heap_entry { long long key; offset_t addr; short line; };
@@ -58,13 +58,13 @@ static int has_inherited;
  */
 
 #define BASIC_TYPE(e,t) ((e) == TYPE_ANY ||\
-			 (e) == (t) ||\
-			 (t) == TYPE_ANY)
+                         (e) == (t) ||\
+                         (t) == TYPE_ANY)
 
 #define TYPE(e,t) (BASIC_TYPE((e) & TYPE_MASK, (t) & TYPE_MASK) ||\
-		   (((e) & TYPE_MOD_POINTER) && ((t) & TYPE_MOD_POINTER) &&\
-		    BASIC_TYPE((e) & (TYPE_MASK & ~TYPE_MOD_POINTER),\
-			       (t) & (TYPE_MASK & ~TYPE_MOD_POINTER))))
+                   (((e) & TYPE_MOD_POINTER) && ((t) & TYPE_MOD_POINTER) &&\
+                    BASIC_TYPE((e) & (TYPE_MASK & ~TYPE_MOD_POINTER),\
+                               (t) & (TYPE_MASK & ~TYPE_MOD_POINTER))))
 
 #define FUNCTION(n) ((struct function *)mem_block[A_FUNCTIONS].block + (n))
 #define VARIABLE(n) ((struct variable *)mem_block[A_VARIABLES].block + (n))
@@ -77,8 +77,8 @@ static int has_inherited;
  * checked and required.
  */
 static int exact_types;
-extern int pragma_strict_types;	/* Maintained by lex.c */
-extern int pragma_save_binary;	/* Save this in the binary shadow dir */
+extern int pragma_strict_types; /* Maintained by lex.c */
+extern int pragma_save_binary;  /* Save this in the binary shadow dir */
 extern int pragma_no_inherit;
 extern int pragma_no_shadow;
 extern int pragma_no_clone;
@@ -181,7 +181,7 @@ static int max_number_of_locals = 0;
  */
 struct mem_block type_of_arguments;
 
-struct program *prog;	/* Is returned to the caller of yyparse */
+struct program *prog;   /* Is returned to the caller of yyparse */
 
 /*
  * Compare two types, and return true if they are compatible.
@@ -190,18 +190,18 @@ static int
 compatible_types(int t1, int t2)
 {
     if (t1 == TYPE_UNKNOWN || t2 == TYPE_UNKNOWN)
-	return 0;
+        return 0;
     if (t1 == t2)
-	return 1;
+        return 1;
     if ((t1|TYPE_MOD_NO_MASK|TYPE_MOD_STATIC|TYPE_MOD_PRIVATE|TYPE_MOD_PUBLIC)
-	== (t2|TYPE_MOD_NO_MASK|TYPE_MOD_STATIC|TYPE_MOD_PRIVATE|TYPE_MOD_PUBLIC))
-	return 1;
+        == (t2|TYPE_MOD_NO_MASK|TYPE_MOD_STATIC|TYPE_MOD_PRIVATE|TYPE_MOD_PUBLIC))
+        return 1;
     if (t1 == TYPE_ANY || t2 == TYPE_ANY)
-	return 1;
+        return 1;
     if ((t1 & TYPE_MOD_POINTER) && (t2 & TYPE_MOD_POINTER)) {
-	if ((t1 & TYPE_MASK) == (TYPE_ANY|TYPE_MOD_POINTER) ||
-	    (t2 & TYPE_MASK) == (TYPE_ANY|TYPE_MOD_POINTER))
-	    return 1;
+        if ((t1 & TYPE_MASK) == (TYPE_ANY|TYPE_MOD_POINTER) ||
+            (t2 & TYPE_MASK) == (TYPE_ANY|TYPE_MOD_POINTER))
+            return 1;
     }
     if (t1 == TYPE_MAPPING)
         return 1;
@@ -217,8 +217,8 @@ add_arg_type(unsigned short type)
 {
     struct mem_block *mbp = &type_of_arguments;
     while (mbp->current_size + sizeof type > mbp->max_size) {
-	mbp->max_size <<= 1;
-	mbp->block = realloc(mbp->block, (size_t)mbp->max_size);
+        mbp->max_size <<= 1;
+        mbp->block = realloc(mbp->block, (size_t)mbp->max_size);
     }
     (void)memcpy(mbp->block + mbp->current_size, &type, sizeof type);
     mbp->current_size += sizeof type;
@@ -240,7 +240,7 @@ static unsigned short*
 get_argument_ptr(int n)
 {
   return &((unsigned short *)
-	   (type_of_arguments.block + type_of_arguments.current_size))[-n];
+           (type_of_arguments.block + type_of_arguments.current_size))[-n];
 }
 /*
  * Get type of argument number 'arg', where there are
@@ -378,62 +378,62 @@ defined_function(char *s)
         return 0;
     }
     if (sub_name == (char *)2)
-	for (offset = 0; offset < mem_block[A_FUNCTIONS].current_size;
-	     offset += sizeof (struct function))
-	    {
-		funp = (struct function *)&mem_block[A_FUNCTIONS].block[offset];
-		/* Only index, prog, and type will be defined. */
-		if (real_name == funp->name)
-		    {
-			function_index_found = offset / sizeof (struct function);
-			function_prog_found = 0;
-			function_type_mod_found = funp->type_flags & TYPE_MOD_MASK;
-			function_inherit_found = mem_block[A_INHERITS].current_size / sizeof(struct inherit);
-			return 1;
-		    }
-	    }
+        for (offset = 0; offset < mem_block[A_FUNCTIONS].current_size;
+             offset += sizeof (struct function))
+            {
+                funp = (struct function *)&mem_block[A_FUNCTIONS].block[offset];
+                /* Only index, prog, and type will be defined. */
+                if (real_name == funp->name)
+                    {
+                        function_index_found = offset / sizeof (struct function);
+                        function_prog_found = 0;
+                        function_type_mod_found = funp->type_flags & TYPE_MOD_MASK;
+                        function_inherit_found = mem_block[A_INHERITS].current_size / sizeof(struct inherit);
+                        return 1;
+                    }
+            }
     else
-	if (sub_name - s > 2)
-	{
-	    super_name = alloca((size_t)(sub_name - s - 1));
-	    (void)memcpy(super_name, s, (size_t)(sub_name - s - 2));
-	    super_name[sub_name - s - 2] = 0;
-	    if (strcmp(super_name, "this") == 0)
-		return defined_function(sub_name);
-	}
-	else
-	    s = sub_name;
+        if (sub_name - s > 2)
+        {
+            super_name = alloca((size_t)(sub_name - s - 1));
+            (void)memcpy(super_name, s, (size_t)(sub_name - s - 2));
+            super_name[sub_name - s - 2] = 0;
+            if (strcmp(super_name, "this") == 0)
+                return defined_function(sub_name);
+        }
+        else
+            s = sub_name;
 
     /* Look for the function in the inherited programs
-	*/
+        */
 
     for (inh = mem_block[A_INHERITS].current_size / sizeof (struct inherit) - 1;
           inh >= 0; inh -= ((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog->
-	 num_inherited)
+         num_inherited)
     {
-	if (super_name &&
-	    strcmp(super_name, ((struct inherit *)(mem_block[A_INHERITS].block))[inh].name) == 0)
-	    search = sub_name;
-	else
-	    search = s;
+        if (super_name &&
+            strcmp(super_name, ((struct inherit *)(mem_block[A_INHERITS].block))[inh].name) == 0)
+            search = sub_name;
+        else
+            search = s;
         if (search_for_ext_function (search,
-	    ((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog))
-	{
-	    /* Adjust for inherit-type */
-	    int type = ((struct inherit *)mem_block[A_INHERITS].block)[inh].type;
+            ((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog))
+        {
+            /* Adjust for inherit-type */
+            int type = ((struct inherit *)mem_block[A_INHERITS].block)[inh].type;
 
-	    if (function_type_mod_found & TYPE_MOD_PRIVATE)
-		type &= ~TYPE_MOD_PUBLIC;
-	    if (function_type_mod_found & TYPE_MOD_PUBLIC)
-		type &= ~TYPE_MOD_PRIVATE;
+            if (function_type_mod_found & TYPE_MOD_PRIVATE)
+                type &= ~TYPE_MOD_PUBLIC;
+            if (function_type_mod_found & TYPE_MOD_PUBLIC)
+                type &= ~TYPE_MOD_PRIVATE;
             function_type_mod_found |= type & TYPE_MOD_MASK;
 
-	    function_inherit_found += inh -
-		(((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog->
-		 num_inherited - 1);
+            function_inherit_found += inh -
+                (((struct inherit *)(mem_block[A_INHERITS].block))[inh].prog->
+                 num_inherited - 1);
 
-	    return 1;
-	}
+            return 1;
+        }
     }
     return 0;
 }
@@ -449,9 +449,9 @@ static INLINE void
 push_address()
 {
     if (comp_stackp >= COMPILER_STACK_SIZE) {
-	    yyerror("Compiler stack overflow");
-	    comp_stackp++;
-	    return;
+            yyerror("Compiler stack overflow");
+            comp_stackp++;
+            return;
     }
     comp_stack[comp_stackp++] = mem_block[A_PROGRAM].current_size;
 }
@@ -466,9 +466,9 @@ static INLINE void
 push_explicit(offset_t address)
 {
     if (comp_stackp >= COMPILER_STACK_SIZE) {
-	    yyerror("Compiler stack overflow");
-	    comp_stackp++;
-	    return;
+            yyerror("Compiler stack overflow");
+            comp_stackp++;
+            return;
     }
     comp_stack[comp_stackp++] = address;
 }
@@ -477,10 +477,10 @@ static INLINE offset_t
 pop_address()
 {
     if (comp_stackp == 0)
-	fatal("Compiler stack underflow.\n");
+        fatal("Compiler stack underflow.\n");
     if (comp_stackp > COMPILER_STACK_SIZE) {
-	    --comp_stackp;
-	    return 0;
+            --comp_stackp;
+            return 0;
     }
     offset_t ret = comp_stack[--comp_stackp];
     return ret;
@@ -508,86 +508,86 @@ define_new_function(char *name, char num_arg, unsigned char num_local, offset_t 
          *   If it was defined in the current program, use that definition.
          */
          /* Point to the function definition found
-	  */
+          */
         if (function_prog_found)
-	{
-	    funp = &function_prog_found->functions[function_index_found];
-	}
-	else
-	    funp = FUNCTION(function_index_found);
+        {
+            funp = &function_prog_found->functions[function_index_found];
+        }
+        else
+            funp = FUNCTION(function_index_found);
 
-	/* If it was declared in the current program, and not a prototype,
-	 * it is a double definition.
-	 */
-	if (!(funp->type_flags & NAME_PROTOTYPE) &&
-	    !function_prog_found)
-	{
-	    char buff[500];
+        /* If it was declared in the current program, and not a prototype,
+         * it is a double definition.
+         */
+        if (!(funp->type_flags & NAME_PROTOTYPE) &&
+            !function_prog_found)
+        {
+            char buff[500];
 
-	    (void)snprintf(buff, sizeof(buff), "Redeclaration of function %s", name);
-	    yyerror (buff);
-	    return;
-	}
+            (void)snprintf(buff, sizeof(buff), "Redeclaration of function %s", name);
+            yyerror (buff);
+            return;
+        }
 
-	/* If neither the new nor the old definition is a prototype,
-	 * it must be a redefinition of an inherited function.
-	 * Check for nomask.
-	 */
-	if ((funp->type_flags & TYPE_MOD_NO_MASK) &&
-	    !(funp->type_flags & NAME_PROTOTYPE))
-	{
-	    char buff[500];
+        /* If neither the new nor the old definition is a prototype,
+         * it must be a redefinition of an inherited function.
+         * Check for nomask.
+         */
+        if ((funp->type_flags & TYPE_MOD_NO_MASK) &&
+            !(funp->type_flags & NAME_PROTOTYPE))
+        {
+            char buff[500];
 
-	    (void)snprintf(buff, sizeof(buff), "Illegal to redefine nomask function %s", name);
-	    yyerror (buff);
-	    return;
-	}
+            (void)snprintf(buff, sizeof(buff), "Illegal to redefine nomask function %s", name);
+            yyerror (buff);
+            return;
+        }
 
-	/* Check types
-	 */
-	if (exact_types &&
-	    ((funp->type_flags & TYPE_MASK) != TYPE_UNKNOWN))
-	{
-	    if (funp->num_arg != num_arg &&
-		!(funp->type_flags & TYPE_MOD_VARARGS))
-	    {
-	        yyerror("Incorrect number of arguments");
-		return;
-	    }
+        /* Check types
+         */
+        if (exact_types &&
+            ((funp->type_flags & TYPE_MASK) != TYPE_UNKNOWN))
+        {
+            if (funp->num_arg != num_arg &&
+                !(funp->type_flags & TYPE_MOD_VARARGS))
+            {
+                yyerror("Incorrect number of arguments");
+                return;
+            }
 /*
  * This is just a nuisance! /JnA
 
-	    else if (!(funp->type_flags & NAME_STRICT_TYPES))
-	    {
-	        yyerror("Function called not compiled with type testing");
-		return;
-	    }
+            else if (!(funp->type_flags & NAME_STRICT_TYPES))
+            {
+                yyerror("Function called not compiled with type testing");
+                return;
+            }
 */
 
 #if 0
             else
-	    {
-	        int i;
-		/* Now check argument types
-		 */
-		for (i=0; i < num_arg; i++)
-		{
-		}
-	    }
+            {
+                int i;
+                /* Now check argument types
+                 */
+                for (i=0; i < num_arg; i++)
+                {
+                }
+            }
 #endif
-	}
-	/* If it is a prototype for a function that has already been defined,
-	 * we don't need it.
-	 */
-	if ((type_flags & NAME_PROTOTYPE) && !function_prog_found)
-	    return;
+        }
+        /* If it is a prototype for a function that has already been defined,
+         * we don't need it.
+         */
+        if ((type_flags & NAME_PROTOTYPE) && !function_prog_found)
+            return;
 
-	/* If the function was defined in an inherited program, we need to
-	 * make a new definition here.
-	 */
-	if (function_prog_found) {
-	    funp = &fun;
-	}
+        /* If the function was defined in an inherited program, we need to
+         * make a new definition here.
+         */
+        if (function_prog_found) {
+            funp = &fun;
+        }
     }
     else { /* Function was not defined before, we need a new definition */
         funp = &fun;
@@ -612,33 +612,33 @@ define_new_function(char *name, char num_arg, unsigned char num_local, offset_t 
         funp->type_flags |= NAME_STRICT_TYPES;
 
     if (!exact_types || num_arg == 0) {
-	    argument_start_index = INDEX_START_NONE;
+            argument_start_index = INDEX_START_NONE;
     }
     else
     {
-	int i;
-	/*
-	 * Save the start of argument types.
-	 */
-	argument_start_index =
-	    mem_block[A_ARGUMENT_TYPES].current_size /
-		sizeof (unsigned short);
-	for (i=0; i < num_arg; i++)
-	    add_to_mem_block(A_ARGUMENT_TYPES, (char *)&type_of_locals[i],
-			     sizeof type_of_locals[i]);
+        int i;
+        /*
+         * Save the start of argument types.
+         */
+        argument_start_index =
+            mem_block[A_ARGUMENT_TYPES].current_size /
+                sizeof (unsigned short);
+        for (i=0; i < num_arg; i++)
+            add_to_mem_block(A_ARGUMENT_TYPES, (char *)&type_of_locals[i],
+                             sizeof type_of_locals[i]);
     }
     if (funp == &fun)
     {
-	funp->name = make_sstring(name);
+        funp->name = make_sstring(name);
         add_to_mem_block (A_FUNCTIONS, (char *)&fun, sizeof fun);
-	add_to_mem_block(A_ARGUMENT_INDEX, (char *)&argument_start_index,
+        add_to_mem_block(A_ARGUMENT_INDEX, (char *)&argument_start_index,
                     sizeof argument_start_index);
     }
     else
     {
-	(void)memcpy(&mem_block[A_ARGUMENT_INDEX].
-		     block[function_index_found * sizeof(argument_start_index)],
-		     (char *)&argument_start_index, sizeof(argument_start_index));
+        (void)memcpy(&mem_block[A_ARGUMENT_INDEX].
+                     block[function_index_found * sizeof(argument_start_index)],
+                     (char *)&argument_start_index, sizeof(argument_start_index));
     }
     return;
 }
@@ -648,7 +648,7 @@ is_simul_efun (char *name)
 {
 
     if (simul_efun_ob != 0 && search_for_function (name, simul_efun_ob->prog) &&
-	!(function_type_mod_found & (TYPE_MOD_PRIVATE | TYPE_MOD_STATIC)))
+        !(function_type_mod_found & (TYPE_MOD_PRIVATE | TYPE_MOD_STATIC)))
         return 1;
     return 0;
 }
@@ -662,9 +662,9 @@ define_variable(char *name, int type)
     n = check_declared(name);
     if (n != -1 && (n & TYPE_MOD_NO_MASK))
     {
-	char *p = (char *)alloca(80 + strlen(name));
-	(void)sprintf(p, "Illegal to redefine 'nomask' variable \"%s\"", name);
-	yyerror(p);
+        char *p = (char *)alloca(80 + strlen(name));
+        (void)sprintf(p, "Illegal to redefine 'nomask' variable \"%s\"", name);
+        yyerror(p);
     }
 
     dummy.name = make_sstring(name);
@@ -682,18 +682,18 @@ store_prog_string(char *str)
 
     for (i = mem_block[A_STRTAB].current_size - sizeof(short); i >= 0; i -= sizeof(short))
     {
-	char *str2;
-	unsigned short offset;
-	((char *)&offset)[0] = mem_block[A_STRTAB].block[i];
-	((char *)&offset)[1] = mem_block[A_STRTAB].block[i + 1];
-	str2 = mem_block[A_RODATA].block + offset;
-	if (strcmp(str, str2) == 0)
-	    return offset;
+        char *str2;
+        unsigned short offset;
+        ((char *)&offset)[0] = mem_block[A_STRTAB].block[i];
+        ((char *)&offset)[1] = mem_block[A_STRTAB].block[i + 1];
+        str2 = mem_block[A_RODATA].block + offset;
+        if (strcmp(str, str2) == 0)
+            return offset;
     }
     if (mem_block[A_RODATA].current_size >= 0x10000)
     {
-	yyerror("Too large rodata segment!\n");
-	mem_block[A_RODATA].current_size = 0;
+        yyerror("Too large rodata segment!\n");
+        mem_block[A_RODATA].current_size = 0;
     }
     addr = mem_block[A_RODATA].current_size;
 
@@ -729,11 +729,11 @@ ins_label(offset_t lbl)
     offset_t here = mem_block[A_PROGRAM].current_size;
     l = &((struct label *)mem_block[A_LABELS].block)[lbl];
     if (l->address != EMPTY_LABEL)
-	    ins_address(l->address);
+            ins_address(l->address);
     else
     {
-	    ins_address(l->link);
-	    l->link = here;
+            ins_address(l->link);
+            l->link = here;
     }
 }
 
@@ -748,8 +748,8 @@ set_label(offset_t lbl, offset_t addr)
 
     for (link1 = l->link; link1 != EMPTY_LABEL; link1 = next)
     {
-	    next = read_address(link1);
-	    upd_address(link1, addr);
+            next = read_address(link1);
+            upd_address(link1, addr);
     }
 
     l->link = EMPTY_LABEL;
@@ -757,13 +757,13 @@ set_label(offset_t lbl, offset_t addr)
 
 
 static INLINE long long cmp_case_keys(struct case_heap_entry *entry1,
-				struct case_heap_entry *entry2, int is_str)
+                                struct case_heap_entry *entry2, int is_str)
 {
     if (is_str)
-	return strcmp(mem_block[A_RODATA].block + (unsigned short)entry1->key,
-		      mem_block[A_RODATA].block + (unsigned short)entry2->key);
+        return strcmp(mem_block[A_RODATA].block + (unsigned short)entry1->key,
+                      mem_block[A_RODATA].block + (unsigned short)entry2->key);
     else
-	return entry1->key - entry2->key;
+        return entry1->key - entry2->key;
 }
 
 void
@@ -781,67 +781,67 @@ add_to_case_heap(int block_index, struct case_heap_entry *entry, struct case_hea
     }
     else
     {
-	    current_heap = current_case_string_heap;
+            current_heap = current_case_string_heap;
         is_str = 1;
     }
 
     if (entry2 && cmp_case_keys(entry, entry2, is_str) > 0)
-	return;
+        return;
 
     heap_top = (struct case_heap_entry *)(mem_block[block_index].block + mem_block[block_index].current_size);
     heap_entry = (struct case_heap_entry *)(mem_block[block_index].block + current_heap);
 
     for (; heap_entry < heap_top; heap_entry++)
     {
-	if (cmp_case_keys(heap_entry, entry, is_str) > 0)
-	    break;
+        if (cmp_case_keys(heap_entry, entry, is_str) > 0)
+            break;
 
-	if (heap_entry->addr == OFFSET_MAX)
-	{
+        if (heap_entry->addr == OFFSET_MAX)
+        {
         /* Range entry, compare next also */
-	    if (cmp_case_keys(++heap_entry, entry, is_str) >= 0)
-	    {
-		/* Duplicate case label! */
-		char buff[100];
+            if (cmp_case_keys(++heap_entry, entry, is_str) >= 0)
+            {
+                /* Duplicate case label! */
+                char buff[100];
 
-		(void)sprintf(buff, "Duplicate case label (line %d)",
-			heap_entry->line);
-		yyerror(buff);
-		break;
-	    }
-	}
+                (void)sprintf(buff, "Duplicate case label (line %d)",
+                        heap_entry->line);
+                yyerror(buff);
+                break;
+            }
+        }
     }
 
     if (heap_entry < heap_top &&
-	(!cmp_case_keys(heap_entry, entry, is_str) ||
-	 (entry2 && (cmp_case_keys(entry2, heap_entry, is_str) >= 0))))
+        (!cmp_case_keys(heap_entry, entry, is_str) ||
+         (entry2 && (cmp_case_keys(entry2, heap_entry, is_str) >= 0))))
     {
-	/* Duplicate case label! */
-	char buff[100];
+        /* Duplicate case label! */
+        char buff[100];
 
-	(void)sprintf(buff, "Duplicate case label (line %d)",
-		heap_entry->line);
-	yyerror(buff);
+        (void)sprintf(buff, "Duplicate case label (line %d)",
+                heap_entry->line);
+        yyerror(buff);
     }
 
 
     to = ((char *)(heap_entry + 1 + (entry2 != NULL))) -
-	mem_block[block_index].block;
+        mem_block[block_index].block;
     from = ((char *)heap_entry) - mem_block[block_index].block;
     size = (heap_top - heap_entry) * sizeof(*entry);
 
     add_to_mem_block(block_index, (char *)entry, sizeof(*entry));
     if (entry2)
-	add_to_mem_block(block_index, (char *)entry2, sizeof(*entry2));
+        add_to_mem_block(block_index, (char *)entry2, sizeof(*entry2));
 
     if (heap_entry != heap_top)
     {
-	(void)memmove(mem_block[block_index].block + to,
-		      mem_block[block_index].block + from, (size_t)size);
-	(void)memcpy(mem_block[block_index].block + from, entry, sizeof(*entry));
-	if (entry2)
-	    (void)memcpy(mem_block[block_index].block + from + sizeof(*entry),
-			 entry2, sizeof(*entry));
+        (void)memmove(mem_block[block_index].block + to,
+                      mem_block[block_index].block + from, (size_t)size);
+        (void)memcpy(mem_block[block_index].block + from, entry, sizeof(*entry));
+        if (entry2)
+            (void)memcpy(mem_block[block_index].block + from + sizeof(*entry),
+                         entry2, sizeof(*entry));
     }
 }
 
@@ -853,7 +853,7 @@ static void
 transfer_init_control()
 {
     if (mem_block[A_PROGRAM].current_size - 2 == last_initializer_end) {
-	    mem_block[A_PROGRAM].current_size -= 3;
+            mem_block[A_PROGRAM].current_size -= 3;
     }
     else
     {
@@ -861,7 +861,7 @@ transfer_init_control()
          * Change the address of the last jump after the last
          * initializer to this point.
          */
-	    upd_address(last_initializer_end, mem_block[A_PROGRAM].current_size);
+            upd_address(last_initializer_end, mem_block[A_PROGRAM].current_size);
     }
 }
 

@@ -29,7 +29,7 @@ void
 f_ftoi(int num_arg)
 {
     if (sp->u.real > (double)LLONG_MAX || sp->u.real < (double)LLONG_MIN)
-	error("Integer overflow.\n");
+        error("Integer overflow.\n");
     sp->type = T_NUMBER;
     sp->u.number = sp->u.real;
 }
