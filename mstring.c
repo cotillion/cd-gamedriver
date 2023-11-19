@@ -67,7 +67,7 @@ allocate_mstring(size_t len)
 {
     char *cp;
     if (len < 0 || len > MAX_STRING_SIZE)
-        error("Illegal string size.\n"); 
+        error("Illegal string size.\n");
 
     cp = (char *)xalloc(mstring_header + len + 1) + mstring_header;
 #ifdef DEBUG
@@ -222,7 +222,7 @@ make_sstring(const char *cp)
     }
     len = strlen(cp);
     if (len < 0 || len > MAX_STRING_SIZE)
-        error("Illegal string size.\n"); 
+        error("Illegal string size.\n");
 
     xp = (char *)xalloc(sstring_header + len + 1) + sstring_header;
 #ifdef DEBUG
@@ -288,7 +288,7 @@ multiply_string(char *str, long long factor)
     }
 
     if (factor > MAX_STRING_SIZE)
-        error("Illegal string size.\n"); 
+        error("Illegal string size.\n");
 
     newsize = size * factor;
     result = allocate_mstring(newsize);
@@ -299,7 +299,7 @@ multiply_string(char *str, long long factor)
 }
 
 
-void 
+void
 add_string_status(char *debinf)
 {
     int i, n;
@@ -323,7 +323,7 @@ add_string_status(char *debinf)
         if (max < n)
             max = n;
         sum1 += n;
-        sum2 += n * n;
+        sum2 += (long)n * n;
     }
 
     if (sum1 == 0)
@@ -345,7 +345,7 @@ add_string_status(char *debinf)
 
     (void)strcat(debinf, "\nShared string hash table:\n");
     (void)strcat(debinf, "-------------------------     Strings        Bytes\n");
-    
+
     (void)sprintf(debinf + strlen(debinf), "Total asked for\t\t%12d %12ld\n",
             allocd_strings_shared, allocd_bytes_shared);
     (void)sprintf(debinf + strlen(debinf), "Actually used\t\t%12d %12ld\n",
@@ -373,7 +373,7 @@ add_string_status(char *debinf)
 
     (void)strcat(debinf, "\nMalloced string table:\n");
     (void)strcat(debinf, "----------------------\t     Strings        Bytes\n");
-    
+
     (void)sprintf(debinf + strlen(debinf), "Total asked for\t\t%12d %12ld\n",
             allocd_strings_malloced, allocd_bytes_malloced);
     (void)sprintf(debinf + strlen(debinf), "Actually used\t\t%12d %12ld\n",
