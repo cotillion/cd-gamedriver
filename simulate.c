@@ -1246,8 +1246,7 @@ find_object(char *str)
 }
 
 /* same as find_object, but don't call 'create()' if not loaded */
-struct object *find_object_no_create(str)
-    char *str;
+struct object *find_object_no_create(char *str)
 {
     struct object *ob;
 

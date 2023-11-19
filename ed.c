@@ -322,7 +322,7 @@ regexp  *optpat(void);
 /*      append.c        */
 
 
-int 
+int
 append(int line, int glob)
 {
     if(glob)
@@ -377,13 +377,13 @@ more_append(char *str)
     (void)ins(str);
 }
 
-static void 
+static void
 count_blanks(int line)
 {
     _count_blanks(gettxtl(getptr(line)), 0);
 }
 
-static void 
+static void
 _count_blanks(char *str, int blanks)
 {
     for ( ; *str; str++ )
@@ -397,7 +397,7 @@ _count_blanks(char *str, int blanks)
 
 /*      ckglob.c        */
 
-int 
+int
 ckglob()
 {
     regexp      *glbpat;
@@ -449,7 +449,7 @@ ckglob()
  *      empty; Test whether they have valid values.
  */
 
-int 
+int
 deflt(int def1, int def2)
 {
     if(P_NLINES == 0)
@@ -470,7 +470,7 @@ deflt(int def1, int def2)
  * ... It could check to<=P_LASTLN ... igp
  */
 
-int 
+int
 del(int from, int to)
 {
     LINE        *first, *last, *next, *tmp;
@@ -493,7 +493,7 @@ del(int from, int to)
 }
 
 
-int 
+int
 dolst(int line1, int line2)
 {
     int oldflags = P_FLAGS, p;
@@ -506,7 +506,7 @@ dolst(int line1, int line2)
 
 /*      doprnt.c        */
 
-int 
+int
 doprnt(int from, int to)
 {
     from = (from < 1) ? 1 : from;
@@ -526,9 +526,9 @@ doprnt(int from, int to)
     return(0);
 }
 
-void prntln(char *str, int vflg, int len) 
+void prntln(char *str, int vflg, int len)
 {
-    char *line, start[(MAXLINE << 1) + 2]; 
+    char *line, start[(MAXLINE << 1) + 2];
 
     line = start;
     if (len)
@@ -566,7 +566,7 @@ void prntln(char *str, int vflg, int len)
 
 /*      egets.c */
 
-int 
+int
 egets(char *str, int size, FILE *stream)
 {
     int c = 0, count;
@@ -614,7 +614,7 @@ egets(char *str, int size, FILE *stream)
 }  /* egets */
 
 
-int 
+int
 doread(int lin, char *fname)
 {
     FILE        *fp;
@@ -661,7 +661,7 @@ doread(int lin, char *fname)
 }  /* doread */
 
 
-int 
+int
 dowrite(int from, int to, char *fname, int apflg)
 {
     FILE        *fp;
@@ -732,7 +732,7 @@ int find(regexp *pat, int dir)
 }
 
 #if 0
-/*      findg.c by Ted Gaunt for global searches....    much like 'grep' 
+/*      findg.c by Ted Gaunt for global searches....    much like 'grep'
     especially useful when line numbering is turned on.
     */
 int
@@ -819,7 +819,7 @@ getfn(int writeflg)
 }  /* getfn */
 
 
-int 
+int
 getnum(int first)
 {
     regexp      *srchpat;
@@ -884,7 +884,7 @@ getnum(int first)
 #define FIRST 1
 #define NOTFIRST 0
 
-int 
+int
 getone()
 {
     int c, i, num;
@@ -938,8 +938,7 @@ getlst()
 
 /*      getptr.c        */
 
-LINE *getptr(num)
-    int num;
+LINE *getptr(int num)
 {
     LINE        *ptr;
     int j;
@@ -959,7 +958,7 @@ LINE *getptr(num)
 
 /*      getrhs.c        */
 
-int 
+int
 getrhs(char *sub)
 {
     char delim = *inptr++;
@@ -1083,7 +1082,7 @@ int ins(char *str)
 
 /*      join.c  */
 
-int 
+int
 join(int first, int last)
 {
     char buf[MAXLINE];
@@ -1224,13 +1223,13 @@ optpat()
 }
 
 /* regerror.c */
-void 
+void
 regerror(char *s)
 {
     (void)add_message("ed: %s\n", s );
 }
 
-int 
+int
 set()
 {
     char        word[16];
@@ -1242,11 +1241,11 @@ set()
     } else
         inptr++;
 
-    if ( (*inptr == NL))
+    if (*inptr == NL)
     {
         (void)add_message("ed version %d.%d\n", version/100, version%100);
         for(t = tbl; t->t_str; t+=2) {
-            (void)add_message("%s:%s ", t->t_str, 
+            (void)add_message("%s:%s ", t->t_str,
                               P_FLAGS & t->t_or_mask ?"on":"off");
         }
         (void)add_message("\nshiftwidth:%d\n",P_SHIFTWIDTH);
@@ -1303,7 +1302,7 @@ relink(LINE *a, LINE *x, LINE *y, LINE *b)
 }
 #endif
 
-void 
+void
 set_ed_buf()
 {
     relink(&P_LINE0, &P_LINE0, &P_LINE0, &P_LINE0);
@@ -1511,7 +1510,7 @@ indent(char *buf)
         shi = 0;        /* in case a comment starts on this line */
     else if ((in_ppcontrol || *p == '#') && p[1] != '\'')
     {
-        if (*p == '#') 
+        if (*p == '#')
         {
             /*
              * Check for #if, #else or #endif pps's,
@@ -1961,7 +1960,7 @@ clean_pps_stack(void)
     }
 }
 
-static int 
+static int
 indent_code()
 {
     /*
@@ -1985,7 +1984,7 @@ indent_code()
     small_shift = full_shift / 2;
 
     P_FCHANGED = TRUE;
-    for (lineno = 1; lineno <= P_LASTLN; lineno++) 
+    for (lineno = 1; lineno <= P_LASTLN; lineno++)
     {
         setCurLn(lineno);
         indent(gettxtl(P_CURPTR));
@@ -2005,7 +2004,7 @@ indent_code()
  *      by inptr.  Actually, this finds the command letter first.
  */
 
-int 
+int
 docmd(int glob)
 {
     static char rhs[MAXPAT];
@@ -2196,13 +2195,13 @@ docmd(int glob)
             (void)add_message("Indenting entire code...\n");
             if (indent_code())
                 (void)add_message("Indention halted.\n");
-            else 
+            else
                 (void)add_message("Done indenting.\n");
             break;
 #endif
 
         case 'H':
-        case 'h': 
+        case 'h':
             print_help(*(inptr++));
             break;
 
@@ -2347,7 +2346,7 @@ docmd(int glob)
                         return(ERR);
                     break;
             }
-            break;      
+            break;
         default:
             return(ERR);
     }
@@ -2462,7 +2461,7 @@ void ed_start(char *file_arg, struct closure *exit_func)
         (void)strncpy(P_FNAME, file_arg, MAXFNAME-1);
         P_FNAME[MAXFNAME-1] = 0;
     }
-    else 
+    else
         (void)add_message("No file.\n");
     set_prompt(PROMPT);
     return;
@@ -2503,7 +2502,7 @@ free_ed_buffer()
     return;
 }
 
-void 
+void
 ed_cmd(char *str)
 {
     char cmd[MAXLINE];
@@ -2529,7 +2528,7 @@ ed_cmd(char *str)
         strcat(cmd, "\n");
     }
 
-    strncpy(inlin, cmd, MAXLINE - 1);    
+    strncpy(inlin, cmd, MAXLINE - 1);
     inlin[MAXLINE - 1] = 0;
     inptr = inlin;
     if(getlst() >= 0) {
@@ -2585,7 +2584,7 @@ ed_cmd(char *str)
     }
 }
 
-void 
+void
 save_ed_buffer()
 {
     struct svalue *stmp;
@@ -2671,7 +2670,7 @@ print_help(int arg)
             (void)add_message("Commmand: e  Usage: e filename\n");
             (void)add_message("Causes the current file to be wiped from memory, and the new file\n");
             (void)add_message("to be loaded in.\n");
-            break;      
+            break;
         case 'E':
             (void)add_message("Commmand: E  Usage: E filename\n");
             (void)add_message("Causes the current file to be wiped from memory, and the new file\n");
@@ -2807,8 +2806,8 @@ print_help(int arg)
     }
 }
 
-static void 
-print_help2() 
+static void
+print_help2()
 {
     P_MORE = 0;
     (void)add_message("j\tjoin lines together\n");

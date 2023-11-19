@@ -46,8 +46,7 @@ int toupper (int);
 #endif
 
 void
-fatal(str)
-char *str;
+fatal(char *str)
 {
     (void)fprintf(stderr, "%s", str);
     exit(1);
@@ -195,7 +194,7 @@ main(int argc, char **argv)
     size_t i;
 
     if ((f = fopen(FUNC_SPEC, "r")) == NULL)
-    { 
+    {
         perror(FUNC_SPEC);
         exit(1);
     }
@@ -275,7 +274,7 @@ main(int argc, char **argv)
     return 0;
 }
 
-void 
+void
 yyerror(char *str)
 {
     (void)fprintf(stderr, "%s:%d: %s\n", FUNC_SPEC, current_line, str);
@@ -307,7 +306,7 @@ oper()
     return ID;
 }
 
-int 
+int
 ident(int c)
 {
     char buff[100];
@@ -345,7 +344,7 @@ int
 yylex1()
 {
     register int c;
-    
+
     for(;;) {
         switch(c = getc(f)) {
         case ' ':

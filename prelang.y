@@ -234,14 +234,6 @@ pop_arg_stack(int n)
     type_of_arguments.current_size -= sizeof (unsigned short) * n;
 }
 
-/* Get a pointer to first argument when there are 'n' arguments in total. */
-INLINE
-static unsigned short*
-get_argument_ptr(int n)
-{
-  return &((unsigned short *)
-           (type_of_arguments.block + type_of_arguments.current_size))[-n];
-}
 /*
  * Get type of argument number 'arg', where there are
  * 'n' arguments in total in this function call. Argument
@@ -338,16 +330,6 @@ static INLINE void
 ins_mem(void *data, size_t n)
 {
    add_to_mem_block(A_PROGRAM, data, n);
-}
-
-/*
- * Store a 4 byte number. It is stored in such a way as to be sure
- * that correct byte order is used, regardless of machine architecture.
- */
-static INLINE void
-ins_long(int l)
-{
-    add_to_mem_block(A_PROGRAM, &l, sizeof(l));
 }
 
 static INLINE void

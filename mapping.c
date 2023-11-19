@@ -36,7 +36,7 @@ free_apairs(struct apair *p)
 {
     struct apair *next;
     int pairs = 0;
-    
+
     for (;p;p = next) {
         free_svalue(&p->arg);
         free_svalue(&p->val);
@@ -58,7 +58,7 @@ free_mapping(struct mapping *m)
     for (i = 0; i < m->size; i++)
         m->card -= free_apairs(m->pairs[i]);
     num_mappings--;
-    total_mapping_size -= (sizeof(struct apair *) * m->size + 
+    total_mapping_size -= (sizeof(struct apair *) * m->size +
                            sizeof(struct mapping));
     free((char *)m->pairs);
     free((char *)m);
@@ -106,7 +106,7 @@ newpair(struct apair *n, struct svalue *k, struct svalue *v, unsigned int h)
     return p;
 }
 
-static INLINE unsigned int 
+static INLINE unsigned int
 hashsvalue(struct svalue *v)
 {
     switch(v->type) {
@@ -161,13 +161,12 @@ get_map_lvalue(struct mapping *m, struct svalue *k, int c)
 }
 
 struct vector *
-map_domain(m)
-struct mapping *m;
+map_domain(struct mapping *m)
 {
     struct vector *d;
     unsigned int cnt, i, k;
     struct apair *p;
-    
+
     cnt = m->card;
     d = allocate_array(cnt);
     for (k = 0, i = 0; i < m->size; i++)
@@ -182,7 +181,7 @@ map_codomain(struct mapping *m)
     struct vector *d;
     unsigned int cnt, i, k;
     struct apair *p;
-    
+
     cnt = m->card;
     d = allocate_array(cnt);
     for (k = 0, i = 0; i < m->size; i++)
@@ -208,7 +207,7 @@ make_mapping(struct vector *ind, struct vector *val)
         m = allocate_map(max);
         for (i = 0 ; i < max ; i++)
         {
-            assign_svalue(get_map_lvalue(m, &ind->item[i], 1), 
+            assign_svalue(get_map_lvalue(m, &ind->item[i], 1),
                                   &val->item[i]);
         }
     } else if (ind != NULL && val == NULL) {
@@ -353,7 +352,7 @@ copy_mapping(struct mapping *m)
     struct mapping *cm;
     struct apair *pair;
     unsigned int i;
-    
+
     num_mappings++;
     cm = (struct mapping *) xalloc(sizeof(struct mapping));
     cm->pairs = (struct apair **) xalloc(sizeof(struct apair *) * m->size);
@@ -370,7 +369,7 @@ copy_mapping(struct mapping *m)
 }
 
 /* Runs all codomain elements of a mapping through fun
-   and replaces each value in the codomain map by the value returned 
+   and replaces each value in the codomain map by the value returned
    by fun.
    */
 struct mapping *
@@ -397,7 +396,7 @@ map_map(struct mapping *map, struct closure *fun)
 
 
 /* EFUN: filter (mapping part)
-   
+
    Runs all codomaing elements of an map through fun
    and returns a mapping holding those elements that fun
    returned non-zero for.

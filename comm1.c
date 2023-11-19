@@ -461,8 +461,7 @@ set_interactive_address(struct interactive *ip, struct sockaddr_storage *addr, s
  * and can go to num_player - 1.  For users(), etc.
  */
 struct object *
-get_interactive_object(i)
-int i;
+get_interactive_object(int i)
 {
     int n;
 

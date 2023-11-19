@@ -248,7 +248,7 @@ json2val(const char *cp)
     static struct svalue ret = {T_NUMBER};
 
     json_object *jobj = json_tokener_parse(cp);
-    if ((jobj == NULL)) {
+    if (jobj == NULL) {
         printf("Unable to parse JSON: %s\n", cp);
         return NULL;
     }
