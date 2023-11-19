@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := all
+
 # Set MUD_LIB to the directory which contains the mud data. Was formerly
 # defined in config.h !
 MUD_LIB = /home/mud/genesis/lib
@@ -12,7 +14,7 @@ ISRC= clib/efun.c clib/stdobject.c clib/gl_language.c
 IOBJ= clib/efun.o clib/stdobject.o clib/gl_language.o
 
 #Enable warnings from the compiler, if wanted.
-WARN=-Wall -Wformat=2  
+WARN=-Wall -Wformat=2
 
 #
 # Enable run time debugging. It will use more time and space.
@@ -28,11 +30,11 @@ DEBUG=
 #
 
 SYS_CFLAGS=-pipe
-SYS_OPT=-std=gnu99 -O3 -fgnu89-inline -ggdb 
+SYS_OPT=-std=gnu99 -O3 -fgnu89-inline -ggdb
 SYS_LIBS=-lcrypt
 CC=gcc
 
-CFLAGS=  $(SYS_CFLAGS) $(SYS_OPT) $(WARN) $(DEBUG) 
+CFLAGS=  $(SYS_CFLAGS) $(SYS_OPT) $(WARN) $(DEBUG)
 
 #
 # Add extra libraries here.
@@ -43,12 +45,14 @@ MFLAGS = "BINDIR=$(BINDIR)" "MUD_LIB=$(MUD_LIB)"
 CFLAGS += $(shell pkg-config --cflags json-c)
 LIBS += $(shell pkg-config --libs json-c)
 
+.PHONY: all
 all: driver
 
 install.utils:
 	make -C util install
 
-utils:	
+.PHONY: utils
+utils:
 	make -C util
 
 tags:	TAGS
@@ -116,25 +120,10 @@ lang.y efun_defs.c: func_spec.i make_func prelang.y postlang.y config.h
 lang.c lang.h: lang.y
 	bison -y -o lang.c -d lang.y
 
+.PHONY: install
 install:
 	-mv $(BINDIR)/driver $(BINDIR)/driver.old
 	-cp driver $(BINDIR)/driver
-
-check:
-	sh regress.sh
-
-.PHONY : clean
-clean:
-	-rm -f *.o lang.h lang.c lexical.c mon.out *.ln tags
-	-rm -f parse core TAGS 
-	-rm -f config.status lpmud.log
-	-rm -f clib/*.o
-	-rm -f driver driver.old
-	-rm -f efun_defs.c efun_table.h
-	-rm -f lang.y
-	-rm -f make_func make_func.c make_table func_spec.i
-	-rm -f master.h master.t genfkntab
-	(cd util ; echo "Cleaning in util." ; $(MAKE) clean)
 
 tags: $(SRC)
 	ctags prelang.y postlang.y $(SRC)
@@ -142,6 +131,7 @@ tags: $(SRC)
 TAGS: $(SRC) $(HEADERS)
 	etags -t prelang.y postlang.y $(SRC) $(HEADERS)
 
+.PHONY: depend
 depend: Makefile.depend
 
 Makefile.depend: $(SRC) ${ISRC} make_func.c master.h lang.h efun_table.h prelang.y
@@ -150,3 +140,19 @@ Makefile.depend: $(SRC) ${ISRC} make_func.c master.h lang.h efun_table.h prelang
 
 include Makefile.depend
 
+.PHONY: check
+check:
+	sh regress.sh
+
+.PHONY: clean
+clean:
+	-rm -f *.o lang.h lang.c lexical.c mon.out *.ln tags
+	-rm -f parse core TAGS
+	-rm -f config.status lpmud.log
+	-rm -f clib/*.o efun/*.o
+	-rm -f driver driver.old
+	-rm -f efun_defs.c efun_table.h
+	-rm -f lang.y
+	-rm -f make_func make_func.c make_table func_spec.i
+	-rm -f master.h master.t genfkntab
+	(cd util ; echo "Cleaning in util." ; $(MAKE) clean)

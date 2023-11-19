@@ -23,4 +23,3 @@ func_spec.i
 master.h
 master.t
 genfkntab
-Makefile.depend
