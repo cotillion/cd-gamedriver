@@ -141,7 +141,7 @@ Makefile.depend: $(SRC) ${ISRC} make_func.c master.h lang.h efun_table.h prelang
 include Makefile.depend
 
 .PHONY: check
-check:
+check: all
 	sh regress.sh
 
 .PHONY: clean
