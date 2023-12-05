@@ -1,13 +1,10 @@
 #! /bin/sh
 
-echo Note that there is supposed to be errors in the following
-echo output. There should, however, be a statement at the end
-echo stating all regression tests has passed.
-echo
 echo Running regression tests...
-(./driver -m`pwd`/regress 31789 -u-1 -p-1 2>&1) | tee `pwd`/regress/regress.output
+./driver -m`pwd`/regress 31789 -u-1 -p-1 1>`pwd`/regress/regress.stdout 2>`pwd`/regress/regress.stderr
 
-diff `pwd`/regress/expected.output `pwd`/regress/regress.output
+diff `pwd`/regress/expected.stdout `pwd`/regress/regress.stdout &&
+    diff `pwd`/regress/expected.stderr `pwd`/regress/regress.stderr
 
 if [ $? != 0 ]; then
     echo
@@ -17,5 +14,6 @@ fi
 
 echo
 echo INFO: All regression tests passed.
-rm -f `pwd`/regress/regress.output
+rm -f `pwd`/regress/regress.stdout
+rm -f `pwd`/regress/regress.stderr
 exit 0
