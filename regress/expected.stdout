@@ -1,0 +1,5 @@
+eval_cost too big 5000001 (/tests/test-013.c Line: 9)
+Setting up ipc.
+Listening to telnet port: 0.0.0.0:3011
+Listening to telnet port: :::3011
+Shutting down ipc...

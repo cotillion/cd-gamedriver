@@ -13,8 +13,7 @@ Loading /tests/test-011.c -> *too many alarms in object
 Loading /tests/test-012.c -> /tests/test-012.c: redefinition of variable 'i' line 7
 /tests/test-012.c: Type mismatch ( int * vs int ) when initializing i line 7
 *Error in loading object
-Loading /tests/test-013.c -> eval_cost too big 5000001 (/tests/test-013.c Line: 9)
-*Too long evaluation. Execution aborted.
+Loading /tests/test-013.c -> *Too long evaluation. Execution aborted.
 Loading /tests/test-014.c -> Ok.
 Loading /tests/test-015.c -> Ok.
 Loading /tests/test-016.c -> Ok.
@@ -45,8 +44,4 @@ num inherits 2 (48)
 total size 304
 Huge program size Ok.
 Loading /tests/test-explode.c -> Ok.
-Setting up ipc.
-Listening to telnet port: 0.0.0.0:3011
-Listening to telnet port: :::3011
-Shutting down ipc...
 exec of hname failed.
