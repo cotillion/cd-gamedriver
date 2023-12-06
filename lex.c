@@ -1909,7 +1909,7 @@ add_input(char *p)
     }
     outp -= l;
     nbuf += l;
-    strcpy(outp, p);
+    memcpy(outp, p, l);
 }
 
 #define DEFHASH 1999
