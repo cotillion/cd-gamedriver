@@ -75,7 +75,7 @@ nd_init(void)
     nd_tail = NULL;
 
     pollfds = malloc(sizeof(struct pollfd) * pollfd_size);
-    nd_ndesc = malloc(sizeof(ndesc_t) * ndesc_size);
+    nd_ndesc = malloc(sizeof(ndesc_t *) * ndesc_size);
 }
 
 /*
@@ -152,7 +152,7 @@ nd_attach(int fd, void *rfunc, void *wfunc, void *xfunc, void *sfunc, void *vp)
 
     if (fd >= ndesc_size) {
         ndesc_size *= 2;
-        nd_ndesc = realloc(nd_ndesc, ndesc_size * sizeof(ndesc_t));
+        nd_ndesc = realloc(nd_ndesc, ndesc_size * sizeof(ndesc_t *));
     }
     nd_ndesc[fd] = nd;
 
