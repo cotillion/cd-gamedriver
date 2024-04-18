@@ -564,8 +564,6 @@ read_bytes(char *file, int start, size_t len)
     struct stat st;
 
     char *str;
-    int size;
-    int f;
 
     if(len > MAX_BYTE_TRANSFER)
         return 0;
@@ -574,7 +572,7 @@ read_bytes(char *file, int start, size_t len)
 
     if (!file)
         return 0;
-    f = open(file, O_RDONLY);
+    int f = open(file, O_RDONLY);
     if (f < 0)
         return 0;
 
@@ -584,8 +582,8 @@ read_bytes(char *file, int start, size_t len)
 
     if (fstat(f, &st) == -1)
         fatal("Could not stat an open file.\n");
-    size = (int)st.st_size;
-    if(start < 0)
+    int size = st.st_size;
+    if (start < 0)
         start = size + start;
 
     if (start >= size)
@@ -596,14 +594,13 @@ read_bytes(char *file, int start, size_t len)
     if ((start+len) > size)
         len = (size - start);
 
-    if ((size = (int)lseek(f, (off_t)start, 0)) < 0)
+    if (lseek(f, (off_t)start, 0) < 0)
     {
         (void)close(f);
         return 0;
     }
 
     str = allocate_mstring(len);
-
     size = read(f, str, len);
 
     (void)close(f);
