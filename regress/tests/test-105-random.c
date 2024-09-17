@@ -1,10 +1,7 @@
 #pragma strict_types
-#include "test.h"
-
-START_FILLER
 
 void
-CREATE()
+create()
 {
     mapping res = ([]);
     for (int i = 0; i < 100000; i++)
@@ -36,14 +33,9 @@ CREATE()
     for (int i = 0; i < 10000; i++)
     {
         float rand = rnd();
-//            write(sprintf("rand: %f\n", rand));
         if (rand < 0.0 || rand > 1.0)
         {
             throw("rnd() not in range 0.0-1.0\n");
         }
     }
-
-
-
 }
-END_FILLER
