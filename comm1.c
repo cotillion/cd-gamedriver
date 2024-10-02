@@ -14,6 +14,7 @@
 #include <memory.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "config.h"
 #include "lint.h"
@@ -207,6 +208,22 @@ write_gmcp(struct object *ob, char *data)
 
 }
 
+void write_current_time_with_milliseconds(int fd) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    struct tm *tm_info;
+    char buffer[64];
+    tm_info = localtime(&tv.tv_sec);
+
+    // Format time with milliseconds
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm_info);
+    int len = snprintf(buffer + 19, sizeof(buffer) - 19, ".%03ld:", tv.tv_usec / 1000);
+
+    // Write to the given file descriptor
+    write(fd, buffer, 19 + len);
+}
+
 /*
  * Will output to telnet on every newline to avoid overflow.
  */
@@ -228,8 +245,10 @@ write_socket(char *cp, struct object *ob)
     }
 
 #ifdef SUPER_SNOOP
-    if (ip->snoop_fd != -1)
-        (void)write(ip->snoop_fd, cp, strlen(cp));
+    if (ip->snoop_fd != -1) {
+        write_current_time_with_milliseconds(ip->snoop_fd);
+        (void) write(ip->snoop_fd, cp, strlen(cp));
+    }
 #endif
 
     if (ip->snoop_by != NULL)
@@ -1054,6 +1073,7 @@ interactive_input(struct interactive *ip, char *cp)
 #ifdef SUPER_SNOOP
         if (ip->snoop_fd != -1)
         {
+            write_current_time_with_milliseconds(ip->snoop_fd);
             (void)write(ip->snoop_fd, cp, strlen(cp));
             (void)write(ip->snoop_fd, "\n", 1);
         }
