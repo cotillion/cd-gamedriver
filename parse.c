@@ -32,10 +32,6 @@ extern int d_flag; /* for debugging purposes */
 extern struct object *previous_ob;
 struct object *vbfc_object;
 
-#ifndef tolower                 /* On some systems this is a function */
-extern int tolower (int);
-#endif
-
 /*****************************************************
 
   This is the parser used by the efun parse_command
@@ -2008,22 +2004,23 @@ process_value(char *str, int other_ob)
  * Returns:       A string with newline separated strings
  */
 char *
-break_string(char *str, int width, struct svalue *indent)
+break_string(char *str, int width, const struct svalue *indent)
 {
     char        *fstr, *istr;
     struct      vector *lines;
-    long long l;
     int il, nchar, space, indlen;
 
+    size_t len = strlen(str);
+    if (len == 0) {
+        return make_mstring("");
+    }
 
     if (!indent)
-        istr = 0;
-
+        istr = NULL;
     else if (indent->type == T_NUMBER && indent->u.number >= 0 && indent->u.number < 1000)
     {
-        l = indent->u.number;
-        istr = xalloc((size_t)l + 1);
-        for (il = 0; il < l; il++)
+        istr = xalloc(indent->u.number + 1);
+        for (il = 0; il < indent->u.number; il++)
             istr[il] = ' ';
         istr[il] = 0;
     }
@@ -2044,19 +2041,13 @@ break_string(char *str, int width, struct svalue *indent)
     else
         indlen = 0;
 
-    l = strlen(str);
-    if (l == 0) {
-        return make_mstring("");
-    }
-
     /*
      * Split with newlines
      */
     space = -1;
     nchar = 0;
-    l = strlen(str);
     fstr = str;
-    for (il = 0; il < l; il++)
+    for (il = 0; il < len; il++)
     {
         if (fstr[il] == ' ')
             space = il;
