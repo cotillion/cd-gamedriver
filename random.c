@@ -33,8 +33,8 @@ void init_random() {
 void set_random_seed(unsigned int seed) {
     s_save[0] = s[0];
     s_save[1] = s[1];
-    s[0] = 123456789ULL;
-    s[1] = ((unsigned long long)seed << 32) | 987654321ULL;
+    s[0] = 6364136223846793005ULL * (seed ^ (seed >> 30)) + 1;
+    s[1] = 1442695040888963407ULL * (seed ^ (seed >> 27)) + 1;
 }
 
 void clear_random_seed() {
