@@ -972,6 +972,34 @@ destruct2(struct object *ob)
         free_sentence(s);
         s = next;
     }
+    
+    /* Clean up environment command registry if present */
+    if (ob->env_commands) {
+        /* Need to free all sentences stored in the mapping */
+        struct vector *keys = map_domain(ob->env_commands);
+        int i;
+        
+        for (i = 0; i < keys->size; i++) {
+            struct svalue *val;
+            struct sentence *es, *next_es;
+            
+            val = get_map_lvalue(ob->env_commands, &keys->item[i], 0);
+            if (val && val->type == T_NUMBER && val->u.number != 0) {
+                /* Free all sentences in this command chain */
+                es = (struct sentence *)(intptr_t)val->u.number;
+                while (es) {
+                    next_es = es->next;
+                    free_sentence(es);
+                    es = next_es;
+                }
+            }
+        }
+        
+        free_vector(keys);
+        free_mapping(ob->env_commands);
+        ob->env_commands = 0;
+    }
+    
     delete_all_calls(ob);
     free_object(ob, "destruct_object");
 }
@@ -1721,6 +1749,9 @@ player_parser(char *buff)
     struct svalue *ret;
     struct object *cmd_giver = command_giver;
     struct object *theobj;
+    struct object *env;
+    struct svalue key, *env_val;
+    char verb_buf[256];
 
 #ifdef DEBUG
     if (d_flag & DEBUG_COMMAND)
@@ -1777,13 +1808,39 @@ player_parser(char *buff)
 
     clear_notify();
 
-    for (s = cmd_giver->sent; s; s = s->next)
-    {
+    /* Use environment command registry (or command_giver's own if no environment) */
+    env = cmd_giver->super ? cmd_giver->super : cmd_giver;
+    
+    if (!env->env_commands) {
+        notify_no_command();
+        return 0;
+    }
+    
+    /* Extract verb and look it up in environment command registry (O(1)) */
+    if (length >= sizeof(verb_buf)) {
+        notify_no_command();
+        return 0;
+    }
+    
+    memcpy(verb_buf, cmd, length);
+    verb_buf[length] = '\0';
+    
+    key.type = T_STRING;
+    key.string_type = STRING_CSTRING;
+    key.u.string = verb_buf;
+    
+    env_val = get_map_lvalue(env->env_commands, &key, 0);
+    if (!env_val || env_val->type != T_NUMBER || env_val->u.number == 0) {
+        notify_no_command();
+        return 0;
+    }
+    
+    /* Found command - try each sentence in the chain */
+    for (s = (struct sentence *)(intptr_t)env_val->u.number; s; s = s->next) {
         size_t len;
 
         if (s->verb == 0) {
-            error("An 'action' did something, but returned 0 or had an undefined verb.\n");
-            /* NOTREACHED */
+            continue;
         }
 
         len = strlen(s->verb);
@@ -1794,7 +1851,7 @@ player_parser(char *buff)
             if (s->short_verb == V_NO_SPACE)
                 length = len;
             else {
-#ifndef COMPAT_ADD_ACTIONS      /* Backwards compatibility */
+#ifndef COMPAT_ADD_ACTIONS
                 if (len && length > len)
                     continue;
 #endif
@@ -1808,39 +1865,25 @@ player_parser(char *buff)
             if (strncmp(cmd, s->verb, length))
                 continue;
         }
-        /*
-         * Now we have found a special sentence !
-         */
+        
 #ifdef DEBUG
         if (d_flag & DEBUG_COMMAND)
-            debug_message("Local command %s\n", getclosurename(s->funct));
+            debug_message("Command %s\n", getclosurename(s->funct));
 #endif
 
-        /* Store the last verb */
         if (NULL != last_verb)
             free(last_verb);
-
         last_verb = xalloc(length + 1);
         strncpy(last_verb, cmd, length);
         last_verb[length] = '\0';
 
-        /* Store the last trigger verb */
         if (NULL != trig_verb)
             free(trig_verb);
         trig_verb = string_copy(s->verb);
 
         theobj = s->funct->funobj;
-        /*
-         * If the function is static and not defined by current object,
-         * then it will fail. If this is called directly from player input,
-         * then we set current_object so that static functions are allowed.
-         * current_object is reset just after the call to apply().
-         */
         if (current_object == 0)
             current_object = theobj;
-        /*
-         * Remember the object, to update score.
-         */
         command_giver = cmd_giver;
 
         p = cmd + (s->short_verb == V_NO_SPACE ? len : length);
@@ -1866,33 +1909,17 @@ player_parser(char *buff)
 
         current_object = save_current_object;
 
-        /* If we get fail from the call, it was wrong second argument. */
         if (sp->type == T_NUMBER && sp->u.number == 0) {
-            /* Has the sentences been lost? */
-            /* Does anyone know a better way of doing this? */
-            struct sentence *s0;
-
             pop_stack();
-
-            for (s0 = cmd_giver->sent; s0 && s0 != s; s0 = s0->next)
-                ;
-
-            if (!s0) {
-                s = 0;
-                break;
-            }
-            continue;
-        } else
+            continue; /* Try next command in chain */
+        } else {
             pop_stack();
-        break;
+            return 1; /* Success */
+        }
     }
 
-    if (s == 0)
-    {
-        notify_no_command();
-        return 0;
-    }
-    return 1;
+    notify_no_command();
+    return 0;
 }
 
 /*
@@ -1913,6 +1940,8 @@ add_action(struct closure *func, struct svalue *cmd, int flag)
 {
     struct sentence *p;
     struct object *ob;
+    struct object *env;
+    struct svalue key, *val;
 
     if (current_object->flags & O_DESTRUCTED)
         return;
@@ -1936,16 +1965,49 @@ add_action(struct closure *func, struct svalue *cmd, int flag)
     if (func->funobj)
         func->funobj->flags |= O_ADDED_COMMAND;
 
-    p = alloc_sentence();
-    p->funct = func;
-    INCREF(func->ref);
-    p->next = command_giver->sent;
-    p->short_verb = flag;
-    if (cmd)
+    /* Use environment command registry. If no environment, use command_giver's own registry */
+    env = command_giver->super ? command_giver->super : command_giver;
+    
+    if (!env->env_commands) {
+        env->env_commands = allocate_map(16);
+    }
+    
+    if (!cmd || !cmd->u.string) {
+        /* No verb specified - skip */
+        return;
+    }
+    
+    key.type = T_STRING;
+    key.string_type = STRING_SSTRING;
+    key.u.string = cmd->u.string;
+    
+    val = get_map_lvalue(env->env_commands, &key, 1);
+    if (val->type == T_NUMBER && val->u.number == 0) {
+        /* First command with this verb */
+        p = alloc_sentence();
+        p->funct = func;
+        INCREF(func->ref);
+        p->next = 0;
+        p->short_verb = flag;
         p->verb = make_sstring(cmd->u.string);
-    else
-        p->verb = 0;
-    command_giver->sent = p;
+        
+        val->type = T_NUMBER;
+        val->u.number = (long long)(intptr_t)p;
+    } else if (val->type == T_NUMBER) {
+        /* Command verb already exists - append to chain */
+        struct sentence *first = (struct sentence *)(intptr_t)val->u.number;
+        struct sentence *last = first;
+        
+        p = alloc_sentence();
+        p->funct = func;
+        INCREF(func->ref);
+        p->short_verb = flag;
+        p->verb = make_sstring(cmd->u.string);
+        p->next = 0;
+        
+        while (last->next) last = last->next;
+        last->next = p;
+    }
 }
 
 /*

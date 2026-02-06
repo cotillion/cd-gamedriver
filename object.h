@@ -47,6 +47,7 @@ struct object {
     struct object *shadowed;            /* Is this object shadowed ? */
     struct interactive *interactive;    /* Data about an interactive player */
     struct sentence *sent;
+    struct mapping *env_commands;       /* Environment command registry (hash) */
     struct object *next_hashed_living;
     char *living_name;                  /* Name of living object if in hash */
     struct svalue *variables;           /* All variables to this program */
