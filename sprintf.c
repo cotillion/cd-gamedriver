@@ -153,8 +153,8 @@ typedef unsigned int format_info;
 #define ERR_BAD_FLOAT_TYPE      0xD     /* Bad float type... */
 
 #define ADD_CHAR(x) {\
-  buff[bpos++] = x;\
-  if (bpos > BUFF_SIZE) ERROR(ERR_BUFF_OVERFLOW); \
+  if (bpos >= BUFF_SIZE - 1) ERROR(ERR_BUFF_OVERFLOW); \
+  buff[bpos++] = x; \
   curpos++;\
 }
 
@@ -825,6 +825,8 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
                             {
                                 if (carg->type != T_NUMBER)
                                     ERROR(ERR_INVALID_STAR);
+                                if (carg->u.number < 0 || carg->u.number >= BUFF_SIZE)
+                                    ERROR(ERR_BUFF_OVERFLOW);
                                 prec = carg->u.number;
                                 GET_NEXT_ARG;
                                 continue;
@@ -834,6 +836,8 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
                                  (format_str[fpos] >= '0') &&
                                  (format_str[fpos] <= '9'); fpos++)
                             {
+                                if (prec > (BUFF_SIZE - 1 - (format_str[fpos] - '0')) / 10)
+                                    ERROR(ERR_BUFF_OVERFLOW);
                                 prec = prec*10 + format_str[fpos] - '0';
                             }
                         }
@@ -850,6 +854,8 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
                                 {
                                     if (carg->type != T_NUMBER)
                                         ERROR(ERR_INVALID_STAR);
+                                    if (carg->u.number < 0 || carg->u.number >= BUFF_SIZE)
+                                        ERROR(ERR_BUFF_OVERFLOW);
                                     fs = carg->u.number;
                                     if (prec == -2)
                                         prec = fs; /* colon */
@@ -862,6 +868,8 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
                                  (format_str[fpos]>='0') &&
                                  (format_str[fpos]<='9'); fpos++)
                             {
+                                if (fs > (BUFF_SIZE - 1 - (format_str[fpos] - '0')) / 10)
+                                    ERROR(ERR_BUFF_OVERFLOW);
                                 fs = fs*10 + format_str[fpos] - '0';
                             }
                             if (prec == -2)
@@ -1160,6 +1168,7 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
                           i == INFO_T_FLOAT_F || i == INFO_T_FLOAT_G)
                 {
                     char temp[100];
+                    int written;
 
                     if (carg->type != T_FLOAT)
                     { /* sigh... */
@@ -1174,50 +1183,54 @@ string_print_formatted(int call_master, char *format_input, int argc, struct sva
 #endif /* RETURN_ERROR_MESSAGES */
                     }
 
+                    if (prec > 80)
+                        ERROR(ERR_BUFF_OVERFLOW);
                     if (prec <= 0)
                         prec = 6;
                     format = finfo & INFO_T; 
                     if (format == INFO_T_FLOAT_E)
                         switch (finfo & INFO_PP) {
                           case INFO_PP_SPACE: 
-                            (void)sprintf(temp,"% .*e",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"% .*e",prec, carg->u.real);
                             break;
                           case INFO_PP_PLUS: 
-                            (void)sprintf(temp,"%+.*e",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%+.*e",prec, carg->u.real);
                             break;
                           default:
-                            (void)sprintf(temp,"%.*e",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%.*e",prec, carg->u.real);
                             break;
                         }
                     else if (format == INFO_T_FLOAT_F)
                         switch (finfo & INFO_PP) {
                           case INFO_PP_SPACE: 
-                            (void)sprintf(temp,"% .*f",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"% .*f",prec, carg->u.real);
                             break;
                           case INFO_PP_PLUS: 
-                            (void)sprintf(temp,"%+.*f",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%+.*f",prec, carg->u.real);
                             break;
                           default:
-                            (void)sprintf(temp,"%.*f",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%.*f",prec, carg->u.real);
                             break;
                         }
                     else if (format == INFO_T_FLOAT_G)
                         switch (finfo & INFO_PP) {
                           case INFO_PP_SPACE: 
-                            (void)sprintf(temp,"% .*g",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"% .*g",prec, carg->u.real);
                             break;
                           case INFO_PP_PLUS: 
-                            (void)sprintf(temp,"%+.*g",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%+.*g",prec, carg->u.real);
                             break;
                           default:
-                            (void)sprintf(temp,"%.*g",prec, carg->u.real);
+                            written = snprintf(temp, sizeof(temp),"%.*g",prec, carg->u.real);
                             break;
                         }
                     else {
                         ERROR(ERR_BAD_FLOAT_TYPE);
                     }
+                    if (written < 0 || written >= sizeof(temp))
+                        ERROR(ERR_BUFF_OVERFLOW);
                     {
-                        int tmpl = strlen(temp);
+                        int tmpl = written;
                         
                         if (tmpl < fs)
                             add_justified(temp, pad, fs, finfo,

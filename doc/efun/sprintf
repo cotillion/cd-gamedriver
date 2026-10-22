@@ -11,6 +11,11 @@ characters starting with a percent sign "%" and terminated with a
 argument type specifier.  To include a "%" sign in the output, it is
 nessasary to include a double percent sign "%%".
 
+Float precision is limited to 80 digits. Float conversions must fit in
+99 output bytes; larger results raise an LPC error. Negative star widths
+or precisions, overflowing decimal modifiers, and oversized output also
+raise an error.
+
 Valid argument type specifiers are:
   "s" : the argument is a string.
   "d" : the argument is an integer to be included in decimal
