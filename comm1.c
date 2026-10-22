@@ -756,7 +756,7 @@ set_snoop(struct object *me, struct object *you)
             push_object(you);
         ret = apply_master_ob(M_VALID_SNOOP, 3);
 
-        if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+        if (master_hook_denied(ret))
             return 0;
     }
     /* Stop snoop */
@@ -984,7 +984,7 @@ replace_interactive(struct object *ob, struct object *obfrom,
         push_number(0);
     push_object(obfrom);
     v = apply_master_ob(M_VALID_EXEC, 3);
-    if (v && (v->type != T_NUMBER || v->u.number == 0))
+    if (master_hook_denied(v))
         return 0;
 
     /* (void)fprintf(stderr,"DEBUG: %s,%s\n",ob->name,obfrom->name); */

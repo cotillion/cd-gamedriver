@@ -12,6 +12,13 @@
 #define WORD_WRAP
 
 /*
+ * Require explicit nonzero numeric permission from master authorization hooks.
+ * Leave undefined for legacy behavior, where most missing hooks allow access.
+ * Missing hooks are reported when the master is loaded or reloaded either way.
+ */
+/* #define STRICT_MASTER_AUTH */
+
+/*
  * Max size of a file allowed to be read by 'read_file()'.
  */
 #define READ_FILE_MAX_SIZE      500000

@@ -428,7 +428,7 @@ load_object(char *lname, int dont_reset, struct object *old_ob, int depth)
         struct svalue *ret;
         push_object(ob);
         ret = apply_master_ob(M_VALID_RESIDENT, 1);
-        if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+        if (master_hook_denied(ret))
             ob->prog->flags &= ~PRAGMA_RESIDENT;
     }
 
@@ -2492,7 +2492,7 @@ check_valid_path(char *path, struct object *ob,
         v = apply_master_ob(M_VALID_WRITE, 3);
     else
         v = apply_master_ob(M_VALID_READ, 3);
-    if (v && (v->type != T_NUMBER || v->u.number == 0))
+    if (master_hook_denied(v))
         return 0;
     if (path[0] == '/')
         path++;

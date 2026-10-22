@@ -2812,7 +2812,7 @@ f_query_remote_port(int num_arg)
     push_object(ob);
 
     ret = apply_master_ob(M_VALID_QUERY_IP_NUMBER_NAME, 2);
-    if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+    if (master_hook_denied(ret))
     {
         if (num_arg)
             pop_stack();
@@ -2852,7 +2852,7 @@ f_query_ip_number_name(int name, int num_arg)
     push_object(current_object);
     push_object(ob);
     ret = apply_master_ob(M_VALID_QUERY_IP_NUMBER_NAME, 3);
-    if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+    if (master_hook_denied(ret))
     {
         if (num_arg)
             pop_stack();
@@ -2897,7 +2897,11 @@ f_set_ip_number(int num_arg)
     push_string(ip, STRING_SSTRING);
 
     struct svalue *ret = apply_master_ob(M_VALID_SET_IP_NUMBER, 3);
+#ifdef STRICT_MASTER_AUTH
+    if (!master_hook_denied(ret))
+#else
     if (!ret || ret->type != T_NUMBER || ret->u.number != 0)
+#endif
     {
         set_ip_number(ob, ip);
     }
@@ -2919,7 +2923,7 @@ f_query_ip_ident(int num_arg)
     push_object(current_object);
     push_object(ob);
     ret = apply_master_ob(M_VALID_QUERY_IP_IDENT, 2);
-    if ((ret && (ret->type != T_NUMBER || ret->u.number == 0)) ||
+    if (master_hook_denied(ret) ||
         !ob->interactive || !ob->interactive->rname)
         push_number(0);
     else
@@ -4117,7 +4121,7 @@ f_users(int num_arg)
     {
         push_object(current_object);
         ret = apply_master_ob(M_VALID_USERS, 1);
-        if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+        if (master_hook_denied(ret))
         {
             push_number(0);
             return;
@@ -4377,7 +4381,7 @@ f_move_object(int num_arg)
     push_object(current_object);
     push_object(ob);
     ret = apply_master_ob(M_VALID_MOVE, 2);
-    if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+    if (master_hook_denied(ret))
     {
         pop_n_elems(num_arg);   /* Get rid of all arguments */
         push_number(0);
@@ -4561,7 +4565,7 @@ f_crypt(int num_arg)
     push_svalue(&arg[1]);
 
         struct svalue *ret = apply_master_ob(M_VALID_CRYPT, 2);
-        if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+        if (master_hook_denied(ret))
         {
         error("Access to crypt() was denied");
             return;
@@ -5811,7 +5815,7 @@ f_debug(int num_arg)
         for (i = 0; i < num_arg; i++)
             push_svalue(&arg[i]);
         ret = apply_master_ob(M_VALID_DEBUG, num_arg + 1);
-        if (ret && (ret->type != T_NUMBER || ret->u.number == 0))
+        if (master_hook_denied(ret))
         {
             pop_n_elems(num_arg);       /* Get rid of all arguments */
             push_number(0);
@@ -7935,7 +7939,45 @@ do_trace(char *msg, char *fname, char *post)
 }
 #endif
 
+/* Most legacy authorization hooks permit a missing callback, but reject
+ * explicit false or nonnumeric results. Strict mode also rejects absence. */
+int
+master_hook_denied(const struct svalue *ret)
+{
+#ifdef STRICT_MASTER_AUTH
+    return !ret || ret->type != T_NUMBER || ret->u.number == 0;
+#else
+    return ret && (ret->type != T_NUMBER || ret->u.number == 0);
+#endif
+}
+
 #include "master.t"
+
+static void
+warn_missing_master_hooks(void)
+{
+    static const int hooks[] = {
+        M_VALID_READ, M_VALID_WRITE, M_VALID_DEBUG, M_VALID_EXEC,
+        M_VALID_SNOOP, M_VALID_USERS, M_VALID_MOVE, M_VALID_RESIDENT,
+        M_VALID_CRYPT, M_VALID_SET_IP_NUMBER, M_VALID_QUERY_IP_IDENT,
+        M_VALID_QUERY_IP_NUMBER_NAME
+    };
+    size_t i;
+#ifdef STRICT_MASTER_AUTH
+    const char *mode = "enabled";
+#else
+    const char *mode = "disabled";
+#endif
+
+    for (i = 0; i < sizeof(hooks) / sizeof(hooks[0]); ++i)
+    {
+        struct fkntab *tab = &master_fkntab[hooks[i]];
+        if (tab->inherit_index == (unsigned short)-1 &&
+            tab->function_index == (unsigned short)-1)
+            fprintf(stderr, "WARNING: master is missing authorization hook '%s' "
+                    "(STRICT_MASTER_AUTH %s).\n", tab->name, mode);
+    }
+}
 
 void
 resolve_master_fkntab()
@@ -7958,6 +8000,7 @@ resolve_master_fkntab()
             tab->function_index = (unsigned short)-1;
         }
     }
+    warn_missing_master_hooks();
 }
 
 struct svalue *

@@ -39,6 +39,8 @@ struct svalue {
     union u u;
 };
 
+int master_hook_denied(const struct svalue *);
+
 extern struct svalue *sp;
 extern struct svalue start_of_stack[];
 

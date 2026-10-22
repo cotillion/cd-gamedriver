@@ -70,3 +70,39 @@ final_boot()
 {
     debug("shutdown");
 }
+
+/* The regression mudlib explicitly authorizes its fixture file access. */
+static int
+valid_read(string path, object caller, string operation)
+{
+    return 1;
+}
+
+static int
+valid_write(string path, object caller, string operation)
+{
+    return 1;
+}
+
+static varargs int
+valid_debug(object caller, string operation, mixed arg)
+{
+    return 1;
+}
+
+static int
+valid_crypt(object caller, mixed salt)
+{
+    return file_name(caller) == "/tests/test-026";
+}
+
+/* Explicit denials keep the fixture independent of legacy missing-hook rules. */
+static int valid_users(object caller) { return 0; }
+static int valid_move(object caller, object destination) { return 0; }
+static int valid_resident(object caller) { return 0; }
+static int valid_exec(string program, object to, object from) { return 0; }
+static int valid_snoop(object caller, object snooper, object snoopee) { return 0; }
+static int valid_set_ip_number(object caller, object target, string ip) { return 0; }
+static int valid_query_ip_ident(object caller, object target) { return 0; }
+static varargs int valid_query_ip_number_name(mixed name, object caller,
+                                            object target) { return 0; }

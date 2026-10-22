@@ -49,6 +49,9 @@ log_error
 runtime_error
 #
 # Authority admin.
+# STRICT_MASTER_AUTH in config.h requires explicit nonzero numeric permission
+# from authorization hooks. It is undefined by default for compatibility.
+# Missing authorization hooks are warned about when the master is resolved.
 #######
 query_allow_shadow
 #valid_compile_path
