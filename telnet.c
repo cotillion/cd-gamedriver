@@ -295,29 +295,68 @@ telnet_output_gmcp(telnet_t *tp, u_char *cp)
 }
 
 
+/* Preflight an escaped MSSP string without exceeding the response budget. */
+static int
+telnet_mssp_size(u_char *str, size_t *remaining)
+{
+    for (; *str; ++str) {
+        size_t bytes = *str == IAC ? 2 : 1;
+        if (*remaining < bytes)
+            return 0;
+        *remaining -= bytes;
+    }
+    return 1;
+}
+
+static void
+telnet_mssp_string(nqueue_t *nq, u_char *str)
+{
+    for (; *str; ++str) {
+        nq_putc(nq, *str);
+        if (*str == IAC)
+            nq_putc(nq, IAC);
+    }
+}
+
 int
 telnet_output_mssp(telnet_t *tp, mssp_t *vars[], size_t count)
 {
-    nqueue_t *nq;
-    nq = tp->t_outq;
+    nqueue_t *nq = tp->t_outq;
+    size_t remaining;
 
-    nq_putc(nq, IAC);
-    nq_putc(nq, SB);
-    nq_putc(nq, TELOPT_MSSP);
-
-    for (size_t i = 0; i < count; i++) {
-        nq_putc(nq, MSSP_VAR);
-        nq_puts(nq, vars[i]->name);
-
-        for (size_t k = 0; k < vars[i]->size; k++) {
-            nq_putc(nq, MSSP_VAL);
-            nq_puts(nq, vars[i]->values[k]);
+    /* Reserve the framing and keep normal output's truncation reserve intact.
+     * Reject the entire response under backpressure, never a partial SB. */
+    if (nq_len(nq) + 5 > TELNET_OUTQ_HIWAT)
+        return 0;
+    remaining = TELNET_OUTQ_HIWAT - nq_len(nq) - 5;
+    for (size_t i = 0; i < count; ++i) {
+        if (remaining == 0)
+            return 0;
+        --remaining;
+        if (!telnet_mssp_size(vars[i]->name, &remaining))
+            return 0;
+        for (size_t k = 0; k < vars[i]->size; ++k) {
+            if (remaining == 0)
+                return 0;
+            --remaining;
+            if (!telnet_mssp_size(vars[i]->values[k], &remaining))
+                return 0;
         }
     }
 
     nq_putc(nq, IAC);
+    nq_putc(nq, SB);
+    nq_putc(nq, TELOPT_MSSP);
+    for (size_t i = 0; i < count; i++) {
+        nq_putc(nq, MSSP_VAR);
+        telnet_mssp_string(nq, vars[i]->name);
+        for (size_t k = 0; k < vars[i]->size; k++) {
+            nq_putc(nq, MSSP_VAL);
+            telnet_mssp_string(nq, vars[i]->values[k]);
+        }
+    }
+    nq_putc(nq, IAC);
     nq_putc(nq, SE);
-
     telnet_enabw(tp);
     return 1;
 }
