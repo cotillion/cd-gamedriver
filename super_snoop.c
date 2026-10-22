@@ -12,7 +12,6 @@
 volatile int num_super_snooped;
 extern struct interactive *all_players[MAX_PLAYERS];
 static char super_snooped[256][16];
-static char super_snoopfile[256][32];
 
 void 
 read_snoop_file()
@@ -27,43 +26,16 @@ read_snoop_file()
   }
   for (i = 0; fscanf(f, "%s", super_snooped[i]) != EOF && i < 256 ; i++)
   {
-      (void)strcpy(super_snoopfile[i], "../snoops/");
-      (void)strcat(super_snoopfile[i], super_snooped[i]);
   }
 
   fclose(f);
   num_super_snooped = i;
 }
 
-void 
-update_snoop_file()
-{
-    int i, j;
-
-    for (i = 0; num_super_snooped && i < MAX_PLAYERS; i++)
-        if (all_players[i] && all_players[i]->snoop_fd >= 0) {
-            (void)close(all_players[i]->snoop_fd);
-            all_players[i]->snoop_fd = -1;
-            num_super_snooped--;
-        }
-    read_snoop_file();
-    for (i = 0; i < MAX_PLAYERS; i++)
-        for (j = 0; j < num_super_snooped; j++)
-            if (all_players[i] && all_players[i]->ob &&
-                all_players[i]->ob->living_name &&
-                strcmp(all_players[i]->ob->living_name, super_snooped[j]) == 0) {
-                all_players[i]->snoop_fd = open(super_snoopfile[j],
-                                                 O_WRONLY | O_APPEND | O_CREAT,
-                                                 0600);
-                break;
-            }
-}
-
 void
 check_supersnoop(struct object *ob)
 {
-    int i;
-
+    char snoop_file_path[32];
     if (!ob || !ob->interactive)
         return;
 
@@ -74,11 +46,29 @@ check_supersnoop(struct object *ob)
     if (!ob->living_name || !*ob->living_name)
         return;
 
-    for (i = 0; i < num_super_snooped; i++) {
+    snprintf(snoop_file_path, sizeof(snoop_file_path), "../snoops/%s", ob->living_name);
+
+#ifdef SUPER_SNOOP_ALL
+    ob->interactive->snoop_fd = open(snoop_file_path, O_WRONLY | O_APPEND | O_CREAT, 0600);
+#else
+    for (int i = 0; i < num_super_snooped; i++) {
         if (strcmp(ob->living_name, super_snooped[i]) == 0) {
-            ob->interactive->snoop_fd = open(super_snoopfile[i], O_WRONLY | O_APPEND | O_CREAT, 0600);
+            ob->interactive->snoop_fd = open(snoop_file_path, O_WRONLY | O_APPEND | O_CREAT, 0600);
             break;
         }
     }
+#endif
 }
+
+void 
+update_snoop_file()
+{
+    read_snoop_file();
+    for (int i = 0; i < MAX_PLAYERS; i++)
+    {
+        if (all_players[i] && all_players[i]->ob)
+            check_supersnoop(all_players[i]->ob); 
+    }
+}
+
 #endif

@@ -339,6 +339,13 @@
 #define SUPER_SNOOP
 
 /*
+ * SUPER_SNOOP_ALL
+ *
+ * With this defined, all players will be automatically snooped.
+ */
+#define SUPER_SNOOP_ALL
+
+/*
  * DEFAULT_CHARSET
  *
  * The charset the server will request that clients use with the
