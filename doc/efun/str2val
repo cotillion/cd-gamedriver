@@ -12,6 +12,11 @@ DESCRIPTION
 	using the save/restore_map, save/restore_object functions for
 	saving and retrieving data.
 
+        Deserialization accepts at most 8 MiB of input, 131072 values total,
+        and 64 value levels (including the outermost value). Object names
+        must fit in 1023 bytes. Malformed or over-budget input returns 0.
+        The same value limits apply when restoring objects and mappings.
+
 SEE ALSO
 	val2str, save_object, save_map, restore_object, restore_map
 

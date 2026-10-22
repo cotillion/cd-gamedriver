@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <limits.h>
+#include <errno.h>
 #include <string.h>
 #include <memory.h>
 
@@ -425,15 +427,24 @@ valtostr(struct svalue *sval)
 
     return sbuf.buf;
 }
-#define BIG 1000
+/* Shared by all descendants of one value. Bound native recursion, work and
+ * allocations independently of the interpreter's instruction accounting. */
+#define RESTORE_MAX_DEPTH 64
+#define RESTORE_MAX_NODES 131072
+#define RESTORE_MAX_BYTES (8 * 1024 * 1024)
 
-int restore_one (struct svalue *, char **);
+struct restore_context {
+    unsigned int depth;
+    unsigned int nodes;
+};
+
+static int restore_value(struct svalue *, char **, struct restore_context *);
 
 static struct vector *
-restore_array(char **str)
+restore_array(char **str, struct restore_context *ctx)
 {
     struct svalue *tmp;
-    int nmax = BIG;
+    int nmax = 8;
     int i, k;
 
     tmp = (struct svalue *)xalloc(nmax * sizeof(struct svalue));
@@ -459,6 +470,8 @@ restore_array(char **str)
         }
         else
         {
+            if (i >= MAX_ARRAY_SIZE)
+                break;
             if (i >= nmax)
             {
                 struct svalue *ntmp = (struct svalue *)xalloc(nmax * 2 * sizeof(struct svalue));
@@ -469,10 +482,11 @@ restore_array(char **str)
                 for(k = i; k < nmax; k++)
                     tmp[k] = const0;
             }
-            if (!restore_one(&tmp[i++], str))
+            if (!restore_value(&tmp[i++], str, ctx))
                 break;
-            if (*(*str)++ != ',')
+            if (**str != ',')
                 break;
+            ++*str;
         }
         }
         for (i--; i >= 0; i--)
@@ -482,7 +496,7 @@ restore_array(char **str)
 }
 
 static struct mapping *
-restore_mapping(char **str)
+restore_mapping(char **str, struct restore_context *ctx)
 {
     struct mapping *m;
 
@@ -503,19 +517,24 @@ restore_mapping(char **str)
         {
             struct svalue arg, *val;
             arg = const0;
-            if (!restore_one(&arg, str))
+            if (!restore_value(&arg, str, ctx))
                 break;
-            if (*(*str)++ != ':')
+            if (**str != ':')
             {
+                free_svalue(&arg);
+                break;
+            }
+            ++*str;
+            if (m->card >= MAX_MAPPING_SIZE) {
                 free_svalue(&arg);
                 break;
             }
             val = get_map_lvalue(m, &arg, 1);
             free_svalue(&arg);
 
-            if (!restore_one(val, str) ||
-                *(*str)++ != ',')
+            if (!restore_value(val, str, ctx) || **str != ',')
                 break;
+            ++*str;
         }
     }
     free_mapping(m);
@@ -523,8 +542,8 @@ restore_mapping(char **str)
 }
 
 /* XXX function */
-int
-restore_one(struct svalue *v, char **msp)
+static int
+restore_value_body(struct svalue *v, char **msp, struct restore_context *ctx)
 {
     char *q, *p, *s;
 
@@ -537,7 +556,7 @@ restore_one(struct svalue *v, char **msp)
             {
                 struct mapping *map;
                 s++;
-                map = restore_mapping(&s);
+                map = restore_mapping(&s, ctx);
                 if (!map) {
                     return 0;
                 }
@@ -551,7 +570,7 @@ restore_one(struct svalue *v, char **msp)
             {
                 struct vector *vec;
                 s++;
-                vec = restore_array(&s);
+                vec = restore_array(&s, ctx);
                 if (!vec) {
                     return 0;
                 }
@@ -600,16 +619,28 @@ restore_one(struct svalue *v, char **msp)
         break;
     case '$':
         {
-            int ct;
+            long long ct;
             struct object *ob;
-            char name[1024];
-            char *b = strchr(s + 1,'$');
+            char name[1024], *end;
+            char *b = strchr(s + 1, '$');
+            size_t len;
 
-            *name = '\0';
             if (b == NULL)
                 return 0;
-            if (sscanf(s,"$%d@%[^$ \n\t]$",&ct,name) != 2)
+            errno = 0;
+            ct = strtoll(s + 1, &end, 10);
+            if (errno == ERANGE || ct < INT_MIN || ct > INT_MAX ||
+                end == s + 1 || end >= b || *end != '@')
                 return 0;
+            ++end;
+            len = b - end;
+            if (len == 0 || len >= sizeof(name))
+                return 0;
+            for (p = end; p < b; ++p)
+                if (isspace((unsigned char)*p))
+                    return 0;
+            memcpy(name, end, len);
+            name[len] = '\0';
             ob = find_object2(name);
             free_svalue(v);
             if (ob && ob->created == ct)
@@ -640,17 +671,41 @@ restore_one(struct svalue *v, char **msp)
         }
         break;
     default:
-        if (!isdigit(*s) && *s != '-')
+        if (!isdigit((unsigned char)*s) && *s != '-')
             return 0;
         free_svalue(v);
         v->type = T_NUMBER;
         v->u.number = atoll(s);
-        while(isdigit(*s) || *s == '-')
+        while(isdigit((unsigned char)*s) || *s == '-')
             s++;
         break;
     }
     *msp = s;
     return 1;
+}
+
+static int
+restore_value(struct svalue *v, char **str, struct restore_context *ctx)
+{
+    int result;
+
+    if (ctx->depth >= RESTORE_MAX_DEPTH || ctx->nodes >= RESTORE_MAX_NODES)
+        return 0;
+    ++ctx->depth;
+    ++ctx->nodes;
+    result = restore_value_body(v, str, ctx);
+    --ctx->depth;
+    return result;
+}
+
+int
+restore_one(struct svalue *v, char **str)
+{
+    struct restore_context ctx = { 0, 0 };
+
+    if (strnlen(*str, RESTORE_MAX_BYTES + 1) > RESTORE_MAX_BYTES)
+        return 0;
+    return restore_value(v, str, &ctx);
 }
 
 int
@@ -675,7 +730,7 @@ restore_object(struct object *ob, char *file)
     len = strlen(file);
     name = tmpalloc(len + 3);
     (void)strcpy(name, file);
-    if (name[len-2] == '.' && name[len-1] == 'c')
+    if (len >= 2 && name[len-2] == '.' && name[len-1] == 'c')
         name[len-1] = 'o';
     else
         (void)strcat(name, ".o");
@@ -775,7 +830,7 @@ restore_map(struct object *ob, struct mapping *map, char *file)
     len = strlen(file);
     name = tmpalloc(len + 2 + 1);
     (void)strcpy(name, file);
-    if (name[len-2] == '.' && name[len-1] == 'c')
+    if (len >= 2 && name[len-2] == '.' && name[len-1] == 'c')
         name[len-1] = 'o';
     else
         (void)strcat(name, ".o");
