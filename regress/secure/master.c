@@ -81,7 +81,8 @@ valid_read(string path, object caller, string operation)
 static int
 valid_write(string path, object caller, string operation)
 {
-    return 1;
+    return path != "tests/security-target/protected" &&
+           path != "/tests/security-target/protected";
 }
 
 static varargs int

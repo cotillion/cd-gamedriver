@@ -43,6 +43,7 @@ num vars 0 (0)
 num inherits 2 (48)
 total size 304
 Huge program size Ok.
+Loading /tests/test-032.c -> Ok.
 Loading /tests/test-033.c -> Ok.
 Loading /tests/test-explode.c -> Ok.
 exec of hname failed.

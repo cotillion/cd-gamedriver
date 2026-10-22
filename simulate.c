@@ -2839,6 +2839,9 @@ do_rename(char * fr, char *t)
 
         newto = (char *) tmpalloc (strlen (to) + 1 + strlen (cp) + 1);
         (void)sprintf (newto, "%s/%s", to, cp);
+        newto = check_valid_path(newto, current_object, "do_rename_to", 1);
+        if (!newto)
+            return 0;
         return do_move (from, newto);
     }
     else
