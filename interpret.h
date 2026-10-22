@@ -114,6 +114,8 @@ struct control_stack {
     int extern_call;            /* Flag if evaluator should return */
     struct function *funp;      /* Only used for tracebacks */
     int inh_offset;
+    char *last_verb;            /* Task-owned command context */
+    char *trig_verb;
     char ext_call;
 #if defined(PROFILE_LPC)
     double startcpu;

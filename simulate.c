@@ -1689,22 +1689,14 @@ free_sentence(struct sentence *p)
     tot_alloc_sentence--;
 }
 
-/*
- * Resets state variables used in player_plyaers
- */
- void
- reset_player_parser()
- {
-    if (NULL != last_verb) {
-        free(last_verb);
-        last_verb = NULL;
-    }
-
-    if (NULL != trig_verb) {
-        free(trig_verb);
-        trig_verb = NULL;
-    }
- }
+/* Verb strings belong to the current task's temporary pool. Saved command
+ * and interpreter contexts may still refer to them after a nested command. */
+void
+reset_player_parser(void)
+{
+    last_verb = NULL;
+    trig_verb = NULL;
+}
 
 /*
  * Find the sentence for a command from the player.
@@ -1816,18 +1808,12 @@ player_parser(char *buff)
             debug_message("Local command %s\n", getclosurename(s->funct));
 #endif
 
-        /* Store the last verb */
-        if (NULL != last_verb)
-            free(last_verb);
-
-        last_verb = xalloc(length + 1);
+        /* Keep copies alive through nested commands and exception unwinding. */
+        last_verb = tmpalloc(length + 1);
         strncpy(last_verb, cmd, length);
         last_verb[length] = '\0';
 
-        /* Store the last trigger verb */
-        if (NULL != trig_verb)
-            free(trig_verb);
-        trig_verb = string_copy(s->verb);
+        trig_verb = tmpstring_copy(s->verb);
 
         theobj = s->funct->funobj;
         /*

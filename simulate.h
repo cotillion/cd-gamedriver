@@ -3,6 +3,9 @@
 
 struct object;
 
+extern char *last_verb, *trig_verb;
+void reset_player_parser(void);
+
 void update_actions(struct object *aob);
 char *get_gamedriver_info(char *str);
 void fatal(char *fmt, ...) __attribute__((format(printf, 1, 2))) __attribute__ ((noreturn));

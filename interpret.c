@@ -72,7 +72,6 @@ INLINE int search_for_function(char *name, struct program *prog);
 int s_f_f(char *name, struct program *prog);
 
 extern struct object *previous_ob;
-extern char *last_verb, *trig_verb;
 extern int  s_flag, unlimited;
 extern struct object *current_interactive;
 
@@ -707,6 +706,8 @@ save_control_context(struct control_stack *csp1)
         csp1->pc = 0xdeadbeef;
 #endif
     csp1->inh_offset = inh_offset;
+    csp1->last_verb = last_verb;
+    csp1->trig_verb = trig_verb;
 }
 
 void
@@ -756,6 +757,8 @@ restore_control_context(struct control_stack *csp1)
     previous_ob = csp1->prev_ob;
     fp = csp1->fp;
     inh_offset = csp1->inh_offset;
+    last_verb = csp1->last_verb;
+    trig_verb = csp1->trig_verb;
 }
 
 void
@@ -7714,6 +7717,7 @@ reset_machine()
     csp = control_stack - 1;
 #endif
     pop_n_elems(sp - start_of_stack + 1);
+    reset_player_parser();
 }
 
 #if defined(DEBUG) && defined(TRACE_CODE)

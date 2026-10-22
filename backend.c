@@ -97,11 +97,15 @@ int
 parse_command(char *str, struct object *ob)
 {
     struct object *save = command_giver;
+    char *save_verb = last_verb;
+    char *save_trigverb = trig_verb;
     int res;
 
     command_giver = ob;
     res = player_parser(str);
     command_giver = save;
+    last_verb = save_verb;
+    trig_verb = save_trigverb;
     return res;
 }
 
