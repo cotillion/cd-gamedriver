@@ -145,10 +145,14 @@ static struct svalue *fp;       /* Pointer to first argument. */
 struct svalue *sp;              /* Points to value of last push. */
 int inh_offset;                 /* Needed for inheritance */
 
-struct svalue start_of_stack[EVALUATOR_STACK_SIZE];
+/* Reserve an actual element for each empty-stack sentinel. The logical
+ * stacks still have the configured capacities, starting at storage[1]. */
+static struct svalue value_stack_storage[EVALUATOR_STACK_SIZE + 1];
+struct svalue * const start_of_stack = value_stack_storage + 1;
 struct svalue catch_value;      /* Used to throw an error to a catch */
 
-static struct control_stack control_stack[MAX_TRACE];
+static struct control_stack control_stack_storage[MAX_TRACE + 1];
+static struct control_stack * const control_stack = control_stack_storage + 1;
 struct control_stack *csp;      /* Points to last element pushed */
 
 #ifdef COUNT_CALLS /* Temporary */
@@ -188,7 +192,7 @@ unsigned  short function_type_mod_found = 0;
 static INLINE void
 probe_stack(int n)
 {
-    if (sp + n >= &start_of_stack[EVALUATOR_STACK_SIZE])
+    if (n >= &start_of_stack[EVALUATOR_STACK_SIZE] - sp)
         error("stack overflow\n");
 }
 
@@ -765,7 +769,7 @@ void
 pop_control_stack()
 {
 #ifdef DEBUG
-    if (csp == control_stack - 1)
+    if (csp == control_stack_storage)
         fatal("Popped out of the control stack\n");
 #endif
 #if defined(PROFILE_LPC)
@@ -7682,20 +7686,20 @@ opcdump(void)
  */
 void
 init_machine() {
-    sp = start_of_stack - 1;
-    csp = control_stack - 1;
+    sp = value_stack_storage;
+    csp = control_stack_storage;
 }
 
 void
 reset_machine()
 {
 #if defined(PROFILE_LPC)
-    if (csp != control_stack - 1) {
+    if (csp != control_stack_storage) {
         double now = current_cpu();
         struct program *prog = current_prog;
         last_execution = now;
         csp->frame_cpu += (now - csp->startcpu);
-        for (; csp != control_stack - 1; (prog = csp->prog), csp--)
+        for (; csp != control_stack_storage; (prog = csp->prog), csp--)
         {
             double tot_delta = now - csp->frame_start;
             if (prog)
@@ -7714,7 +7718,7 @@ reset_machine()
             putc('\n', trace_calls_file);
     }
 #else
-    csp = control_stack - 1;
+    csp = control_stack_storage;
 #endif
     pop_n_elems(sp - start_of_stack + 1);
     reset_player_parser();

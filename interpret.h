@@ -42,7 +42,7 @@ struct svalue {
 int master_hook_denied(const struct svalue *);
 
 extern struct svalue *sp;
-extern struct svalue start_of_stack[];
+extern struct svalue * const start_of_stack;
 
 #define T_INVALID       0x0
 #define T_LVALUE        0x1

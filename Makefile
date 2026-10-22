@@ -135,7 +135,9 @@ TAGS: $(SRC) $(HEADERS)
 depend: Makefile.depend
 
 Makefile.depend: $(SRC) ${ISRC} make_func.c master.h lang.h efun_table.h prelang.y
-	$(CC) -MM ${SRC} ${ISRC} make_func.c > Makefile.depend
+	@set -e; for dep_source in ${SRC} ${ISRC} make_func.c; do \
+	    $(CC) -MM -MT "$${dep_source%.c}.o" "$$dep_source"; \
+	done > Makefile.depend
 	$(CC) -MM -MT lang.o -x c prelang.y| sed 's/prelang\.y/lang.c/' >>Makefile.depend
 
 include Makefile.depend

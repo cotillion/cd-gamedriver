@@ -47,5 +47,6 @@ Loading /tests/test-031.c -> Ok.
 Loading /tests/test-032.c -> Ok.
 Loading /tests/test-033.c -> Ok.
 Loading /tests/test-034.c -> Ok.
+Loading /tests/test-035.c -> Ok.
 Loading /tests/test-explode.c -> Ok.
 exec of hname failed.

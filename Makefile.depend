@@ -75,19 +75,19 @@ json.o: json.c simulate.h lint.h master.h memory.h interpret.h config.h \
  exec.h mapping.h mstring.h object.h inline_svalue.h
 siphash.o: siphash.c siphash.h siphash_impl.h
 memory.o: memory.c memory.h lint.h master.h
-math.o: efun/math.c efun/../lang.h efun/../interpret.h efun/../config.h \
- efun/../exec.h efun/../simulate.h efun/../random.h
-string.o: efun/string.c efun/../mstring.h efun/../interpret.h \
+efun/math.o: efun/math.c efun/../lang.h efun/../interpret.h \
+ efun/../config.h efun/../exec.h efun/../simulate.h efun/../random.h
+efun/string.o: efun/string.c efun/../mstring.h efun/../interpret.h \
  efun/../config.h efun/../exec.h efun/../simulate.h
-efun.o: clib/efun.c clib/../lint.h clib/../master.h clib/../memory.h \
+clib/efun.o: clib/efun.c clib/../lint.h clib/../master.h clib/../memory.h \
  clib/../interface.h clib/../config.h clib/../exec.h clib/../interpret.h \
  clib/../simulate.h clib/../object.h clib/../mstring.h clib/../simulate.h
-stdobject.o: clib/stdobject.c clib/../lint.h clib/../master.h \
+clib/stdobject.o: clib/stdobject.c clib/../lint.h clib/../master.h \
  clib/../memory.h clib/../interface.h clib/../config.h clib/../exec.h \
  clib/../interpret.h clib/../simulate.h clib/../object.h \
  clib/../mstring.h clib/../mapping.h clib/../simulate.h \
  clib/../inline_svalue.h
-gl_language.o: clib/gl_language.c clib/../lint.h clib/../master.h \
+clib/gl_language.o: clib/gl_language.c clib/../lint.h clib/../master.h \
  clib/../memory.h clib/../interface.h clib/../config.h clib/../exec.h \
  clib/../interpret.h clib/../simulate.h clib/../object.h \
  clib/../mapping.h
