@@ -2,4 +2,27 @@
 .vscode
 .gitignore
 README.md
-*.o
+**/*.o
+
+# Generated build files and executables must be rebuilt for the target platform.
+driver
+driver.old
+genfkntab
+make_func
+make_func.c
+make_table
+func_spec.i
+lang.c
+lang.h
+lang.y
+efun_defs.c
+efun_table.h
+master.h
+master.t
+util/hname
+
+# Local test output.
+core
+**/core
+**/*.log
+regress/regress.*

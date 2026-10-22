@@ -1,32 +1,38 @@
-FROM debian:bullseye-slim as build-env
+FROM debian:trixie-slim AS build-env
 WORKDIR /build
 
-RUN apt-get update && apt-get install -y gcc make bison libjson-c-dev pkg-config
+RUN apt-get -o Acquire::Retries=3 update --error-on=any \
+    && apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+        bison \
+        gcc \
+        libc6-dev \
+        libcrypt-dev \
+        libjson-c-dev \
+        make \
+        pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
-RUN make MUD_LIB=/mud/lib BINDIR=/mud/bin
+RUN make MUD_LIB=/mud/lib BINDIR=/mud/bin && make -C util
 
-WORKDIR /build/util
-RUN make
-
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 WORKDIR /mud
 
-EXPOSE 3011
-EXPOSE 3003
+RUN apt-get -o Acquire::Retries=3 update --error-on=any \
+    && apt-get -o Acquire::Retries=3 install -y --no-install-recommends \
+        libcrypt1 \
+        libjson-c5 \
+        locales \
+    && sed -i '/en_US.ISO-8859-1/s/^# //g' /etc/locale.gen \
+    && locale-gen \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --user-group mud
+
+COPY --from=build-env --chmod=0755 /build/driver /mud/bin/driver
+COPY --from=build-env --chmod=0755 /build/util/hname /mud/bin/hname
+
+EXPOSE 3011 3003
 VOLUME /mud/lib
-
-RUN apt-get update && apt-get install -y locales libjson-c5 && apt-get clean
-
-RUN sed -i '/en_US.ISO-8859-1/s/^# //g' /etc/locale.gen && locale-gen
-
-COPY --from=build-env /build/driver /mud/bin/driver
-COPY --from=build-env /build/util/hname /mud/bin/hname
-RUN chmod a+x /mud/bin/driver /mud/bin/hname
-
-RUN adduser --disabled-password --gecos "" mud
 
 USER mud
 CMD ["/mud/bin/driver"]
-
-
-
